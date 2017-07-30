@@ -1,12 +1,10 @@
 import sys
 
-
-def main(input_filename, bytecode_filename, output_filename):
-    code = Code.parse(input_filename)
-    code.write(bytecode_filename)
-    code = Code.read_bytecode(bytecode_filename)
-    cpp_code = code.translate()
-    cpp_code.write(output_filename)
+from code import Parser
 
 
-main(sys.argv[1:3]*)
+def main(input_filename):
+    code = Parser(file=input_filename).parse()
+    print(code)
+
+main(*sys.argv[1:])

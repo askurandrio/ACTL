@@ -1,2 +1,2 @@
 # ACTL
-ACTL this translator from A to C/C ++
+ACTL this compiler A in C++
