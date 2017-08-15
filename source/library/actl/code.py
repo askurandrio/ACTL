@@ -1,4 +1,4 @@
-from actl import parser
+from actl import syntax_opcodes
 from .opcodes import SET
 
 
@@ -38,8 +38,8 @@ class Code:
             pass
         self.code = list(self.buff)
         for idx, opcode in enumerate(self.code):
-            if parser.AnySyntaxCode == opcode:
-                raise RuntimeError(f'Detected object of {parser.AnySyntaxCode} with idx {idx}:\n{self}')
+            if syntax_opcodes.AnySyntaxCode == opcode:
+                raise RuntimeError(f'Detected object of {syntax_opcodes.AnySyntaxCode} with idx {idx}:\n{self}')
         pass
 
     def __iter__(self):
@@ -52,7 +52,7 @@ class Code:
             s += ('\n' + (' ' * ident))
             if isinstance(opcode, self.__class__):
                 s += opcode.__repr__(ident + 4)
-            elif isinstance(opcode, parser.AnySyntaxCode):
+            elif isinstance(opcode, syntax_opcodes.AnySyntaxCode):
                 s += 'SyntaxCode.' + repr(opcode)
             else:
                 s += repr(opcode)
@@ -66,28 +66,16 @@ class Code:
         return temp
 
 
-class TemporaryValue:
-    COUNT = -1
-
-    def __init__(self):
-        self.COUNT += 1
-        self.name = f'R{self.COUNT}'
-
-    @classmethod
-    def get_name(cls):
-        return parser.Name(cls().name)
-
-
-@Code.add_syntax(parser.Operator.OPEN_CODE, add_context=True)
+@Code.add_syntax(syntax_opcodes.Operator.OPEN_CODE, add_context=True)
 def _(_, context):
     self, idx_buff = context['code'], context['idx_buff']
     count = 1
     code = self.__class__()
     while self.buff[idx_buff:]:
-        if self.buff[idx_buff+1] == parser.Operator.OPEN_CODE:
+        if self.buff[idx_buff+1] == syntax_opcodes.Operator.OPEN_CODE:
             count += 1
             code.buff.append(self.buff.pop(idx_buff+1))
-        elif self.buff[idx_buff+1] == parser.Operator.CLOSE_CODE:
+        elif self.buff[idx_buff+1] == syntax_opcodes.Operator.CLOSE_CODE:
             count -= 1
             if count != 0:
                 code.buff.append(self.buff.pop(idx_buff+1))
@@ -100,7 +88,7 @@ def _(_, context):
     return (code,)
 
 
-Code.add_syntax(parser.Number)(lambda number: (SET(TemporaryValue.get_name(), number),))
-Code.add_syntax(parser.Name, parser.Operator('='), parser.AnySyntaxCode) \
+Code.add_syntax(syntax_opcodes.Number)(lambda number: (SET(syntax_opcodes.Name.get_temp_name(), number),))
+Code.add_syntax(syntax_opcodes.Name, syntax_opcodes.Operator('='), syntax_opcodes.AnySyntaxCode) \
     (lambda name, _, value: (SET(name, value),))
-Code.add_syntax(parser.Operator.NEXT_LINE_CODE)(lambda _: ())
+Code.add_syntax(syntax_opcodes.Operator.NEXT_LINE_CODE)(lambda _: ())
