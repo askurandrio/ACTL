@@ -1,4 +1,5 @@
 from actl import parser
+from .opcodes import SET
 
 
 class Code:
@@ -75,15 +76,6 @@ class TemporaryValue:
     @classmethod
     def get_name(cls):
         return parser.Name(cls().name)
-
-
-class SET:
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value       
-
-    def __repr__(self):
-        return f'{self.name} = {self.value}'
 
 
 @Code.add_syntax(parser.Operator.OPEN_CODE, add_context=True)
