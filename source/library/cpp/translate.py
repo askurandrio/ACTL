@@ -1,28 +1,35 @@
-from actl.code import Code, SET
+from actl import opcodes
+from actl import syntax_opcodes
+from actl.code import Code
+
 
 
 class Translator:
     def __init__(self, code):
         self.code = code
 
-    def translate(self, add_main=True):
-        s = ''.join(self.__translate())
+    def translate(self, ident=0, add_main=True):
+        s = ''.join(self.__translate(ident))
         if add_main:
-            s += 'void main() {} \n\n'
+            s += 'int main() {\n    return 0;\n} \n\n'
         return s
 
-    def __translate(self):
+    def __translate(self, ident):
         for opcode in self.code:
-            if isinstance(opcode, Code):
-                yield '{\n'
-                yield from self.__class__(opcode).translate(add_main=False)
-                yield '}\n'
-            elif isinstance(opcode, SET):
-                yield f'auto {opcode.name.name} = {opcode.value};\n'
+            if Code == opcode:
+                yield (' ' * ident) + '{\n'
+                yield from self.__class__(opcode).translate(ident=ident+4, add_main=False)
+                yield (' ' * ident) + '}\n'
+            elif opcodes.SET == opcode:
+                name = self.get_value(opcode.name)
+                value = self.get_value(opcode.value)
+                yield (' ' * ident) + f'auto {name} = {value};\n'
             else:
                 raise RuntimeError(opcode)
 
     @classmethod
     def get_value(cls, value):
-        if False:
-            pass
+        if syntax_opcodes.Name == value:
+            return value.name
+        elif syntax_opcodes.Number:
+            return value.number

@@ -2,31 +2,18 @@ import sys
 
 import pyparsing
 
+from actl.opcodes import AnyOpCode
+
 
 OPERATORS = '.+-=*/,()[]{{}}=!@'
 ALPHAS = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1))))
 
 
-class MetaSyntaxCode(type):
-    def __eq__(self, item):
-        return isinstance(item, self) or (isinstance(item, type) and issubclass(self, item))
-    
-    def __ne__(self, item):
-        return not (self == item)
+class AnySyntaxCode(AnyOpCode):
+    pass
 
 
-class AnySyntaxCode(metaclass=MetaSyntaxCode):
-    def __init__(self):
-        pass
-
-    def __eq__(self, item):
-        return isinstance(item, self.__class__)
-    
-    def __ne__(self, item):
-        return not (self == item)
-
-
-class Name(AnySyntaxCode, metaclass=MetaSyntaxCode):
+class Name(AnySyntaxCode):
     COUNT_TEMP_NAME = -1
 
     def __init__(self, name):
@@ -52,7 +39,7 @@ class Name(AnySyntaxCode, metaclass=MetaSyntaxCode):
         return word
 
 
-class Number(AnySyntaxCode, metaclass=MetaSyntaxCode):
+class Number(AnySyntaxCode):
     def __init__(self, number):
         self.number = number
     
@@ -71,7 +58,7 @@ class Number(AnySyntaxCode, metaclass=MetaSyntaxCode):
         return word
 
 
-class Operator(AnySyntaxCode, metaclass=MetaSyntaxCode):
+class Operator(AnySyntaxCode):
     def __init__(self, operator):
         self.operator = operator
 

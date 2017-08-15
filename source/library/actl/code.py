@@ -1,8 +1,8 @@
 from actl import syntax_opcodes
-from .opcodes import SET
+from .opcodes import AnyOpCode, SET
 
 
-class Code:
+class Code(AnyOpCode):
     CODE_OPEN = type('CodeOpen', (), {})()
     CODE_CLOSE = type('CodeClose', (), {})()
     __rules = []
