@@ -1,128 +1,114 @@
-import sys
-
-import pyparsing
+from actl import parser
 
 
-ALPHAS = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1))))
+class Code:
+    CODE_OPEN = type('CodeOpen', (), {})()
+    CODE_CLOSE = type('CodeClose', (), {})()
+    __rules = []
 
+    def __init__(self, code=None):
+        self.buff = list(code if code else [])
 
-class Name:
-    def __init__(self, name):
-        self.name = name
-    
-    def __repr__(self):
-        return f"{self.__class__.__name__}('{self.name}')"
-    
-    @classmethod
-    def get_parser(cls):
-        word = pyparsing.Word(ALPHAS + '_', ALPHAS + '_'+ pyparsing.nums)
-        word.setParseAction(lambda tokens: cls(tokens[0]))
-        return word
+    def compile(self):
+        self.__compile()
+        return iter(self)
 
+    def __transform(self):
+        for idx_buff in range(len(self.buff)):
+            for template, add_context, func in self.__rules:
+                is_match = True
+                idx = 0
+                for idx, syntax_code in enumerate(template):
+                    if (len(self.buff) < (idx_buff+idx+1)) or (syntax_code != self.buff[idx_buff+idx]):
+                        is_match = False
+                        break
+                if is_match:
+                    is_find = True
+                    if add_context:
+                        context = {'code':self, 'idx_buff':idx_buff}
+                        temp = func(context=context, *self.buff[idx_buff:idx_buff+idx+1])
+                    else:
+                        temp = func(*self.buff[idx_buff:idx_buff+idx+1])
+                    self.buff[idx_buff:idx_buff+idx+1] = temp
+                    return True
 
-class Number:
-    def __init__(self, number):
-        self.number = number
-    
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.number})"
-    
-    @classmethod
-    def get_parser(cls):
-        word = pyparsing.Word(pyparsing.nums, pyparsing.nums + '.')
-        word.setParseAction(lambda tokens: cls(float(tokens[0])))
-        return word
-
-
-class Operator:
-    def __init__(self, operator):
-        self.operator = operator
-    
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.operator})"
-    
-    @classmethod
-    def get_parser(cls):
-        word = pyparsing.Word('.+-=*/,()[]{{}}=')
-        word.setParseAction(lambda tokens: cls(tokens[0]))
-        return word
-
-
-class MetaCodeOperator(type):
-    def __call__(self, operator=''):
-        if operator not in self._objects:
-            self._objects[operator] = type.__call__(self, operator)
-        return self._objects[operator]
-
-        
-class CodeOperator(metaclass=MetaCodeOperator):
-    _objects = {}
-    OPEN = 'open'
-    CLOSE = 'close'
-    _SHIFT = '__shift'
-    NEXT_LINE = 'next_line'
-
-    def __init__(self, operator=''):
-        self.operator = operator
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}('{self.operator}')"
-
-    @classmethod
-    def get_parsers(cls):
-        word = pyparsing.LineEnd().suppress()
-        word.setParseAction(lambda _: cls('next_line'))
-        yield word
-
-        word = pyparsing.Word(':') + pyparsing.ZeroOrMore(' ')
-        word.setParseAction(lambda _: cls('open'))
-        yield word
-
-class Parser:
-    def __init__(self, buff):
-        self.buff = buff
-        self.rules = self.__get_rules()
+    def __compile(self):
+        while self.__transform():
+            pass
+        self.code = list(self.buff)
+        for idx, opcode in enumerate(self.code):
+            if parser.AnySyntaxCode == opcode:
+                raise RuntimeError(f'Detected object of {parser.AnySyntaxCode} with idx {idx}:\n{self}')
+        pass
 
     def __iter__(self):
-        yield CodeOperator('open')
-        shifts = []
-        prev_code = CodeOperator()
-        while self.buff:
-            for idx, shift in enumerate(shifts):
-                if shift == self.buff[:len(shift)]:
-                    self.buff = self.buff[len(shift):]
-                else:
-                    for _ in range(len(shifts[idx:])):
-                        yield CodeOperator('close')
-                    shifts = shifts[:idx]
-            is_find = False
-            for rule in self.rules:
-                for result, start, end in rule.scanString(self.buff):
-                    if start == 0:
-                        is_find = True
-                        self.buff = self.buff[end:]
-                        code = result[0]
-                        if CodeOperator('open') is prev_code:
-                            shifts.append('')
-                            for idx, char in enumerate(self.buff):
-                                if char != ' ':
-                                    break
-                                shifts[-1] += char
-                            self.buff = self.buff[idx:]
-                        yield code
-                        prev_code = code
-                    break
-            if not is_find:
-                raise RuntimeError(self.buff)
-        for _ in range(len(shifts)):
-            yield CodeOperator('close')
-        yield CodeOperator('close')
-        assert not self.buff
+        return iter(self.code)
 
-    def __get_rules(self):
-        rules = []
-        rules.extend(CodeOperator.get_parsers())
-        rules.append(Name.get_parser())
-        rules.append(Number.get_parser())
-        rules.append(Operator.get_parser())
-        return rules
+    def __repr__(self, ident=4):
+        s = ''
+        s += 'Code:'
+        for opcode in self:
+            s += ('\n' + (' ' * ident))
+            if isinstance(opcode, self.__class__):
+                s += opcode.__repr__(ident + 4)
+            elif isinstance(opcode, parser.AnySyntaxCode):
+                s += 'SyntaxCode.' + repr(opcode)
+            else:
+                s += repr(opcode)
+        return s
+
+    @classmethod
+    def add_syntax(cls, *template, add_context=False):
+        def temp(func):
+            cls.__rules.append((template, add_context, func))
+            return func
+        return temp
+
+
+class TemporaryValue:
+    COUNT = -1
+
+    def __init__(self):
+        self.COUNT += 1
+        self.name = f'R{self.COUNT}'
+
+    @classmethod
+    def get_name(cls):
+        return parser.Name(cls().name)
+
+
+class SET:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value       
+
+    def __repr__(self):
+        return f'{self.name} = {self.value}'
+
+
+@Code.add_syntax(parser.Operator.OPEN_CODE, add_context=True)
+def _(_, context):
+    self, idx_buff = context['code'], context['idx_buff']
+    count = 1
+    code = self.__class__()
+    while self.buff[idx_buff:]:
+        if self.buff[idx_buff+1] == parser.Operator.OPEN_CODE:
+            count += 1
+            code.buff.append(self.buff.pop(idx_buff+1))
+        elif self.buff[idx_buff+1] == parser.Operator.CLOSE_CODE:
+            count -= 1
+            if count != 0:
+                code.buff.append(self.buff.pop(idx_buff+1))
+            else:
+                code.compile()
+                self.buff.pop(idx_buff+1)
+                break
+        else:
+            code.buff.append(self.buff.pop(idx_buff+1))
+    return (code,)
+
+
+Code.add_syntax(parser.Number)(lambda number: (SET(TemporaryValue.get_name(), number),))
+Code.add_syntax(parser.Name, parser.Operator('='), parser.AnySyntaxCode) \
+    (lambda name, _, value: (SET(name, value),))
+Code.add_syntax(parser.Operator.NEXT_LINE_CODE)(lambda _: ())
