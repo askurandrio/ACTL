@@ -1,7 +1,6 @@
+import actl_types
 from actl import opcodes
-from actl import syntax_opcodes
 from actl.code import Code
-
 
 
 class Translator:
@@ -20,11 +19,11 @@ class Translator:
                 yield (' ' * ident) + '{\n'
                 yield from self.__class__(opcode).translate(ident=ident+4, add_main=False)
                 yield (' ' * ident) + '}\n'
-            elif syntax_opcodes.Word == opcode:
+            elif isinstance(opcode, opcodes.Name):
                 yield opcode.name
-            elif syntax_opcodes.Number == opcode:
-                yield opcode.number
+            elif isinstance(opcode, actl_types.Number):
+                yield str(opcode.number)
             elif opcodes.LOAD_ATTRIBUTE == opcode:
                 yield '.'
             else:
-                raise RuntimeError(value)
+                raise RuntimeError(opcode)

@@ -1,1 +1,1 @@
-from .translate import Translator
+from .number import Number

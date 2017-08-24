@@ -15,23 +15,16 @@ class AnySyntaxCode(AnyVirtualOpCode):
 
 
 class Word(AnySyntaxCode):
-    COUNT_TEMP_NAME = -1
-
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, word):
+        self.word = word
     
     def __eq__(self, item):
         if AnySyntaxCode.__eq__(self, item):
-            return self.name == item.name
+            return self.word == item.word
         return False
 
     def __repr__(self):
-        return f"AnySyntaxCode.{self.__class__.__name__}('{self.name}')"
-    
-    @classmethod
-    def get_temp_name(cls):
-        cls.COUNT_TEMP_NAME += 1
-        return cls(f'R{cls.COUNT_TEMP_NAME}')
+        return f"AnySyntaxCode.{self.__class__.__name__}('{self.word}')"
 
     @classmethod
     def get_parser(cls):

@@ -18,9 +18,24 @@ class AnyVirtualOpCode(metaclass=MetaOpCode):
         return not (self == item)
 
 
-class AnyOpCode(metaclass=MetaOpCode):
+class AnyOpCode(AnyVirtualOpCode):
     def __eq__(self, item):
         return isinstance(item, AnyOpCode)
+
+
+class Name(AnyOpCode):
+    COUNT_TEMP_NAME = -1
+
+    def __init__(self, name):
+        self.name = name
+
+    @classmethod
+    def get_temp_name(cls):
+        cls.COUNT_TEMP_NAME += 1
+        return cls(f'R{cls.COUNT_TEMP_NAME}')
+
+    def __repr__(self):
+        return f'{self.name}'
 
 
 class SET(AnyOpCode):

@@ -1,8 +1,10 @@
-from .code import Code
+import actl_types
 from actl import opcodes, syntax_opcodes
+from .code import Code
 
 
-Code.add_syntax(syntax_opcodes.Number)(lambda number: (opcodes.SET(syntax_opcodes.Word.get_temp_name(), number),))
+Code.add_syntax(syntax_opcodes.Number)(lambda number: (actl_types.Number(number),))
+Code.add_syntax(syntax_opcodes.Word)(lambda word: (opcodes.Name(word.word),))
 Code.add_syntax(syntax_opcodes.Operator.NEXT_LINE_CODE)(lambda _: ())
 Code.add_syntax(syntax_opcodes.Word('def'))(lambda _: ())
 
