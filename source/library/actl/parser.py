@@ -34,6 +34,7 @@ class Parser:
                         code = result[0]
                         if Operator.OPEN_CODE is prev_code:
                             shifts.append('')
+                            idx = 0
                             for idx, char in enumerate(self.buff):
                                 if char != ' ':
                                     break

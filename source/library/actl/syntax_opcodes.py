@@ -2,14 +2,14 @@ import sys
 
 import pyparsing
 
-from actl.opcodes import AnyOpCode
+from .opcodes import AnyVirtualOpCode
 
 
 OPERATORS = '.+-=*/,()[]{}=!@'
 ALPHAS = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1))))
 
 
-class AnySyntaxCode(AnyOpCode):
+class AnySyntaxCode(AnyVirtualOpCode):
     def __eq__(self, item):
         return isinstance(item, self.__class__)
 

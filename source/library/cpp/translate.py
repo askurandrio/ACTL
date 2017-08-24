@@ -20,16 +20,11 @@ class Translator:
                 yield (' ' * ident) + '{\n'
                 yield from self.__class__(opcode).translate(ident=ident+4, add_main=False)
                 yield (' ' * ident) + '}\n'
-            elif opcodes.SET == opcode:
-                name = self.get_value(opcode.name)
-                value = self.get_value(opcode.value)
-                yield (' ' * ident) + f'auto {name} = {value};\n'
+            elif syntax_opcodes.Word == opcode:
+                yield opcode.name
+            elif syntax_opcodes.Number == opcode:
+                yield opcode.number
+            elif opcodes.LOAD_ATTRIBUTE == opcode:
+                yield '.'
             else:
-                raise RuntimeError(opcode)
-
-    @classmethod
-    def get_value(cls, value):
-        if syntax_opcodes.Word == value:
-            return value.name
-        elif syntax_opcodes.Number:
-            return value.number
+                raise RuntimeError(value)

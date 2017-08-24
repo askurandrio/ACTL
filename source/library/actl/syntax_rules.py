@@ -1,16 +1,20 @@
 from .code import Code
-from actl import syntax_opcodes
-from .opcodes import AnyOpCode, SET
+from actl import opcodes, syntax_opcodes
 
 
-Code.add_syntax(syntax_opcodes.Number)(lambda number: (SET(syntax_opcodes.Word.get_temp_name(), number),))
+Code.add_syntax(syntax_opcodes.Number)(lambda number: (opcodes.SET(syntax_opcodes.Word.get_temp_name(), number),))
 Code.add_syntax(syntax_opcodes.Operator.NEXT_LINE_CODE)(lambda _: ())
 Code.add_syntax(syntax_opcodes.Word('def'))(lambda _: ())
 
 
+@Code.add_syntax(opcodes.AnyVirtualOpCode, syntax_opcodes.Operator('.'), opcodes.AnyVirtualOpCode)
+def _(obj, _, attribute):
+    return (opcodes.LOAD_ATTRIBUTE(obj, attribute),)
+
+
 @Code.add_syntax(syntax_opcodes.Word, syntax_opcodes.Operator('='), syntax_opcodes.AnySyntaxCode)
 def _(name, _, value):
-    return (SET(name, value),)
+    return (opcodes.SET(name, value),)
 
 
 @Code.add_syntax(syntax_opcodes.Operator.OPEN_CODE, add_context=True)

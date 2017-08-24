@@ -7,24 +7,38 @@ class MetaOpCode(type):
         return not (self == item)
 
 
-class AnyOpCode(metaclass=MetaOpCode):
+class AnyVirtualOpCode(metaclass=MetaOpCode):
     def __init__(self):
         pass
 
     def __eq__(self, item):
-        return isinstance(item, self.__class__)
+        return isinstance(item, AnyVirtualOpCode)
     
     def __ne__(self, item):
         return not (self == item)
 
 
+class AnyOpCode(metaclass=MetaOpCode):
+    def __eq__(self, item):
+        return isinstance(item, AnyOpCode)
+
+
 class SET(AnyOpCode):
     def __init__(self, name, value):
         self.name = name
-        self.value = value       
+        self.value = value
 
     def __repr__(self):
         return f'{self.name} = {self.value}'
+
+
+class LOAD_ATTRIBUTE(AnyOpCode):
+    def __init__(self, obj, attribute):
+        self.obj = obj
+        self.attribute = attribute
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.obj}, {self.attribute})'
 
 
 CODE_OPEN = type('CodeOpen', (AnyOpCode,), {})()
