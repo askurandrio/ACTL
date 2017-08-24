@@ -15,23 +15,15 @@ class Code(AnyOpCode):
         return iter(self)
 
     def __transform(self):
-        for idx_buff in range(len(self.buff)):
-            for template, add_context, func in self.__rules:
-                is_match = True
-                idx = 0
-                for idx, syntax_code in enumerate(template):
-                    if (len(self.buff) < (idx_buff+idx+1)) or (syntax_code != self.buff[idx_buff+idx]):
-                        is_match = False
-                        break
-                if is_match:
-                    is_find = True
-                    if add_context:
-                        context = {'code':self, 'idx_buff':idx_buff}
-                        temp = func(context=context, *self.buff[idx_buff:idx_buff+idx+1])
-                    else:
-                        temp = func(*self.buff[idx_buff:idx_buff+idx+1])
-                    self.buff[idx_buff:idx_buff+idx+1] = temp
+        for idx in range(len(self.buff)):
+            for rule in self.__rules:
+                idx_end = rule.match(self.buff[idx:])
+                if idx_end is not None:
+                    result = rule(self, idx, self.buff[idx:idx+idx_end+1])
+                    if result is not None:
+                        self.buff[idx:idx+idx_end+1] = result
                     return True
+        pass
 
     def __compile(self):
         while self.__transform():
@@ -61,35 +53,51 @@ class Code(AnyOpCode):
     @classmethod
     def add_syntax(cls, *template, add_context=False):
         def temp(func):
-            cls.__rules.append((template, add_context, func))
+            cls.__rules.append(SyntaxRule(func, template, add_context))
             return func
         return temp
 
 
 class SyntaxRule:
-    def __init__(self, *template, add_context=False):
-        pass
+    def __init__(self, func, template, add_context=False):
+        self.func = func
+        self.template = template
+        self.add_context = add_context
+
+    def match(self, buff):
+        idx = 0
+        for idx, syntax_code in enumerate(self.template):
+            if (len(buff) < (idx+1)) or (syntax_code != buff[idx]):
+                return None
+        return idx
+
+    def __call__(self, code, idx_start, matched_code):
+        if self.add_context:
+            context = {'code':code, 'idx_start':idx_start}
+            return self.func(context=context, *matched_code)
+        else:
+            return self.func(*matched_code)
 
 
 @Code.add_syntax(syntax_opcodes.Operator.OPEN_CODE, add_context=True)
 def _(_, context):
-    self, idx_buff = context['code'], context['idx_buff']
+    self, idx_start = context['code'], context['idx_start']
     count = 1
     code = self.__class__()
-    while self.buff[idx_buff:]:
-        if self.buff[idx_buff+1] == syntax_opcodes.Operator.OPEN_CODE:
+    while self.buff[idx_start:]:
+        if self.buff[idx_start+1] == syntax_opcodes.Operator.OPEN_CODE:
             count += 1
-            code.buff.append(self.buff.pop(idx_buff+1))
-        elif self.buff[idx_buff+1] == syntax_opcodes.Operator.CLOSE_CODE:
+            code.buff.append(self.buff.pop(idx_start+1))
+        elif self.buff[idx_start+1] == syntax_opcodes.Operator.CLOSE_CODE:
             count -= 1
             if count != 0:
-                code.buff.append(self.buff.pop(idx_buff+1))
+                code.buff.append(self.buff.pop(idx_start+1))
             else:
                 code.compile()
-                self.buff.pop(idx_buff+1)
+                self.buff.pop(idx_start+1)
                 break
         else:
-            code.buff.append(self.buff.pop(idx_buff+1))
+            code.buff.append(self.buff.pop(idx_start+1))
     return (code,)
 
 
