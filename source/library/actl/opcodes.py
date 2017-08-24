@@ -23,19 +23,24 @@ class AnyOpCode(AnyVirtualOpCode):
         return isinstance(item, AnyOpCode)
 
 
-class Name(AnyOpCode):
+class Variable(AnyOpCode):
     COUNT_TEMP_NAME = -1
 
-    def __init__(self, name):
+    def __init__(self, _type=None, name=None):
+        self._type = _type
         self.name = name
 
     @classmethod
     def get_temp_name(cls):
         cls.COUNT_TEMP_NAME += 1
-        return cls(f'R{cls.COUNT_TEMP_NAME}')
+        return cls(name=f'R{cls.COUNT_TEMP_NAME}')
 
     def __repr__(self):
-        return f'{self.name}'
+        if self._type is None:
+            s = ''
+        else:
+            s = f'{self._type} '
+        return s + f'{self.name}'
 
 
 class SET(AnyOpCode):

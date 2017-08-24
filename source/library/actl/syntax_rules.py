@@ -1,12 +1,17 @@
 import actl_types
 from actl import opcodes, syntax_opcodes
-from .code import Code
+from .code import Code, SyntaxRule
 
 
-Code.add_syntax(syntax_opcodes.Number)(lambda number: (actl_types.Number(number),))
-Code.add_syntax(syntax_opcodes.Word)(lambda word: (opcodes.Name(word.word),))
+Code.add_syntax(syntax_opcodes.Number)(lambda number: (actl_types.Number(number.number),))
+Code.add_syntax(syntax_opcodes.Word)(lambda word: (opcodes.Variable(name=word.word),))
 Code.add_syntax(syntax_opcodes.Operator.NEXT_LINE_CODE)(lambda _: ())
 Code.add_syntax(syntax_opcodes.Word('def'))(lambda _: ())
+
+
+@Code.add_syntax(opcodes.Variable, opcodes.Variable)
+def _(_type, name):
+    return (opcodes.Variable(_type=_type, name=name),)
 
 
 @Code.add_syntax(opcodes.AnyVirtualOpCode, syntax_opcodes.Operator('.'), opcodes.AnyVirtualOpCode)

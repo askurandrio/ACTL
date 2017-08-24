@@ -73,4 +73,3 @@ class SyntaxRule:
             return self.func(context=context, *matched_code)
         else:
             return self.func(*matched_code)
-

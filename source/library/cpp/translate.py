@@ -19,8 +19,8 @@ class Translator:
                 yield (' ' * ident) + '{\n'
                 yield from self.__class__(opcode).translate(ident=ident+4, add_main=False)
                 yield (' ' * ident) + '}\n'
-            elif isinstance(opcode, opcodes.Name):
-                yield opcode.name
+            elif isinstance(opcode, opcodes.Variable):
+                yield repr(opcode)
             elif isinstance(opcode, actl_types.Number):
                 yield str(opcode.number)
             elif opcodes.LOAD_ATTRIBUTE == opcode:
