@@ -5,7 +5,7 @@ import pyparsing
 from actl.opcodes import AnyOpCode
 
 
-OPERATORS = '.+-=*/,()[]{{}}=!@'
+OPERATORS = '.+-=*/,()[]{}=!@'
 ALPHAS = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1))))
 
 
@@ -20,7 +20,7 @@ class Name(AnySyntaxCode):
         self.name = name
     
     def __eq__(self, item):
-        if isinstance(item, self.__class__):
+        if AnySyntaxCode.__eq__(self, item):
             return self.name == item.name
         return False
 
@@ -44,7 +44,7 @@ class Number(AnySyntaxCode):
         self.number = number
     
     def __eq__(self, item):
-        if isinstance(item, self.__class__):
+        if AnySyntaxCode.__eq__(self, item):
             return self.number == item.number
         return False
 
@@ -63,7 +63,7 @@ class Operator(AnySyntaxCode):
         self.operator = operator
 
     def __eq__(self, item):
-        if isinstance(item, self.__class__):
+        if AnySyntaxCode.__eq__(self, item):
             return self.operator == item.operator
         return False
     
