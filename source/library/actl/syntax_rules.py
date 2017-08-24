@@ -3,11 +3,14 @@ from actl import syntax_opcodes
 from .opcodes import AnyOpCode, SET
 
 
-Code.add_syntax(syntax_opcodes.Number)(lambda number: (SET(syntax_opcodes.Name.get_temp_name(), number),))
-Code.add_syntax(syntax_opcodes.Name, syntax_opcodes.Operator('='), syntax_opcodes.AnySyntaxCode) \
-    (lambda name, _, value: (SET(name, value),))
+Code.add_syntax(syntax_opcodes.Number)(lambda number: (SET(syntax_opcodes.Word.get_temp_name(), number),))
 Code.add_syntax(syntax_opcodes.Operator.NEXT_LINE_CODE)(lambda _: ())
-Code.add_syntax(syntax_opcodes.Name('def'))(lambda _: ())
+Code.add_syntax(syntax_opcodes.Word('def'))(lambda _: ())
+
+
+@Code.add_syntax(syntax_opcodes.Word, syntax_opcodes.Operator('='), syntax_opcodes.AnySyntaxCode)
+def _(name, _, value):
+    return (SET(name, value),)
 
 
 @Code.add_syntax(syntax_opcodes.Operator.OPEN_CODE, add_context=True)

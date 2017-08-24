@@ -10,10 +10,11 @@ ALPHAS = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1))))
 
 
 class AnySyntaxCode(AnyOpCode):
-    pass
+    def __eq__(self, item):
+        return isinstance(item, self.__class__)
 
 
-class Name(AnySyntaxCode):
+class Word(AnySyntaxCode):
     COUNT_TEMP_NAME = -1
 
     def __init__(self, name):
@@ -25,7 +26,7 @@ class Name(AnySyntaxCode):
         return False
 
     def __repr__(self):
-        return f"{self.__class__.__name__}('{self.name}')"
+        return f"AnySyntaxCode.{self.__class__.__name__}('{self.name}')"
     
     @classmethod
     def get_temp_name(cls):
@@ -49,7 +50,7 @@ class Number(AnySyntaxCode):
         return False
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.number})"
+        return f"AnySyntaxCode.{self.__class__.__name__}({self.number})"
     
     @classmethod
     def get_parser(cls):
@@ -68,7 +69,7 @@ class Operator(AnySyntaxCode):
         return False
     
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.operator})"
+        return f"AnySyntaxCode.{self.__class__.__name__}({self.operator})"
     
     @classmethod
     def get_parsers(cls):

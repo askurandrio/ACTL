@@ -1,6 +1,6 @@
 import pyparsing
 
-from .syntax_opcodes import Operator, Name, Number
+from .syntax_opcodes import Operator, Word, Number
 
 
 pyparsing.ParserElement.setDefaultWhitespaceChars('')
@@ -52,6 +52,6 @@ class Parser:
     def __get_rules(self):
         rules = []
         rules.extend(Operator.get_parsers())
-        rules.append(Name.get_parser())
+        rules.append(Word.get_parser())
         rules.append(Number.get_parser())
         return rules

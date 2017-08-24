@@ -29,7 +29,7 @@ class Translator:
 
     @classmethod
     def get_value(cls, value):
-        if syntax_opcodes.Name == value:
+        if syntax_opcodes.Word == value:
             return value.name
         elif syntax_opcodes.Number:
             return value.number

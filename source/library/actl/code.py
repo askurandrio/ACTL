@@ -1,10 +1,8 @@
 from actl import syntax_opcodes
-from .opcodes import AnyOpCode, SET
+from .opcodes import AnyOpCode
 
 
 class Code(AnyOpCode):
-    CODE_OPEN = type('CodeOpen', (), {})()
-    CODE_CLOSE = type('CodeClose', (), {})()
     __rules = []
 
     def __init__(self, code=None):
@@ -44,8 +42,6 @@ class Code(AnyOpCode):
             s += ('\n' + (' ' * ident))
             if isinstance(opcode, self.__class__):
                 s += opcode.__repr__(ident + 4)
-            elif isinstance(opcode, syntax_opcodes.AnySyntaxCode):
-                s += 'SyntaxCode.' + repr(opcode)
             else:
                 s += repr(opcode)
         return s
