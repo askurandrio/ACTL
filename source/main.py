@@ -1,6 +1,7 @@
+import os
 import sys
 
-sys.path.append('./library')
+sys.path.append(os.path.join(os.path.dirname(__file__), 'library'))
 
 from actl import Code, Parser
 from cpp import Translator

@@ -66,6 +66,11 @@ class Code(AnyOpCode):
         return temp
 
 
+class SyntaxRule:
+    def __init__(self, *template, add_context=False):
+        pass
+
+
 @Code.add_syntax(syntax_opcodes.Operator.OPEN_CODE, add_context=True)
 def _(_, context):
     self, idx_buff = context['code'], context['idx_buff']
@@ -92,3 +97,5 @@ Code.add_syntax(syntax_opcodes.Number)(lambda number: (SET(syntax_opcodes.Name.g
 Code.add_syntax(syntax_opcodes.Name, syntax_opcodes.Operator('='), syntax_opcodes.AnySyntaxCode) \
     (lambda name, _, value: (SET(name, value),))
 Code.add_syntax(syntax_opcodes.Operator.NEXT_LINE_CODE)(lambda _: ())
+Code.add_syntax(syntax_opcodes.Name('def'), )(lambda _: ())
+
