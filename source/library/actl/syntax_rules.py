@@ -9,17 +9,16 @@ Code.add_syntax(syntax_opcodes.Word)(lambda word: (opcodes.Variable(name=word.wo
 @Code.add_syntax(syntax_opcodes.Number, add_context=True)
 def _(number, context):
     code = context['code']
-    var = opcodes.TypedVariable.get_temp_variable(actl_types.Number)
-    code.buff.insert(0, var)
-    var = var.get_variable()
-    code.buff.insert(1, opcodes.SET(var, actl_types.Number(number.number)))
+    var = opcodes.Variable.get_temp_variable()
+    code.buff.insert(0, opcodes.DECLARE(actl_types.number,  var))
+    code.buff.insert(1, opcodes.SET(var, number.number))
     code.buff.insert(2, syntax_opcodes.Operator.NEXT_LINE_CODE)
     code.buff[context['idx_start'] + 3] = var
 
 
 @Code.add_syntax(opcodes.Variable, opcodes.Variable)
-def _(_type, name):
-    return (opcodes.TypedVariable(_type=_type, name=name),)
+def _(type, name):
+    return (opcodes.DECLARE(type=type, name=name),)
 
 
 

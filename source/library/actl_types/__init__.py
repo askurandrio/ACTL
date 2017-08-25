@@ -1,1 +1,2 @@
-from .number import Number
+from .utils import To
+from .number import number

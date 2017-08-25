@@ -1,6 +1,6 @@
 from .actl_object import actl_object
 
-class Number(actl_object):
+class number(actl_object):
     def __init__(self, number):
         self.number = number
 

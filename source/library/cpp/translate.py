@@ -1,6 +1,6 @@
+import actl
 import actl_types
 from actl import opcodes
-from actl.code import Code
 
 
 class Translator:
@@ -15,15 +15,26 @@ class Translator:
 
     def __translate(self, ident):
         for opcode in self.code:
-            if Code == opcode:
+            if isinstance(opcode, actl.Code):
                 yield (' ' * ident) + '{\n'
                 yield from self.__class__(opcode).translate(ident=ident+4, add_main=False)
                 yield (' ' * ident) + '}\n'
-            elif isinstance(opcode, opcodes.Variable):
-                yield repr(opcode)
-            elif isinstance(opcode, actl_types.Number):
-                yield str(opcode.number)
-            elif opcodes.LOAD_ATTRIBUTE == opcode:
-                yield '.'
             else:
-                raise RuntimeError(opcode)
+                yield self.get_cpp_code(opcode)
+
+    @classmethod
+    def get_cpp_code(cls, opcode):
+        if isinstance(opcode, opcodes.DECLARE):
+            type = cls.get_cpp_code(opcode.type)
+            name = cls.get_cpp_code(opcode.name)
+            return f'{type} {name};\n'
+        elif isinstance(opcode, opcodes.SET):
+            name = cls.get_cpp_code(opcode.name)
+            value = cls.get_cpp_code(opcode.value)
+            return f'{name} = {value};\n'
+        elif isinstance(opcode, opcodes.Variable):
+            return str(opcode.name)
+        elif isinstance(opcode, int) or isinstance(opcode, float):
+            return str(opcode)
+        else:
+            raise RuntimeError(opcode)

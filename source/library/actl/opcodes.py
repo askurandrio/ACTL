@@ -27,13 +27,16 @@ class Variable(AnyOpCode):
     COUNT_TEMP_VARIABLE = -1
 
     def __init__(self, name=None):
-        self.name = name
+        if isinstance(name, self.__class__):
+            self.name = name.name
+        else:
+            self.name = name
 
     def __eq__(self):
         return AnyOpCode.__eq__(self, item) and (self.name == item.name)
 
     @classmethod
-    def get_temp_variable(cls, _type=None):
+    def get_temp_variable(cls):
         cls.COUNT_TEMP_VARIABLE += 1
         return cls(f'R{cls.COUNT_TEMP_VARIABLE}')
 
@@ -41,21 +44,16 @@ class Variable(AnyOpCode):
         return f'{self.__class__.__name__}({self.name})'
 
 
-class TypedVariable(Variable):
-    def __init__(self, _type=None, name=None):
-        self._type = _type
-        Variable.__init__(self, name)
+class DECLARE:
+    def __init__(self, type=None, name=None):
+        self.type = Variable(type)
+        self.name = Variable(name)
 
     def get_variable(self):
-        return Variable(self.name)
-
-    @classmethod
-    def get_temp_variable(cls, _type):
-        var = Variable.get_temp_variable()
-        return cls(_type=_type, name=var.name)
+        return self.name
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self._type}, {self.name})'
+        return f'{self.__class__.__name__}({self.type}, {self.name})'
 
 
 class SET(AnyOpCode):
