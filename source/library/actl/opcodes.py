@@ -26,11 +26,8 @@ class AnyOpCode(AnyVirtualOpCode):
 class Variable(AnyOpCode):
     COUNT_TEMP_VARIABLE = -1
 
-    def __init__(self, name=None):
-        if isinstance(name, self.__class__):
-            self.name = name.name
-        else:
-            self.name = name
+    def __init__(self, name):
+        self.name = name
 
     def __eq__(self):
         return AnyOpCode.__eq__(self, item) and (self.name == item.name)
@@ -45,12 +42,9 @@ class Variable(AnyOpCode):
 
 
 class DECLARE:
-    def __init__(self, type=None, name=None):
-        self.type = Variable(type)
-        self.name = Variable(name)
-
-    def get_variable(self):
-        return self.name
+    def __init__(self, type, name):
+        self.type = type
+        self.name = name
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.type}, {self.name})'
@@ -63,6 +57,16 @@ class SET(AnyOpCode):
 
     def __repr__(self):
         return f'SET({self.name.name}, {self.value})'
+
+
+class CALL_FUNCTION:
+    def __init__(self, function, return_name, arguments):
+        self.function = function
+        self.return_name = return_name
+        self.arguments = arguments
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.function}, {self.return_name}, {self.arguments})'
 
 
 class LOAD_ATTRIBUTE(AnyOpCode):
