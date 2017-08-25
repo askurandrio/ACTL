@@ -18,19 +18,25 @@ class Code(AnyOpCode):
                 idx_end = rule.match(self.buff[idx:])
                 if idx_end is not None:
                     result = rule(self, idx, self.buff[idx:idx+idx_end+1])
-                    if result is not None:
+                    if (not rule.add_context) and (result is not None):
                         self.buff[idx:idx+idx_end+1] = result
                     return True
-        pass
+
+    def __after_transform(self):
+        for idx, opcode in enumerate(self.buff):
+            if syntax_opcodes.Operator.NEXT_LINE_CODE == opcode:
+                del self.buff[idx]
+                return True
 
     def __compile(self):
         while self.__transform():
+            pass
+        while self.__after_transform():
             pass
         self.code = list(self.buff)
         for idx, opcode in enumerate(self.code):
             if syntax_opcodes.AnySyntaxCode == opcode:
                 raise RuntimeError(f'Detected object of {syntax_opcodes.AnySyntaxCode} with idx {idx}:\n{self}')
-        pass
 
     def __iter__(self):
         return iter(self.code)
@@ -73,3 +79,6 @@ class SyntaxRule:
             return self.func(context=context, *matched_code)
         else:
             return self.func(*matched_code)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.func}, {self.template})'

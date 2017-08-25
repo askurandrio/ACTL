@@ -66,7 +66,7 @@ class Operator(AnySyntaxCode):
     
     @classmethod
     def get_parsers(cls):
-        word = pyparsing.LineEnd().suppress()
+        word = pyparsing.LineEnd()
         word.setParseAction(lambda _: cls.NEXT_LINE_CODE)
         yield word
 

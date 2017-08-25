@@ -3,7 +3,7 @@ import pyparsing
 from .syntax_opcodes import Operator, Word, Number
 
 
-pyparsing.ParserElement.setDefaultWhitespaceChars('')
+pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
 
 
 class Parser:
@@ -28,7 +28,7 @@ class Parser:
             is_find = False
             for rule in self.rules:
                 for result, start, end in rule.scanString(self.buff):
-                    if not self.buff[:start].lstrip():
+                    if not self.buff[:start].lstrip(' '):
                         is_find = True
                         self.buff = self.buff[end:]
                         code = result[0]

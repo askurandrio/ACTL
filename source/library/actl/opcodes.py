@@ -20,27 +20,42 @@ class AnyVirtualOpCode(metaclass=MetaOpCode):
 
 class AnyOpCode(AnyVirtualOpCode):
     def __eq__(self, item):
-        return isinstance(item, AnyOpCode)
+        return isinstance(item, self.__class__)
 
 
 class Variable(AnyOpCode):
-    COUNT_TEMP_NAME = -1
+    COUNT_TEMP_VARIABLE = -1
 
-    def __init__(self, _type=None, name=None):
-        self._type = _type
+    def __init__(self, name=None):
         self.name = name
 
+    def __eq__(self):
+        return AnyOpCode.__eq__(self, item) and (self.name == item.name)
+
     @classmethod
-    def get_temp_name(cls):
-        cls.COUNT_TEMP_NAME += 1
-        return cls(name=f'R{cls.COUNT_TEMP_NAME}')
+    def get_temp_variable(cls, _type=None):
+        cls.COUNT_TEMP_VARIABLE += 1
+        return cls(f'R{cls.COUNT_TEMP_VARIABLE}')
 
     def __repr__(self):
-        if self._type is None:
-            s = ''
-        else:
-            s = f'{self._type} '
-        return s + f'{self.name}'
+        return f'{self.__class__.__name__}({self.name})'
+
+
+class TypedVariable(Variable):
+    def __init__(self, _type=None, name=None):
+        self._type = _type
+        Variable.__init__(self, name)
+
+    def get_variable(self):
+        return Variable(self.name)
+
+    @classmethod
+    def get_temp_variable(cls, _type):
+        var = Variable.get_temp_variable()
+        return cls(_type=_type, name=var.name)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self._type}, {self.name})'
 
 
 class SET(AnyOpCode):
@@ -49,7 +64,7 @@ class SET(AnyOpCode):
         self.value = value
 
     def __repr__(self):
-        return f'{self.name} = {self.value}'
+        return f'SET({self.name.name}, {self.value})'
 
 
 class LOAD_ATTRIBUTE(AnyOpCode):
