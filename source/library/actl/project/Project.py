@@ -5,10 +5,11 @@ from ..code.opcodes.opcodes import RULES
 
 
 class Project:
-	def __init__(self, main):
-		self.parser = Parser(main)
+	def __init__(self, mainf):
+		self.parser = Parser(open(mainf).read())
 		buff = list(self.parser)
 		print(buff)
 		self.code = Code(buff, rules=RULES)
+		self.code.compile()
 		buff = list(self.code)
 		print(buff)
