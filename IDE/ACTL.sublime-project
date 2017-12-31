@@ -1,0 +1,18 @@
+{
+	"folders":
+	[
+		{
+			"path": "C:\\Users\\askur\\Git\\ACTL\\source"
+		},
+		{
+			"path": "C:\\Users\\askur\\Git\\ACTL\\test"
+		}
+	],
+	"settings":
+	{
+		"tab_size": 3,
+		"pylinter":
+		{
+		}
+	}
+}

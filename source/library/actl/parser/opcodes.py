@@ -2,11 +2,12 @@ import sys
 
 import pyparsing
 
-from ..opcodes.AnyOpCode import AnyOpCode
+from ..code.opcodes.AnyOpCode import AnyOpCode
 
 
 class Word(AnyOpCode):
-    symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1))))
+    symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_' + \
+                pyparsing.nums
 
     def __init__(self, word):
         self.word = word
@@ -21,28 +22,9 @@ class Word(AnyOpCode):
 
     @classmethod
     def get_parsers(cls):
-        word = pyparsing.Word(cls.symbols + '_', cls.symbols + '_'+ pyparsing.nums)
+        word = pyparsing.Word(cls.symbols)
         word.setParseAction(lambda tokens: cls(tokens[0]))
         yield word
-
-
-class Number(AnyOpCode):
-    def __init__(self, number):
-        self.number = number
-    
-    def __eq__(self, item):
-        if super().__eq__(item):
-            return self.number == item.number
-        return False
-
-    def __repr__(self):
-        return f"AnyOpCode.{self.__class__.__name__}({self.number})"
-    
-    @classmethod
-    def get_parsers(cls):
-        parser = pyparsing.Word(pyparsing.nums, pyparsing.nums + '.')
-        parser.setParseAction(lambda tokens: cls(float(tokens[0])))
-        yield parser
 
 
 class Operator(AnyOpCode):

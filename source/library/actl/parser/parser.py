@@ -1,6 +1,6 @@
 import pyparsing
 
-from .opcodes import Word, Operator, Number
+from .opcodes import Word, Operator
 
 
 pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
@@ -37,8 +37,9 @@ class Parser:
 
     def __find_opcode(self):
         for rule in self.rules:
+            print(list(self.buff))          
             for result, start, end in rule.scanString(self.buff):
-                if self.buff[:start].lstrip():
+                if self.buff[:start].lstrip(' '):
                     break
                 self.buff = self.buff[end:]
                 yield result[0]
@@ -57,7 +58,6 @@ class Parser:
 
     def __get_rules(self):
         rules = []
-        rules.extend(Word.get_parsers())
-        rules.extend(Number.get_parsers())
         rules.extend(Operator.get_parsers())
+        rules.extend(Word.get_parsers())
         return rules

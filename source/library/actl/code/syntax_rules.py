@@ -16,11 +16,6 @@ def _(number, context):
     code.buff[context['idx_start'] + 3] = var
 
 
-@Code.add_syntax(opcodes.Variable, opcodes.Variable)
-def _(type, name):
-    return (opcodes.DECLARE(type=type, name=name),)
-
-
 
 @Code.add_syntax(syntax_opcodes.Operator.OPEN_CODE, add_context=True)
 def _(_, context):

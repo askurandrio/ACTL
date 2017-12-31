@@ -1,0 +1,503 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"a",
+				"attribute"
+			],
+			[
+				"w",
+				"word"
+			],
+			[
+				"S",
+				"SyntaxRulesL〔class〕"
+			],
+			[
+				"f",
+				"func"
+			],
+			[
+				"s",
+				"syntax_rules"
+			],
+			[
+				"p",
+				"pyparsing"
+			],
+			[
+				"fo",
+				"found"
+			],
+			[
+				"star",
+				"startswitch"
+			],
+			[
+				"op",
+				"operator"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/C/Users/askur/Git/ACTL/source/library/actl/code/opcodes/opcodes.py",
+			"settings":
+			{
+				"buffer_size": 715,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/askur/AppData/Local/Programs/Python/Python36-32/Lib/site-packages/pylint/__main__.py",
+			"settings":
+			{
+				"buffer_size": 206,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "# Copyright (c) 2008, 2012 LOGILAB S.A. (Paris, FRANCE) <contact@logilab.fr>\n# Copyright (c) 2014, 2016 Claudiu Popa <pcmanticore@gmail.com>\n# Copyright (c) 2014 Arun Persaud <arun@nubati.net>\n# Copyright (c) 2015 Ionel Cristian Maries <contact@ionelmc.ro>\n\n# Licensed under the GPL: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n# For details: https://github.com/PyCQA/pylint/blob/master/COPYING\n\nimport sys\n\nfrom .__pkginfo__ import version as __version__\n\ndef run_pylint():\n    \"\"\"run pylint\"\"\"\n    from pylint.lint import Run\n    Run(sys.argv[1:] + [])\n\n\ndef run_epylint():\n    \"\"\"run pylint\"\"\"\n    from pylint.epylint import Run\n    Run()\n\ndef run_pyreverse():\n    \"\"\"run pyreverse\"\"\"\n    from pylint.pyreverse.main import Run\n    Run(sys.argv[1:])\n\ndef run_symilar():\n    \"\"\"run symilar\"\"\"\n    from pylint.checkers.similar import Run\n    Run(sys.argv[1:])\n",
+			"file": "/C/Users/askur/AppData/Local/Programs/Python/Python36-32/Lib/site-packages/pylint/__init__.py",
+			"file_size": 866,
+			"file_write_time": 131590528463449361,
+			"settings":
+			{
+				"buffer_size": 871,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/Users/askur/Git/ACTL/source/library/actl/code/__init__.py",
+			"settings":
+			{
+				"buffer_size": 24,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/askur/Git/ACTL/test/test_case/example.a",
+			"settings":
+			{
+				"buffer_size": 7,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "\nfrom ..code import Code\nfrom ..parser import Parser\n\n\nclass Project:\n\tdef __init__(self, main):\n\t\tself.parser = Parser(main)\n\t\tbuff = list(self.parser)\n\t\tprint(buff)\n\t\tself.code = Code(buff, rules=self.__build_rules())\n\ndef\n",
+			"file": "/C/Users/askur/Git/ACTL/source/library/actl/project/Project.py",
+			"file_size": 203,
+			"file_write_time": 131592183527824107,
+			"settings":
+			{
+				"buffer_size": 225,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "re",
+		"selected_items":
+		[
+			[
+				"re",
+				"Package Control: Remove Package"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"instal",
+				"Install Package Control"
+			]
+		],
+		"width": 540.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/Users/askur/Git/ACTL/source",
+		"/C/Users/askur/Git/ACTL/test"
+	],
+	"file_history":
+	[
+		"/C/Users/askur/Git/ACTL/IDE/ACTL.sublime-project",
+		"/C/Users/askur/Git/ACTL/source/main.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/code/opcodes/__init__.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/code/opcodes/AnyOpCode.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/code/Code.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/parser/opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/parser/parser.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/__init__.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/project/Project.py.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/project/__init__ - Copy.py",
+		"/C/Users/askur/Git/ACTL/source/library/project/Project.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/code/__init__.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/code/opcodes/opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/project/__init__.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/code/opcodes/syntax_rules.py",
+		"/C/Users/askur/Git/ACTL/test/test_case/example.a",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/code.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/code.py",
+		"/C/Users/askur/Git/ACTL/test/test.cmd",
+		"/C/Users/askur/Git/ACTL/source/library/actl/parser/__init__.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/syntax_rules.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/SyntaxRule.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/AnyOpCode.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/__init__.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/parse/opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/pyparse/opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/pyparse/parser.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/parser.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/anyopcode.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/pyparsing_opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes/syntax_opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/opcodes.py",
+		"/C/Users/askur/Git/ACTL/source/library/actl/syntax_opcodes.py"
+	],
+	"find":
+	{
+		"height": 37.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"Project",
+			"buff",
+			"decorator",
+			"AnySyntaxCode",
+			"AnyVirtualOpCode"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"AnyOpCode"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/C/Users/askur/Git/ACTL/source/library/actl/code/opcodes/opcodes.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 715,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								313,
+								313
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 3,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/Users/askur/AppData/Local/Programs/Python/Python36-32/Lib/site-packages/pylint/__main__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 206,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/C/Users/askur/AppData/Local/Programs/Python/Python36-32/Lib/site-packages/pylint/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 871,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								563,
+								563
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 6.0,
+						"translation.y": 261.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/C/Users/askur/Git/ACTL/source/library/actl/code/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 24,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								24,
+								24
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/C/Users/askur/Git/ACTL/test/test_case/example.a",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7,
+								7
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/C/Users/askur/Git/ACTL/source/library/actl/project/Project.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 225,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 3,
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 37.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.unsaved_changes":
+	{
+		"height": 186.0
+	},
+	"pinned_build_system": "",
+	"project": "ACTL.sublime-project",
+	"replace":
+	{
+		"height": 70.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
