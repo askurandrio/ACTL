@@ -53,14 +53,15 @@ class Operator(AnyOpCode, metaclass=MetaOperator):
 		return self is item
 
 	def __repr__(self):
-		return f"Operator({self.operator})"
+		return f'Operator("{self.operator}")'
 	
 	@classmethod
 	def get_parsers(cls):
 		parser = pyparsing.LineEnd()
 		parser.setParseAction(lambda _: cls('line_end'))
 		yield parser
-
-		parser = pyparsing.Word(cls.symbols)
-		parser.setParseAction(lambda tokens: cls(tokens[0]))
-		yield parser
+		
+		for symbol in cls.symbols:
+			parser = pyparsing.Literal(symbol)
+			parser.setParseAction(lambda tokens: cls(tokens[0]))
+			yield parser

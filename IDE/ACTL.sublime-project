@@ -13,6 +13,10 @@
 		"tab_size": 3,
 		"pylinter":
 		{
+			"disable": [
+				"C0203",
+				"C0325"
+			],
 		}
 	}
 }

@@ -19,16 +19,16 @@ class Code(AnyOpCode):
 			for rule in self.rules:
 				idx_end = rule.match(self.buff[idx:])
 				if idx_end is not None:
-					result = rule(self, idx, self.buff[idx:idx+idx_end+1])
+					result = rule(self, idx, self.buff[idx:idx+idx_end])
 					if (not rule.add_context) and (result is not None):
-						self.buff[idx:idx+idx_end+1] = result
+						self.buff[idx:idx+idx_end] = result
 					return True
 
 	def __after_compile(self):
 		for idx, opcode in enumerate(self.buff):
 			if Operator('line_end') == opcode:
 				del self.buff[idx]
-				return None
+				return True
 			#assert opcode in (Word, Operator), f'{opcode} in {(Word, Operator)}'
 
 	def __iter__(self):

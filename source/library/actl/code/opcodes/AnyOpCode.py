@@ -6,6 +6,9 @@ class MetaAnyOpCode(type):
 	def __ne__(self, item):
 		return not (self == item)
 
+	def __repr__(self):
+		return f"opcodes.{self.__name__}"
+
 
 class AnyOpCode(metaclass=MetaAnyOpCode): #pylint: disable=R0903
 
