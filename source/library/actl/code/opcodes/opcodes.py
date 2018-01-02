@@ -43,9 +43,29 @@ RULES.add(Word, lambda word: (VARIABLE(name=word.word),))
 
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'destination', 'source')
 RULES.add(VARIABLE, Operator('='), VARIABLE,
-			 lambda destination, _, source: (SET_VARIABLE(destination, source),)) #pylint: disable=C0330
+			 lambda destination, _, source: (SET_VARIABLE(destination, source),))
 
 BUILD_TUPLE = DynamicOpCode.create('BUILD_TUPLE', 'variables')
+BUILDING_TUPLE = DynamicOpCode.create('BUILDING_TUPLE', 'variables')
 
-RULES.add(Operator('('), Operator(')'), lambda _o1, _o2: (BUILD_TUPLE(variables=()),))
-RULES.add(Maybe(Operator(',')), Many(VARIABLE, Operator(',')), lambda *_o1: (BUILD_TUPLE(variables=_o1),))
+
+@RULES.add(Operator('('), None, in_context=True)
+def _(code, idx_start, matched_code):
+	count_braces = 0
+	for idx_end, opcode in enumerate(code.buff[idx_start:], start=idx_start):
+		if opcode == Operator('('):
+			count_braces += 1
+		if opcode == Operator(')'):
+			count_braces -= 1
+			if not count_braces:
+				idx_end += 1
+		if not count_braces:
+			break
+	subcode = code[idx_start:idx_end]
+	del code[idx_start:idx_end]
+	del subcode[0]
+	del subcode[-1]
+	subcode.compile()
+	code.insert(idx_start, subcode[:-1])
+	if subcode:
+		code.insert(idx_start + 1, subcode[-1])

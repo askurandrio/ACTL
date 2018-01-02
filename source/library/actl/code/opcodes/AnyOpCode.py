@@ -13,7 +13,7 @@ class MetaAnyOpCode(type):
 class AnyOpCode(metaclass=MetaAnyOpCode): #pylint: disable=R0903
 
 	def __eq__(self, item):
-		return isinstance(item, AnyOpCode)
+		return isinstance(item, type(self))
 
 	def __ne__(self, item):
 		return not (self == item)

@@ -6,10 +6,10 @@ from ..Buffer import Buffer
 
 
 class SyntaxRule:
-	def __init__(self, template, func):
+	def __init__(self, template, func=None, in_context=False):
 		self.func = func
-		self.template = [SearchTemplate.create(tmpl) for tmpl in template]
-		self.add_context = False
+		self.in_context = in_context
+		self.template = [OneOpcode.create(tmpl) for tmpl in template]
 
 	def match(self, buff):
 		elements = Buffer(itertools.zip_longest(itertools.count(), self.template, buff))
@@ -24,11 +24,9 @@ class SyntaxRule:
 				return None
 
 	def __call__(self, code, idx_start, matched_code):
-		if self.add_context:
-			context = {'code':code, 'idx_start':idx_start}
-			return self.func(context=context, *matched_code)
-		else:
-			return self.func(*matched_code)
+		if self.in_context:
+			return self.func(code=code, idx_start=idx_start, matched_code=matched_code)
+		return self.func(*matched_code)
 
 	@staticmethod
 	@Buffer.generator
@@ -40,7 +38,7 @@ class SyntaxRule:
 		return f'{type(self).__name__}(func={self.func}, template={self.template}'
 
 
-class SearchTemplate:
+class OneOpcode(SyntaxRule):
 	def __init__(self, template):
 		self.__template = template
 
@@ -49,18 +47,15 @@ class SearchTemplate:
 
 	@classmethod
 	def create(cls, template):
-		if isinstance(template, cls):
+		if isinstance(SyntaxRule, cls):
 			return template
 		return cls(template)
 
 	def __repr__(self):
-		return f'{type(self).__name__}(template={self.__template})'
+		return f'{self.__template}'
 
 
-class Maybe(SyntaxRule, SearchTemplate):
-	def __init__(self, *template):
-		super().__init__(func=None, template=template)
-
+class Maybe(SyntaxRule):
 	def match(self, buff):
 		backup = copy.deepcopy(buff)
 		result = super().match(super().only_opcodes(buff))
@@ -69,16 +64,13 @@ class Maybe(SyntaxRule, SearchTemplate):
 		return False
 
 
-class Many(SyntaxRule, SearchTemplate):
-	def __init__(self, *template):
-		super().__init__(func=None, template=template)
-
+class Many(SyntaxRule):
 	def match(self, buff):
 		is_find = False
 		while True:
 			backup = copy.deepcopy(buff)
 			result = super().match(super().only_opcodes(buff))
-			print(self, super().only_opcodes(buff.__deepcopy__()), result, sep=' || ')
+			print(self, copy.deepcopy(backup), result, sep=' || ')
 			if result is None:
 				buff.update(backup)
 				return is_find
@@ -91,15 +83,14 @@ class SyntaxRules:
 	def __init__(self):
 		self.rules = []
 
-	def add(self, *args):
+	def add(self, *args, in_context=False):
 		template, func = args[:-1], args[-1]
 		if func is None:
 			def decorator(func):
-				if func is None:
-					self.rules.append(SyntaxRule(template, func))
+				self.rules.append(SyntaxRule(template, func, in_context))
 				return func
 			return decorator
-		self.rules.append(SyntaxRule(template, func))
+		self.rules.append(SyntaxRule(template, func, in_context))
 
 	def __iter__(self):
 		return iter(self.rules)
