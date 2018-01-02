@@ -1,7 +1,7 @@
 
 
 from ...parser import Word, Operator
-from ..SyntaxRule import SyntaxRules, Maybe, Many
+from ..SyntaxRule import SyntaxRule, SyntaxRules, Or
 from .AnyOpCode import AnyOpCode
 
 
@@ -38,15 +38,32 @@ class DynamicOpCode(AnyOpCode):
 		return lc_scope[name]
 
 
-VARIABLE = DynamicOpCode.create('VARIABLE', 'name')
+class Making(DynamicOpCode):
+	_attributes = ('opcode',)
+
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+		return self.opcode == other.opcode #pylint: disable=E1101
+
+
+class VARIABLE(DynamicOpCode):
+	__count_temp = 0
+	_attributes = ('name',)
+
+	@classmethod
+	def get_temp(cls):
+		cls.__count_temp += 1
+		return cls(name=f'_R{cls.__count_temp}')
+
+
 RULES.add(Word, lambda word: (VARIABLE(name=word.word),))
 
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'destination', 'source')
 RULES.add(VARIABLE, Operator('='), VARIABLE,
 			 lambda destination, _, source: (SET_VARIABLE(destination, source),))
 
-BUILD_TUPLE = DynamicOpCode.create('BUILD_TUPLE', 'variables')
-BUILDING_TUPLE = DynamicOpCode.create('BUILDING_TUPLE', 'variables')
+BUILD_TUPLE = DynamicOpCode.create('BUILD_TUPLE', 'variable', 'variables')
 
 
 @RULES.add(Operator('('), None, in_context=True)
@@ -69,3 +86,21 @@ def _(code, idx_start, matched_code):
 	code.insert(idx_start, subcode[:-1])
 	if subcode:
 		code.insert(idx_start + 1, subcode[-1])
+
+
+@RULES.add(Or((Making(BUILD_TUPLE),), (VARIABLE, Operator(','))), None, in_context=True)
+def _(code, idx_start, matched_code): #pylint: disable=R1710
+	if Making(BUILD_TUPLE) != matched_code[0]:
+		code.insert(idx_start, Making(BUILD_TUPLE(variable=VARIABLE.get_temp(), variables=[])))
+	result = code.buff[idx_start]
+	idx_start += 1
+	for idx_end, opcode in enumerate(code.buff[idx_start:], start=idx_start):
+		if VARIABLE == opcode:
+			result.opcode.variables.append(opcode)
+		elif Operator(',') == opcode:
+			continue
+		else:
+			del code[idx_start:idx_end]
+			return Making
+	code[idx_start-1] = result.opcode
+	del code[idx_start:idx_end+1] #pylint: disable=W0631

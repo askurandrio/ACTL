@@ -61,9 +61,9 @@ class Buffer:
 		return self
 
 	def __next__(self):
-		if not self.__cache:
-			return next(self.__head)
-		return self.__cache.pop(0)
+		if self.__cache:
+			return self.__cache.pop(0)
+		return next(self.__head)
 
 	def __bool__(self):
 		try:

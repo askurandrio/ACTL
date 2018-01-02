@@ -6,18 +6,22 @@
 		},
 		{
 			"path": "C:\\Users\\askur\\Git\\ACTL\\test"
+		},
+		{
+			"path": "C:\\Users\\askur\\Git\\ACTL\\test\\test_case"
 		}
 	],
 	"settings":
 	{
-		"tab_size": 3,
 		"pylinter":
 		{
-			"disable": [
+			"disable":
+			[
 				"C0203",
 				"C0325",
 				"C0330"
-			],
-		}
+			]
+		},
+		"tab_size": 3
 	}
 }

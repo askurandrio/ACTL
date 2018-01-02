@@ -6,6 +6,8 @@ from ..Buffer import Buffer
 
 
 class SyntaxRule:
+	CONTINUE = object()
+
 	def __init__(self, template, func=None, in_context=False):
 		self.func = func
 		self.in_context = in_context
@@ -18,9 +20,10 @@ class SyntaxRule:
 			if tmpl is None:
 				return idx
 			if opcode is None:
-				return None
+				return None 
 			elements = Buffer.create((idx, tmpl, opcode)) + elements
 			if not tmpl.match(elements):
+				#print(idx, tmpl, opcode, sep=' || ')
 				return None
 
 	def __call__(self, code, idx_start, matched_code):
@@ -35,7 +38,7 @@ class SyntaxRule:
 			yield opcode
 
 	def __repr__(self):
-		return f'{type(self).__name__}(func={self.func}, template={self.template}'
+		return f'{type(self).__name__}(func={self.func}, template={self.template})'
 
 
 class OneOpcode(SyntaxRule):
@@ -47,7 +50,7 @@ class OneOpcode(SyntaxRule):
 
 	@classmethod
 	def create(cls, template):
-		if isinstance(SyntaxRule, cls):
+		if isinstance(template, SyntaxRule):
 			return template
 		return cls(template)
 
@@ -55,28 +58,24 @@ class OneOpcode(SyntaxRule):
 		return f'{self.__template}'
 
 
-class Maybe(SyntaxRule):
-	def match(self, buff):
-		backup = copy.deepcopy(buff)
-		result = super().match(super().only_opcodes(buff))
-		if result is None:
-			buff.update(backup)
-		return False
+class Or(SyntaxRule):
+	def __init__(self, *templates):
+		self.__rules = []
+		for template in templates:
+			self.__rules.append(SyntaxRule(template))
 
-
-class Many(SyntaxRule):
 	def match(self, buff):
-		is_find = False
-		while True:
+		for rule in self.__rules:
 			backup = copy.deepcopy(buff)
-			result = super().match(super().only_opcodes(buff))
-			print(self, copy.deepcopy(backup), result, sep=' || ')
+			result = rule.match(super().only_opcodes(buff))
 			if result is None:
 				buff.update(backup)
-				return is_find
 			else:
-				is_find = True
-				buff.update(backup[result:])
+				return True
+		return False
+
+	def __repr__(self):
+		return f'{type(self).__name__}({self.__rules})'
 
 
 class SyntaxRules:
