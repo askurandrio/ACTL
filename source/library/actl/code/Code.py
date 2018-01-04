@@ -1,4 +1,6 @@
 
+import weakref
+
 from ..parser.opcodes import Operator
 from .opcodes import AnyOpCode
 from .opcodes.opcodes import Making
@@ -10,14 +12,43 @@ class Code(AnyOpCode):
 		self.buff = buff
 		self.rules = rules
 
+	def get(self, index, default=None):
+		try:
+			return self[index]
+		except IndexError:
+			return default
+
+	def get_subcode(self, idx_start, idx_end):
+		subcode = type(self)(self.buff[idx_start:idx_end], self.rules)
+		del self[idx_start:idx_end]
+		return subcode
+
 	def insert(self, index, opcode):
 		self.buff.insert(index, opcode)
+
+	def extend(self, buff):
+		self.buff.extend(buff)
 
 	def compile(self):
 		while self.__apply_rule():
 			pass
 		while self.__after_compile():
 			pass
+
+	def pop(self, index):
+		return self.buff.pop(index)
+
+	def add_definition(self, idx, opcodes):
+		while (idx > 0) and (self[idx] != Operator('line_end')):
+			idx -= 1
+		if idx != 0:
+			idx += 1
+		is_add = False
+		if Definition != self[idx]:
+			self.insert(idx, Definition([], self.rules))
+			is_add = True
+		self[idx].extend(opcodes)
+		return is_add
 
 	def __apply_rule(self):
 		for idx, _ in enumerate(self.buff):
@@ -37,6 +68,8 @@ class Code(AnyOpCode):
 			if Operator('line_end') == opcode:
 				del self.buff[idx]
 				return True
+			#if type(self) == opcode:
+			#	opcode.compile()
 			#assert opcode in (Word, Operator), f'{opcode} in {(Word, Operator)}'
 
 	def __iter__(self):
@@ -62,10 +95,15 @@ class Code(AnyOpCode):
 			def generator():
 				yield f'{type(self).__name__}:\n'
 				for opcode in self:
-					if isinstance(opcode, type(self)):
+					if isinstance(opcode, Code):
 						for repr_opcode in opcode.__repr__(True):
 							yield '   ' + repr_opcode
 					else:
 						yield '   ' + repr(opcode) + '\n'
 			return generator()
 		return ''.join(self.__repr__(True))
+
+
+class Definition(Code):
+	pass
+

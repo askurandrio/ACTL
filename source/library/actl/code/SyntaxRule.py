@@ -6,8 +6,6 @@ from ..Buffer import Buffer
 
 
 class SyntaxRule:
-	CONTINUE = object()
-
 	def __init__(self, template, func=None, in_context=False):
 		self.func = func
 		self.in_context = in_context
@@ -23,7 +21,6 @@ class SyntaxRule:
 				return None 
 			elements = Buffer.create((idx, tmpl, opcode)) + elements
 			if not tmpl.match(elements):
-				#print(idx, tmpl, opcode, sep=' || ')
 				return None
 
 	def __call__(self, code, idx_start, matched_code):

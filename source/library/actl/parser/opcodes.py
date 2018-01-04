@@ -43,10 +43,12 @@ class MetaOperator(MetaAnyOpCode):
 
 class Operator(AnyOpCode, metaclass=MetaOperator):
 	symbols = ':.,+-=*/()<>![]{}=!@;'
+	allowed_operators = set(tuple(symbols) + (None, 'line_end', 'code_open', 'code_close'))
 
 	def __init__(self, operator):
 		if operator == '\n':
 			operator = 'line_end'
+		assert operator in self.allowed_operators
 		self.operator = operator
 
 	def __eq__(self, item):

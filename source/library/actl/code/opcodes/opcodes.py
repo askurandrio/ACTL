@@ -59,11 +59,19 @@ class VARIABLE(DynamicOpCode):
 
 RULES.add(Word, lambda word: (VARIABLE(name=word.word),))
 
-SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'destination', 'source')
+SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dest', 'source')
 RULES.add(VARIABLE, Operator('='), VARIABLE,
-			 lambda destination, _, source: (SET_VARIABLE(destination, source),))
+			 lambda dest, _, source: (SET_VARIABLE(dest, source),))
 
-BUILD_TUPLE = DynamicOpCode.create('BUILD_TUPLE', 'variable', 'variables')
+BUILD_CTUPLE = DynamicOpCode.create('BUILD_CTUPLE', 'out', 'args', 'kwargs')
+CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'out', 'function', 'ctuple')
+
+
+@RULES.add(VARIABLE, Operator('('), None, in_context=True)
+def _(code, idx_start, matched_code):
+	code[idx_start] = Making(CALL_FUNCTION(out=VARIABLE.get_temp(),
+														function=code[idx_start],
+														ctuple=None))
 
 
 @RULES.add(Operator('('), None, in_context=True)
@@ -78,29 +86,45 @@ def _(code, idx_start, matched_code):
 				idx_end += 1
 		if not count_braces:
 			break
-	subcode = code[idx_start:idx_end]
-	del code[idx_start:idx_end]
+	subcode = code.get_subcode(idx_start, idx_end)
 	del subcode[0]
 	del subcode[-1]
 	subcode.compile()
-	code.insert(idx_start, subcode[:-1])
-	if subcode:
-		code.insert(idx_start + 1, subcode[-1])
+	code[idx_start] = subcode.pop(-1)
+	code.add_definition(idx_start, subcode)
 
 
-@RULES.add(Or((Making(BUILD_TUPLE),), (VARIABLE, Operator(','))), None, in_context=True)
+@RULES.add(Or((Making(BUILD_CTUPLE),), (VARIABLE, Operator(','))), None, in_context=True)
 def _(code, idx_start, matched_code): #pylint: disable=R1710
-	if Making(BUILD_TUPLE) != matched_code[0]:
-		code.insert(idx_start, Making(BUILD_TUPLE(variable=VARIABLE.get_temp(), variables=[])))
+	if Making(BUILD_CTUPLE) != matched_code[0]:
+		code.insert(idx_start, Making(BUILD_CTUPLE(out=VARIABLE.get_temp(), args=[], kwargs=[])))
 	result = code.buff[idx_start]
-	idx_start += 1
+	idx_end = idx_start
 	for idx_end, opcode in enumerate(code.buff[idx_start:], start=idx_start):
-		if VARIABLE == opcode:
-			result.opcode.variables.append(opcode)
+		if (idx_end == idx_start) and opcode is result:
+			continue
+		elif (VARIABLE == opcode) and (code.get(idx_end+1, Operator(',')) == Operator(',')):
+			result.opcode.args.append(opcode)
 		elif Operator(',') == opcode:
 			continue
+		elif SET_VARIABLE == opcode:
+			result.opcode.kwargs.append(opcode)
 		else:
-			del code[idx_start:idx_end]
+			del code[idx_start+1:idx_end]
 			return Making
-	code[idx_start-1] = result.opcode
-	del code[idx_start:idx_end+1] #pylint: disable=W0631
+	#import pdb; pdb.set_trace()
+	if code.add_definition(idx_start, (result.opcode,)):
+		idx_start += 1
+		idx_end += 1
+	code[idx_start] = result.opcode.out
+	del code[idx_start+1:idx_end+1]
+
+
+@RULES.add(Making(CALL_FUNCTION), VARIABLE, None, in_context=True)
+def _(code, idx_start, matched_code): #pylint: disable=R1710
+	opcode = code[idx_start].opcode
+	opcode.ctuple = code.pop(idx_start+1)
+	if code.add_definition(idx_start, (opcode,)):
+		idx_start += 1
+	code[idx_start] = opcode.out
+	
