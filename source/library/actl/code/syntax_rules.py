@@ -12,21 +12,21 @@ def _(number, context):
     var = opcodes.Variable.get_temp_variable()
     code.buff.insert(0, opcodes.DECLARE(opcodes.Variable(actl_types.number),  var))
     code.buff.insert(1, opcodes.SET(var, number.number))
-    code.buff.insert(2, syntax_opcodes.Operator.NEXT_LINE_CODE)
+    code.buff.insert(2, syntax_opcodes.OPERATOR.NEXT_LINE_CODE)
     code.buff[context['idx_start'] + 3] = var
 
 
 
-@Code.add_syntax(syntax_opcodes.Operator.OPEN_CODE, add_context=True)
+@Code.add_syntax(syntax_opcodes.OPERATOR.OPEN_CODE, add_context=True)
 def _(_, context):
     main_code, idx_start = context['code'], context['idx_start']
     count = 1
     code = main_code.__class__()
     while main_code.buff[idx_start:]:
-        if main_code.buff[idx_start+1] == syntax_opcodes.Operator.OPEN_CODE:
+        if main_code.buff[idx_start+1] == syntax_opcodes.OPERATOR.OPEN_CODE:
             count += 1
             code.buff.append(main_code.buff.pop(idx_start+1))
-        elif main_code.buff[idx_start+1] == syntax_opcodes.Operator.CLOSE_CODE:
+        elif main_code.buff[idx_start+1] == syntax_opcodes.OPERATOR.CLOSE_CODE:
             count -= 1
             if count != 0:
                 code.buff.append(main_code.buff.pop(idx_start+1))

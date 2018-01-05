@@ -1,6 +1,6 @@
 import pyparsing
 
-from .opcodes import Word, Operator
+from .opcodes import Word, OPERATOR
 
 
 pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
@@ -17,19 +17,19 @@ class Parser:
 		self.buff = buff
 		self.rules = self.__get_rules()
 		self.shifts = []
-		self.prev_code = Operator(None)
+		self.prev_code = OPERATOR(None)
 
 	def __delete_shifts(self):
-		if self.prev_code == Operator('line_end'):
+		if self.prev_code == OPERATOR('line_end'):
 			for idx, shift in enumerate(self.shifts):
 				try:
 					self.buff = remove_start(self.buff, shift)
 				except RuntimeError:
 					for _ in self.shifts[idx:]:
-						yield Operator('code_close')
+						yield OPERATOR('code_close')
 					del self.shifts[idx:]
 			if self.buff[0] == ' ':
-				yield Operator('code_open')
+				yield OPERATOR('code_open')
 				self.shifts.append('')
 				while self.buff[0] == ' ':
 					self.shifts[-1] += ' '
@@ -47,16 +47,16 @@ class Parser:
 			raise RuntimeError(f'This token not found: "{self.buff[:start]}"')
 
 	def __iter__(self):
-		yield Operator('code_open')
+		yield OPERATOR('code_open')
 		while self.buff:
 			yield from self.__delete_shifts()
 			yield from self.__find_opcode()
 		for _ in self.shifts:
-			yield Operator('code_close')
-		yield Operator('code_close')
+			yield OPERATOR('code_close')
+		yield OPERATOR('code_close')
 
 	def __get_rules(self):
 		rules = []
-		rules.extend(Operator.get_parsers())
+		rules.extend(OPERATOR.get_parsers())
 		rules.extend(Word.get_parsers())
 		return rules

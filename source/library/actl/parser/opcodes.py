@@ -28,7 +28,7 @@ class Word(AnyOpCode):
 		yield word
 
 
-class MetaOperator(MetaAnyOpCode):
+class MetaOPERATOR(MetaAnyOpCode):
 	def __init__(self, *args, **kwargs):
 		self.__cache = {}
 		super().__init__(*args, **kwargs)
@@ -41,21 +41,22 @@ class MetaOperator(MetaAnyOpCode):
 			return self(operator)
 
 
-class Operator(AnyOpCode, metaclass=MetaOperator):
-	symbols = ':.,+-=*/()<>![]{}=!@;'
-	allowed_operators = set(tuple(symbols) + (None, 'line_end', 'code_open', 'code_close'))
+class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
+	brackets = {'(':')', '{':'}', '[':']'}
+	symbols = ':.,+-!=*/<>@;' + ''.join(brackets.keys()) + ''.join(brackets.values())
+	allowed = set(tuple(symbols) + (None, 'line_end', 'code_open', 'code_close'))
 
 	def __init__(self, operator):
 		if operator == '\n':
 			operator = 'line_end'
-		assert operator in self.allowed_operators
+		assert operator in self.allowed
 		self.operator = operator
 
 	def __eq__(self, item):
 		return self is item
 
 	def __repr__(self):
-		return f'Operator("{self.operator}")'
+		return f'OPERATOR("{self.operator}")'
 	
 	@classmethod
 	def get_parsers(cls):

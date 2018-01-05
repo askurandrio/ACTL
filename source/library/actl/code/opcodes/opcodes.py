@@ -1,6 +1,6 @@
 
 
-from ...parser import Word, Operator
+from ...parser import Word, OPERATOR
 from ..SyntaxRule import SyntaxRule, SyntaxRules, Or
 from .AnyOpCode import AnyOpCode
 
@@ -54,65 +54,78 @@ class VARIABLE(DynamicOpCode):
 	@classmethod
 	def get_temp(cls):
 		cls.__count_temp += 1
-		return cls(name=f'_R{cls.__count_temp}')
+		return cls(name=f'__IV{cls.__count_temp}')
 
 
 RULES.add(Word, lambda word: (VARIABLE(name=word.word),))
 
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dest', 'source')
-RULES.add(VARIABLE, Operator('='), VARIABLE,
+RULES.add(VARIABLE, OPERATOR('='), VARIABLE,
 			 lambda dest, _, source: (SET_VARIABLE(dest, source),))
 
-BUILD_CTUPLE = DynamicOpCode.create('BUILD_CTUPLE', 'out', 'args', 'kwargs')
+SET_TYPE_CTUPLE = DynamicOpCode.create('SET_TYPE_CTUPLE', 'bracket')
+BUILD_CTUPLE = DynamicOpCode.create('BUILD_CTUPLE', 'out', 'type', 'args', 'kwargs')
 CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'out', 'function', 'ctuple')
 
 
-@RULES.add(VARIABLE, Operator('('), None, in_context=True)
+@RULES.add(Or(*((OPERATOR(bracket),) for bracket in OPERATOR.brackets)), None, in_context=True)
 def _(code, idx_start, matched_code):
-	code[idx_start] = Making(CALL_FUNCTION(out=VARIABLE.get_temp(),
-														function=code[idx_start],
-														ctuple=None))
-
-
-@RULES.add(Operator('('), None, in_context=True)
-def _(code, idx_start, matched_code):
+	open_bracket = matched_code[0]
+	close_brucket = OPERATOR(OPERATOR.brackets[open_bracket.operator])
 	count_braces = 0
+	idx_end = idx_start
 	for idx_end, opcode in enumerate(code.buff[idx_start:], start=idx_start):
-		if opcode == Operator('('):
+		if opcode == open_bracket:
 			count_braces += 1
-		if opcode == Operator(')'):
+		if opcode == close_brucket:
 			count_braces -= 1
 			if not count_braces:
 				idx_end += 1
 		if not count_braces:
 			break
 	subcode = code.get_subcode(idx_start, idx_end)
-	del subcode[0]
+	subcode[0] = SET_TYPE_CTUPLE(subcode[0].operator)
 	del subcode[-1]
 	subcode.compile()
-	code[idx_start] = subcode.pop(-1)
-	code.add_definition(idx_start, subcode)
+	definitions = []
+	definitions.append(subcode[:-1])
+	#create CALL_FUNCTION opcode(if needed)
+	if code[:idx_start] and (VARIABLE == code[idx_start - 1]):
+		call_function = CALL_FUNCTION(out=VARIABLE.get_temp(),
+												function=code[idx_start - 1],
+												ctuple=subcode.pop(-1))
+		definitions.append(call_function)
+		code[idx_start-1:idx_start+1] = (call_function.out,)
+	else:
+		code[idx_start] = subcode.pop(-1)
+	code.add_definition(idx_start, definitions)	
 
 
-@RULES.add(Or((Making(BUILD_CTUPLE),), (VARIABLE, Operator(','))), None, in_context=True)
+@RULES.add(Or((Making(BUILD_CTUPLE),), (VARIABLE, OPERATOR(',')), (SET_TYPE_CTUPLE,)),
+			  None, in_context=True)
 def _(code, idx_start, matched_code): #pylint: disable=R1710
-	if Making(BUILD_CTUPLE) != matched_code[0]:
-		code.insert(idx_start, Making(BUILD_CTUPLE(out=VARIABLE.get_temp(), args=[], kwargs=[])))
+	if Making(BUILD_CTUPLE) == matched_code[0]:
+		pass
+	elif VARIABLE == matched_code[0]:
+		opcode = BUILD_CTUPLE(out=VARIABLE.get_temp(), type='(', args=[], kwargs=[])
+		code.insert(idx_start, Making(opcode))
+	elif SET_TYPE_CTUPLE == matched_code[0]:
+		opcode = BUILD_CTUPLE(out=VARIABLE.get_temp(), type=matched_code[0].bracket, args=[], kwargs=[])
+		code[idx_start] = Making(opcode)
 	result = code.buff[idx_start]
 	idx_end = idx_start
 	for idx_end, opcode in enumerate(code.buff[idx_start:], start=idx_start):
 		if (idx_end == idx_start) and opcode is result:
 			continue
-		elif (VARIABLE == opcode) and (code.get(idx_end+1, Operator(',')) == Operator(',')):
+		elif (VARIABLE == opcode) and (code.get(idx_end+1, OPERATOR(',')) == OPERATOR(',')):
 			result.opcode.args.append(opcode)
-		elif Operator(',') == opcode:
+		elif OPERATOR(',') == opcode:
 			continue
 		elif SET_VARIABLE == opcode:
 			result.opcode.kwargs.append(opcode)
 		else:
 			del code[idx_start+1:idx_end]
 			return Making
-	#import pdb; pdb.set_trace()
 	if code.add_definition(idx_start, (result.opcode,)):
 		idx_start += 1
 		idx_end += 1
@@ -121,10 +134,19 @@ def _(code, idx_start, matched_code): #pylint: disable=R1710
 
 
 @RULES.add(Making(CALL_FUNCTION), VARIABLE, None, in_context=True)
-def _(code, idx_start, matched_code): #pylint: disable=R1710
-	opcode = code[idx_start].opcode
+def _(code, idx_start, matched_code):
+	opcode = matched_code[0].opcode
 	opcode.ctuple = code.pop(idx_start+1)
 	if code.add_definition(idx_start, (opcode,)):
 		idx_start += 1
 	code[idx_start] = opcode.out
-	
+
+
+#RULES.add(VARIABLE,
+#			  Or(*((OPERATOR(symbol),) for symbol in OPERATOR.symbols)),
+#			  VARIABLE,
+#			  None,
+#			  in_context=True)
+def _(code, idx_start, matched_code): #pylint: disable=R1710
+	print(code[idx_start:])
+	raise 1

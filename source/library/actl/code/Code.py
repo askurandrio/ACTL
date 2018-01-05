@@ -1,7 +1,7 @@
 
 import weakref
 
-from ..parser.opcodes import Operator
+from ..parser.opcodes import OPERATOR
 from .opcodes import AnyOpCode
 from .opcodes.opcodes import Making
 from .SyntaxRule import SyntaxRule
@@ -39,7 +39,7 @@ class Code(AnyOpCode):
 		return self.buff.pop(index)
 
 	def add_definition(self, idx, opcodes):
-		while (idx > 0) and (self[idx] != Operator('line_end')):
+		while (idx > 0) and (self[idx] != OPERATOR('line_end')):
 			idx -= 1
 		if idx != 0:
 			idx += 1
@@ -65,12 +65,12 @@ class Code(AnyOpCode):
 
 	def __after_compile(self):
 		for idx, opcode in enumerate(self.buff):
-			if Operator('line_end') == opcode:
+			if OPERATOR('line_end') == opcode:
 				del self.buff[idx]
 				return True
 			#if type(self) == opcode:
 			#	opcode.compile()
-			#assert opcode in (Word, Operator), f'{opcode} in {(Word, Operator)}'
+			#assert opcode in (Word, OPERATOR), f'{opcode} in {(Word, OPERATOR)}'
 
 	def __iter__(self):
 		return iter(self.buff)
