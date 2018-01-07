@@ -17,8 +17,11 @@ def _(_, word):
 def _(code, idx_start, _):
 	open_bracket = code[idx_start]
 	close_brucket = OPERATOR(OPERATOR.brackets[open_bracket.operator])
+	next_code = code[idx_start+1:]
+	next_code.compile()
+	code.buff[idx_start+1:] = next_code.buff
+
 	count_braces = 0
-	idx_end = idx_start
 	for idx_end, opcode in enumerate(code.buff[idx_start:], start=idx_start):
 		if opcode == open_bracket:
 			count_braces += 1
@@ -75,13 +78,12 @@ def _(code, idx_start, _):
 	code.add_definition(idx_start, (result,))
 
 
-@RULES.add(Not((opcodes.VARIABLE,)),
-			  Or(*((opcodes.BRACKETS(bracket),) for bracket in OPERATOR.brackets)), 
+@RULES.add(Not((opcodes.VARIABLE,),
+					(Or(*((opcodes.BRACKETS(bracket),) for bracket in OPERATOR.brackets)),)), 
 			  opcodes.VARIABLE,
 			  in_context=True)
 def _(code, idx_start, _):
-	print(code)
-	functions = {'(':'tuple', '[':'list', '{':'dict'}
+	functions = {'(':'tuple', '[':'list', '{':'dict', '<':'template'}
 	function = opcodes.VARIABLE(functions[code[idx_start].bracket])
 	out = opcodes.VARIABLE.get_temp()
 	code[idx_start] = out

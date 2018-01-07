@@ -1,5 +1,6 @@
 
 import copy
+import enum
 import itertools
 
 from ..Buffer import Buffer
@@ -12,15 +13,16 @@ class SyntaxRule:
 		self.template = [OneOpcode.create(tmpl) for tmpl in template]
 
 	def match(self, buff):
-		elements = Buffer(itertools.zip_longest(itertools.count(), self.template, buff))
+		template = iter(self.template)
+		elements = Buffer(itertools.zip_longest(itertools.count(), template, buff))
 		while True:
 			idx, tmpl, opcode = next(elements)
 			if tmpl is None:
 				return idx
 			if opcode is None:
 				return None 
-			telements = Buffer.create((idx, tmpl, opcode)) + elements
-			if not tmpl.match(telements):
+			elements = Buffer.create((idx, tmpl, opcode)) + elements
+			if not tmpl.match(elements):
 				return None
 
 	def __call__(self, code, idx_start, idx_end):
@@ -62,10 +64,12 @@ class Or(SyntaxRule):
 			self.__rules.append(SyntaxRule(template))
 
 	def match(self, buff):
-		for rule in self.__rules:
+		for idx, rule in enumerate(self.__rules):
 			backup = copy.deepcopy(buff)
 			result = rule.match(super().only_opcodes(buff))
 			if result is None:
+				if idx == len(self.__rules) - 1:
+					return False
 				buff.update(backup)
 			else:
 				return True
@@ -76,15 +80,16 @@ class Or(SyntaxRule):
 
 
 class Not(SyntaxRule):
-	def __init__(self, template):
-		super().__init__(template, None)
+	def __init__(self, not_match, rule):
+		self.not_match = SyntaxRule(not_match, None)
+		self.rule = SyntaxRule(rule, None)
 
 	def match(self, buff):
 		backup = copy.deepcopy(buff)
-		result = super().match(super().only_opcodes(buff))
+		result = self.not_match.match(super().only_opcodes(buff))
 		if result is None:
 			buff.update(backup)
-			return True
+			return self.rule.match(super().only_opcodes(buff))
 		return False
 
 	def __repr__(self):

@@ -1,6 +1,7 @@
 
 from ..code import Code
 from ..parser import Parser
+from ..executor import SExecutor
 from ..code.rules import RULES
 
 
@@ -12,3 +13,6 @@ class Project:
 		print(self.code)
 		self.code.compile()
 		print(self.code)
+		self.executor = SExecutor(self.code)
+		self.executor.exec()
+
