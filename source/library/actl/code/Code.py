@@ -29,14 +29,8 @@ class Code(AnyOpCode):
 	def extend(self, buff):
 		self.buff.extend(buff)
 
-	def compile(self):
-		while self.__apply_rule():
-			pass
-		while self.__after_compile():
-			pass
-
-	def pop(self, index):
-		return self.buff.pop(index)
+	def append(self, buff):
+		self.buff.append(buff)
 
 	def add_definition(self, idx, opcodes):
 		while (idx > 0) and (self[idx] != OPERATOR('line_end')):
@@ -50,17 +44,29 @@ class Code(AnyOpCode):
 		self[idx].extend(opcodes)
 		return is_add
 
+	def compile(self):
+		while self.__apply_rule():
+			pass
+		while self.__after_compile():
+			pass
+
+	def pop(self, index):
+		return self.buff.pop(index)
+
+	def create(self):
+		return type(self)(buff=[], rules=self.rules)
+
 	def __apply_rule(self):
-		for idx, _ in enumerate(self.buff):
+		for idx_start, _ in enumerate(self.buff):
 			for rule in self.rules:
-				idx_end = rule.match(self.buff[idx:])
+				idx_end = rule.match(self.buff[idx_start:])
 				if idx_end is not None:
-					result = rule(self, idx, self.buff[idx:idx+idx_end])
+					result = rule(self, idx_start, idx_end)
 					if rule.in_context:
 						if result is Making:
 							continue
 					else:
-						self.buff[idx:idx+idx_end] = result
+						self.buff[idx_start:idx_start+idx_end] = result
 					return True
 
 	def __after_compile(self):
