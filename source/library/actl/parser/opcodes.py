@@ -3,29 +3,37 @@ import sys
 
 import pyparsing
 
+from ..code.opcodes import opcodes
 from ..code.opcodes.AnyOpCode import MetaAnyOpCode, AnyOpCode
 
 
-class Word(AnyOpCode):
+class VARIABLE(AnyOpCode):
 	symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_' + \
 				pyparsing.nums
-
-	def __init__(self, word):
-		self.word = word
-	
-	def __eq__(self, item):
-		if super().__eq__(item):
-			return self.word == item.word
-		return False
-
-	def __repr__(self):
-		return f"Word('{self.word}')"
 
 	@classmethod
 	def get_parsers(cls):
 		word = pyparsing.Word(cls.symbols)
-		word.setParseAction(lambda tokens: cls(tokens[0]))
+		word.setParseAction(lambda tokens: opcodes.VARIABLE(tokens[0]))
 		yield word
+
+
+class STRING(AnyOpCode):
+	def __init__(self, string):
+		self.string = string
+
+	def __eq__(self, other):
+		if super().__eq__(other):
+			return self.string == other.string
+
+	def __repr__(self):
+		return f'{type(self)}("{self.string}")'
+
+	@classmethod
+	def get_parsers(cls):
+		parser = pyparsing.QuotedString(quoteChar='"')
+		parser.setParseAction(lambda tokens: cls(tokens[0]))
+		yield parser
 
 
 class MetaOPERATOR(MetaAnyOpCode):

@@ -6,13 +6,23 @@ from ..code.rules import RULES
 
 
 class Project:
-	def __init__(self, mainf):
-		self.parser = Parser(open(mainf).read())
-		buff = list(self.parser)
-		self.code = Code(buff, rules=RULES)
-		print(self.code)
-		self.code.compile()
-		print(self.code)
-		self.executor = SExecutor(self.code)
-		self.executor.exec()
+	__this = None
 
+	def __init__(self, mainf):
+		self.__class__.__this = self
+		code = self.compile(open(mainf).read())
+		executor = SExecutor(code)
+		executor.exec()
+
+	def compile(self, scode):
+		parser = Parser(scode)
+		buff = list(parser.parse())
+		code = Code(buff, rules=RULES)
+		print(code)
+		code.compile()
+		print(code)
+		return code
+
+	@classmethod
+	def this(cls):
+		return cls.__this

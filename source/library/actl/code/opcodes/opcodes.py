@@ -53,23 +53,8 @@ class VARIABLE(DynamicOpCode):
 		return cls(name=f'__IV{cls.__count_temp}')
 
 
-class CALL_FUNCTION(DynamicOpCode):
-	_attributes = ('out', 'function', 'type', 'ctuple')
-
-	@classmethod
-	def build(cls, out, function, type='(', args=None, kwargs=None):
-		if args is None:
-			args = []
-		if kwargs is None:
-			kwargs = []
-		var_ctuple = VARIABLE.get_temp()
-		code = []
-		code.append(BUILD_CTUPLE(var_ctuple, args, kwargs))
-		code.append(cls(out, function, type, var_ctuple))
-		return code
-
-
-BRACKETS = DynamicOpCode.create('BRACKETS', 'bracket')
+CTUPLE = DynamicOpCode.create('CTUPLE', 'type', 'args', 'kwargs')
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'out', 'source')
 BUILD_STRING = DynamicOpCode.create('BUILD_STRING', 'out', 'string')
-BUILD_CTUPLE = DynamicOpCode.create('BUILD_CTUPLE', 'out', 'args', 'kwargs')
+BUILD_NUMBER = DynamicOpCode.create('BUILD_NUMBER', 'out', 'number')
+CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'out', 'function', 'type', 'args', 'kwargs')

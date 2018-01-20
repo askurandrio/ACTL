@@ -1,13 +1,13 @@
 import pyparsing
 
-from .opcodes import Word, OPERATOR
+from .opcodes import VARIABLE, STRING, OPERATOR
 
 
 pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
 
 
 def remove_start(string, template):
-	if string.startswitch(template):
+	if string.startswith(template):
 		return string[len(template):]
 	raise RuntimeError('Template not found')
 
@@ -41,12 +41,13 @@ class Parser:
 				if self.buff[:start].lstrip(' '):
 					break
 				self.buff = self.buff[end:]
+				self.prev_code = result[0]
 				yield result[0]
 				return None
 		if self.buff[:start]:
 			raise RuntimeError(f'This token not found: "{self.buff[:start]}"')
 
-	def __iter__(self):
+	def parse(self):
 		yield OPERATOR('code_open')
 		while self.buff:
 			yield from self.__delete_shifts()
@@ -57,6 +58,7 @@ class Parser:
 
 	def __get_rules(self):
 		rules = []
+		rules.extend(VARIABLE.get_parsers())
+		rules.extend(STRING.get_parsers())
 		rules.extend(OPERATOR.get_parsers())
-		rules.extend(Word.get_parsers())
 		return rules

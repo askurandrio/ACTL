@@ -57,8 +57,8 @@ class Code(AnyOpCode):
 		return type(self)(buff=[], rules=self.rules)
 
 	def __apply_rule(self):
-		for idx_start, _ in enumerate(self.buff):
-			for rule in self.rules:
+		for rule in self.rules:
+			for idx_start, _ in enumerate(self.buff):
 				idx_end = rule.match(self.buff[idx_start:])
 				if idx_end is not None:
 					result = rule(self, idx_start, idx_end)
@@ -74,8 +74,8 @@ class Code(AnyOpCode):
 			if OPERATOR('line_end') == opcode:
 				del self.buff[idx]
 				return True
-			#if type(self) == opcode:
-			#	opcode.compile()
+			if Code == opcode:
+				opcode.compile()
 			#assert opcode in (Word, OPERATOR), f'{opcode} in {(Word, OPERATOR)}'
 
 	def __iter__(self):
