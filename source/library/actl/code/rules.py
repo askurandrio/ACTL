@@ -52,7 +52,6 @@ def _(code, idx_start, _):
 
 @RULES.add(Or(*((OPERATOR(bracket),) for bracket in OPERATOR.brackets)), in_context=True)
 def _(code, idx_start, _, in_context=True):
-	print('s', code[idx_start:])
 	subcode = extract_code_from_brackets(code, idx_start)
 	type_bracket = subcode[0].operator
 	del subcode[0]
@@ -61,12 +60,9 @@ def _(code, idx_start, _, in_context=True):
 	if opcodes.VARIABLE == code.get(idx_start-1):
 		ctuple = opcodes.Making(opcodes.CTUPLE(type=type_bracket, args=[], kwargs=[]))
 		subcode.insert(0, ctuple)
-	print('s s', subcode)
 	subcode.compile()
-	print('e s',subcode)
 	code.insert(idx_start, subcode.pop(-1))
 	code.add_definition(idx_start, subcode)
-	print('e', code[idx_start:])
 
 
 @RULES.add(opcodes.VARIABLE, OPERATOR(','))
@@ -107,7 +103,7 @@ def _(code, idx_start, _):
 
 
 
-RULES.add(opcodes.VARIABLE,
+@RULES.add(opcodes.VARIABLE,
 			  Or(*((OPERATOR(symbol),) for symbol in std.operator.allowed)),
 			  opcodes.VARIABLE,
 			  in_context=True)
@@ -116,14 +112,19 @@ def _(code, idx_start, idx_end):
 	soperator = code.pop(idx_start).operator
 	var2 = code.pop(idx_start)
 	if soperator == '=':
-		code.insert(idx_start, opcodes.SET_VARIABLE(var1, var2))
+		try:
+			idx_end_line = code[idx_start:].index(OPERATOR('line_end'))
+			idx_end_line += idx_start + 1
+		except ValueError:
+			idx_end_line = len(code)
+		code.add_definition(idx_end_line, (opcodes.SET_VARIABLE(var1, var2),))
+		code.insert(idx_start, var2)
 	else:
-		from ..project import Project
+		from actl import Project
 
 		result = opcodes.VARIABLE.get_temp()
 		code.insert(idx_start, result)
-		project = Project.this()
-		scode = f'{result.name} = operator("{soperator}")({var1.name}, {var2.name})'
-		print(scode)
-		subcode = project.compile(scode)
-		code.add_definition(idx_start, subcode)
+
+		s_subcode = f'{result.name} = operator("{soperator}")({var1.name}, {var2.name})'
+		subcode = list(Project.this().parse(string=s_subcode))
+		code.add_definition(idx_start, code.create(buff=subcode))
