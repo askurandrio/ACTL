@@ -6,6 +6,9 @@ class MetaAnyOpCode(type):
 	def __ne__(self, item):
 		return not (self == item)
 
+	def __hash__(self):
+		return hash(tuple(sorted(self.__dict__)))
+
 	def __repr__(self):
 		return f"opcodes.{self.__name__}"
 

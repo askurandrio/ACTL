@@ -11,6 +11,13 @@ class VARIABLE(AnyOpCode):
 	symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_' + \
 				pyparsing.nums
 
+	def __init__(self, name):
+		self.name = name
+
+	def __eq__(self, other):
+		if super().__eq__(other):
+			return self.name == other.name
+
 	@classmethod
 	def get_parsers(cls):
 		word = pyparsing.Word(cls.symbols)
