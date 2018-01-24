@@ -3,7 +3,7 @@ import unittest
 
 from actl import Code
 from actl.code.opcodes import opcodes
-from actl.syntax import SyntaxRules, Or, Maybe, Many
+from actl.syntax import SyntaxRules, Or, Maybe, Many, Range
 
 
 class test_SyntaxRule(unittest.TestCase):
@@ -28,6 +28,14 @@ class test_SyntaxRule(unittest.TestCase):
 							 opcodes.VARIABLE('b'),
 							 opcodes.VARIABLE('z'),
 							 opcodes.VARIABLE('b')]
+		elif code_variant == 'range':
+			code.buff = [opcodes.VARIABLE('_'),
+							 opcodes.VARIABLE('['),
+							 opcodes.VARIABLE('a'),
+							 opcodes.VARIABLE('b'),
+							 opcodes.VARIABLE('c'),
+							 opcodes.VARIABLE(']'),
+							 opcodes.VARIABLE('_')]
 
 		return code, rules
 
@@ -83,8 +91,20 @@ class test_SyntaxRule(unittest.TestCase):
 			return (opcodes.VARIABLE(f'Many({name})'),)
 
 		code.compile()
-		print(code.buff)
 		self.assertEqual(code.buff, [opcodes.VARIABLE('Many(aaa)'),
 											  opcodes.VARIABLE('Many(bb)'),
 											  opcodes.VARIABLE('z'),
 											  opcodes.VARIABLE('b')])
+
+	def test_range(self):
+		code, rules = self.init('range')
+
+		@rules.add(Range((opcodes.VARIABLE('['),), lambda _: (opcodes.VARIABLE(']'),)))
+		def _(_, *matched_code):
+			name = ''.join(var.name for var in matched_code)
+			return (opcodes.VARIABLE(f'Range({name})'),)
+
+		code.compile()
+		self.assertEqual(code.buff, [opcodes.VARIABLE('_'),
+											  opcodes.VARIABLE('Range([abc])'),
+											  opcodes.VARIABLE('_')])

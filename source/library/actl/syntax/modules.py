@@ -1,4 +1,6 @@
 
+import itertools
+
 from .SyntaxRule import SyntaxRule, ResultMath
 
 
@@ -69,6 +71,31 @@ def Many(*template, minimum=1):
 			else:
 				return result
 	return CustomRule(func, f'Many({template})')
+
+
+def Range(open_template, function):
+	open_rule = SyntaxRule(open_template)
+	def func(buff):
+		result_match = open_rule.match(buff)
+		if not result_match:
+			return ResultMath(None, False)
+		close_rule = SyntaxRule(function(*buff[:result_match.idx_end]))
+		count = 0
+		for idx in itertools.count():
+			if not buff[idx:]:
+				break
+			if open_rule.match(buff[idx:]):
+				count += 1
+			if close_rule.match(buff[idx:]):
+				count -= 1
+			if not count:
+				break
+		result_match = close_rule.match(buff[idx:])
+		if result_match:
+			idx += result_match.idx_end
+		assert not count
+		return ResultMath(idx, True)
+	return CustomRule(func)
 
 
 def Stub(function):

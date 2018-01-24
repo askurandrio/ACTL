@@ -88,20 +88,6 @@ def _(code, *matched_code): #pylint: disable=R1710
 	return (result,)
 
 
-@RULES.add(opcodes.VARIABLE, opcodes.CTUPLE, in_context=True)
-def _(code, idx_start, _):
-	ctuple = code[idx_start+1]
-	result = opcodes.CALL_FUNCTION(out=opcodes.VARIABLE.get_temp(),
-											 function=code[idx_start],
-											 type=ctuple.type,
-											 args=ctuple.args,
-											 kwargs=ctuple.kwargs)
-	del code[idx_start+1]
-	code[idx_start] = result.out
-	code.add_definition(idx_start, (result,))
-
-
-
 @RULES.add(opcodes.VARIABLE,
 			  Or(*((OPERATOR(symbol),) for symbol in std.operator.allowed)),
 			  opcodes.VARIABLE,
