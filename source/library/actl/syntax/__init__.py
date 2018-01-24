@@ -1,3 +1,3 @@
 
 from .SyntaxRule import SyntaxRule, SyntaxRules
-from .modules import OneOpcode, Or, Many
+from .modules import OneOpcode, Or, Maybe, Many

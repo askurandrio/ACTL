@@ -40,6 +40,17 @@ class Or(SyntaxRule):
 		return f'{type(self).__name__}({self.__rules})'
 
 
+class Maybe(SyntaxRule):
+	def __init__(self, *template):
+		super().__init__(template, None)
+
+	def match(self, buff):
+		result = super().match(buff)
+		if result:
+			return result
+		return ResultMath(0, True)
+
+
 class Many(SyntaxRule):
 	def __init__(self, *template, minimum=0):
 		self.__minimum = minimum

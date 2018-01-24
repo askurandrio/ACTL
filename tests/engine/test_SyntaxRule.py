@@ -3,7 +3,7 @@ import unittest
 
 from actl import Code
 from actl.parser import opcodes
-from actl.syntax import SyntaxRules, Or, Many
+from actl.syntax import SyntaxRules, Or, Maybe, Many
 
 
 class test_SyntaxRule(unittest.TestCase):
@@ -15,6 +15,11 @@ class test_SyntaxRule(unittest.TestCase):
 							 opcodes.VARIABLE('b'),
 							 opcodes.VARIABLE('c'),
 							 opcodes.VARIABLE('d')]
+		elif code_variant == 'maybe':
+			code.buff = [opcodes.VARIABLE('a'),
+							 opcodes.VARIABLE('b'),
+							 opcodes.VARIABLE('_'),
+							 opcodes.VARIABLE('b')]
 		elif code_variant == 'many':
 			code.buff = [opcodes.VARIABLE('a'),
 							 opcodes.VARIABLE('a'),
@@ -50,6 +55,23 @@ class test_SyntaxRule(unittest.TestCase):
 											  opcodes.VARIABLE('Or(b)'),
 											  opcodes.VARIABLE('c'),
 											  opcodes.VARIABLE('Or(d)')])
+
+	def test_maybe(self):
+		code, rules = self.init('maybe')
+
+		@rules.add(opcodes.VARIABLE('b'))
+		@rules.add(Maybe(opcodes.VARIABLE('a')), opcodes.VARIABLE('b'))
+		def _(_, var1, var2=None):
+			if var2 is None:
+				opcode = opcodes.VARIABLE(f'Single({var1.name})')
+			else:
+				opcode = opcodes.VARIABLE(f'Maybe({var1.name}, {var2.name})')
+			return (opcode,)
+
+		code.compile()
+		self.assertEqual(code.buff, [opcodes.VARIABLE('Maybe(a, b)'),
+											  opcodes.VARIABLE('_'),
+											  opcodes.VARIABLE('Single(b)')])
 
 	def test_many(self):
 		code, rules = self.init('many')
