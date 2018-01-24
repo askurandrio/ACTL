@@ -3,11 +3,13 @@ from .SyntaxRule import SyntaxRule, ResultMath
 
 
 class CustomRule:
-	def __init__(self, func):
+	def __init__(self, func, name=None):
+		self.__name = name
 		self.__func = func
 
-	def match(self, buff):
-		return self.__func(buff)
+	@property
+	def match(self):
+		return self.__func
 
 	@classmethod
 	def create(cls, template):
@@ -15,13 +17,17 @@ class CustomRule:
 			return template
 		return OneOpcode(template)
 
+	def __repr__(self):
+		name = self.__func if self.__name is None else self.__name
+		return f'CustomRule({name})'
+
 
 def OneOpcode(template):
 	def func(buff):
 		if buff and (template == buff[0]):
 			return ResultMath(1)
 		return ResultMath(None, False)
-	return CustomRule(func)
+	return CustomRule(func, f'OneOpcode({template}')
 
 
 def Or(*templates):
@@ -32,7 +38,7 @@ def Or(*templates):
 			if result:
 				return result
 		return ResultMath(None, False)
-	return CustomRule(func)
+	return CustomRule(func, f'Or({templates}')
 
 
 def Maybe(*template):
@@ -42,10 +48,11 @@ def Maybe(*template):
 		if result:
 			return result
 		return ResultMath(0, True)
-	return CustomRule(func)
+	return CustomRule(func, f'Maybe({template}')
 
 
-def Many(*template, minimum=0):
+def Many(*template, minimum=1):
+	assert minimum
 	rule = SyntaxRule(template)
 	def func(buff):
 		result = ResultMath(0, False)
@@ -61,4 +68,11 @@ def Many(*template, minimum=0):
 				result += result_match
 			else:
 				return result
-	return CustomRule(func)
+	return CustomRule(func, f'Many({template})')
+
+
+def Stub(function):
+	def func(buff):
+		function(buff)
+		return ResultMath(0, True)
+	return CustomRule(func, f'Stub({function})')

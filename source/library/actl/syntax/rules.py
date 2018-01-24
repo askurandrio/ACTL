@@ -1,11 +1,11 @@
 
 import std
 
-from ..parser.opcodes import VARIABLE, OPERATOR, STRING
+from ..parser.opcodes import OPERATOR, STRING
 from ..code.opcodes import opcodes
 
 from .SyntaxRule import SyntaxRules
-from .modules import Or, Maybe, Many
+from .modules import Or, Maybe, Many, Stub
 
 
 def extract_code_from_brackets(code, idx_start):
@@ -69,13 +69,23 @@ def _(code, idx_start, _, in_context=True):
 
 
 @RULES.add(Maybe(opcodes.Making(opcodes.CTUPLE)),
-			  Maybe(OPERATOR('(')),
-			  Many(VARIABLE, OPERATOR(',')),
-			  Maybe(VARIABLE),
-			  Maybe(OPERATOR(')')))
+			  Many(opcodes.VARIABLE, OPERATOR(',')),
+			  Maybe(opcodes.VARIABLE))
 def _(code, *matched_code): #pylint: disable=R1710
-	print(matched_code)
-	raise 1
+	matched_code = list(matched_code)
+	if opcodes.Making(opcodes.CTUPLE) == matched_code[0]:
+		result = matched_code[0].opcode
+		matched_code.pop(0)
+	else:
+		result = opcodes.CTUPLE(type='(', args=[], kwargs=[])
+	for opcode in matched_code:
+		if opcodes.VARIABLE == opcode:
+			result.args.append(opcode)
+		elif OPERATOR(',') == opcode:
+			continue
+		else:
+			raise RuntimeError(f'Unexpected opcode: {opcode}')
+	return (result,)
 
 
 @RULES.add(opcodes.VARIABLE, opcodes.CTUPLE, in_context=True)

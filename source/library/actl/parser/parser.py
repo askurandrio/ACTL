@@ -1,6 +1,6 @@
 import pyparsing
 
-from .opcodes import VARIABLE, STRING, OPERATOR
+from .opcodes import get_parsers, STRING, OPERATOR
 
 
 pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
@@ -58,7 +58,7 @@ class Parser:
 
 	def __get_rules(self):
 		rules = []
-		rules.extend(VARIABLE.get_parsers())
+		rules.extend(get_parsers())
 		rules.extend(STRING.get_parsers())
 		rules.extend(OPERATOR.get_parsers())
 		return rules

@@ -7,22 +7,14 @@ from ..code.opcodes import opcodes
 from ..code.opcodes.AnyOpCode import MetaAnyOpCode, AnyOpCode
 
 
-class VARIABLE(AnyOpCode):
-	symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_' + \
-				pyparsing.nums
+symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_' + \
+			 pyparsing.nums
 
-	def __init__(self, name):
-		self.name = name
 
-	def __eq__(self, other):
-		if super().__eq__(other):
-			return self.name == other.name
-
-	@classmethod
-	def get_parsers(cls):
-		word = pyparsing.Word(cls.symbols)
-		word.setParseAction(lambda tokens: opcodes.VARIABLE(tokens[0]))
-		yield word
+def get_parsers():
+	word = pyparsing.Word(symbols)
+	word.setParseAction(lambda tokens: opcodes.VARIABLE(tokens[0]))
+	yield word
 
 
 class STRING(AnyOpCode):

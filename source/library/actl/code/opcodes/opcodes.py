@@ -45,6 +45,11 @@ class VARIABLE(DynamicOpCode):
 	__count_temp = 0
 	_attributes = ('name',)
 
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+		return self.name == other.name #pylint: disable=E1101
+
 	@classmethod
 	def get_temp(cls, count=None):
 		if count is not None:

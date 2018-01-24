@@ -2,7 +2,7 @@
 import unittest
 
 from actl import Code
-from actl.parser import opcodes
+from actl.code.opcodes import opcodes
 from actl.syntax import SyntaxRules, Or, Maybe, Many
 
 
@@ -76,13 +76,14 @@ class test_SyntaxRule(unittest.TestCase):
 	def test_many(self):
 		code, rules = self.init('many')
 
-		@rules.add(Many(opcodes.VARIABLE('a')))
+		@rules.add(Many(opcodes.VARIABLE('a'), minimum=3))
 		@rules.add(Many(opcodes.VARIABLE('b'), minimum=2))
 		def _(_, *matched_code):
 			name = ''.join(var.name for var in matched_code)
 			return (opcodes.VARIABLE(f'Many({name})'),)
 
 		code.compile()
+		print(code.buff)
 		self.assertEqual(code.buff, [opcodes.VARIABLE('Many(aaa)'),
 											  opcodes.VARIABLE('Many(bb)'),
 											  opcodes.VARIABLE('z'),
