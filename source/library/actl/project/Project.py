@@ -1,7 +1,7 @@
 
 from ..code.Code import Code
 from ..parser import Parser
-from ..code.rules import RULES
+from ..syntax.rules import RULES
 
 
 class Project:

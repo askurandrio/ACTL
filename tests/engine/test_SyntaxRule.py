@@ -3,7 +3,7 @@ import unittest
 
 from actl import Code
 from actl.parser import opcodes
-from actl.code.SyntaxRule import Or, Not, SyntaxRules
+from actl.syntax.SyntaxRule import Or, Not, SyntaxRules
 
 
 class test_SyntaxRule(unittest.TestCase):

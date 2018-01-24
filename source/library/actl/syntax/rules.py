@@ -1,7 +1,7 @@
 
 import std
 from ..parser.opcodes import OPERATOR, STRING
-from .opcodes import opcodes
+from ..code.opcodes import opcodes
 from .SyntaxRule import SyntaxRules, Not, Or
 
 

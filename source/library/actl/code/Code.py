@@ -4,7 +4,6 @@ import weakref
 from ..parser.opcodes import OPERATOR
 from .opcodes import AnyOpCode
 from .opcodes.opcodes import Making
-from .SyntaxRule import SyntaxRule
 
 
 class Code(AnyOpCode):
