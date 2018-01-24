@@ -1,11 +1,11 @@
 
 class SyntaxRule:
 	def __init__(self, template, func=None, in_context=False):
-		from .modules import OneOpcode
+		from .modules import CustomRule
 
 		self.func = func
 		self.in_context = in_context
-		self.template = [OneOpcode.create(tmpl) for tmpl in template]
+		self.template = [CustomRule.create(tmpl) for tmpl in template]
 
 	def match(self, buff):
 		result = ResultMath(0, False)

@@ -1,11 +1,11 @@
 
 import std
 
-from ..parser.opcodes import OPERATOR, STRING
+from ..parser.opcodes import VARIABLE, OPERATOR, STRING
 from ..code.opcodes import opcodes
 
 from .SyntaxRule import SyntaxRules
-from .modules import Or
+from .modules import Or, Maybe, Many
 
 
 def extract_code_from_brackets(code, idx_start):
@@ -68,28 +68,14 @@ def _(code, idx_start, _, in_context=True):
 	code.add_definition(idx_start, subcode)
 
 
-@RULES.add(opcodes.VARIABLE, OPERATOR(','))
-def _(code, var, _):
-	ctuple = opcodes.CTUPLE(out=opcodes.VARIABLE.get_temp(), type='(', args=[var], kwargs=[])
-	return (opcodes.Making(ctuple),)
-
-
-@RULES.add(opcodes.Making(opcodes.CTUPLE), in_context=True)
-def _(code, idx_start, _): #pylint: disable=R1710
-	result = code.buff[idx_start]
-	idx_end = None
-	for idx_end, opcode in enumerate(code.buff[idx_start:], start=idx_start):
-		if (idx_end == idx_start) and opcode is result:
-			continue
-		elif opcodes.VARIABLE == opcode:
-			result.opcode.args.append(opcode)
-		elif OPERATOR(',') == opcode:
-			continue
-		else:
-			del code[idx_start+1:idx_end]
-			return opcodes.Making
-	del code[idx_start:idx_end+1]
-	code.insert(idx_start, result.opcode)
+@RULES.add(Maybe(opcodes.Making(opcodes.CTUPLE)),
+			  Maybe(OPERATOR('(')),
+			  Many(VARIABLE, OPERATOR(',')),
+			  Maybe(VARIABLE),
+			  Maybe(OPERATOR(')')))
+def _(code, *matched_code): #pylint: disable=R1710
+	print(matched_code)
+	raise 1
 
 
 @RULES.add(opcodes.VARIABLE, opcodes.CTUPLE, in_context=True)
