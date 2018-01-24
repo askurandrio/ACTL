@@ -13,7 +13,7 @@ def set_pythonpath():
 
 
 def test_engine():
-	process = subprocess.Popen(f'python {WORK_DIR}/engine/run.py', env=os.environ)
+	process = subprocess.Popen(f'python {WORK_DIR}/engine/run.py -f', env=os.environ)
 	process.wait()
 	assert process.returncode == 0
 

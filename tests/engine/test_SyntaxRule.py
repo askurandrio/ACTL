@@ -3,7 +3,7 @@ import unittest
 
 from actl import Code
 from actl.parser import opcodes
-from actl.syntax.SyntaxRule import Or, Not, SyntaxRules
+from actl.syntax import SyntaxRules, Or
 
 
 class test_SyntaxRule(unittest.TestCase):
@@ -15,11 +15,6 @@ class test_SyntaxRule(unittest.TestCase):
 							 opcodes.VARIABLE('b'),
 							 opcodes.VARIABLE('c'),
 							 opcodes.VARIABLE('d')]
-		elif code_variant == 'not':
-			code.buff = [opcodes.VARIABLE('a'),
-							 opcodes.VARIABLE('b'),
-							 opcodes.VARIABLE('c'),
-							 opcodes.VARIABLE('b')]
 		return code, rules
 
 	def test_simple(self):
@@ -37,23 +32,12 @@ class test_SyntaxRule(unittest.TestCase):
 	def test_or(self):
 		code, rules = self.init('or')
 
-		@rules.add(Or((opcodes.VARIABLE('b'),), (opcodes.VARIABLE('c'),)))
-		def _(_, var1, var2):
-			return (opcodes.VARIABLE(f'Or({var1.name}, {var2.name})'),)
+		@rules.add(Or((opcodes.VARIABLE('b'),), (opcodes.VARIABLE('d'),)))
+		def _(_, var):
+			return (opcodes.VARIABLE(f'Or({var.name})'),)
 
 		code.compile()
 		self.assertEqual(code.buff, [opcodes.VARIABLE('a'),
-											  opcodes.VARIABLE('Or(b, c)'),
-											  opcodes.VARIABLE('d')])
-
-	def test_not(self):
-		code, rules = self.init('not')
-
-		@rules.add(Not((opcodes.VARIABLE('a'),), (opcodes.VARIABLE('c'),)))
-		def _(_, var1, var2):
-			return (opcodes.VARIABLE(f'Not({var1.name}, {var2.name})'),)
-
-		code.compile()
-		self.assertEqual(code.buff, [opcodes.VARIABLE('a'),
-											  opcodes.VARIABLE('b'),
-											  opcodes.VARIABLE('Not(c, b)'),])
+											  opcodes.VARIABLE('Or(b)'),
+											  opcodes.VARIABLE('c'),
+											  opcodes.VARIABLE('Or(d)')])

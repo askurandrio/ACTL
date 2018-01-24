@@ -1,8 +1,11 @@
 
 import std
+
 from ..parser.opcodes import OPERATOR, STRING
 from ..code.opcodes import opcodes
-from .SyntaxRule import SyntaxRules, Not, Or
+
+from .SyntaxRule import SyntaxRules
+from .modules import Or
 
 
 def extract_code_from_brackets(code, idx_start):

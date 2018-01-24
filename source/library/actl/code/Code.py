@@ -64,14 +64,14 @@ class Code(AnyOpCode):
 	def __apply_rule(self):
 		for rule in self.rules:
 			for idx_start, _ in enumerate(self.buff):
-				idx_end = rule.match(self.buff[idx_start:])
-				if idx_end is not None:
-					result = rule(self, idx_start, idx_end)
+				result_match = rule.match(self.buff[idx_start:])
+				if result_match:
+					result = rule(self, idx_start, result_match.idx_end)
 					if rule.in_context:
 						if result is Making:
 							continue
 					else:
-						self.buff[idx_start:idx_start+idx_end] = result
+						self.buff[idx_start:idx_start+result_match.idx_end] = result
 					return True
 
 	def __after_compile(self):
