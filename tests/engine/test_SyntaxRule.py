@@ -3,7 +3,7 @@ import unittest
 
 from actl import Code
 from actl.parser import opcodes
-from actl.syntax import SyntaxRules, Or
+from actl.syntax import SyntaxRules, Or, Many
 
 
 class test_SyntaxRule(unittest.TestCase):
@@ -15,6 +15,15 @@ class test_SyntaxRule(unittest.TestCase):
 							 opcodes.VARIABLE('b'),
 							 opcodes.VARIABLE('c'),
 							 opcodes.VARIABLE('d')]
+		elif code_variant == 'many':
+			code.buff = [opcodes.VARIABLE('a'),
+							 opcodes.VARIABLE('a'),
+							 opcodes.VARIABLE('a'),
+							 opcodes.VARIABLE('b'),
+							 opcodes.VARIABLE('b'),
+							 opcodes.VARIABLE('z'),
+							 opcodes.VARIABLE('b')]
+
 		return code, rules
 
 	def test_simple(self):
@@ -41,3 +50,18 @@ class test_SyntaxRule(unittest.TestCase):
 											  opcodes.VARIABLE('Or(b)'),
 											  opcodes.VARIABLE('c'),
 											  opcodes.VARIABLE('Or(d)')])
+
+	def test_many(self):
+		code, rules = self.init('many')
+
+		@rules.add(Many(opcodes.VARIABLE('a')))
+		@rules.add(Many(opcodes.VARIABLE('b'), minimum=2))
+		def _(_, *matched_code):
+			name = ''.join(var.name for var in matched_code)
+			return (opcodes.VARIABLE(f'Many({name})'),)
+
+		code.compile()
+		self.assertEqual(code.buff, [opcodes.VARIABLE('Many(aaa)'),
+											  opcodes.VARIABLE('Many(bb)'),
+											  opcodes.VARIABLE('z'),
+											  opcodes.VARIABLE('b')])
