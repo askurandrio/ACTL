@@ -8,7 +8,7 @@ class SyntaxRule:
 		self.template = [CustomRule.create(tmpl) for tmpl in template]
 
 	def match(self, buff):
-		result = ResultMath(0, False)
+		result = ResultMatch(0, False)
 		template = iter(self.template)
 
 		for tmpl in template:
@@ -16,19 +16,33 @@ class SyntaxRule:
 			if result_rule:
 				result += result_rule
 			else:
-				return ResultMath(is_find=False)
+				return ResultMatch(is_find=False)
 		return result
 
 	def __call__(self, code, idx_start, idx_end):
+		if hasattr(self.func, 'args'):
+			kwargs = {}
+			for arg in self.func.args:
+				if arg == 'code':
+					kwargs['code'] = code
+				elif arg == 'idx_start':
+					kwargs['idx_start'] = idx_start
+				elif arg == 'idx_end':
+					kwargs['idx_end'] = idx_end
+				elif arg == 'matched_code':
+					kwargs['matched_code'] = code.buff[idx_start:idx_start+idx_end]
+				else:
+					raise RuntimeError(f'This arg not found: {arg}')
+			return self.func(**kwargs)
 		if self.in_context:
 			return self.func(code, idx_start, idx_end)
-		return self.func(code, *code.buff[idx_start:idx_start+idx_end])
+		return self.func(*code.buff[idx_start:idx_start+idx_end])
 
 	def __repr__(self):
 		return f'{type(self).__name__}(func={self.func}, template={self.template})'
 
 
-class ResultMath:
+class ResultMatch:
 	def __init__(self, idx_end=None, is_find=None):
 		self.__idx_end = idx_end
 		self.__is_find = is_find
@@ -57,8 +71,10 @@ class SyntaxRules:
 	def __init__(self):
 		self.rules = []
 
-	def add(self, *template, in_context=False):
+	def add(self, *template, in_context=False, args=None):
 		def decorator(func):
+			if args is not None:
+				setattr(func, 'args', args)
 			self.rules.append(SyntaxRule(template, func, in_context))
 			return func
 		return decorator

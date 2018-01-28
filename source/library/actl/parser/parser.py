@@ -52,6 +52,8 @@ class Parser:
 		while self.buff:
 			yield from self.__delete_shifts()
 			yield from self.__find_opcode()
+		if OPERATOR('line_end') != self.prev_code:
+			yield OPERATOR('line_end')
 		for _ in self.shifts:
 			yield OPERATOR('code_close')
 		yield OPERATOR('code_close')

@@ -1,7 +1,8 @@
 
 import itertools
 
-from .SyntaxRule import SyntaxRule, ResultMath
+from ..code.opcodes.AnyOpCode import AnyOpCode
+from .SyntaxRule import SyntaxRule, ResultMatch
 
 
 class CustomRule:
@@ -25,10 +26,11 @@ class CustomRule:
 
 
 def OneOpcode(template):
+	assert AnyOpCode == template
 	def func(buff):
 		if buff and (template == buff[0]):
-			return ResultMath(1)
-		return ResultMath(None, False)
+			return ResultMatch(1)
+		return ResultMatch(None, False)
 	return CustomRule(func, f'OneOpcode({template}')
 
 
@@ -39,7 +41,7 @@ def Or(*templates):
 			result = rule.match(buff)
 			if result:
 				return result
-		return ResultMath(None, False)
+		return ResultMatch(None, False)
 	return CustomRule(func, f'Or({templates}')
 
 
@@ -49,7 +51,7 @@ def Maybe(*template):
 		result = rule.match(buff)
 		if result:
 			return result
-		return ResultMath(0, True)
+		return ResultMatch(0, True)
 	return CustomRule(func, f'Maybe({template}')
 
 
@@ -57,13 +59,13 @@ def Many(*template, minimum=1):
 	assert minimum
 	rule = SyntaxRule(template)
 	def func(buff):
-		result = ResultMath(0, False)
+		result = ResultMatch(0, False)
 		for _ in range(minimum):
 			result_match = rule.match(buff[result.idx_end:])
 			if result_match:
 				result += result_match
 			else:
-				return ResultMath(None, False)
+				return ResultMatch(None, False)
 		while True:
 			result_match = rule.match(buff[result.idx_end:])
 			if result_match:
@@ -78,7 +80,7 @@ def Range(open_template, function):
 	def func(buff):
 		result_match = open_rule.match(buff)
 		if not result_match:
-			return ResultMath(None, False)
+			return ResultMatch(None, False)
 		close_rule = SyntaxRule(function(*buff[:result_match.idx_end]))
 		count = 0
 		for idx in itertools.count():
@@ -88,18 +90,30 @@ def Range(open_template, function):
 				count += 1
 			if close_rule.match(buff[idx:]):
 				count -= 1
+				if not count:
+					idx += 1
 			if not count:
 				break
 		result_match = close_rule.match(buff[idx:])
 		if result_match:
 			idx += result_match.idx_end
 		assert not count
-		return ResultMath(idx, True)
-	return CustomRule(func)
+		return ResultMatch(idx, True)
+	return CustomRule(func, f'Range({open_template}, {function}')
+
+
+def Not(*template):
+	rule = SyntaxRule(template)
+	def func(buff):
+		result = rule.match(buff)
+		if result:
+			return ResultMatch(None, False)
+		return ResultMatch(0, True)
+	return CustomRule(func, f'Not({template}')
 
 
 def Stub(function):
 	def func(buff):
 		function(buff)
-		return ResultMath(0, True)
+		return ResultMatch(0, True)
 	return CustomRule(func, f'Stub({function})')

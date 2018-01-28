@@ -1,6 +1,4 @@
 
-import weakref
-
 from ..parser.opcodes import OPERATOR
 from .opcodes import AnyOpCode
 from .opcodes.opcodes import Making
@@ -42,7 +40,7 @@ class Code(AnyOpCode):
 			idx += 1
 		is_add = False
 		if Definition != self[idx]:
-			self.insert(idx, Definition([], self.rules, self.scope))
+			self.insert(idx, self.create_definition())
 			is_add = True
 		self[idx].extend(opcodes)
 		return is_add
@@ -58,12 +56,17 @@ class Code(AnyOpCode):
 	def pop(self, index):
 		return self.buff.pop(index)
 
-	def create(self, buff=None):
-		return type(self)(buff=([] if buff is None else buff), rules=self.rules, scope=self.scope)
+	def create(self, buff=None, type_code=None):
+		buff = [] if buff is None else list(buff)
+		type_code = type(self) if type_code is None else type_code
+		return type_code(buff=buff, rules=self.rules, scope=self.scope)
+
+	def create_definition(self, buff=None):
+		return self.create(buff, type_code=Definition)
 
 	def __apply_rule(self):
-		for rule in self.rules:
-			for idx_start, _ in enumerate(self.buff):
+		for idx_start, _ in enumerate(self.buff):
+			for rule in self.rules:
 				result_match = rule.match(self.buff[idx_start:])
 				if result_match:
 					result = rule(self, idx_start, result_match.idx_end)
@@ -71,7 +74,13 @@ class Code(AnyOpCode):
 						if result is Making:
 							continue
 					else:
-						self.buff[idx_start:idx_start+result_match.idx_end] = result
+						if (len(result) > 1) and (Definition == result[0]):
+							definition = result[0]
+							result = result[1:]
+							self.buff[idx_start:idx_start+result_match.idx_end] = result
+							self.add_definition(idx_start, definition)
+						else:
+							self.buff[idx_start:idx_start+result_match.idx_end] = result
 					return True
 
 	def __after_compile(self):

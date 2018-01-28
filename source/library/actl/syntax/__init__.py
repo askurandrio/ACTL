@@ -1,3 +1,3 @@
 
-from .SyntaxRule import SyntaxRule, SyntaxRules
-from .modules import CustomRule, OneOpcode, Or, Maybe, Many, Range, Stub
+from .SyntaxRule import SyntaxRule, ResultMatch, SyntaxRules
+from .modules import CustomRule, OneOpcode, Or, Maybe, Many, Range, Not, Stub

@@ -3,10 +3,10 @@ from .AnyOpCode import AnyOpCode
 
 
 class DynamicOpCode(AnyOpCode):
-	_attributes = ()
+	__slots__ = ()
 
 	def __init__(self, *args, **kwargs):
-		for key, value in zip(self._attributes, args):
+		for key, value in zip(self.__slots__, args):
 			setattr(self, key, value)
 		for key, value in kwargs.items():
 			assert (not hasattr(self, key)), f'This attribute already exist: {key}, {self}'
@@ -14,7 +14,7 @@ class DynamicOpCode(AnyOpCode):
 
 	def __repr__(self):
 		result = f'{self.__class__.__name__}('
-		for key in self._attributes:
+		for key in self.__slots__:
 			result += f'{key}={getattr(self, key)}, '
 		if result[-2:] == ', ':
 			result = result[:-2]
@@ -24,7 +24,7 @@ class DynamicOpCode(AnyOpCode):
 	@classmethod
 	def create(cls, name, *attributes):
 		code_template = 'class {name}(DynamicOpCode):\n' \
-							 '   _attributes = ({attributes},)\n'
+							 '   __slots__ = ({attributes},)\n'
 		code = code_template.format(name=name,
 											 attributes=', '.join(f'"{attribute}"' for attribute in attributes))
 		lc_scope = {'DynamicOpCode':cls}
@@ -33,7 +33,7 @@ class DynamicOpCode(AnyOpCode):
 
 
 class Making(DynamicOpCode):
-	_attributes = ('opcode',)
+	__slots__ = ('opcode',)
 
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):
@@ -43,7 +43,7 @@ class Making(DynamicOpCode):
 
 class VARIABLE(DynamicOpCode):
 	__count_temp = 0
-	_attributes = ('name',)
+	__slots__ = ('name',)
 
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):
@@ -58,8 +58,8 @@ class VARIABLE(DynamicOpCode):
 		return cls(name=f'__IV{cls.__count_temp}')
 
 
-CTUPLE = DynamicOpCode.create('CTUPLE', 'type', 'args', 'kwargs')
+CTUPLE = DynamicOpCode.create('CTUPLE', 'typeb', 'args', 'kwargs')
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'out', 'source')
 BUILD_STRING = DynamicOpCode.create('BUILD_STRING', 'out', 'string')
 BUILD_NUMBER = DynamicOpCode.create('BUILD_NUMBER', 'out', 'number')
-CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'out', 'function', 'type', 'args', 'kwargs')
+CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'out', 'function', 'typeb', 'args', 'kwargs')

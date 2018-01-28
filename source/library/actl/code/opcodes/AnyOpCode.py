@@ -1,7 +1,11 @@
 
 class MetaAnyOpCode(type):
 	def __eq__(self, item):
-		return isinstance(item, self) or (isinstance(item, type) and issubclass(self, item))
+		if isinstance(item, self):
+			return True
+		if isinstance(item, type):
+			return issubclass(item, self)
+		return False
 
 	def __ne__(self, item):
 		return not (self == item)

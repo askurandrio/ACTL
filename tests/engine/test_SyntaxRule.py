@@ -32,7 +32,9 @@ class test_SyntaxRule(unittest.TestCase):
 			code.buff = [opcodes.VARIABLE('_'),
 							 opcodes.VARIABLE('['),
 							 opcodes.VARIABLE('a'),
+							 opcodes.VARIABLE('['),
 							 opcodes.VARIABLE('b'),
+							 opcodes.VARIABLE(']'),
 							 opcodes.VARIABLE('c'),
 							 opcodes.VARIABLE(']'),
 							 opcodes.VARIABLE('_')]
@@ -43,7 +45,7 @@ class test_SyntaxRule(unittest.TestCase):
 		code, rules = self.init('simple')
 
 		@rules.add(opcodes.VARIABLE('b'), opcodes.VARIABLE('c'))
-		def _(_, var1, var2):
+		def _(var1, var2):
 			return (opcodes.VARIABLE(var1.name + var2.name),)
 
 		code.compile()
@@ -55,7 +57,7 @@ class test_SyntaxRule(unittest.TestCase):
 		code, rules = self.init('or')
 
 		@rules.add(Or((opcodes.VARIABLE('b'),), (opcodes.VARIABLE('d'),)))
-		def _(_, var):
+		def _(var):
 			return (opcodes.VARIABLE(f'Or({var.name})'),)
 
 		code.compile()
@@ -69,7 +71,7 @@ class test_SyntaxRule(unittest.TestCase):
 
 		@rules.add(opcodes.VARIABLE('b'))
 		@rules.add(Maybe(opcodes.VARIABLE('a')), opcodes.VARIABLE('b'))
-		def _(_, var1, var2=None):
+		def _(var1, var2=None):
 			if var2 is None:
 				opcode = opcodes.VARIABLE(f'Single({var1.name})')
 			else:
@@ -86,7 +88,7 @@ class test_SyntaxRule(unittest.TestCase):
 
 		@rules.add(Many(opcodes.VARIABLE('a'), minimum=3))
 		@rules.add(Many(opcodes.VARIABLE('b'), minimum=2))
-		def _(_, *matched_code):
+		def _(*matched_code):
 			name = ''.join(var.name for var in matched_code)
 			return (opcodes.VARIABLE(f'Many({name})'),)
 
@@ -100,11 +102,11 @@ class test_SyntaxRule(unittest.TestCase):
 		code, rules = self.init('range')
 
 		@rules.add(Range((opcodes.VARIABLE('['),), lambda _: (opcodes.VARIABLE(']'),)))
-		def _(_, *matched_code):
+		def _(*matched_code):
 			name = ''.join(var.name for var in matched_code)
 			return (opcodes.VARIABLE(f'Range({name})'),)
 
 		code.compile()
 		self.assertEqual(code.buff, [opcodes.VARIABLE('_'),
-											  opcodes.VARIABLE('Range([abc])'),
+											  opcodes.VARIABLE('Range([a[b]c])'),
 											  opcodes.VARIABLE('_')])

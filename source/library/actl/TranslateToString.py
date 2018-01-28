@@ -14,7 +14,7 @@ class TranslateToString:
 	def __translate(self, code):
 		for opcode in code:
 			if Code == opcode:
-				yield 'code:\n'
+				yield f'{type(opcode).__name__}:\n'
 				for repr_opcode in self.__translate(opcode):
 					yield '   ' + repr_opcode
 			else:
@@ -34,8 +34,8 @@ class TranslateToString:
 			if args and opcode.kwargs:
 				args += ', '
 			args += ', '.join(opcode.kwargs)
-			close_brucket = OPERATOR(OPERATOR.brackets[opcode.type]).operator
-			return f'{opcode.out.name} = {opcode.function.name}{opcode.type}{args}{close_brucket}'
+			close_brucket = OPERATOR(OPERATOR.brackets[opcode.typeb]).operator
+			return f'{opcode.out.name} = {opcode.function.name}{opcode.typeb}{args}{close_brucket}'
 		else:
 			return repr(opcode)
 		raise RuntimeError(f'This opcode not found: {opcode}')
