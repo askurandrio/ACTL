@@ -1,12 +1,10 @@
 
-import std
+from actl.code.opcodes import opcodes
+from actl.code.Code import Definition
+from actl.parser.opcodes import OPERATOR, STRING
+from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Not
 
-from ..code.opcodes import opcodes
-from ..code.Code import Definition
-from ..parser.opcodes import OPERATOR, STRING
-
-from .SyntaxRule import SyntaxRules
-from .modules import Or, Maybe, Many, Range, Not
+from ..operator import operator
 
 
 RULES = SyntaxRules()
@@ -77,13 +75,13 @@ def _(var1, _, var2, line_end):
 
 @RULES.add(Many(opcodes.VARIABLE,
 					 Not(OPERATOR('=')),
-					 Or(*((OPERATOR(symbol),) for symbol in std.operator.allowed)),
+					 Or(*((OPERATOR(symbol),) for symbol in operator.allowed)),
 					 opcodes.VARIABLE),
 			  Maybe(Not(OPERATOR('=')),
-					  Or(*((OPERATOR(symbol),) for symbol in std.operator.allowed)),
+					  Or(*((OPERATOR(symbol),) for symbol in operator.allowed)),
 					  opcodes.VARIABLE),
 			  args=('code', 'matched_code'))
-def build_operators(code, matched_code):
+def _(code, matched_code):
 	var1, operator, var2 = matched_code
 	operator = operator.operator
 
@@ -91,7 +89,7 @@ def build_operators(code, matched_code):
 
 	out = opcodes.VARIABLE.get_temp()
 	s_subcode = f'{out.name} = operator("{operator}")({var1.name}, {var2.name})'
-	subcode = list(Project.this().parse(string=s_subcode))
+	subcode = list(Project.this.parse(string=s_subcode))
 	definition = code.create_definition(subcode)
 	definition.compile()
 	return definition, out

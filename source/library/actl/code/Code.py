@@ -5,6 +5,8 @@ from .opcodes.opcodes import Making
 
 
 class Code(AnyOpCode):
+	transform = property(lambda self: self.compile)
+
 	def __init__(self, buff, rules, scope):
 		self.buff = buff
 		self.rules = rules
@@ -67,7 +69,7 @@ class Code(AnyOpCode):
 	def __apply_rule(self):
 		for idx_start, _ in enumerate(self.buff):
 			for rule in self.rules:
-				result_match = rule.match(self.buff[idx_start:])
+				result_match = rule.match(self, self.buff[idx_start:])
 				if result_match:
 					result = rule(self, idx_start, result_match.idx_end)
 					if rule.in_context:
@@ -109,6 +111,9 @@ class Code(AnyOpCode):
 
 	def __len__(self):
 		return len(self.buff)
+
+	def __hash__(self):
+		return hash(tuple(self))
 
 	def __bool__(self):
 		return bool(self.buff)

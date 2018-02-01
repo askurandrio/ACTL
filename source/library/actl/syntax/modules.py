@@ -1,6 +1,7 @@
 
 import itertools
 
+from ..code.opcodes import opcodes
 from ..code.opcodes.AnyOpCode import AnyOpCode
 from .SyntaxRule import SyntaxRule, ResultMatch
 
@@ -27,7 +28,7 @@ class CustomRule:
 
 def OneOpcode(template):
 	assert AnyOpCode == template
-	def func(buff):
+	def func(code, buff):
 		if buff and (template == buff[0]):
 			return ResultMatch(1)
 		return ResultMatch(None, False)
@@ -36,9 +37,9 @@ def OneOpcode(template):
 
 def Or(*templates):
 	rules = [SyntaxRule(template) for template in templates]
-	def func(buff):
+	def func(code, buff):
 		for rule in rules:
-			result = rule.match(buff)
+			result = rule.match(code, buff)
 			if result:
 				return result
 		return ResultMatch(None, False)
@@ -47,8 +48,8 @@ def Or(*templates):
 
 def Maybe(*template):
 	rule = SyntaxRule(template)
-	def func(buff):
-		result = rule.match(buff)
+	def func(code, buff):
+		result = rule.match(code, buff)
 		if result:
 			return result
 		return ResultMatch(0, True)
@@ -58,16 +59,16 @@ def Maybe(*template):
 def Many(*template, minimum=1):
 	assert minimum
 	rule = SyntaxRule(template)
-	def func(buff):
+	def func(code, buff):
 		result = ResultMatch(0, False)
 		for _ in range(minimum):
-			result_match = rule.match(buff[result.idx_end:])
+			result_match = rule.match(code, buff[result.idx_end:])
 			if result_match:
 				result += result_match
 			else:
 				return ResultMatch(None, False)
 		while True:
-			result_match = rule.match(buff[result.idx_end:])
+			result_match = rule.match(code, buff[result.idx_end:])
 			if result_match:
 				result += result_match
 			else:
@@ -77,8 +78,8 @@ def Many(*template, minimum=1):
 
 def Range(open_template, function):
 	open_rule = SyntaxRule(open_template)
-	def func(buff):
-		result_match = open_rule.match(buff)
+	def func(code, buff):
+		result_match = open_rule.match(code, buff)
 		if not result_match:
 			return ResultMatch(None, False)
 		close_rule = SyntaxRule(function(*buff[:result_match.idx_end]))
@@ -86,15 +87,15 @@ def Range(open_template, function):
 		for idx in itertools.count():
 			if not buff[idx:]:
 				break
-			if open_rule.match(buff[idx:]):
+			if open_rule.match(code, buff[idx:]):
 				count += 1
-			if close_rule.match(buff[idx:]):
+			if close_rule.match(code, buff[idx:]):
 				count -= 1
 				if not count:
 					idx += 1
 			if not count:
 				break
-		result_match = close_rule.match(buff[idx:])
+		result_match = close_rule.match(code, buff[idx:])
 		if result_match:
 			idx += result_match.idx_end
 		assert not count
@@ -104,16 +105,25 @@ def Range(open_template, function):
 
 def Not(*template):
 	rule = SyntaxRule(template)
-	def func(buff):
-		result = rule.match(buff)
+	def func(code, buff):
+		result = rule.match(code, buff)
 		if result:
 			return ResultMatch(None, False)
 		return ResultMatch(0, True)
 	return CustomRule(func, f'Not({template}')
 
 
+def Value(value):
+	def func(code, buff):
+		if buff and (opcodes.VARIABLE == buff[0]):
+			if opcodes.VARIABLE.name in code.scope:
+				if code.scope[opcodes.VARIABLE.name] == value:
+					return ResultMatch(1)
+		return ResultMatch(None, False)
+	return CustomRule(func, f'VALUE({value}')
+
 def Stub(function):
-	def func(buff):
+	def func(code, buff):
 		function(buff)
 		return ResultMatch(0, True)
 	return CustomRule(func, f'Stub({function})')

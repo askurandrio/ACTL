@@ -25,5 +25,9 @@ class AnyOpCode(metaclass=MetaAnyOpCode): #pylint: disable=R0903
 	def __ne__(self, item):
 		return not (self == item)
 
+	def __hash__(self):
+		dsort = sorted(self.__dict__.items(), key=lambda kv: kv[0])
+		return hash(tuple(dsort))
+
 	def __repr__(self):
 		return f'{self.__class__.__name__}({self.__dict__})'

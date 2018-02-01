@@ -7,16 +7,16 @@ class SyntaxRule:
 		self.in_context = in_context
 		self.template = [CustomRule.create(tmpl) for tmpl in template]
 
-	def match(self, buff):
+	def match(self, code, buff):
 		result = ResultMatch(0, False)
 		template = iter(self.template)
 
 		for tmpl in template:
-			result_rule = tmpl.match(buff[result.idx_end:])
+			result_rule = tmpl.match(code, buff[result.idx_end:])
 			if result_rule:
 				result += result_rule
 			else:
-				return ResultMatch(is_find=False)
+				return result_rule
 		return result
 
 	def __call__(self, code, idx_start, idx_end):

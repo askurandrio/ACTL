@@ -4,6 +4,7 @@ from .AnyOpCode import AnyOpCode
 
 class DynamicOpCode(AnyOpCode):
 	__slots__ = ()
+	__hash__ = AnyOpCode.__hash__
 
 	def __init__(self, *args, **kwargs):
 		for key, value in zip(self.__slots__, args):
@@ -44,6 +45,7 @@ class Making(DynamicOpCode):
 class VARIABLE(DynamicOpCode):
 	__count_temp = 0
 	__slots__ = ('name',)
+	__hash__ = AnyOpCode.__hash__
 
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):

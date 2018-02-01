@@ -49,6 +49,7 @@ class MetaOPERATOR(MetaAnyOpCode):
 
 
 class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
+	__hash__ = AnyOpCode.__hash__
 	brackets = {'(':')', '{':'}', '[':']', '<':'>'}
 	symbols = ':.,+-!=*/<>@;' + ''.join(brackets.keys()) + ''.join(brackets.values())
 	allowed = set(tuple(symbols) + (None, 'line_end', 'code_open', 'code_close'))
