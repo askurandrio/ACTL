@@ -3,7 +3,7 @@ import unittest
 
 from actl import Code
 from actl.code.opcodes import opcodes
-from actl.syntax import SyntaxRules, Or, Maybe, Many, Range
+from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Value
 
 
 class test_SyntaxRule(unittest.TestCase):
@@ -110,3 +110,17 @@ class test_SyntaxRule(unittest.TestCase):
 		self.assertEqual(code.buff, [opcodes.VARIABLE('_'),
 											  opcodes.VARIABLE('Range([a[b]c])'),
 											  opcodes.VARIABLE('_')])
+
+	def test_range(self):
+		code, rules = self.init('range')
+
+		@rules.add(Range((opcodes.VARIABLE('['),), lambda _: (opcodes.VARIABLE(']'),)))
+		def _(*matched_code):
+			name = ''.join(var.name for var in matched_code)
+			return (opcodes.VARIABLE(f'Range({name})'),)
+
+		code.compile()
+		self.assertEqual(code.buff, [opcodes.VARIABLE('_'),
+											  opcodes.VARIABLE('Range([a[b]c])'),
+											  opcodes.VARIABLE('_')])
+

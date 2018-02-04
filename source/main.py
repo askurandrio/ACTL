@@ -4,9 +4,9 @@ import sys
 from actl import Project
 
 
-def main(filename):
+def main(mainf):
 	project = Project()
-	project.compile(filename=filename)
+	project.compile(filename=mainf)
 
 
 main(*sys.argv[1:])
