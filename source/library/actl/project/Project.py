@@ -14,8 +14,11 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__
 
 
 class Project:
-	def __init__(self):
+	def __init__(self, mainf, projectf):
+		self.__data = {}
+		self.__load(projectf)
 		self.__class__.this = self
+		self.compile(mainf)
 
 	def parse(self, filename=None, string=None):
 		if filename is not None:
@@ -29,13 +32,24 @@ class Project:
 		if code is None:
 			buff = list(parser)
 			code = Code(buff, RULES, Scope())
-			print(code)
 		LinkLayer(code, EExecutor).link()
 
 		from actl.TranslateToString import TranslateToString
 		tr = TranslateToString()
 		tr.translate(code)
-		print(tr.string)
+
+	def get(self, *keys, ivalue=None):
+		if ivalue is None:
+			ivalue = self.__data
+		for key in keys[:-1]:
+			ivalue = self.get(key, ivalue=ivalue)
+		value = ivalue[keys[-1]]
+		if isinstance(value, dict) and 'evalv' in value:
+			value = eval(value['evalv'])
+		return value
+
+	def __load(self, projectf):
+		self.__data.update(yaml.load(open(projectf)))
 
 
 class LinkLayer:

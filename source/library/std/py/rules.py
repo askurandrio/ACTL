@@ -34,38 +34,30 @@ def _(code, matched_code):
 	typeb = matched_code[1].operator
 	subcode = code.create(list(matched_code[2:-1]))
 	subcode.compile()
-	if subcode and Definition == subcode[0]:
+	if Definition == subcode.get(0):
 		definition = subcode.pop(0)
 	else:
 		definition = code.create_definition()
-	assert len(subcode) == 1
-	if opcodes.VARIABLE == subcode[0]:
-		args = [subcode[0]]
-		kwargs = []
-	else:
-		args = subcode[0].args
-		kwargs = subcode[0].kwargs
+	cargs = build_cargs(subcode)
 	out = opcodes.VARIABLE.get_temp()
 	definition.append(opcodes.CALL_FUNCTION(out=out,
 														 function=function,
 														 typeb=typeb,
-														 args=args,
-														 kwargs=kwargs))
+														 args=cargs.args,
+														 kwargs=cargs.kwargs))
 	return definition, out
 
 
-@RULES.add(Many(opcodes.VARIABLE, OPERATOR(',')),
-			  Maybe(opcodes.VARIABLE))
-def _(*matched_code): #pylint: disable=R1710
-	result = opcodes.CTUPLE(typeb='(', args=[], kwargs=[])
-	for opcode in matched_code:
+def build_cargs(code):
+	result = opcodes.CARGS(args=[], kwargs=[])
+	for opcode in code:
 		if opcodes.VARIABLE == opcode:
 			result.args.append(opcode)
 		elif OPERATOR(',') == opcode:
 			continue
 		else:
 			raise RuntimeError(f'Unexpected opcode: {opcode}')
-	return (result,)
+	return result
 
 
 @RULES.add(opcodes.VARIABLE, OPERATOR('='), opcodes.VARIABLE, OPERATOR('line_end'))

@@ -9,7 +9,10 @@ class TranslateToString:
 		self.string = ''
 
 	def translate(self, code):
+		from actl.project.Project import Project
+
 		self.string = ''.join(self.__translate(code))
+		open(Project.this.get('translator', 'out'), 'a').write(self.string)
 
 	def __translate(self, code):
 		for opcode in code:

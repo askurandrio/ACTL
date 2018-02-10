@@ -1,0 +1,3 @@
+translator:
+   out:
+      evalv: "__import__('os').environ['out_fname']"

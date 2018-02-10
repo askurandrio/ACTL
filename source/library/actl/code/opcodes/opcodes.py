@@ -60,7 +60,7 @@ class VARIABLE(DynamicOpCode):
 		return cls(name=f'__IV{cls.__count_temp}')
 
 
-CTUPLE = DynamicOpCode.create('CTUPLE', 'typeb', 'args', 'kwargs')
+CARGS = DynamicOpCode.create('CARGS', 'args', 'kwargs')
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'out', 'source')
 BUILD_STRING = DynamicOpCode.create('BUILD_STRING', 'out', 'string')
 BUILD_NUMBER = DynamicOpCode.create('BUILD_NUMBER', 'out', 'number')
