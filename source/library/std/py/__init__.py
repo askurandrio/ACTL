@@ -1,2 +1,0 @@
-
-from .rules import RULES

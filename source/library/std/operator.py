@@ -1,3 +1,0 @@
-
-class operator:
-	allowed = set('.+-=*/<>!@')

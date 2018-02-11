@@ -1,10 +1,7 @@
 
 import os
-import copy
 
 import yaml
-
-from std.py import RULES
 
 from ..code.Code import Code
 from ..parser import Parser
@@ -14,11 +11,16 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__
 
 
 class Project:
-	def __init__(self, mainf, projectf):
+	add_syntax = property(lambda self: self.__rules.add)
+
+	def __init__(self, projectf):
+		from pyport import RULES, Scope
+
 		self.__data = {}
+		self.__rules = RULES
+		self.__scope = Scope()
 		self.__load(projectf)
 		self.__class__.this = self
-		self.compile(mainf)
 
 	def parse(self, filename=None, string=None):
 		if filename is not None:
@@ -26,12 +28,12 @@ class Project:
 		return Parser(string).parse()
 
 	def compile(self, filename=None, string=None, code=None):
-		from pyport import EExecutor, Scope
+		from pyport import EExecutor
 
 		parser = self.parse(filename, string)
 		if code is None:
 			buff = list(parser)
-			code = Code(buff, RULES, Scope())
+			code = Code(buff, self.__rules, self.__scope)
 		LinkLayer(code, EExecutor).link()
 
 		from actl.TranslateToString import TranslateToString

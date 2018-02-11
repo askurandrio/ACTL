@@ -1,39 +1,40 @@
 import pyparsing
 
-from .opcodes import get_parsers, STRING, OPERATOR
+from .tokens import INDENT, VARIABLE, STRING, OPERATOR
 
 
 pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
-
-
-def remove_start(string, template):
-	if string.startswith(template):
-		return string[len(template):]
-	raise RuntimeError('Template not found')
 
 
 class Parser:
 	def __init__(self, buff):
 		self.buff = buff
 		self.rules = self.__get_rules()
-		self.shifts = []
+		self.indents = []
 		self.prev_code = OPERATOR(None)
 
-	def __delete_shifts(self):
-		if self.prev_code == OPERATOR('line_end'):
-			for idx, shift in enumerate(self.shifts):
-				try:
-					self.buff = remove_start(self.buff, shift)
-				except RuntimeError:
-					for _ in self.shifts[idx:]:
-						yield OPERATOR('code_close')
-					del self.shifts[idx:]
-			if self.buff[0] == ' ':
-				yield OPERATOR('code_open')
-				self.shifts.append('')
-				while self.buff[0] == ' ':
-					self.shifts[-1] += ' '
-					self.buff = self.buff[1:]
+	def __delete_indents(self, force=False):
+		if (self.prev_code != OPERATOR('line_end')) and (not force):
+			return None
+
+		for idx, indent in enumerate(self.indents):
+			if self.buff.startswith(indent.string):
+				yield indent
+				self.buff = self.buff[len(indent.string):]
+			else:
+				del self.indents[idx:]
+				break
+
+		if self.buff and ((self.buff[0] == ' ') or (self.buff[0] == '	')):
+			tmpl = self.buff[0]
+			indent = INDENT('')
+			while self.buff and (self.buff[0] == tmpl):
+				indent.string += self.buff[0]
+				self.buff = self.buff[1:]
+			if self.buff:
+				assert (self.buff[0] != ' ') or (self.buff[0] != '	')
+			self.indents.append(indent)
+			yield indent
 
 	def __find_opcode(self):
 		for rule in self.rules:
@@ -49,18 +50,15 @@ class Parser:
 
 	def parse(self):
 		yield OPERATOR('code_open')
+		yield from self.__delete_indents(force=True)
 		while self.buff:
-			yield from self.__delete_shifts()
 			yield from self.__find_opcode()
-		if OPERATOR('line_end') != self.prev_code:
-			yield OPERATOR('line_end')
-		for _ in self.shifts:
-			yield OPERATOR('code_close')
+			yield from self.__delete_indents()
 		yield OPERATOR('code_close')
 
 	def __get_rules(self):
 		rules = []
-		rules.extend(get_parsers())
+		rules.extend(VARIABLE.get_parsers())
 		rules.extend(STRING.get_parsers())
 		rules.extend(OPERATOR.get_parsers())
 		return rules

@@ -19,7 +19,7 @@ class SyntaxRule:
 				return result_rule
 		return result
 
-	def __call__(self, code, idx_start, idx_end):
+	def __prepare_arguments(self, code, idx_start, idx_end):
 		if hasattr(self.func, 'args'):
 			kwargs = {}
 			for arg in self.func.args:
@@ -33,10 +33,20 @@ class SyntaxRule:
 					kwargs['matched_code'] = code.buff[idx_start:idx_start+idx_end]
 				else:
 					raise RuntimeError(f'This arg not found: {arg}')
-			return self.func(**kwargs)
+			return (), kwargs
 		if self.in_context:
-			return self.func(code, idx_start, idx_end)
-		return self.func(*code.buff[idx_start:idx_start+idx_end])
+			return (code, idx_start, idx_end), {}
+		return code.buff[idx_start:idx_start+idx_end], {}
+
+	def __contains__(self, item):
+		for tmpl in self.template:
+			if item not in tmpl:
+				return False
+		return True
+
+	def __call__(self, code, idx_start, idx_end):
+		args, kwargs = self.__prepare_arguments(code, idx_start, idx_end)
+		return self.func(*args, **kwargs)
 
 	def __repr__(self):
 		return f'{type(self).__name__}(func={self.func}, template={self.template})'
@@ -51,20 +61,28 @@ class ResultMatch:
 			self.__is_find = True
 
 	@property
+	def is_matching(self):
+		return bool(self.__idx_end)
+
+	@property
+	def is_find(self):
+		return bool(self.__is_find)
+
+	@property
 	def idx_end(self):
 		assert self.__idx_end is not None
 		return self.__idx_end
 
 	def __add__(self, other):
-		assert other
-		if self.__is_find:
-			idx_end = self.idx_end
-		else:
-			idx_end = 0
-		return type(self)(other.idx_end + idx_end, True)
+		idx_end = self.idx_end if self.is_matching else 0
+		idx_end += other.idx_end if other.is_matching else 0
+		return type(self)(idx_end, self.is_find or other.is_find)
 
 	def __bool__(self):
-		return self.__is_find
+		return self.is_find
+
+	def __repr__(self):
+		return f'ResultMatch(idx_end={self.__idx_end}, is_find={self.__is_find})'
 
 
 class SyntaxRules:

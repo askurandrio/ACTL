@@ -4,17 +4,48 @@ import sys
 import pyparsing
 
 from ..code.opcodes import opcodes
-from ..code.opcodes.AnyOpCode import MetaAnyOpCode, AnyOpCode
+from ..code.opcodes.AnyOpCode import MetaAnyOpCode, AnyOpCode, DynamicOpCode
 
 
 symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_' + \
 			 pyparsing.nums
 
 
-def get_parsers():
-	word = pyparsing.Word(symbols)
-	word.setParseAction(lambda tokens: opcodes.VARIABLE(tokens[0]))
-	yield word
+class INDENT(DynamicOpCode):
+	__slots__ = ('string',)
+
+	def __eq__(self, other):
+		return self.string == other.string
+
+	def __hash__(self):
+		return hash(f'INDENT({self.string})')
+
+
+class VARIABLE(DynamicOpCode):
+	__count_temp = 10
+	__slots__ = ('name',)
+	__hash__ = AnyOpCode.__hash__
+
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+		return self.name == other.name #pylint: disable=E1101
+
+	def __hash__(self):
+		return hash(f'VARIABLE({self.name})')
+
+	@classmethod
+	def get_temp(cls, count=None):
+		if count is not None:
+			return [cls.get_temp() for _ in range(count)]
+		cls.__count_temp += 1
+		return cls(name=f'__IV{cls.__count_temp}')
+
+	@classmethod
+	def get_parsers(cls):
+		word = pyparsing.Word(symbols)
+		word.setParseAction(lambda tokens: cls(tokens[0]))
+		yield word
 
 
 class STRING(AnyOpCode):
@@ -50,8 +81,9 @@ class MetaOPERATOR(MetaAnyOpCode):
 
 class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
 	__hash__ = AnyOpCode.__hash__
+	reloadable = ':.+-!=*/<>@<>' 
 	brackets = {'(':')', '{':'}', '[':']', '<':'>'}
-	symbols = ':.,+-!=*/<>@;' + ''.join(brackets.keys()) + ''.join(brackets.values())
+	symbols = reloadable + ',;' + ''.join(f'{item[0]}{item[1]}' for item in brackets.items())
 	allowed = set(tuple(symbols) + (None, 'line_end', 'code_open', 'code_close'))
 
 	def __init__(self, operator):
@@ -59,6 +91,16 @@ class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
 			operator = 'line_end'
 		assert operator in self.allowed
 		self.operator = operator
+
+	@property
+	def mirror(self):
+		if self.operator in self.brackets.keys():
+			return type(self)(self.brackets[self.operator])
+		elif self.operator in self.brackets.values():
+			for key, value in self.brackets.values():
+				if value == self.operator:
+					return type(self)(key)
+		raise RuntimeError(f'Mirror not found: {self}')
 
 	def __eq__(self, item):
 		return self is item

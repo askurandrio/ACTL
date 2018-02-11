@@ -19,7 +19,7 @@ def test_engine():
 
 
 def test_compiler():
-	process = subprocess.Popen(f'python {WORK_DIR}/compiler/run.py', env=os.environ)
+	process = subprocess.Popen(f'python {WORK_DIR}/compiler/run.py -f', env=os.environ)
 	process.wait()
 	assert process.returncode == 0
 

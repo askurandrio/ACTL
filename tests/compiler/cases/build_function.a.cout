@@ -1,0 +1,10 @@
+Code:
+   Definition:
+      object def f(a, b):
+         Definition:
+            __IV12 = "+"
+            __IV13 = operator(__IV12)
+            __IV14 = __IV13(a, b)
+         return __IV14
+      __IV11 = f
+   __IV11

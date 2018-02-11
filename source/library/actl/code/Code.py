@@ -1,7 +1,6 @@
 
-from ..parser.opcodes import OPERATOR
+from ..parser.tokens import OPERATOR
 from .opcodes import AnyOpCode
-from .opcodes.opcodes import Making
 
 
 class Code(AnyOpCode):
@@ -48,12 +47,10 @@ class Code(AnyOpCode):
 		return is_add
 
 	def compile(self):
-		is_changed = False
 		while self.__apply_rule():
-			is_changed = True
+			pass
 		while self.__after_compile():
-			is_changed = True
-		return is_changed
+			pass
 
 	def pop(self, index):
 		return self.buff.pop(index)
@@ -73,16 +70,14 @@ class Code(AnyOpCode):
 				if result_match:
 					result = rule(self, idx_start, result_match.idx_end)
 					if rule.in_context:
-						if result is Making:
-							continue
+						return True
+					if (len(result) > 1) and (Definition == result[0]):
+						definition = result[0]
+						result = result[1:]
+						self.buff[idx_start:idx_start+result_match.idx_end] = result
+						self.add_definition(idx_start, definition)
 					else:
-						if (len(result) > 1) and (Definition == result[0]):
-							definition = result[0]
-							result = result[1:]
-							self.buff[idx_start:idx_start+result_match.idx_end] = result
-							self.add_definition(idx_start, definition)
-						else:
-							self.buff[idx_start:idx_start+result_match.idx_end] = result
+						self.buff[idx_start:idx_start+result_match.idx_end] = result
 					return True
 
 	def __after_compile(self):
@@ -90,9 +85,10 @@ class Code(AnyOpCode):
 			if OPERATOR('line_end') == opcode:
 				del self.buff[idx]
 				return True
-			if Code == opcode:
+			elif Code == opcode:
 				opcode.compile()
-			#assert opcode in (Word, OPERATOR), f'{opcode} in {(Word, OPERATOR)}'
+			elif hasattr(opcode, 'code'):
+				opcode.code.compile()
 
 	def __iter__(self):
 		return iter(self.buff)

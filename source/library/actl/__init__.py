@@ -1,3 +1,3 @@
 
 from .code.Code import Code
-from .project import Project
+from .project.Project import Project

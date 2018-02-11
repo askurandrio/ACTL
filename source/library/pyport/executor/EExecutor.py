@@ -6,7 +6,10 @@ class EExecutor:
 	transform = property(lambda self: self.execute)
 
 	def __init__(self, code):
+		from .abuiltins import abuiltins
+
 		self.code = code
+		self.code.scope.update(abuiltins)
 
 	def execute(self):
 		for opcode in self.code:

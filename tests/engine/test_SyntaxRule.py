@@ -2,8 +2,10 @@
 import unittest
 
 from actl import Code
-from actl.code.opcodes import opcodes
-from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Value
+from actl.code import opcodes
+from actl.parser import tokens
+from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Value, ToSpecific
+from pyport import Scope
 
 
 class test_SyntaxRule(unittest.TestCase):
@@ -11,116 +13,155 @@ class test_SyntaxRule(unittest.TestCase):
 		rules = SyntaxRules()
 		code = Code(None, rules, None)
 		if (code_variant == 'simple') or (code_variant == 'or'):
-			code.buff = [opcodes.VARIABLE('a'),
-							 opcodes.VARIABLE('b'),
-							 opcodes.VARIABLE('c'),
-							 opcodes.VARIABLE('d')]
+			code.buff = [tokens.VARIABLE('a'),
+							 tokens.VARIABLE('b'),
+							 tokens.VARIABLE('c'),
+							 tokens.VARIABLE('d')]
 		elif code_variant == 'maybe':
-			code.buff = [opcodes.VARIABLE('a'),
-							 opcodes.VARIABLE('b'),
-							 opcodes.VARIABLE('_'),
-							 opcodes.VARIABLE('b')]
+			code.buff = [tokens.VARIABLE('a'),
+							 tokens.VARIABLE('b'),
+							 tokens.VARIABLE('_'),
+							 tokens.VARIABLE('b')]
 		elif code_variant == 'many':
-			code.buff = [opcodes.VARIABLE('a'),
-							 opcodes.VARIABLE('a'),
-							 opcodes.VARIABLE('a'),
-							 opcodes.VARIABLE('b'),
-							 opcodes.VARIABLE('b'),
-							 opcodes.VARIABLE('z'),
-							 opcodes.VARIABLE('b')]
+			code.buff = [tokens.VARIABLE('a'),
+							 tokens.VARIABLE('a'),
+							 tokens.VARIABLE('a'),
+							 tokens.VARIABLE('b'),
+							 tokens.VARIABLE('b'),
+							 tokens.VARIABLE('z'),
+							 tokens.VARIABLE('b')]
 		elif code_variant == 'range':
-			code.buff = [opcodes.VARIABLE('_'),
-							 opcodes.VARIABLE('['),
-							 opcodes.VARIABLE('a'),
-							 opcodes.VARIABLE('['),
-							 opcodes.VARIABLE('b'),
-							 opcodes.VARIABLE(']'),
-							 opcodes.VARIABLE('c'),
-							 opcodes.VARIABLE(']'),
-							 opcodes.VARIABLE('_')]
+			code.buff = [tokens.VARIABLE('_'),
+							 tokens.VARIABLE('['),
+							 tokens.VARIABLE('a'),
+							 tokens.VARIABLE('['),
+							 tokens.VARIABLE('b'),
+							 tokens.VARIABLE(']'),
+							 tokens.VARIABLE('c'),
+							 tokens.VARIABLE(']'),
+							 tokens.VARIABLE('_')]
+		elif code_variant == 'Value':
+			code.scope = Scope()
+			code.scope[tokens.VARIABLE('a')] = 1
+			code.buff = [tokens.VARIABLE('b'),
+							 tokens.VARIABLE('a'),
+							 tokens.VARIABLE('b')]
+		elif code_variant == 'ToSpecific':
+			code.buff = [tokens.VARIABLE('_'),
+							 tokens.VARIABLE('['),
+							 tokens.VARIABLE('a'),
+							 tokens.VARIABLE('['),
+							 tokens.VARIABLE('b'),
+							 tokens.VARIABLE(']'),
+							 tokens.VARIABLE('b')]
 
 		return code, rules
 
 	def test_simple(self):
 		code, rules = self.init('simple')
 
-		@rules.add(opcodes.VARIABLE('b'), opcodes.VARIABLE('c'))
+		@rules.add(tokens.VARIABLE('b'), tokens.VARIABLE('c'))
 		def _(var1, var2):
-			return (opcodes.VARIABLE(var1.name + var2.name),)
+			return (tokens.VARIABLE(var1.name + var2.name),)
 
 		code.compile()
-		self.assertEqual(code.buff, [opcodes.VARIABLE('a'),
-											  opcodes.VARIABLE('bc'),
-											  opcodes.VARIABLE('d')])
+		self.assertEqual(code.buff, [tokens.VARIABLE('a'),
+											  tokens.VARIABLE('bc'),
+											  tokens.VARIABLE('d')])
 
 	def test_or(self):
 		code, rules = self.init('or')
 
-		@rules.add(Or((opcodes.VARIABLE('b'),), (opcodes.VARIABLE('d'),)))
+		@rules.add(Or((tokens.VARIABLE('b'),), (tokens.VARIABLE('d'),)))
 		def _(var):
-			return (opcodes.VARIABLE(f'Or({var.name})'),)
+			return (tokens.VARIABLE(f'Or({var.name})'),)
 
 		code.compile()
-		self.assertEqual(code.buff, [opcodes.VARIABLE('a'),
-											  opcodes.VARIABLE('Or(b)'),
-											  opcodes.VARIABLE('c'),
-											  opcodes.VARIABLE('Or(d)')])
+		self.assertEqual(code.buff, [tokens.VARIABLE('a'),
+											  tokens.VARIABLE('Or(b)'),
+											  tokens.VARIABLE('c'),
+											  tokens.VARIABLE('Or(d)')])
 
 	def test_maybe(self):
 		code, rules = self.init('maybe')
 
-		@rules.add(opcodes.VARIABLE('b'))
-		@rules.add(Maybe(opcodes.VARIABLE('a')), opcodes.VARIABLE('b'))
+		@rules.add(tokens.VARIABLE('b'))
+		@rules.add(Maybe(tokens.VARIABLE('a')), tokens.VARIABLE('b'))
 		def _(var1, var2=None):
 			if var2 is None:
-				opcode = opcodes.VARIABLE(f'Single({var1.name})')
+				opcode = tokens.VARIABLE(f'Single({var1.name})')
 			else:
-				opcode = opcodes.VARIABLE(f'Maybe({var1.name}, {var2.name})')
+				opcode = tokens.VARIABLE(f'Maybe({var1.name}, {var2.name})')
 			return (opcode,)
 
 		code.compile()
-		self.assertEqual(code.buff, [opcodes.VARIABLE('Maybe(a, b)'),
-											  opcodes.VARIABLE('_'),
-											  opcodes.VARIABLE('Single(b)')])
+		self.assertEqual(code.buff, [tokens.VARIABLE('Maybe(a, b)'),
+											  tokens.VARIABLE('_'),
+											  tokens.VARIABLE('Single(b)')])
 
 	def test_many(self):
 		code, rules = self.init('many')
 
-		@rules.add(Many(opcodes.VARIABLE('a'), minimum=3))
-		@rules.add(Many(opcodes.VARIABLE('b'), minimum=2))
+		@rules.add(Many(tokens.VARIABLE('a'), minimum=3))
+		@rules.add(Many(tokens.VARIABLE('b'), minimum=2))
 		def _(*matched_code):
 			name = ''.join(var.name for var in matched_code)
-			return (opcodes.VARIABLE(f'Many({name})'),)
+			return (tokens.VARIABLE(f'Many({name})'),)
 
 		code.compile()
-		self.assertEqual(code.buff, [opcodes.VARIABLE('Many(aaa)'),
-											  opcodes.VARIABLE('Many(bb)'),
-											  opcodes.VARIABLE('z'),
-											  opcodes.VARIABLE('b')])
+		self.assertEqual(code.buff, [tokens.VARIABLE('Many(aaa)'),
+											  tokens.VARIABLE('Many(bb)'),
+											  tokens.VARIABLE('z'),
+											  tokens.VARIABLE('b')])
 
 	def test_range(self):
 		code, rules = self.init('range')
 
-		@rules.add(Range((opcodes.VARIABLE('['),), lambda _: (opcodes.VARIABLE(']'),)))
+		@rules.add(Range((tokens.VARIABLE('['),), lambda _: (tokens.VARIABLE(']'),)))
 		def _(*matched_code):
 			name = ''.join(var.name for var in matched_code)
-			return (opcodes.VARIABLE(f'Range({name})'),)
+			return (tokens.VARIABLE(f'Range({name})'),)
 
 		code.compile()
-		self.assertEqual(code.buff, [opcodes.VARIABLE('_'),
-											  opcodes.VARIABLE('Range([a[b]c])'),
-											  opcodes.VARIABLE('_')])
+		self.assertEqual(code.buff, [tokens.VARIABLE('_'),
+											  tokens.VARIABLE('Range([a[b]c])'),
+											  tokens.VARIABLE('_')])
 
 	def test_range(self):
 		code, rules = self.init('range')
 
-		@rules.add(Range((opcodes.VARIABLE('['),), lambda _: (opcodes.VARIABLE(']'),)))
+		@rules.add(Range((tokens.VARIABLE('['),), lambda _: (tokens.VARIABLE(']'),)))
 		def _(*matched_code):
 			name = ''.join(var.name for var in matched_code)
-			return (opcodes.VARIABLE(f'Range({name})'),)
+			return (tokens.VARIABLE(f'Range({name})'),)
 
 		code.compile()
-		self.assertEqual(code.buff, [opcodes.VARIABLE('_'),
-											  opcodes.VARIABLE('Range([a[b]c])'),
-											  opcodes.VARIABLE('_')])
+		self.assertEqual(code.buff, [tokens.VARIABLE('_'),
+											  tokens.VARIABLE('Range([a[b]c])'),
+											  tokens.VARIABLE('_')])
+
+	def test_value(self):
+		code, rules = self.init('Value')
+
+		@rules.add(Value(1), args=('code', 'matched_code'))
+		def _(code, matched_code):
+			value = code.scope[matched_code[0]]
+			return (tokens.VARIABLE(f'Value({value})'),)
+
+		code.compile()
+		self.assertEqual(code.buff, [tokens.VARIABLE('b'),
+											  tokens.VARIABLE('Value(1)'),
+											  tokens.VARIABLE('b')])
+
+	def test_tospecific(self):
+		code, rules = self.init('ToSpecific')
+
+		@rules.add(ToSpecific(tokens.VARIABLE(']')))
+		def _(*matched_code):
+			name = ''.join(var.name for var in matched_code)
+			return (tokens.VARIABLE(f'ToSpecific({name})'),)
+
+		code.compile()
+		self.assertEqual(code.buff, [tokens.VARIABLE('ToSpecific(_[a[b])'),
+											  tokens.VARIABLE('b')])
 

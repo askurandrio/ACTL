@@ -1,7 +1,18 @@
 
+import actl
+
+
 class Scope:
 	def __init__(self):
 		self.__head = {}
+
+	def update(self, scope):
+		it = scope if isinstance(scope, type(self)) else scope.items()
+		for key, value in it:
+			self[key] = value
+
+	def get(self, key, default=None):
+		return self.__head.get(key, default)
 
 	def __getitem__(self, key):
 		return self.__head[key]
