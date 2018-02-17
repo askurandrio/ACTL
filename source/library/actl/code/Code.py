@@ -68,6 +68,7 @@ class Code(AnyOpCode):
 			for rule in self.rules:
 				result_match = rule.match(self, self.buff[idx_start:])
 				if result_match:
+				   #запускать надо после поиска других правил
 					result = rule(self, idx_start, result_match.idx_end)
 					if rule.in_context:
 						return True
