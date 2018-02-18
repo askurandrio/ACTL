@@ -105,10 +105,10 @@ def _(code, idx_start):
 
 @RULES.add(Many(tokens.VARIABLE,
 					 Not(tokens.OPERATOR('=')),
-					 Or(*((tokens.OPERATOR(symbol),) for symbol in tokens.OPERATOR.reloadable)),
+					 Many(Or(*((tokens.OPERATOR(symbol),) for symbol in tokens.OPERATOR.reloadable))),
 					 tokens.VARIABLE),
 			  Maybe(Not(tokens.OPERATOR('=')),
-					  Or(*((tokens.OPERATOR(symbol),) for symbol in tokens.OPERATOR.reloadable)),
+					  Many(Or(*((tokens.OPERATOR(symbol),) for symbol in tokens.OPERATOR.reloadable))),
 					  tokens.VARIABLE),
 			  args=('code', 'matched_code'))
 def _(code, matched_code):

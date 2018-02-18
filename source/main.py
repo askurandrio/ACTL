@@ -1,9 +1,17 @@
 
+import os
 import sys
 import argparse
 import traceback
 
-from actl import Project
+try:
+	import actl
+except ImportError:
+	DIR_LIBRARY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'library')
+	if DIR_LIBRARY not in sys.path:
+		sys.path.insert(0, DIR_LIBRARY)
+	import actl
+
 
 
 def repl(project):
@@ -13,7 +21,8 @@ def repl(project):
 		code = None
 		uinput = ''
 		try:
-			for line in sys.stdin:
+			while True:
+				line = input()
 				if not line.strip():
 					break
 				uinput += line
@@ -25,19 +34,25 @@ def repl(project):
 			if code is not None:
 				print('\n')
 				project.translator.exec(code)
+		except EOFError:
+			if uinput:
+				code = project.build(string=uinput)
+				print('\n')
+				project.translator.exec(code)
+			break
 		except Exception: #pylint: disable=W0703
 			traceback.print_exc()
 
 
 def main(args):
 	if args.projectf and args.mainf:
-		project = Project(projectf=args.projectf)
+		project = actl.Project(projectf=args.projectf)
 		project.set('mainf', value=args.mainf)
 	elif args.projectf:
-		project = Project.create_temp()
+		project = actl.Project(data={'from':'std'})
 		project.set('mainf', value=args.projectf)
 	else:
-		project = Project(data={'from':'repl'})
+		project = actl.Project(data={'from':'repl'})
 		args.repl = True
 
 	if args.repl:

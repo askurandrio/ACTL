@@ -4,18 +4,19 @@ from actl.code import Code, opcodes
 
 
 class TranslateToString:
-	def __init__(self):
-		self.string = ''
+	def translate(self, code):
+		return ''.join(self.__translate(code))
+
+	def exec(self, code):
+		print(self.translate(code))
 
 	def write(self, code):
 		from actl.project.Project import Project
-
-		self.string = ''.join(self.__translate(code))
 		try:
 			file = Project.this.get('translator', 'out', 'file')
 		except KeyError:
 			file = open(Project.this.get('translator', 'out', 'filename'), 'w')
-		file.write(self.string)
+		file.write(self.translate(code))
 
 	def __translate(self, code):
 		from std.abuiltins import abuiltins

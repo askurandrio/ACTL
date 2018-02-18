@@ -82,10 +82,6 @@ class Project:
 					if ocommand[0] == 'set':
 						self.data[self.get('on_init', idx, 1)] = self.get('on_init', idx, 2)
 
-	@classmethod
-	def create_temp(cls):
-		return cls(data={'from':'std'})
-
 
 class LinkLayer:
 	def __init__(self, code, *layers):

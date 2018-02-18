@@ -2,6 +2,3 @@ from: std
 translator:
   value:
     plget: "__import__('adb').TranslateToString"
-  out:
-    file:
-      pget: "lambda: __import__('sys').stdout"

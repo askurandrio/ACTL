@@ -41,11 +41,9 @@ class ResultMatch:
 			assert self.__idx_end is not None
 			self.__is_find = True
 
-	@property
 	def is_matching(self):
 		return bool(self.__idx_end)
 
-	@property
 	def is_find(self):
 		return bool(self.__is_find)
 
@@ -55,12 +53,12 @@ class ResultMatch:
 		return self.__idx_end
 
 	def __add__(self, other):
-		idx_end = self.idx_end if self.is_matching else 0
-		idx_end += other.idx_end if other.is_matching else 0
-		return type(self)(idx_end, self.is_find or other.is_find)
+		idx_end = self.idx_end if self.is_matching() else 0
+		idx_end += other.idx_end if other.is_matching() else 0
+		return type(self)(idx_end, self.is_find() or other.is_find())
 
 	def __bool__(self):
-		return self.is_find
+		return self.is_find()
 
 	def __repr__(self):
-		return f'ResultMatch(idx_end={self.__idx_end}, is_find={self.__is_find})'
+		return f'ResultMatch(idx_end={self.__idx_end}, is_find={self.is_find()})'

@@ -11,6 +11,14 @@ class Code(AnyOpCode):
 		self.rules = rules
 		self.scope = scope
 
+	def is_matching(self):
+		for idx_start, _ in enumerate(self.buff):
+			for rule in self.rules:
+				result_match = rule.match(self, self.buff[idx_start:])
+				if result_match or result_match.is_matching():
+					return True
+		return False
+
 	def get(self, index, default=None):
 		try:
 			return self[index]
