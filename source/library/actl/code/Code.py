@@ -26,6 +26,8 @@ class Code(AnyOpCode):
 		self.buff.insert(index, opcode)
 
 	def extend(self, buff):
+		if buff and Definition == buff[0]:
+			self.add_definition(len(self), buff.pop(0))
 		self.buff.extend(buff)
 
 	def append(self, buff):
@@ -39,12 +41,9 @@ class Code(AnyOpCode):
 			idx -= 1
 		if idx != 0:
 			idx += 1
-		is_add = False
 		if Definition != self[idx]:
 			self.insert(idx, self.create_definition())
-			is_add = True
 		self[idx].extend(opcodes)
-		return is_add
 
 	def compile(self):
 		while self.__apply_rule():
@@ -68,7 +67,6 @@ class Code(AnyOpCode):
 			for rule in self.rules:
 				result_match = rule.match(self, self.buff[idx_start:])
 				if result_match:
-				   #запускать надо после поиска других правил
 					result = rule(self, idx_start, result_match.idx_end)
 					if rule.in_context:
 						return True

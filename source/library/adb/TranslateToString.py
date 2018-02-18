@@ -7,14 +7,18 @@ class TranslateToString:
 	def __init__(self):
 		self.string = ''
 
-	def translate(self, code):
+	def write(self, code):
 		from actl.project.Project import Project
 
 		self.string = ''.join(self.__translate(code))
-		open(Project.this.get('translator', 'out'), 'w').write(self.string)
+		try:
+			file = Project.this.get('translator', 'out', 'file')
+		except KeyError:
+			file = open(Project.this.get('translator', 'out', 'filename'), 'w')
+		file.write(self.string)
 
 	def __translate(self, code):
-		from pyport.executor.abuiltins import abuiltins
+		from std.abuiltins import abuiltins
 
 		ftype = abuiltins[tokens.VARIABLE('def')]
 
@@ -27,7 +31,6 @@ class TranslateToString:
 				yield f'{opcode.to_string()}:\n'
 				for repr_opcode in self.__translate(opcode.code):
 					yield '   ' + repr_opcode
-
 			else:
 				yield self.__tact(opcode) + '\n'
 

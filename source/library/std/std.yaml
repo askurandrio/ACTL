@@ -1,0 +1,4 @@
+on_init:
+  - [set, rules, pget: "lambda: __import__('std').RULES"]
+  - [set, scope, pget: "lambda: __import__('std').Scope()"]
+  - [set, layers, pget: "lambda: [__import__('std').EExecutor]"]

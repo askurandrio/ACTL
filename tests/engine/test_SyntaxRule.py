@@ -5,7 +5,7 @@ from actl import Code
 from actl.code import opcodes
 from actl.parser import tokens
 from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Value, ToSpecific
-from pyport import Scope
+from std.Scope import Scope
 
 
 class test_SyntaxRule(unittest.TestCase):

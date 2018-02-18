@@ -55,7 +55,7 @@ class TestCompiler(unittest.TestCase):
 			if os.path.splitext(filename)[1] == '.a':
 				filename = os.path.join(CASES_DIR, filename)
 				tmpl_filename = os.path.splitext(filename)[0] + '.a.cout'
-				process = subprocess.Popen(f'python {DIR_SOURCE}/main.py {filename} {self.pfname}')
+				process = subprocess.Popen(f'python {DIR_SOURCE}/main.py {self.pfname} {filename}')
 				process.wait()
 				try:
 					assert process.returncode == 0

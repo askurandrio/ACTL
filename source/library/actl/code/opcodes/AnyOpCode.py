@@ -11,7 +11,11 @@ class MetaAnyOpCode(type):
 		return not (self == item)
 
 	def __hash__(self):
-		return hash(tuple(sorted(self.__dict__)))
+		import pdb; pdb.set_trace()
+		values = []
+		for attr in dir(self):
+			values.append(attr, getattr(self, attr))
+		return hash(tuple(sorted(values)))
 
 	def __repr__(self):
 		return f"opcodes.{self.__name__}"
@@ -35,7 +39,6 @@ class AnyOpCode(metaclass=MetaAnyOpCode): #pylint: disable=R0903
 
 class DynamicOpCode(AnyOpCode):
 	__slots__ = ()
-	__hash__ = AnyOpCode.__hash__
 
 	def __init__(self, *args, **kwargs):
 		for key, value in zip(self.__slots__, args):

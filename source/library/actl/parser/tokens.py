@@ -13,12 +13,11 @@ symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_
 
 class INDENT(DynamicOpCode):
 	__slots__ = ('string',)
+	__hash__ = AnyOpCode.__hash__
 
 	def __eq__(self, other):
-		return self.string == other.string
-
-	def __hash__(self):
-		return hash(f'INDENT({self.string})')
+		if super().__eq__(other):
+			return self.string == other.string
 
 
 class VARIABLE(DynamicOpCode):
@@ -30,9 +29,6 @@ class VARIABLE(DynamicOpCode):
 		if not isinstance(other, type(self)):
 			return False
 		return self.name == other.name #pylint: disable=E1101
-
-	def __hash__(self):
-		return hash(f'VARIABLE({self.name})')
 
 	@classmethod
 	def get_temp(cls, count=None):
@@ -49,6 +45,8 @@ class VARIABLE(DynamicOpCode):
 
 
 class STRING(AnyOpCode):
+	__hash__ = AnyOpCode.__hash__
+
 	def __init__(self, string):
 		self.string = string
 

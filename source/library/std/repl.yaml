@@ -3,5 +3,5 @@ translator:
   value:
     plget: "__import__('adb').TranslateToString"
   out:
-    filename:
-      pget: "lambda: __import__('os').environ['out_fname']"
+    file:
+      pget: "lambda: __import__('sys').stdout"
