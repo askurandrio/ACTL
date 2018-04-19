@@ -1,5 +1,6 @@
 
-from actl.parser import tokens
+import actl
+from actl.tokenizer import tokens
 from actl.code import opcodes, Definition
 from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Not
 
@@ -17,28 +18,33 @@ def _(_, var, lend):
 	return (opcodes.RETURN(var), lend)
 
 
-@RULES.add(opcodes.BUILD_CODE, in_context=True, args=('code', 'idx_start'))
+@RULES.add(tokens.VARIABLE, tokens.OPERATOR(':'),
+			  in_context=True, args=('code', 'idx_start'))
 def _(code, idx_start):
-	function = code.pop(idx_start).function
-	result = code.create()
-	if code and (code[idx_start] != tokens.OPERATOR('line_end')):
-		while code and (code[idx_start] != tokens.OPERATOR('line_end')):
-			result.append(code.pop(idx_start))
-		function(result)
-		return True
+	function = code.pop(idx_start)
+
 	code.pop(idx_start)
+	code.pop(idx_start)
+
 	indents = []
-	while code and (tokens.INDENT == code[idx_start]):
+	while tokens.INDENT == code[idx_start]:
 		indents.append(code.pop(idx_start))
-	result.extend(code.get_subcode(idx_start, code.index(tokens.OPERATOR('line_end'))+1))
+
+	result = code.create()
+	result.extend(code.extract(idx_start, code.index(tokens.OPERATOR('line_end'))+1))
+
 	while True:
 		for indent in indents:
-			if (not code[idx_start:]) or (tokens.INDENT != code[idx_start]):
-				function(result)
-				return True
-			assert indent == code[idx_start]
-			code.pop(idx_start)
-		result.extend(code.get_subcode(idx_start, code.index(tokens.OPERATOR('line_end'))+1))
+			if indent == code.get(idx_start):
+				code.pop(idx_start)
+			else:
+				code.insert(idx_start, opcodes.SAVE_CODE(function=function))
+				code.insert(idx_start+1, result)
+				return None
+		result.extend(code.extract(idx_start, code.index(tokens.OPERATOR('line_end'))+1))
+	code.insert(idx_start, opcodes.SAVE_CODE(function=function))
+	code.insert(idx_start+1, result)
+	return None
 
 
 @RULES.add(tokens.STRING, args=('code', 'idx_start', 'matched_code'))
@@ -64,7 +70,7 @@ def _(code, matched_code):
 	function = matched_code[0]
 	typeb = matched_code[1].operator
 	subcode = code.create(list(matched_code[2:-1]))
-	subcode.compile()
+	actl.Project.this.parse(subcode)
 	if Definition == subcode.get(0):
 		definition = subcode.pop(0)
 	else:
@@ -80,7 +86,7 @@ def _(code, matched_code):
 
 
 def build_cargs(code):
-	result = opcodes.CARGS(args=[], kwargs=[])
+	result = opcodes.CARGS(args=[], kwargs={})
 	for opcode in code:
 		if tokens.VARIABLE == opcode:
 			result.args.append(opcode)
@@ -96,8 +102,8 @@ def build_cargs(code):
 def _(code, idx_start):
 	out = code.pop(idx_start)
 	code.pop(idx_start)
-	subcode = code.get_subcode(idx_start, None)
-	subcode.compile()
+	subcode = code.extract(idx_start, None)
+	actl.Project.this.parse(subcode)
 	source = subcode.pop(-1)
 	code[idx_start:] = subcode
 	code.insert(idx_start+len(subcode), opcodes.SET_VARIABLE(out=out, source=source))

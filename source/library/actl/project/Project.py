@@ -1,100 +1,135 @@
 
 import os
+import copy
+import logging
+import collections
 
 import yaml
 
-from ..code.Code import Code
-from ..parser import Parser
 
-
+LOGGER = logging.getLogger('actl')
 DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+def add_orderd_dict_yaml():
+
+	dict_representer = lambda dumper, data: dumper.represent_dict(data.iteritems())
+	dict_constructor = lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))
+
+	yaml.add_representer(collections.OrderedDict, dict_representer)
+	yaml.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, dict_constructor)
+add_orderd_dict_yaml()
+
+
+def recursice_update(base, update_dict):
+	for key, value in update_dict.items():
+		if isinstance(value, collections.Mapping):
+			base[key] = base.get(key, {})
+			recursice_update(base[key], value)
+		else:
+			base[key] = value
+
+
 class Project:
-	add_syntax = property(lambda self: self.data['rules'].add)
+	pfunctions = {}
+	add_syntax = property(lambda self: self[('rules',)].add)
 
 	def __init__(self, projectf=None, data=None):
 		if data is None:
-			self.data = yaml.load(open(projectf))
+			self.__data = yaml.load(open(projectf))
 		else:
-			self.data = data
+			self.__data = data
 		self.__class__.this = self
 		self.__init()
 
-	def parse(self, filename=None, string=None):
-		if not string:
-			if not filename:
-				filename = self.get('mainf')
-			string = open(filename, encoding='utf8').read()
-		return Parser(string).parse()		
+	def __init(self):
+		idx = 0
+		while idx < len(self.__data):
+			command = list(self.__data)[idx]
+			self.pfunctions[command](command)
+			idx += 1
 
-	def build(self, filename=None, string=None, code=None):
-		parser = self.parse(filename, string)
-		if code is None:
-			buff = list(parser)
-			code = Code(buff, self.data['rules'], self.data['scope'])
-		LinkLayer(code, *self.data['layers']).link()
-		return code
+	def build(self):
+		self[('LinkerLayer',)].link()
 
-	def translate(self, code):
-		from actl.TranslateToString import TranslateToString
-		tr = TranslateToString()
-		tr.translate(code)
+	def parse(self, code):
+		#raise code
+		import actl
 
-	def get(self, *keys, ivalue=None):
-		if ivalue is None:
-			ivalue = self.data
+		parser = actl.code.Parser(code, self[('rules',)])
+		parser.link()
+
+	def update(self, data):
+		self.__data.update(data)
+
+	def __peval(self, code):
+		try:
+			return eval(code, {'this':self})
+		except:
+			LOGGER.exception(code)
+			raise
+
+	def __init(self):
+		if 'from' in self.__data:
+			project_name = self[('from',)]
+			del self.__data['from']
+			project = type(self)(projectf=os.path.join(DIR_LIBRARY, 'std', f"{project_name}.yaml"))
+			self.__class__.this = self
+			self_data = self.__data
+			self.__data = copy.deepcopy(project.__data)
+			recursice_update(self.__data, self_data)
+
+	def __getitem__(self, keys, data=None):
+		if data is None:
+			data = self.__data
 		for key in keys[:-1]:
-			ivalue = self.get(key, ivalue=ivalue)
-		value = ivalue[keys[-1]]
-		if isinstance(value, dict) and 'pget' in value:
-			value = eval(value['pget'])()
-		if isinstance(value, dict) and 'plget' in value:
-			if '__value_plget' not in value:
-				value['__value_plget'] = eval(value['plget'])()
-			return value['__value_plget']
+			data = self.__getitem__((key,), data)
+		if keys:
+			value = data[keys[-1]]
+		else:
+			return data
+
+		if isinstance(value, dict):
+			if 'pget' in value:
+				if '__value_pget' not in value:
+					value['__value_pget'] = self.__peval(value['pget'])
+				return value['__value_pget']
+			if 'pfunction' in value:
+				if '__value_pfunction' not in value:
+					pfunction = self.__getitem__(('pfunction',), value)
+					function = self.__peval(self.__getitem__(('function',), pfunction))
+					args = []
+					kwargs = {}
+					if 'kwargs' in pfunction:
+						for key in self.__getitem__(('kwargs',), pfunction):
+							kwargs[key] = self.__getitem__(('kwargs', key), pfunction)
+					if 'args' in pfunction:
+						for idx, _ in enumerate(self.__getitem__(('args',), pfunction)):
+							args.append(self.__getitem__(('args', idx), pfunction))
+					value['__value_pfunction'] = function(*args, **kwargs)
+				value = value['__value_pfunction']
 		return value
 
-	def set(self, *keys, value):
-		if len(keys) > 1:
-			data = self.get(*keys[:-1])
-		else:
-			data = self.data
-		if (keys[-1] in data) and isinstance(data[keys[-1]], dict) and ('pset' in data[keys[-1]]):
-			eval(value['pset'])(value)
+	def __setitem__(self, keys, value):
+		data = self[keys[:-1]]
+		if (keys[-1] in data) and isinstance(data[keys[-1]], dict) and ('pfset' in data[keys[-1]]):
+			self.__peval(data[keys[-1]]['pfset'])(value)
 		else:
 			data[keys[-1]] = value
 
-	@property
-	def translator(self):
-		return self.get('translator', 'value')
 
-	def __init(self):
-		this = self.this
-		for pcommand in list(self.data):
-			if pcommand == 'from':
-				projectf = os.path.join(DIR_LIBRARY, 'std', f"{self.data['from']}.yaml")
-				project = type(self)(projectf=projectf)
-				self.data.update(project.data)
-				self.__class__.this = this
-			elif pcommand == 'on_init':
-				for idx, ocommand in enumerate(self.data['on_init']):
-					if ocommand[0] == 'set':
-						self.data[self.get('on_init', idx, 1)] = self.get('on_init', idx, 2)
-
-
-class LinkLayer:
-	def __init__(self, code, *layers):
-		self.code = code
-		self.layers = [layer(self.code) for layer in layers]
+class LinkerLayer:
+	def __init__(self, tokenizer, *layers):
+		self.__tokenizer = tokenizer
+		self.__layers = layers
 
 	def link(self):
-		while self.__link():
-			pass
-
-	def __link(self):
-		old_hash = hash(self.code)
-		self.code.transform()
-		for layer in self.layers:
-			layer.transform()
-		return old_hash != hash(self.code)
+		idx_layer = 0
+		while idx_layer < len(self.__layers):
+			opt = self.__layers[idx_layer].link()
+			if opt == 'back':
+				idx_layer -= 1
+			elif opt == 'next':
+				idx_layer += 1
+			else:
+				raise RuntimeError(f'opt from layer<{self.__layers[idx_layer]}> not found: {opt}')

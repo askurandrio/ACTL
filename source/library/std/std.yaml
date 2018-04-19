@@ -1,4 +1,65 @@
-on_init:
-  - [set, rules, pget: "lambda: __import__('std').RULES"]
-  - [set, scope, pget: "lambda: __import__('std').Scope()"]
-  - [set, layers, pget: "lambda: [__import__('std').EExecutor]"]
+tokenizer:
+  pfunction:
+    function: "__import__('actl').tokenizer.Tokenizer"
+    kwargs:
+      inpfile:
+        pget: "this[('inpfile',)]"
+
+
+scope:
+  pfunction:
+    function: "__import__('std').Scope"
+
+
+code:
+  pfunction:
+    function: "__import__('actl').code.Code"
+    kwargs:
+      buff:
+        pget: "list(this[('tokenizer',)].tokenize())"
+      scope:
+        pget: "this[('scope',)]"
+
+
+rules:
+  pget: "__import__('std').RULES"
+
+
+parser:
+  pfunction:
+    function: "__import__('actl').code.Parser"
+    kwargs:
+      code:
+        pget: "this[('code',)]"
+      rules:
+        pget: "this[('rules',)]"
+
+
+sexecutor:
+  pfunction:
+    function: "__import__('std').SExecutor"
+    kwargs:
+      code:
+        pget: "this[('code',)]"
+
+
+translator:
+  pfunction:
+    function: "__import__('adb').TranslateToString"
+    kwargs:
+      code:
+        pget: "this[('code',)]"
+
+
+LinkerLayer:
+  pfunction:
+    function: "__import__('actl').project.LinkerLayer"
+    args:
+      - pget: "this[('tokenizer',)]"
+      - pget: "this[('parser',)]"
+      - pget: "this[('sexecutor',)]"
+      - pget: "this[('translator',)]"
+
+
+mainf:
+  pfset: "lambda path: this.__setitem__(('inpfile',), open(path))"

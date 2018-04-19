@@ -1,8 +1,9 @@
 
+import copy
 import itertools
 
 from ..code import opcodes
-from ..parser import tokens
+from ..tokenizer import tokens
 from .Template import Template, ResultMatch
 
 
@@ -140,42 +141,6 @@ class Value(Template):
 
 	def __repr__(self):
 		return f'{type(self).__name__}({self.__values})'
-
-
-class ToSpecific(Template):
-	def __init__(self, *template):
-		super().__init__(*template)
-
-	def match(self, code, buff):
-		result = ResultMatch(0, False)
-		while buff[result.idx_end:]:
-			midx_end = self.__get_max(code, buff[result.idx_end:])
-			if midx_end == -1:
-				result += self.__func(code, buff)
-				return result
-			else:
-				result += ResultMatch(result.idx_end+midx_end, False)
-		return ResultMatch(result.idx_end, False)
-	
-	def __get_max(self, code, buff):
-		max_idx = -1
-		for crule in code.rules:
-			if self in crule:
-				result = crule.match(code, buff)
-				if result and (result.idx_end > max_idx):
-					max_idx = result.idx_end
-		return max_idx
-
-	def __func(self, code, buff):
-		result = ResultMatch(0, False)
-		while buff[result.idx_end:]:
-			result_match = super().match(code, buff[result.idx_end:])
-			if result_match:
-				result += result_match
-				return result
-			else:
-				result += ResultMatch(1, False)
-		return ResultMatch(result.idx_end, False)
 
 
 class Stub(Template):

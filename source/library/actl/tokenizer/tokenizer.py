@@ -6,9 +6,9 @@ from .tokens import INDENT, VARIABLE, STRING, OPERATOR
 pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
 
 
-class Parser:
-	def __init__(self, buff):
-		self.buff = buff
+class Tokenizer:
+	def __init__(self, inpfile):
+		self.buff = inpfile.read()
 		self.rules = self.__get_rules()
 		self.indents = []
 		self.prev_code = OPERATOR(None)
@@ -48,7 +48,7 @@ class Parser:
 		if self.buff[:start]:
 			raise RuntimeError(f'This token not found: "{self.buff[:start]}"')
 
-	def parse(self):
+	def tokenize(self):
 		yield OPERATOR('code_open')
 		yield from self.__delete_indents(force=True)
 		while self.buff:
@@ -58,7 +58,7 @@ class Parser:
 
 	def __get_rules(self):
 		rules = []
-		rules.extend(VARIABLE.get_parsers())
-		rules.extend(STRING.get_parsers())
-		rules.extend(OPERATOR.get_parsers())
+		rules.extend(VARIABLE.get_tokenizers())
+		rules.extend(STRING.get_tokenizers())
+		rules.extend(OPERATOR.get_tokenizers())
 		return rules

@@ -1,22 +1,19 @@
 
-from actl.parser import tokens
+from actl.tokenizer import tokens
 from actl.code import Code, opcodes
 
 
 class TranslateToString:
-	def translate(self, code):
-		return ''.join(self.__translate(code))
+	def __init__(self, code, out_file):
+		self.__out_file = out_file
+		self.__code = code
 
-	def exec(self, code):
-		print(self.translate(code))
+	def link(self):		
+		self.__out_file.write(''.join(self.__translate(self.__code)))
+		return 'next'
 
-	def write(self, code):
-		from actl.project.Project import Project
-		try:
-			file = Project.this.get('translator', 'out', 'file')
-		except KeyError:
-			file = open(Project.this.get('translator', 'out', 'filename'), 'w')
-		file.write(self.translate(code))
+	def exec(self):
+		print(''.join(self.__translate(self.__code)))
 
 	def __translate(self, code):
 		from std.abuiltins import abuiltins
@@ -46,11 +43,20 @@ class TranslateToString:
 			return f'{opcode.out.name} = {opcode.number}'
 		elif opcodes.RETURN == opcode:
 			return f'return {opcode.var.name}'
+		elif opcodes.CALL_OPERATOR == opcode:
+			result = ''
+			if opcode.out is not None:
+				result += f'{self.__tact(opcode.out)} = '
+			result += f'operator("{opcode.operator}")'
+			result += f'({", ".join(map(self.__tact, opcode.args))})'
+			return result
+		elif opcodes.SAVE_CODE == opcode:
+			return f'SAVE_CODE({opcode.function.name})'
 		elif opcodes.CALL_FUNCTION == opcode:
 			args = ', '.join(map(lambda var: var.name, opcode.args))
 			if args and opcode.kwargs:
 				args += ', '
-			args += ', '.join(opcode.kwargs)
+			args += ', '.join(f'{key}={value}' for key, value in opcode.kwargs.items())
 			close_brucket = tokens.OPERATOR(tokens.OPERATOR.brackets[opcode.typeb]).operator
 			return f'{opcode.out.name} = {opcode.function.name}{opcode.typeb}{args}{close_brucket}'
 		else:

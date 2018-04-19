@@ -38,7 +38,7 @@ class VARIABLE(DynamicOpCode):
 		return cls(name=f'__IV{cls.__count_temp}')
 
 	@classmethod
-	def get_parsers(cls):
+	def get_tokenizers(cls):
 		word = pyparsing.Word(symbols)
 		word.setParseAction(lambda tokens: cls(tokens[0]))
 		yield word
@@ -58,7 +58,7 @@ class STRING(AnyOpCode):
 		return f'{type(self)}("{self.string}")'
 
 	@classmethod
-	def get_parsers(cls):
+	def get_tokenizers(cls):
 		parser = pyparsing.QuotedString(quoteChar='"')
 		parser.setParseAction(lambda tokens: cls(tokens[0]))
 		yield parser
@@ -79,7 +79,7 @@ class MetaOPERATOR(MetaAnyOpCode):
 
 class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
 	__hash__ = AnyOpCode.__hash__
-	reloadable = ':.+-!=*/<>@<>' 
+	reloadable = ':.+-!=*/<>@' 
 	brackets = {'(':')', '{':'}', '[':']', '<':'>'}
 	symbols = reloadable + ',;' + ''.join(f'{item[0]}{item[1]}' for item in brackets.items())
 	allowed = set(tuple(symbols) + (None, 'line_end', 'code_open', 'code_close'))
@@ -107,7 +107,7 @@ class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
 		return f'OPERATOR("{self.operator}")'
 	
 	@classmethod
-	def get_parsers(cls):
+	def get_tokenizers(cls):
 		parser = pyparsing.LineEnd()
 		parser.setParseAction(lambda _: cls('line_end'))
 		yield parser

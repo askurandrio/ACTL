@@ -19,13 +19,13 @@ class SyntaxRule(Template):
 				elif arg == 'idx_end':
 					kwargs['idx_end'] = idx_end
 				elif arg == 'matched_code':
-					kwargs['matched_code'] = code.buff[idx_start:idx_start+idx_end]
+					kwargs['matched_code'] = list(code[idx_start:idx_start+idx_end])
 				else:
 					raise RuntimeError(f'This arg not found: {arg}')
 			return (), kwargs
 		if self.in_context:
 			return (code, idx_start, idx_end), {}
-		return code.buff[idx_start:idx_start+idx_end], {}
+		return list(code[idx_start:idx_start+idx_end]), {}
 
 	def __call__(self, code, idx_start, idx_end):
 		args, kwargs = self.__prepare_arguments(code, idx_start, idx_end)

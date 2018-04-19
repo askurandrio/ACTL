@@ -47,10 +47,10 @@ def repl(project):
 def main(args):
 	if args.projectf and args.mainf:
 		project = actl.Project(projectf=args.projectf)
-		project.set('mainf', value=args.mainf)
+		project[('mainf',)] = args.mainf
 	elif args.projectf:
 		project = actl.Project(data={'from':'std'})
-		project.set('mainf', value=args.projectf)
+		project[('mainf',)] = args.projectf
 	else:
 		project = actl.Project(data={'from':'repl'})
 		args.repl = True
@@ -58,18 +58,18 @@ def main(args):
 	if args.repl:
 		repl(project)
 	else:
-		code = project.build()
-		project.translator.write(code)
+		project.build()
 
 
 def build_argparser():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('projectf', help='Code or Project file', nargs='?')
-	parser.add_argument('mainf', help='Code or Project file', nargs='?')
+	parser.add_argument('mainf', help='Code file', nargs='?')
 	parser.add_argument('--repl', help='Specify for open repl mode', action='store_true')
 	parser.add_argument('--projectf', help='Project file')
 	parser.add_argument('--mainf', help='Code file')
 	return parser
+
 
 if __name__ == '__main__':
 	main(build_argparser().parse_args())

@@ -2,24 +2,7 @@
 import actl
 
 
-FIND_BRACKETS = actl.syntax.Range( \
-						 (actl.syntax.Or( \
-							 *((actl.parser.tokens.OPERATOR(bracket),) \
-								 for bracket in actl.parser.tokens.OPERATOR.brackets)),),
-						 lambda open_bracket: (open_bracket.mirror,))
-
-class Signature:
-	def __init__(self, return_type, typeb, args, kwargs):
-		self.return_type = return_type
-		self.typeb = typeb
-		self.args = args
-		self.kwargs = kwargs
-
-	def __repr__(self):
-		return f'Signature({self.return_type}, {self.typeb}, {self.args}, {self.kwargs})'
-
-
-class Function(actl.code.opcodes.AnyOpCode):
+class Function:
 	def __init__(self, name, signature, code):
 		self.name = name
 		self.signature = signature
@@ -42,35 +25,44 @@ class Function(actl.code.opcodes.AnyOpCode):
 
 
 @actl.Project.this.add_syntax(actl.syntax.Value(Function),
-										actl.syntax.ToSpecific(actl.parser.tokens.OPERATOR(':')),
-										args=('code', 'idx_start', 'idx_end'))
-def _(code, idx_start, idx_end):
-	subcode = code[idx_start:idx_end]
-	assert Function == subcode.scope[subcode.pop(0)]
-	rfind_brackets = FIND_BRACKETS.match(subcode, subcode.buff)
-	if rfind_brackets and (rfind_brackets.idx_end == (len(subcode) - 2)):
-		name = actl.parser.tokens.VARIABLE.get_temp()
-		typeb, _ = subcode.pop(0), subcode.pop(-2)
-	else:
-		rfind_brackets = FIND_BRACKETS.match(subcode, subcode.buff[1:])
-		if rfind_brackets and (rfind_brackets.idx_end == (len(subcode) - 2)):
-			name = subcode.pop(0)
-			typeb, _ = subcode.pop(0), subcode.pop(-2)
-		else:
-			name = actl.parser.tokens.VARIABLE.get_temp()
-			typeb = actl.parser.tokens.OPERATOR('(')
-	signature = Signature('object', typeb, [], {})
-	while len(subcode) > 1:
-		signature.args.append(subcode.pop(0))
-		if len(subcode) > 1:
-			assert subcode.pop(0) == actl.parser.tokens.OPERATOR(',')
-	assert tuple(subcode) == (actl.parser.tokens.OPERATOR(':'),)
+										actl.syntax.Maybe(actl.tokenizer.tokens.VARIABLE),
+										actl.syntax.Range((actl.tokenizer.tokens.OPERATOR('('),),
+															lambda op: (op.mirror,)),
+										args=('code', 'matched_code'))
+def _(code, matched_code):
+	matched_code = list(matched_code)
 
-	out = actl.parser.tokens.VARIABLE.get_temp()
-	function = Function(name, signature, (actl.code.opcodes.PASS,))
+	function = matched_code.pop(0)
+	assert Function == code.scope[function]
+
+	if actl.tokenizer.tokens.VARIABLE == matched_code[0]:
+		function_name = matched_code.pop(0)
+	else:
+		function_name = actl.tokenizer.tokens.VARIABLE.get_temp()
+
+	function_typeb = matched_code[0]
+	assert actl.tokenizer.tokens.OPERATOR('(') == matched_code.pop(0)
+	assert actl.tokenizer.tokens.OPERATOR(')') == matched_code.pop(-1)
+
+	function_args = []
+	for opcode in matched_code:
+		if actl.tokenizer.tokens.VARIABLE == opcode:
+			function_args.append(opcode)
+		elif actl.tokenizer.tokens.OPERATOR(',') == opcode:
+			pass
+		else:
+			raise RuntimeError(opcode)
+
 	definition = code.create_definition()
-	definition.append(function)
-	definition.append(actl.code.opcodes.SET_VARIABLE(out=out, source=function.name))
-	return definition, \
-			 out, \
-			 actl.code.opcodes.BUILD_CODE(function.set_code)
+	definition.append(actl.code.opcodes.BUILD_STRING(out=actl.tokenizer.tokens.VARIABLE.get_temp(),
+																	 string='create'))
+	definition.append(actl.code.opcodes.CALL_OPERATOR(out=actl.tokenizer.tokens.VARIABLE.get_temp(),
+																	  operator='.',
+																	  args=[function, definition[0].out]))
+	definition.append(actl.code.opcodes.CALL_FUNCTION(out=function_name,
+																	  function=definition[1].out,
+																	  typeb='(',
+																	  args=[],
+																	  kwargs={'typeb': function_typeb,
+																				 'args': function_args}))
+	return definition, function_name

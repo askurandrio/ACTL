@@ -1,10 +1,12 @@
 Code:
    Definition:
-      object def f(a, b):
-         Definition:
-            __IV12 = "+"
-            __IV13 = operator(__IV12)
-            __IV14 = __IV13(a, b)
-         return __IV14
-      __IV11 = f
-   __IV11
+      __IV11 = "create"
+      __IV12 = operator(".")(def, __IV11)
+      f = __IV12(typeb=OPERATOR("("), args=[VARIABLE(name=a), VARIABLE(name=b)])
+   SAVE_CODE(f)
+   Code:
+      Definition:
+         __IV13 = "+"
+         __IV14 = operator(__IV13)
+         __IV15 = __IV14(a, b)
+      return __IV15
