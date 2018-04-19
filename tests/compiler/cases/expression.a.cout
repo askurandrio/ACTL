@@ -1,0 +1,10 @@
+Code:
+   Definition:
+      __IV11 = 1
+      __IV12 = 2
+      __IV13 = 3
+      __IV14 = operator("*")(__IV12, __IV13)
+      __IV15 = operator("+")(__IV11, __IV14)
+      __IV16 = 5
+      __IV17 = operator("/")(__IV15, __IV16)
+   a = __IV17

@@ -36,17 +36,17 @@ class TranslateToString:
 		if tokens.VARIABLE == opcode:
 			return opcode.name
 		elif opcodes.SET_VARIABLE == opcode:
-			return f'{opcode.out.name} = {opcode.source.name}'
+			return f'{opcode.dst.name} = {opcode.source.name}'
 		elif opcodes.BUILD_STRING == opcode:
-			return f'{opcode.out.name} = "{opcode.string}"'
+			return f'{opcode.dst.name} = "{opcode.string}"'
 		elif opcodes.BUILD_NUMBER == opcode:
-			return f'{opcode.out.name} = {opcode.number}'
+			return f'{opcode.dst.name} = {opcode.number}'
 		elif opcodes.RETURN == opcode:
 			return f'return {opcode.var.name}'
 		elif opcodes.CALL_OPERATOR == opcode:
 			result = ''
-			if opcode.out is not None:
-				result += f'{self.__tact(opcode.out)} = '
+			if opcode.dst is not None:
+				result += f'{self.__tact(opcode.dst)} = '
 			result += f'operator("{opcode.operator}")'
 			result += f'({", ".join(map(self.__tact, opcode.args))})'
 			return result
@@ -58,7 +58,7 @@ class TranslateToString:
 				args += ', '
 			args += ', '.join(f'{key}={value}' for key, value in opcode.kwargs.items())
 			close_brucket = tokens.OPERATOR(tokens.OPERATOR.brackets[opcode.typeb]).operator
-			return f'{opcode.out.name} = {opcode.function.name}{opcode.typeb}{args}{close_brucket}'
+			return f'{opcode.dst.name} = {opcode.function.name}{opcode.typeb}{args}{close_brucket}'
 		else:
 			return f'repr({opcode})'
 		raise RuntimeError(f'This opcode not found: {opcode}')

@@ -25,8 +25,8 @@ class Function:
 
 
 @actl.Project.this.add_syntax(actl.syntax.Value(Function),
-										actl.syntax.Maybe(actl.tokenizer.tokens.VARIABLE),
-										actl.syntax.Range((actl.tokenizer.tokens.OPERATOR('('),),
+										actl.syntax.Maybe(actl.tokens.VARIABLE),
+										actl.syntax.Range((actl.tokens.OPERATOR('('),),
 															lambda op: (op.mirror,)),
 										args=('code', 'matched_code'))
 def _(code, matched_code):
@@ -35,32 +35,32 @@ def _(code, matched_code):
 	function = matched_code.pop(0)
 	assert Function == code.scope[function]
 
-	if actl.tokenizer.tokens.VARIABLE == matched_code[0]:
+	if actl.tokens.VARIABLE == matched_code[0]:
 		function_name = matched_code.pop(0)
 	else:
-		function_name = actl.tokenizer.tokens.VARIABLE.get_temp()
+		function_name = actl.tokens.VARIABLE.get_temp()
 
 	function_typeb = matched_code[0]
-	assert actl.tokenizer.tokens.OPERATOR('(') == matched_code.pop(0)
-	assert actl.tokenizer.tokens.OPERATOR(')') == matched_code.pop(-1)
+	assert actl.tokens.OPERATOR('(') == matched_code.pop(0)
+	assert actl.tokens.OPERATOR(')') == matched_code.pop(-1)
 
 	function_args = []
 	for opcode in matched_code:
-		if actl.tokenizer.tokens.VARIABLE == opcode:
+		if actl.tokens.VARIABLE == opcode:
 			function_args.append(opcode)
-		elif actl.tokenizer.tokens.OPERATOR(',') == opcode:
+		elif actl.tokens.OPERATOR(',') == opcode:
 			pass
 		else:
 			raise RuntimeError(opcode)
 
 	definition = actl.code.Definition()
-	definition.append(actl.code.opcodes.BUILD_STRING(out=actl.tokenizer.tokens.VARIABLE.get_temp(),
+	definition.append(actl.code.opcodes.BUILD_STRING(dst=actl.tokens.VARIABLE.get_temp(),
 																	 string='create'))
-	definition.append(actl.code.opcodes.CALL_OPERATOR(out=actl.tokenizer.tokens.VARIABLE.get_temp(),
+	definition.append(actl.code.opcodes.CALL_OPERATOR(dst=actl.tokens.VARIABLE.get_temp(),
 																	  operator='.',
-																	  args=[function, definition[0].out]))
-	definition.append(actl.code.opcodes.CALL_FUNCTION(out=function_name,
-																	  function=definition[1].out,
+																	  args=[function, definition[0].dst]))
+	definition.append(actl.code.opcodes.CALL_FUNCTION(dst=function_name,
+																	  function=definition[1].dst,
 																	  typeb='(',
 																	  args=[],
 																	  kwargs={'typeb': function_typeb,

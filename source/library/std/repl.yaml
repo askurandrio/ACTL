@@ -10,7 +10,7 @@ translator:
 make_code:
   def pfunction: |
     Code = __import__('actl').code.Code
-    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['scope',])
+    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['scope',]())
 
 
 build:

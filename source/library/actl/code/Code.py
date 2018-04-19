@@ -36,8 +36,8 @@ class Code(AnyOpCode):
 		import actl
 
 		while (idx > 0) and \
-				(actl.tokenizer.tokens.OPERATOR('line_end') != self.get(idx)) and \
-				(actl.tokenizer.tokens.INDENT != self.get(idx)):
+				(actl.tokens.OPERATOR('line_end') != self.get(idx)) and \
+				(actl.tokens.INDENT != self.get(idx)):
 			idx -= 1
 		if idx != 0:
 			idx += 1

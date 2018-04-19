@@ -7,8 +7,11 @@ tokenizer:
 
 
 scope:
-  pfunction:
-    function: "__import__('std').Scope"
+  def pfunction: |
+    std = __import__('std')
+    scope = std.Scope()
+    scope.update(__import__('std.abuiltins').abuiltins.abuiltins)
+    return scope
 
 
 rules:
@@ -44,7 +47,7 @@ translator:
 build:
   def pfunction: |
     Code = __import__('actl').code.Code
-    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['scope',])
+    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['scope',]())
 
     LinkerLayer = __import__('actl').project.LinkerLayer
     llayer = LinkerLayer(this['parser',],

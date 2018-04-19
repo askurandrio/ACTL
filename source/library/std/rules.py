@@ -20,8 +20,8 @@ def _(num1, *other):
 		number = f'{num1.number}.{other[1].number}'
 	else:
 		number = num1.number		
-	definition.append(opcodes.BUILD_NUMBER(out=tokens.VARIABLE.get_temp(), number=number))
-	return definition, definition[0].out
+	definition.append(opcodes.BUILD_NUMBER(dst=tokens.VARIABLE.get_temp(), number=number))
+	return definition, definition[0].dst
 
 
 @RULES.add(tokens.VARIABLE('return'), tokens.VARIABLE, tokens.OPERATOR('line_end'))
@@ -61,9 +61,9 @@ def _(code, idx_start):
 @RULES.add(tokens.STRING)
 def _(token):
 	definition = Definition()
-	definition.append(opcodes.BUILD_STRING(out=tokens.VARIABLE.get_temp(),
+	definition.append(opcodes.BUILD_STRING(dst=tokens.VARIABLE.get_temp(),
 														string=token.string))
-	return definition, definition[-1].out
+	return definition, definition[-1].dst
 
 
 @RULES.add(Range((tokens.OPERATOR('code_open'),), lambda _: (tokens.OPERATOR('code_close'),)),
@@ -92,17 +92,22 @@ def _(*matched_code):
 				break
 
 	definition = Definition()
-	definition.append(opcodes.CALL_FUNCTION(out=tokens.VARIABLE.get_temp(),
+	definition.append(opcodes.CALL_FUNCTION(dst=tokens.VARIABLE.get_temp(),
 														 function=call_function,
 														 typeb=call_typeb,
 														 args=call_args,
 														 kwargs={}))
-	return definition, definition[0].out
+	return definition, definition[0].dst
+
+
+@RULES.add(tokens.OPERATOR('('), tokens.VARIABLE, tokens.OPERATOR(')'))
+def _(_op1, var, _op2):
+	return (var,)
 
 
 @RULES.add(tokens.VARIABLE, tokens.OPERATOR('='), tokens.VARIABLE, tokens.OPERATOR('line_end'))
-def _(out, _, source, line_end):
-	result = opcodes.SET_VARIABLE(out=out, source=source)
+def _(dst, _, source, line_end):
+	result = opcodes.SET_VARIABLE(dst=dst, source=source)
 	return result, line_end
 
 
@@ -124,10 +129,10 @@ def _(*matched_code_ungroup):
 	definition = Definition()
 
 	if tokens.OPERATOR == matched_code[0]:
-		definition.append(opcodes.CALL_OPERATOR(out=tokens.VARIABLE.get_temp(),
+		definition.append(opcodes.CALL_OPERATOR(dst=tokens.VARIABLE.get_temp(),
 															 operator=matched_code.pop(0),
 															 args=[matched_code.pop(0)]))
-		matched_code.insert(0, definition[-1].out)
+		matched_code.insert(0, definition[-1].dst)
 
 	while (len(matched_code) >= 3) and \
 				(tokens.VARIABLE == matched_code[0]) and \
@@ -136,16 +141,16 @@ def _(*matched_code_ungroup):
 		args.append(matched_code.pop(0))
 		operator = matched_code.pop(0)
 		args.append(matched_code.pop(0))
-		definition.append(opcodes.CALL_OPERATOR(out=tokens.VARIABLE.get_temp(),
+		definition.append(opcodes.CALL_OPERATOR(dst=tokens.VARIABLE.get_temp(),
 															 operator=operator,
 															 args=args))
-		matched_code.insert(0, definition[-1].out)
+		matched_code.insert(0, definition[-1].dst)
 
 	if len(matched_code) == 2:
 		args = [matched_code.pop(0)]
-		definition.append(opcodes.CALL_OPERATOR(out=tokens.VARIABLE.get_temp(),
+		definition.append(opcodes.CALL_OPERATOR(dst=tokens.VARIABLE.get_temp(),
 															 operator=matched_code.pop(0),
 															 args=args))
-		matched_code.insert(0, definition[-1].out)
+		matched_code.insert(0, definition[-1].dst)
 
 	return definition, matched_code.pop(0)

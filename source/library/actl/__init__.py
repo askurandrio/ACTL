@@ -3,6 +3,7 @@ import sys
 import logging
 
 from .code import *
+from .tokenizer import *
 from .project.Project import Project
 
 
