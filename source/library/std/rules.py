@@ -90,16 +90,10 @@ def _(code, matched_code):
 	return definition, definition[0].out
 
 
-@RULES.add(tokens.VARIABLE, tokens.OPERATOR('='), tokens.VARIABLE,
-			  in_context=True, args=('code', 'idx_start'))
-def _(code, idx_start):
-	out = code.pop(idx_start)
-	code.pop(idx_start)
-	subcode = code.extract(idx_start, None)
-	actl.Project.this.parse(subcode)
-	source = subcode.pop(-1)
-	code[idx_start:] = subcode
-	code.insert(idx_start+len(subcode), opcodes.SET_VARIABLE(out=out, source=source))
+@RULES.add(tokens.VARIABLE, tokens.OPERATOR('='), tokens.VARIABLE, tokens.OPERATOR('line_end'))
+def _(out, _, source, line_end):
+	result = opcodes.SET_VARIABLE(out=out, source=source)
+	return result, line_end
 
 
 @RULES.add(Many(tokens.VARIABLE,
