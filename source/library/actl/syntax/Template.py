@@ -41,6 +41,9 @@ class ResultMatch:
 			assert self.__idx_end is not None
 			self.__is_find = True
 
+	def convert_to_false(self):
+		return type(self)(idx_end=self.__idx_end, is_find=False)
+
 	def is_matching(self):
 		return bool(self.__idx_end)
 

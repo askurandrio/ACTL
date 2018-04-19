@@ -12,7 +12,6 @@ class Making(DynamicOpCode):
 
 
 PASS = DynamicOpCode.create('PASS')
-CARGS = DynamicOpCode.create('CARGS', 'args', 'kwargs')
 RETURN = DynamicOpCode.create('RETURN', 'var')
 SAVE_CODE = DynamicOpCode.create('SAVE_CODE', 'function')
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'out', 'source')

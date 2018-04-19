@@ -80,31 +80,43 @@ class Many(Template):
 
 
 class Range(Template):
-	def __init__(self, open_template, function):
+	def __init__(self, open_template, function, subtemplate=None):
+		self.__open_template = Template(*open_template)
 		self.__function = function
+		if subtemplate is not None:
+			subtemplate = Template(*subtemplate)
+		self.__subtemplate = subtemplate
 		super().__init__(*open_template)
 
 	def match(self, code, buff):
-		result_match = super().match(code, buff)
-		if not result_match:
+		result_open = self.__open_template.match(code, buff)
+		if not result_open:
 			return ResultMatch(None, False)
-		close_rule = Template(*self.__function(*buff[:result_match.idx_end]))
+		close_template = Template(*self.__function(*buff[:result_open.idx_end]))
 		count = 0
 		for idx in itertools.count():
 			if not buff[idx:]:
 				break
-			if super().match(code, buff[idx:]):
+			subresult_open = self.__open_template.match(code, buff[idx:])
+			if subresult_open:
 				count += 1
-			if close_rule.match(code, buff[idx:]):
-				count -= 1
-				if not count:
+				idx += subresult_open.idx_end
+			else:
+				result_close = close_template.match(code, buff[idx:])
+				if result_close:
+					count -= 1
+					idx += result_close.idx_end
+				else:
 					idx += 1
 			if not count:
 				break
-		result_match = close_rule.match(code, buff[idx:])
-		if result_match:
-			idx += result_match.idx_end
-		assert not count
+		if count:
+			return ResultMatch(idx, False)
+		if self.__subtemplate is not None:
+			subbuff = buff[result_open.idx_end:idx-result_close.idx_end]
+			result_sub = self.__subtemplate.match(code, subbuff)
+			if not result_sub:
+				return result_sub.convert_to_false()
 		return ResultMatch(idx, True)
 
 	def __repr__(self):

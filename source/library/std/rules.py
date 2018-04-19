@@ -62,39 +62,32 @@ def _(code, matched_code):
 	return (subcode,)
 
 
-@RULES.add(tokens.VARIABLE,
+@RULES.add(tokens.VARIABLE, 
 			  Range((Or(*((tokens.OPERATOR(bracket),) for bracket in tokens.OPERATOR.brackets)),),
-					  lambda open_bracket: (open_bracket.mirror,)),
+					  lambda open_bracket: (open_bracket.mirror,),
+					  (Many(tokens.VARIABLE, tokens.OPERATOR(',')), Maybe(tokens.VARIABLE))),
 			  args=('code', 'matched_code'))
 def _(code, matched_code):
-	function = matched_code[0]
-	typeb = matched_code[1].operator
-	subcode = code.create(list(matched_code[2:-1]))
-	actl.Project.this.parse(subcode)
-	if Definition == subcode.get(0):
-		definition = subcode.pop(0)
-	else:
-		definition = code.create_definition()
-	cargs = build_cargs(subcode)
-	out = tokens.VARIABLE.get_temp()
-	definition.append(opcodes.CALL_FUNCTION(out=out,
-														 function=function,
-														 typeb=typeb,
-														 args=cargs.args,
-														 kwargs=cargs.kwargs))
-	return definition, out
-
-
-def build_cargs(code):
-	result = opcodes.CARGS(args=[], kwargs={})
-	for opcode in code:
+	call_function = matched_code.pop(0)
+	call_typeb = matched_code.pop(0).operator
+	matched_code.pop(-1)
+	call_args = []
+	it_matched_code = iter(matched_code)
+	for opcode in it_matched_code:
 		if tokens.VARIABLE == opcode:
-			result.args.append(opcode)
-		elif tokens.OPERATOR(',') == opcode:
-			continue
-		else:
-			raise RuntimeError(f'Unexpected opcode: {opcode}')
-	return result
+			call_args.append(opcode)
+			try:
+				next(it_matched_code)
+			except StopIteration:
+				break
+
+	definition = code.create_definition()
+	definition.append(opcodes.CALL_FUNCTION(out=tokens.VARIABLE.get_temp(),
+														 function=call_function,
+														 typeb=call_typeb,
+														 args=call_args,
+														 kwargs={}))
+	return definition, definition[0].out
 
 
 @RULES.add(tokens.VARIABLE, tokens.OPERATOR('='), tokens.VARIABLE,
