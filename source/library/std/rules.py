@@ -13,9 +13,20 @@ def _(_):
 	return (opcodes.PASS,)
 
 
+@RULES.add(Or((tokens.NUMBER, tokens.OPERATOR('.'), tokens.NUMBER), (tokens.NUMBER,)))
+def _(num1, *other):
+	definition = Definition()
+	if other:
+		number = f'{num1.number}.{other[1].number}'
+	else:
+		number = num1.number		
+	definition.append(opcodes.BUILD_NUMBER(out=tokens.VARIABLE.get_temp(), number=number))
+	return definition, definition[0].out
+
+
 @RULES.add(tokens.VARIABLE('return'), tokens.VARIABLE, tokens.OPERATOR('line_end'))
-def _(_, var, lend):
-	return (opcodes.RETURN(var), lend)
+def _(_, var, line_end):
+	return opcodes.RETURN(var), line_end
 
 
 @RULES.add(tokens.VARIABLE, tokens.OPERATOR(':'),
@@ -30,7 +41,7 @@ def _(code, idx_start):
 	while tokens.INDENT == code[idx_start]:
 		indents.append(code.pop(idx_start))
 
-	result = code.create()
+	result = type(code)(buff=[], scope=code.scope)
 	result.extend(code.extract(idx_start, code.index(tokens.OPERATOR('line_end'))+1))
 
 	while True:
@@ -47,27 +58,26 @@ def _(code, idx_start):
 	return None
 
 
-@RULES.add(tokens.STRING, args=('code', 'idx_start', 'matched_code'))
-def _(code, idx_start, matched_code):
-	result = opcodes.BUILD_STRING(out=tokens.VARIABLE.get_temp(),
-											string=matched_code[0].string)
-	definition = code.create_definition((result,))
-	return definition, result.out
+@RULES.add(tokens.STRING)
+def _(token):
+	definition = Definition()
+	definition.append(opcodes.BUILD_STRING(out=tokens.VARIABLE.get_temp(),
+														string=token.string))
+	return definition, definition[-1].out
 
 
 @RULES.add(Range((tokens.OPERATOR('code_open'),), lambda _: (tokens.OPERATOR('code_close'),)),
-			  args=('code', 'matched_code'))
+			args=('code', 'matched_code'))
 def _(code, matched_code):
-	subcode = code.create(matched_code[1:-1])
-	return (subcode,)
+	return (type(code)(buff=matched_code[1:-1], scope=code.scope),)
 
 
 @RULES.add(tokens.VARIABLE, 
 			  Range((Or(*((tokens.OPERATOR(bracket),) for bracket in tokens.OPERATOR.brackets)),),
 					  lambda open_bracket: (open_bracket.mirror,),
-					  (Many(tokens.VARIABLE, tokens.OPERATOR(',')), Maybe(tokens.VARIABLE))),
-			  args=('code', 'matched_code'))
-def _(code, matched_code):
+					  (Maybe(Many(tokens.VARIABLE, tokens.OPERATOR(',')), Maybe(tokens.VARIABLE)),)))
+def _(*matched_code):
+	matched_code = list(matched_code)
 	call_function = matched_code.pop(0)
 	call_typeb = matched_code.pop(0).operator
 	matched_code.pop(-1)
@@ -81,7 +91,7 @@ def _(code, matched_code):
 			except StopIteration:
 				break
 
-	definition = code.create_definition()
+	definition = Definition()
 	definition.append(opcodes.CALL_FUNCTION(out=tokens.VARIABLE.get_temp(),
 														 function=call_function,
 														 typeb=call_typeb,
@@ -96,28 +106,46 @@ def _(out, _, source, line_end):
 	return result, line_end
 
 
-@RULES.add(Many(tokens.VARIABLE,
-					 Not(tokens.OPERATOR('=')),
-					 Many(Or(*((tokens.OPERATOR(symbol),) for symbol in tokens.OPERATOR.reloadable))),
-					 tokens.VARIABLE),
-			  Maybe(Not(tokens.OPERATOR('=')),
-					  Many(Or(*((tokens.OPERATOR(symbol),) for symbol in tokens.OPERATOR.reloadable))),
-					  tokens.VARIABLE),
-			  args=('code', 'matched_code'))
-def _(code, matched_code):
-	var1, operator, var2 = matched_code
+TMPL_OPERATORS = Many(Or(*((tokens.OPERATOR(symbol),) for symbol in tokens.OPERATOR.reloadable)))
+@RULES.add(Many(tokens.VARIABLE, Not(tokens.OPERATOR('=')), TMPL_OPERATORS, tokens.VARIABLE))
+def _(*matched_code_ungroup):
+	matched_code_ungroup = list(matched_code_ungroup)
+	matched_code = []
+	while matched_code_ungroup:
+		if tokens.VARIABLE == matched_code_ungroup[0]:
+			matched_code.append(matched_code_ungroup.pop(0))
+		elif tokens.OPERATOR == matched_code_ungroup[0]:
+			operator = ''
+			while matched_code_ungroup and (tokens.OPERATOR == matched_code_ungroup[0]):
+				operator += matched_code_ungroup.pop(0).operator
+			matched_code.append(operator)
+		else:
+			raise RuntimeError(matched_code_ungroup)
+	definition = Definition()
 
-	definition = code.create_definition()
-	definition.append(opcodes.BUILD_STRING(out=tokens.VARIABLE.get_temp(),
-														string=operator.operator))
-	definition.append(opcodes.CALL_FUNCTION(out=tokens.VARIABLE.get_temp(),
-														 function=tokens.VARIABLE('operator'),
-														 typeb='(',
-														 args=(definition[0].out,),
-														 kwargs={}))
-	definition.append(opcodes.CALL_FUNCTION(out=tokens.VARIABLE.get_temp(),
-														 function=definition[1].out,
-														 typeb='(',
-														 args=(var1, var2),
-														 kwargs={}))
-	return definition, definition[2].out
+	if tokens.OPERATOR == matched_code[0]:
+		definition.append(opcodes.CALL_OPERATOR(out=tokens.VARIABLE.get_temp(),
+															 operator=matched_code.pop(0),
+															 args=[matched_code.pop(0)]))
+		matched_code.insert(0, definition[-1].out)
+
+	while (len(matched_code) >= 3) and \
+				(tokens.VARIABLE == matched_code[0]) and \
+				(tokens.VARIABLE == matched_code[2]):
+		args = []
+		args.append(matched_code.pop(0))
+		operator = matched_code.pop(0)
+		args.append(matched_code.pop(0))
+		definition.append(opcodes.CALL_OPERATOR(out=tokens.VARIABLE.get_temp(),
+															 operator=operator,
+															 args=args))
+		matched_code.insert(0, definition[-1].out)
+
+	if len(matched_code) == 2:
+		args = [matched_code.pop(0)]
+		definition.append(opcodes.CALL_OPERATOR(out=tokens.VARIABLE.get_temp(),
+															 operator=matched_code.pop(0),
+															 args=args))
+		matched_code.insert(0, definition[-1].out)
+
+	return definition, matched_code.pop(0)

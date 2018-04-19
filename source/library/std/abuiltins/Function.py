@@ -53,7 +53,7 @@ def _(code, matched_code):
 		else:
 			raise RuntimeError(opcode)
 
-	definition = code.create_definition()
+	definition = actl.code.Definition()
 	definition.append(actl.code.opcodes.BUILD_STRING(out=actl.tokenizer.tokens.VARIABLE.get_temp(),
 																	 string='create'))
 	definition.append(actl.code.opcodes.CALL_OPERATOR(out=actl.tokenizer.tokens.VARIABLE.get_temp(),

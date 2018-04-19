@@ -3,12 +3,10 @@ import sys
 
 import pyparsing
 
-from ..code.opcodes import opcodes
 from ..code.opcodes.AnyOpCode import MetaAnyOpCode, AnyOpCode, DynamicOpCode
 
 
-symbols = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1)))) + '_' + \
-			 pyparsing.nums
+ALPHAS = ''.join(filter(str.isalpha, map(chr, range(sys.maxunicode + 1))))
 
 
 class INDENT(DynamicOpCode):
@@ -39,7 +37,23 @@ class VARIABLE(DynamicOpCode):
 
 	@classmethod
 	def get_tokenizers(cls):
-		word = pyparsing.Word(symbols)
+		word = pyparsing.Word(ALPHAS, ALPHAS + '_' + pyparsing.nums)
+		word.setParseAction(lambda tokens: cls(tokens[0]))
+		yield word
+
+
+class NUMBER(DynamicOpCode):
+	__slots__ = ('number',)
+	__hash__ = AnyOpCode.__hash__
+
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+		return self.number == other.number #pylint: disable=E1101
+
+	@classmethod
+	def get_tokenizers(cls):
+		word = pyparsing.Word(pyparsing.nums)
 		word.setParseAction(lambda tokens: cls(tokens[0]))
 		yield word
 

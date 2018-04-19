@@ -1,14 +1,14 @@
 import pyparsing
 
-from .tokens import INDENT, VARIABLE, STRING, OPERATOR
+from .tokens import INDENT, VARIABLE, STRING, OPERATOR, NUMBER
 
 
 pyparsing.ParserElement.setDefaultWhitespaceChars(' ')
 
 
 class Tokenizer:
-	def __init__(self, inpfile):
-		self.buff = inpfile.read()
+	def __init__(self, buff):
+		self.buff = str(buff)
 		self.rules = self.__get_rules()
 		self.indents = []
 		self.prev_code = OPERATOR(None)
@@ -60,6 +60,7 @@ class Tokenizer:
 	def __get_rules(self):
 		rules = []
 		rules.extend(VARIABLE.get_tokenizers())
+		rules.extend(NUMBER.get_tokenizers())
 		rules.extend(STRING.get_tokenizers())
 		rules.extend(OPERATOR.get_tokenizers())
 		return rules

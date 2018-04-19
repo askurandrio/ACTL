@@ -6,7 +6,5 @@ Code:
    SAVE_CODE(f)
    Code:
       Definition:
-         __IV13 = "+"
-         __IV14 = operator(__IV13)
-         __IV15 = __IV14(a, b)
-      return __IV15
+         __IV13 = operator("+")(a, b)
+      return __IV13

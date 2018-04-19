@@ -49,22 +49,12 @@ class Project:
 			self.pfunctions[command](command)
 			idx += 1
 
-	def build(self):
-		self[('LinkerLayer',)].link()
-
-	def parse(self, code):
-		#raise code
-		import actl
-
-		parser = actl.code.Parser(code, self[('rules',)])
-		parser.link()
-
 	def update(self, data):
 		self.__data.update(data)
 
-	def __peval(self, code):
+	def __run_code(self, function, code, lc_scope=None):
 		try:
-			return eval(code, {'this':self})
+			return function(code, {'this':self}, lc_scope)
 		except:
 			LOGGER.exception(code)
 			raise
@@ -91,36 +81,37 @@ class Project:
 
 		if isinstance(value, dict):
 			if 'pget' in value:
-				if '__value_pget' not in value:
-					value['__value_pget'] = self.__peval(value['pget'])
-				return value['__value_pget']
+				return self.__run_code(eval, value['pget'])
+			if 'def pfunction' in value:
+				code = 'def pfunction():\n'
+				code += '\n'.join(f'   {line}' for line in value['def pfunction'].split('\n'))
+				lc_scope = {}
+				self.__run_code(exec, code, lc_scope)
+				return lc_scope['pfunction']
 			if 'pfunction' in value:
-				if '__value_pfunction' not in value:
-					pfunction = self.__getitem__(('pfunction',), value)
-					function = self.__peval(self.__getitem__(('function',), pfunction))
-					args = []
-					kwargs = {}
-					if 'kwargs' in pfunction:
-						for key in self.__getitem__(('kwargs',), pfunction):
-							kwargs[key] = self.__getitem__(('kwargs', key), pfunction)
-					if 'args' in pfunction:
-						for idx, _ in enumerate(self.__getitem__(('args',), pfunction)):
-							args.append(self.__getitem__(('args', idx), pfunction))
-					value['__value_pfunction'] = function(*args, **kwargs)
-				value = value['__value_pfunction']
+				pfunction = self.__getitem__(('pfunction',), value)
+				function = self.__run_code(eval, self.__getitem__(('function',), pfunction))
+				args = []
+				kwargs = {}
+				if 'kwargs' in pfunction:
+					for key in self.__getitem__(('kwargs',), pfunction):
+						kwargs[key] = self.__getitem__(('kwargs', key), pfunction)
+				if 'args' in pfunction:
+					for idx, _ in enumerate(self.__getitem__(('args',), pfunction)):
+						args.append(self.__getitem__(('args', idx), pfunction))
+				return function(*args, **kwargs)
 		return value
 
 	def __setitem__(self, keys, value):
 		data = self[keys[:-1]]
 		if (keys[-1] in data) and isinstance(data[keys[-1]], dict) and ('pfset' in data[keys[-1]]):
-			self.__peval(data[keys[-1]]['pfset'])(value)
+			self.__run_code(eval, data[keys[-1]]['pfset'])(value)
 		else:
 			data[keys[-1]] = value
 
 
 class LinkerLayer:
-	def __init__(self, tokenizer, *layers):
-		self.__tokenizer = tokenizer
+	def __init__(self, *layers):
 		self.__layers = layers
 
 	def link(self):

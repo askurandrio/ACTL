@@ -1,1 +1,42 @@
 from: std
+
+translator:
+  pfunction:
+    kwargs:
+      out_file:
+        pget: "__import__('sys').stdout"
+
+
+make_code:
+  def pfunction: |
+    Code = __import__('actl').code.Code
+    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['scope',])
+
+
+build:
+  def pfunction: |
+    this['make_code',]()
+
+    LinkerLayer = __import__('actl').project.LinkerLayer
+    llayer = LinkerLayer(this['parser',])
+    llayer.link()
+
+
+run:
+  def pfunction: |
+    this['make_code',]()
+
+    LinkerLayer = __import__('actl').project.LinkerLayer
+    llayer = LinkerLayer(this['parser',],
+                         this['sexecutor',],
+                         this['translator',])
+    llayer.link()
+
+
+uinput:
+  pfset: "lambda string: this.__setitem__(('buff',), string)"
+
+
+out_file:
+  pget:
+    __import__('sys').stdout

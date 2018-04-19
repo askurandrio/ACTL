@@ -18,47 +18,45 @@ def repl(project):
 	while True:
 		print('>>> ', end='')
 		sys.stdout.flush()
-		code = None
 		uinput = ''
 		try:
 			while True:
-				line = input()
-				if not line.strip():
-					break
-				uinput += line
-				if line[0] == ' ':
-					continue
-				code = project.build(string=uinput)
-				if not code.is_matching():
-					break
-			if code is not None:
-				print('\n')
-				project.translator.exec(code)
+				try:
+					line = input('')
+				except EOFError:
+					raise
+				else:
+					uinput += line
+					if line and (line[0] == ' '):
+						print('... ')
+						continue
+				finally:
+					project['uinput',] = uinput
+					project['build',]()
+			project['run',]()
 		except EOFError:
-			if uinput:
-				code = project.build(string=uinput)
-				print('\n')
-				project.translator.exec(code)
+			project['run',]()
 			break
 		except Exception: #pylint: disable=W0703
 			traceback.print_exc()
+			break
 
 
 def main(args):
 	if args.projectf and args.mainf:
 		project = actl.Project(projectf=args.projectf)
-		project[('mainf',)] = args.mainf
+		project['mainf',] = args.mainf
 	elif args.projectf:
 		project = actl.Project(data={'from':'std'})
-		project[('mainf',)] = args.projectf
+		project['mainf',] = args.projectf
 	else:
 		project = actl.Project(data={'from':'repl'})
 		args.repl = True
 
 	if args.repl:
 		repl(project)
-	else:
-		project.build()
+	else:		
+		project['build',]()
 
 
 def build_argparser():

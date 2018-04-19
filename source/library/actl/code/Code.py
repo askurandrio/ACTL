@@ -32,7 +32,7 @@ class Code(AnyOpCode):
 	def index(self, opcode):
 		return self.__buff.index(opcode)
 
-	def add_definition(self, idx, opcodes):
+	def add_definition(self, idx, definition):
 		import actl
 
 		while (idx > 0) and \
@@ -42,19 +42,11 @@ class Code(AnyOpCode):
 		if idx != 0:
 			idx += 1
 		if Definition != self[idx]:
-			self.insert(idx, self.create_definition())
-		self[idx].extend(opcodes)
+			self.insert(idx, Definition(scope=self.scope))
+		self[idx].extend(definition)
 
 	def pop(self, index):
 		return self.__buff.pop(index)
-
-	def create(self, buff=None, type_code=None):
-		buff = [] if buff is None else list(buff)
-		type_code = type(self) if type_code is None else type_code
-		return type_code(buff=buff, scope=self.scope)
-
-	def create_definition(self, buff=None):
-		return self.create(buff, type_code=Definition)
 
 	def __iter__(self):
 		return iter(self.__buff)
@@ -62,7 +54,7 @@ class Code(AnyOpCode):
 	def __getitem__(self, index):
 		buff = self.__buff[index]
 		if isinstance(index, slice):
-			return self.create(buff)
+			return Code(buff=buff, scope=self.scope)
 		return buff
 
 	def __setitem__(self, index, elem):
@@ -95,5 +87,8 @@ class Code(AnyOpCode):
 
 
 class Definition(Code):
-	pass
+	def __init__(self, buff=None, scope=None):
+		if buff is None:
+			buff = []
+		super().__init__(buff=buff, scope=scope)
 
