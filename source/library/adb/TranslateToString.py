@@ -36,11 +36,11 @@ class TranslateToString:
 		if tokens.VARIABLE == opcode:
 			return opcode.name
 		elif opcodes.SET_VARIABLE == opcode:
-			return f'{opcode.dst.name} = {opcode.source.name}'
+			return f'{self.__tact(opcode.dst)} = {self.__tact(opcode.src)}'
 		elif opcodes.BUILD_STRING == opcode:
-			return f'{opcode.dst.name} = "{opcode.string}"'
+			return f'{self.__tact(opcode.dst)} = "{opcode.string}"'
 		elif opcodes.BUILD_NUMBER == opcode:
-			return f'{opcode.dst.name} = {opcode.number}'
+			return f'{self.__tact(opcode.dst)} = {opcode.number}'
 		elif opcodes.RETURN == opcode:
 			return f'return {opcode.var.name}'
 		elif opcodes.CALL_OPERATOR == opcode:

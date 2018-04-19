@@ -7,6 +7,16 @@ from ..tokenizer import tokens
 from .Template import Template, ResultMatch
 
 
+class Empty(Template):
+	def match(self, code, buff):
+		if buff:
+			return ResultMatch(None, False)
+		return ResultMatch(0)
+
+	def __repr__(self):
+		return f'{type(self).__name__}()'
+
+
 class OneOpcode(Template):
 	def __init__(self, template):
 		self.__template = template
@@ -59,7 +69,6 @@ class Maybe(Template):
 class Many(Template):
 	def __init__(self, *template, minimum=1):
 		self.__minimum = minimum
-		assert self.__minimum
 		super().__init__(*template)
 
 	def match(self, code, buff):

@@ -8,8 +8,10 @@ tokenizer:
 
 scope:
   def pfunction: |
+    actl = __import__('actl')
     std = __import__('std')
     scope = std.Scope()
+    scope.update({"stack":[], "codes":[], actl.tokens.VARIABLE("print"):'print'})
     scope.update(__import__('std.abuiltins').abuiltins.abuiltins)
     return scope
 
@@ -51,7 +53,6 @@ build:
 
     LinkerLayer = __import__('actl').project.LinkerLayer
     llayer = LinkerLayer(this['parser',],
-                         this['sexecutor',],
                          this['translator',])
     llayer.link()
 

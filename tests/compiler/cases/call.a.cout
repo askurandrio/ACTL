@@ -1,4 +1,10 @@
 Code:
    Definition:
-      __IV11 = f(a, b)
+      __IV11 = f()
    __IV11
+   Definition:
+      __IV12 = f(a)
+   __IV12
+   Definition:
+      __IV13 = f(a, b)
+   __IV13

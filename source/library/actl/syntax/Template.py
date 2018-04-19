@@ -30,7 +30,7 @@ class Template:
 		return template
 
 	def __repr__(self):
-		return f'{type(self).__name__}(*{self.__template})'
+		return f'{type(self).__name__}({self.__template})'
 
 
 class ResultMatch:

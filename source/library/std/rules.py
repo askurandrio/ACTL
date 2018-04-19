@@ -2,7 +2,7 @@
 import actl
 from actl.tokenizer import tokens
 from actl.code import opcodes, Definition
-from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Not
+from actl.syntax import SyntaxRules, Or, Maybe, Many, Range, Not, Empty
 
 
 RULES = SyntaxRules()
@@ -13,13 +13,13 @@ def _(_):
 	return (opcodes.PASS,)
 
 
-@RULES.add(Or((tokens.NUMBER, tokens.OPERATOR('.'), tokens.NUMBER), (tokens.NUMBER,)))
+@RULES.add(Maybe(tokens.NUMBER, tokens.OPERATOR('.')), tokens.NUMBER)
 def _(num1, *other):
 	definition = Definition()
 	if other:
 		number = f'{num1.number}.{other[1].number}'
 	else:
-		number = num1.number		
+		number = num1.number
 	definition.append(opcodes.BUILD_NUMBER(dst=tokens.VARIABLE.get_temp(), number=number))
 	return definition, definition[0].dst
 
@@ -75,7 +75,8 @@ def _(code, matched_code):
 @RULES.add(tokens.VARIABLE, 
 			  Range((Or(*((tokens.OPERATOR(bracket),) for bracket in tokens.OPERATOR.brackets)),),
 					  lambda open_bracket: (open_bracket.mirror,),
-					  (Maybe(Many(tokens.VARIABLE, tokens.OPERATOR(',')), Maybe(tokens.VARIABLE)),)))
+					  (Maybe(Many(tokens.VARIABLE, tokens.OPERATOR(','), minimum=0)),
+					  	Or((tokens.VARIABLE,), (Empty(),)),)))
 def _(*matched_code):
 	matched_code = list(matched_code)
 	call_function = matched_code.pop(0)
@@ -90,6 +91,8 @@ def _(*matched_code):
 				next(it_matched_code)
 			except StopIteration:
 				break
+		else:
+			raise RuntimeError(opcode)
 
 	definition = Definition()
 	definition.append(opcodes.CALL_FUNCTION(dst=tokens.VARIABLE.get_temp(),
@@ -106,8 +109,8 @@ def _(_op1, var, _op2):
 
 
 @RULES.add(tokens.VARIABLE, tokens.OPERATOR('='), tokens.VARIABLE, tokens.OPERATOR('line_end'))
-def _(dst, _, source, line_end):
-	result = opcodes.SET_VARIABLE(dst=dst, source=source)
+def _(dst, _, src, line_end):
+	result = opcodes.SET_VARIABLE(dst=dst, src=src)
 	return result, line_end
 
 

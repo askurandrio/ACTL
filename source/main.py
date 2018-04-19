@@ -20,21 +20,20 @@ def repl(project):
 		sys.stdout.flush()
 		uinput = ''
 		try:
+			project['is_mathcing',] = False
 			while True:
-				try:
-					line = input('')
-				except EOFError:
-					raise
-				else:
-					uinput += line
-					if line and (line[0] == ' '):
-						print('... ')
-						continue
-				finally:
-					project['uinput',] = uinput
-					project['build',]()
+				line = input('')
+				uinput += line
+				if line and ((line[-1] == ':') or (line[0] == ' ')):
+					print('... ', end='')
+					continue
+				break
+			project['uinput',] = uinput
+			project['build',]()
 			project['run',]()
 		except EOFError:
+			project['uinput',] = uinput
+			project['build',]()
 			project['run',]()
 			break
 		except Exception: #pylint: disable=W0703

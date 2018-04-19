@@ -28,8 +28,7 @@ run:
 
     LinkerLayer = __import__('actl').project.LinkerLayer
     llayer = LinkerLayer(this['parser',],
-                         this['sexecutor',],
-                         this['translator',])
+                         this['sexecutor',])
     llayer.link()
 
 
