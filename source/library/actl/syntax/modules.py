@@ -8,7 +8,7 @@ from .Template import Template, ResultMatch
 
 
 class Empty(Template):
-	def match(self, code, buff):
+	def match(self, scope, buff):
 		if buff:
 			return ResultMatch(None, False)
 		return ResultMatch(0)
@@ -22,7 +22,7 @@ class OneOpcode(Template):
 		self.__template = template
 		assert opcodes.AnyOpCode == self.__template, f'{opcodes.AnyOpCode} != {self.__template}'
 
-	def match(self, code, buff):
+	def match(self, scope, buff):
 		if buff and (self.__template == buff[0]):
 			return ResultMatch(1)
 		return ResultMatch(None, False)
@@ -38,9 +38,9 @@ class Or(Template):
 	def __init__(self, *templates):
 		self.__rules = [Template(*template) for template in templates]
 
-	def match(self, code, buff):
+	def match(self, scope, buff):
 		for rule in self.__rules:
-			result = rule.match(code, buff)
+			result = rule.match(scope, buff)
 			if result:
 				return result
 		return ResultMatch(None, False)
@@ -59,8 +59,8 @@ class Maybe(Template):
 	def __init__(self, *template):
 		super().__init__(*template)
 
-	def match(self, code, buff):
-		result = super().match(code, buff)
+	def match(self, scope, buff):
+		result = super().match(scope, buff)
 		if result:
 			return result
 		return ResultMatch(0, True)
@@ -71,16 +71,16 @@ class Many(Template):
 		self.__minimum = minimum
 		super().__init__(*template)
 
-	def match(self, code, buff):
+	def match(self, scope, buff):
 		result = ResultMatch(0, False)
 		for _ in range(self.__minimum):
-			result_match = super().match(code, buff[result.idx_end:])
+			result_match = super().match(scope, buff[result.idx_end:])
 			if result_match:
 				result += result_match
 			else:
 				return ResultMatch(None, False)
 		while True:
-			result_match = super().match(code, buff[result.idx_end:])
+			result_match = super().match(scope, buff[result.idx_end:])
 			if result_match:
 				result += result_match
 			else:
@@ -97,8 +97,8 @@ class Range(Template):
 		self.__subtemplate = subtemplate
 		super().__init__(*open_template)
 
-	def match(self, code, buff):
-		result_open = self.__open_template.match(code, buff)
+	def match(self, scope, buff):
+		result_open = self.__open_template.match(scope, buff)
 		if not result_open:
 			return ResultMatch(None, False)
 		close_template = Template(*self.__function(*buff[:result_open.idx_end]))
@@ -106,12 +106,12 @@ class Range(Template):
 		for idx in itertools.count():
 			if not buff[idx:]:
 				break
-			subresult_open = self.__open_template.match(code, buff[idx:])
+			subresult_open = self.__open_template.match(scope, buff[idx:])
 			if subresult_open:
 				count += 1
 				idx += subresult_open.idx_end
 			else:
-				result_close = close_template.match(code, buff[idx:])
+				result_close = close_template.match(scope, buff[idx:])
 				if result_close:
 					count -= 1
 					idx += result_close.idx_end
@@ -123,7 +123,7 @@ class Range(Template):
 			return ResultMatch(idx, False)
 		if self.__subtemplate is not None:
 			subbuff = buff[result_open.idx_end:idx-result_close.idx_end]
-			result_sub = self.__subtemplate.match(code, subbuff)
+			result_sub = self.__subtemplate.match(scope, subbuff)
 			if not result_sub:
 				return result_sub.convert_to_false()
 		return ResultMatch(idx, True)
@@ -136,8 +136,8 @@ class Not(Template):
 	def __init__(self, *template):
 		super().__init__(*template)
 
-	def match(self, code, buff):
-		result = super().match(code, buff)
+	def match(self, scope, buff):
+		result = super().match(scope, buff)
 		if result:
 			return ResultMatch(None, False)
 		return ResultMatch(0, True)
@@ -148,14 +148,14 @@ class Value(Template):
 		self.__values = values
 		super().__init__(*(tokens.VARIABLE for _ in self.__values))
 
-	def match(self, code, buff):
+	def match(self, scope, buff):
 		result = ResultMatch(0, False)
 
-		if not super().match(code, buff):
+		if not super().match(scope, buff):
 			return result
 
 		for idx, value in enumerate(self.__values):
-			if code.scope.get(buff[idx]) != value:
+			if scope.get(buff[idx]) != value:
 				return ResultMatch(result.idx_end, False)
 			result += ResultMatch(1, True)
 		return result
@@ -168,8 +168,8 @@ class Stub(Template):
 	def __init__(self, function):
 		self.__function = function
 
-	def match(self, code, buff):
-		self.__function(buff)
+	def match(self, scope, buff):
+		self.__function(scope, buff)
 		return ResultMatch(0, True)
 
 	def __repr__(self):

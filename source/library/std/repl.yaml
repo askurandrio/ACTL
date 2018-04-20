@@ -7,15 +7,19 @@ translator:
         pget: "__import__('sys').stdout"
 
 
-make_code:
+get_scope:
   def pfunction: |
-    Code = __import__('actl').code.Code
-    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['scope',]())
+    try:
+      return this['__scope',]
+    except KeyError:
+      this['__scope',] = this['scope',]()
+    return this['get_scope',]()
 
 
 build:
   def pfunction: |
-    this['make_code',]()
+    Code = __import__('actl').code.Code
+    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['get_scope',]())
 
     LinkerLayer = __import__('actl').project.LinkerLayer
     llayer = LinkerLayer(this['parser',])
@@ -24,7 +28,8 @@ build:
 
 run:
   def pfunction: |
-    this['make_code',]()
+    Code = __import__('actl').code.Code
+    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['get_scope',]())
 
     LinkerLayer = __import__('actl').project.LinkerLayer
     llayer = LinkerLayer(this['parser',],

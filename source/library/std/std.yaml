@@ -24,8 +24,8 @@ parser:
   pfunction:
     function: "__import__('actl').code.Parser"
     kwargs:
-      code:
-        pget: "this['code',]"
+      buff:
+        pget: "this['tokenizer',].tokenize()"
       rules:
         pget: "this['rules',]"
 
@@ -48,12 +48,14 @@ translator:
 
 build:
   def pfunction: |
+    this['scope',] = this['scope',]()
+
     Code = __import__('actl').code.Code
-    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['scope',]())
+
+    this['code',] = Code(buff=list(this['parser',].parse()), scope=this['scope',])
 
     LinkerLayer = __import__('actl').project.LinkerLayer
-    llayer = LinkerLayer(this['parser',],
-                         this['translator',])
+    llayer = LinkerLayer(this['translator',])
     llayer.link()
 
 

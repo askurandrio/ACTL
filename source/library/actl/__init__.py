@@ -2,6 +2,7 @@
 import sys
 import logging
 
+from .Buffer import Buffer
 from .code import *
 from .tokenizer import *
 from .project.Project import Project

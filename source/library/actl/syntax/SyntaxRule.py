@@ -3,33 +3,32 @@ from .Template import Template
 
 
 class SyntaxRule(Template):
-	def __init__(self, template, func, in_context=False):
+	def __init__(self, template, name, func, in_context=False):
+		self.name = name
 		self.__func = func
 		self.in_context = in_context
 		super().__init__(*template)
 
-	def __prepare_arguments(self, code, idx_start, idx_end):
-		if hasattr(self.__func, 'args'):
-			args = []
-			for key in self.__func.args:
-				if key == 'code':
-					args.append(code)
-				elif key == 'idx_start':
-					args.append(idx_start)
-				elif key == 'idx_end':
-					args.append(idx_end)
-				elif key == 'matched_code':
-					args.append(list(code[idx_start:idx_start+idx_end]))
-				else:
-					raise RuntimeError(f'This key not found: {key}')
-		elif self.in_context:
-			args = code, idx_start, idx_end
-		else:
-			args = code[idx_start:idx_start+idx_end]
-		return args
+	def __prepare_arguments(self, args, scope, buff):
+		for key in args:
+			if key == 'scope':
+				yield scope
+			elif key == 'rule':
+				yield self
+			elif key == 'buff':
+				yield buff
+			else:
+				raise RuntimeError(f'This key not found: {key}')
 
-	def __call__(self, code, idx_start, idx_end):
-		args = self.__prepare_arguments(code, idx_start, idx_end)
+	def __call__(self, scope, buff):
+		if hasattr(self.__func, 'args'):
+			args = self.__func.args
+		elif self.in_context:
+			args = ('scope', 'buff')
+		else:
+			args = ('buff',)
+
+		args = self.__prepare_arguments(args, scope, buff)
 		return self.__func(*args)
 
 	def __repr__(self):
@@ -40,11 +39,11 @@ class SyntaxRules:
 	def __init__(self):
 		self.rules = []
 
-	def add(self, *template, in_context=False, args=None):
+	def add(self, *template, name=None, in_context=False, args=None):
 		def decorator(func):
 			if args is not None:
 				setattr(func, 'args', args)
-			self.rules.append(SyntaxRule(template, func, in_context))
+			self.rules.append(SyntaxRule(template, name, func, in_context))
 			return func
 		return decorator
 

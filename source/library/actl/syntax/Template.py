@@ -3,12 +3,12 @@ class Template:
 	def __init__(self, *template):
 		self.__template = [self.create(tmpl) for tmpl in template]
 
-	def match(self, code, buff):
+	def match(self, scope, buff):
 		result = ResultMatch(0, False)
 		template = iter(self.__template)
 
 		for tmpl in template:
-			result_rule = tmpl.match(code, buff[result.idx_end:])
+			result_rule = tmpl.match(scope, buff[result.idx_end:])
 			if result_rule:
 				result += result_rule
 			else:
