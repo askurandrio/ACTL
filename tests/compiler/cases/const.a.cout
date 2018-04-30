@@ -2,9 +2,8 @@ Code:
    Definition:
       __IV11 = "string"
    s = __IV11
+   line_end
    Definition:
       __IV12 = 1
    n = __IV12
-   Definition:
-      __IV13 = 1.0
-   nf = __IV13
+   line_end

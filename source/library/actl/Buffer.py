@@ -8,13 +8,13 @@ class Buffer:
 		self.__head = iter(head)
 		self.__cache = []
 
-	def proxy(self, idx_start):
-		return BufferProxy(idx_start, self)
+	def child(self, idx_start):
+		return BufferChild(idx_start, self)
 
 	def get(self, index, default=None):
 		try:
 			return self[index]
-		except KeyError:
+		except IndexError:
 			return default
 
 	def pop(self, index):
@@ -26,30 +26,17 @@ class Buffer:
 		return self.__cache.insert(index, elem)
 
 	def load(self, index):
-		index -= len(self.__cache)
-		if index >= 0:
+		if index is not None:
+			index -= len(self.__cache)
 			if index < 10:
 				index = 10
+		if (index is None) or (index >= 0):
 			self.__cache.extend(itertools.islice(self.__head, None, index, None))
 
 	def __getitem__(self, index):
 		if isinstance(index, slice):
-			if index.start is None:
-				index_start = None
-			else:
-				index_start = index.start - len(self.__cache)
-				if index_start < 0:
-					index_start = None
-			if index.stop is None:
-				index_stop = None
-			else:
-				index_stop = index.stop - len(self.__cache)
-				if index_stop < 0:
-					index_stop = None
-			it, self.__head = itertools.tee(self.__head, 2)
-			result = self.__cache[index]
-			result.extend(itertools.islice(it, index_start, index_stop, index.step))
-			return type(self)(result)
+			self.load(index.stop)
+			return type(self)(self.__cache[index])
 		self.load(index)
 		return self.__cache[index]
 
@@ -79,13 +66,22 @@ class Buffer:
 
 	def __repr__(self):
 		self.load(20)
-		return f'Buffer<{self.__cache[:20]}>'
+		return f'{type(self).__name__}<{self.__cache[:20]}>'
+
+	@classmethod
+	def of(cls, func):
+		def temp(*args, **kwargs):
+			return cls(iter(func(*args, **kwargs)))
+		return temp
 
 
-class BufferProxy:
+class BufferChild:
 	def __init__(self, idx_start, parent):
 		self.__idx_start = idx_start
 		self.__parent = parent
+
+	def shift(self, idx):
+		self.__idx_start += idx
 
 	def get(self, index):
 		return self.__parent.get(self.calculate_index(index))
@@ -98,9 +94,10 @@ class BufferProxy:
 
 	def calculate_index(self, index):
 		if isinstance(index, slice):
-			index_start = None if index.start is None else self.__idx_start + index.start
-			index_stop = None if index.stop is None else self.__idx_start + index.stop
-			return slice(index_start, index.stop, index_stop)
+			index_start = self.__idx_start if index.start is None \
+													 else self.calculate_index(index.start)
+			index_stop = None if index.stop is None else self.calculate_index(index.stop)
+			return slice(index_start, index_stop, index.step)
 		return self.__idx_start + index
 
 	def __getitem__(self, index):
@@ -123,4 +120,4 @@ class BufferProxy:
 		return bool(self.__parent[self.calculate_index(1):])
 
 	def __repr__(self):
-		return f'BufferProxy<{self[:20]}>'
+		return f'{type(self).__name__}<{list(self[:20])}>'

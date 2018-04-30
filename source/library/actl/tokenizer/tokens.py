@@ -1,5 +1,6 @@
 
 import sys
+import copy
 
 import pyparsing
 
@@ -14,8 +15,9 @@ class INDENT(DynamicOpCode):
 	__hash__ = AnyOpCode.__hash__
 
 	def __eq__(self, other):
-		if super().__eq__(other):
-			return self.string == other.string
+		if not super().__eq__(other):
+			return False
+		return self.string == other.string
 
 
 class VARIABLE(DynamicOpCode):
@@ -24,7 +26,7 @@ class VARIABLE(DynamicOpCode):
 	__hash__ = AnyOpCode.__hash__
 
 	def __eq__(self, other):
-		if not isinstance(other, type(self)):
+		if not super().__eq__(other):
 			return False
 		return self.name == other.name #pylint: disable=E1101
 
@@ -47,7 +49,7 @@ class NUMBER(DynamicOpCode):
 	__hash__ = AnyOpCode.__hash__
 
 	def __eq__(self, other):
-		if not isinstance(other, type(self)):
+		if not super().__eq__(other):
 			return False
 		return self.number == other.number #pylint: disable=E1101
 
@@ -79,39 +81,34 @@ class STRING(AnyOpCode):
 
 
 class MetaOPERATOR(MetaAnyOpCode):
-	def __init__(self, *args, **kwargs):
-		self.__cache = {}
+	def __init__(cls, *args, **kwargs):
+		cls.__operators = {}
+		for operator in ':.+-!=*/@<>(){}[],;':
+			cls.__build(operator)
+		cls.__build('line_end')
+		cls.__build('code_open')
+		cls.__build('code_close')
 		super().__init__(*args, **kwargs)
 
-	def __call__(self, operator):
-		try:
-			return self.__cache[operator]
-		except KeyError:
-			self.__cache[operator] = super().__call__(operator)
-			return self(operator)
+	def __build(cls, operator):
+		cls.__operators[operator] = super().__call__(operator)
+
+	def __call__(cls, operator):
+		return cls.__operators[operator]
 
 
 class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
 	__hash__ = AnyOpCode.__hash__
-	reloadable = ':.+-!=*/<>@' 
-	brackets = {'(':')', '{':'}', '[':']', '<':'>'}
-	symbols = reloadable + ',;' + ''.join(f'{item[0]}{item[1]}' for item in brackets.items())
-	allowed = set(tuple(symbols) + (None, 'line_end', 'code_open', 'code_close'))
 
 	def __init__(self, operator):
-		if operator == '\n':
-			operator = 'line_end'
-		assert operator in self.allowed
 		self.operator = operator
 
-	@property
-	def mirror(self):
-		if self.operator in self.brackets.keys():
-			return type(self)(self.brackets[self.operator])
-		elif self.operator in self.brackets.values():
-			for key, value in self.brackets.values():
-				if value == self.operator:
-					return type(self)(key)
+	def get_mirror(self):
+		for open_bracket, close_bracket in self.get_brackets():
+			if self == open_bracket:
+				return close_bracket
+			if self == close_bracket:
+				return open_bracket
 		raise RuntimeError(f'Mirror not found: {self}')
 
 	def __eq__(self, item):
@@ -119,14 +116,34 @@ class OPERATOR(AnyOpCode, metaclass=MetaOPERATOR):
 
 	def __repr__(self):
 		return f'OPERATOR("{self.operator}")'
-	
+
+	@classmethod
+	def get_reloadable(cls):
+		for operator in ':.+-!=*/<>':
+			yield cls(operator)
+
+	@classmethod
+	def get_brackets(cls):
+		yield cls('<'), cls('>')
+		yield cls('['), cls(']')
+		yield cls('{'), cls('}')
+		yield cls('('), cls(')')
+
+	@classmethod
+	def get_toperators(cls):
+		yield from cls.get_reloadable()
+		for brackets in cls.get_brackets():
+			yield from brackets
+		yield cls(',')
+		yield cls(';')
+
 	@classmethod
 	def get_tokenizers(cls):
 		parser = pyparsing.LineEnd()
 		parser.setParseAction(lambda _: cls('line_end'))
 		yield parser
-		
-		for symbol in cls.symbols:
-			parser = pyparsing.Literal(symbol)
+
+		for operator in cls.get_toperators():
+			parser = pyparsing.Literal(operator.operator)
 			parser.setParseAction(lambda tokens: cls(tokens[0]))
 			yield parser

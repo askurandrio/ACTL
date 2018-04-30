@@ -17,7 +17,7 @@ class Function:
 		result += 'def ' + self.name.name
 		result += self.signature.typeb.operator
 		result += ', '.join(arg.name for arg in self.signature.args)
-		result += self.signature.typeb.mirror.operator
+		result += self.signature.typeb.get_mirror().operator
 		return result
 
 	def __repr__(self):
@@ -27,42 +27,35 @@ class Function:
 @actl.Project.this.add_syntax(actl.syntax.Value(Function),
 										actl.syntax.Maybe(actl.tokens.VARIABLE),
 										actl.syntax.Range((actl.tokens.OPERATOR('('),),
-															lambda op: (op.mirror,)),
-										args=('code', 'matched_code'))
-def _(code, matched_code):
-	matched_code = list(matched_code)
+																lambda op: (op.get_mirror(),)),
+										args=('buff',))
+def _(buff):
+	cfunction = buff.pop(0)
 
-	function = matched_code.pop(0)
-	assert Function == code.scope[function]
-
-	if actl.tokens.VARIABLE == matched_code[0]:
-		function_name = matched_code.pop(0)
+	if actl.tokens.VARIABLE == buff[0]:
+		function = buff.pop(0)
 	else:
-		function_name = actl.tokens.VARIABLE.get_temp()
+		function = actl.tokens.VARIABLE.get_temp()
 
-	function_typeb = matched_code[0]
-	assert actl.tokens.OPERATOR('(') == matched_code.pop(0)
-	assert actl.tokens.OPERATOR(')') == matched_code.pop(-1)
+	close_bracket_op = buff[0].get_mirror()
+	function_typeb = buff.pop(0).operator
 
 	function_args = []
-	for opcode in matched_code:
-		if actl.tokens.VARIABLE == opcode:
-			function_args.append(opcode)
-		elif actl.tokens.OPERATOR(',') == opcode:
-			pass
+	while True:
+		if actl.tokens.VARIABLE == buff[0]:
+			function_args.append(buff.pop(0))
+			if actl.tokens.OPERATOR(',') == buff[0]:
+				buff.pop(0)
+		elif close_bracket_op == buff[0]:
+			buff.pop(0)
+			break
 		else:
-			raise RuntimeError(opcode)
+			raise RuntimeError(buff[0])
 
-	definition = actl.code.Definition()
-	definition.append(actl.code.opcodes.BUILD_STRING(dst=actl.tokens.VARIABLE.get_temp(),
-																	 string='create'))
-	definition.append(actl.code.opcodes.CALL_OPERATOR(dst=actl.tokens.VARIABLE.get_temp(),
-																	  operator='.',
-																	  args=[function, definition[0].dst]))
-	definition.append(actl.code.opcodes.CALL_FUNCTION(dst=function_name,
-																	  function=definition[1].dst,
-																	  typeb='(',
-																	  args=[],
-																	  kwargs={'typeb': function_typeb,
-																				 'args': function_args}))
-	return definition, function_name
+	yield actl.Definition(actl.opcodes.CALL_FUNCTION(dst=function,
+																	 function=cfunction,
+																	 typeb='(',
+																	 args=[],
+																	 kwargs={'typeb': function_typeb,
+																				'args': function_args}))
+	yield function

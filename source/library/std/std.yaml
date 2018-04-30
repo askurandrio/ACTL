@@ -6,14 +6,13 @@ tokenizer:
         pget: "this['buff',]"
 
 
-scope:
+make_scope:
   def pfunction: |
     actl = __import__('actl')
     std = __import__('std')
-    scope = std.Scope()
-    scope.update({"stack":[], "codes":[], actl.tokens.VARIABLE("print"):'print'})
-    scope.update(__import__('std.abuiltins').abuiltins.abuiltins)
-    return scope
+    this['scope',] = std.Scope()
+    this['scope',].update({"stack":[], "codes":[], actl.tokens.VARIABLE("print"):'print'})
+    this['scope',].update(__import__('std.abuiltins').abuiltins.abuiltins)
 
 
 rules:
@@ -26,6 +25,8 @@ parser:
     kwargs:
       buff:
         pget: "this['tokenizer',].tokenize()"
+      scope:
+        pget: this['scope',]
       rules:
         pget: "this['rules',]"
 
@@ -48,11 +49,10 @@ translator:
 
 build:
   def pfunction: |
-    this['scope',] = this['scope',]()
+    this['make_scope',]()
 
     Code = __import__('actl').code.Code
-
-    this['code',] = Code(buff=list(this['parser',].parse()), scope=this['scope',])
+    this['code',] = Code(list(this['parser',].parse()))
 
     LinkerLayer = __import__('actl').project.LinkerLayer
     llayer = LinkerLayer(this['translator',])

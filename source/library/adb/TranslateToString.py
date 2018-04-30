@@ -57,8 +57,10 @@ class TranslateToString:
 			if args and opcode.kwargs:
 				args += ', '
 			args += ', '.join(f'{key}={value}' for key, value in opcode.kwargs.items())
-			close_brucket = tokens.OPERATOR(tokens.OPERATOR.brackets[opcode.typeb]).operator
+			close_brucket = tokens.OPERATOR(opcode.typeb).get_mirror().operator
 			return f'{opcode.dst.name} = {opcode.function.name}{opcode.typeb}{args}{close_brucket}'
+		elif tokens.OPERATOR('line_end') == opcode:
+			return 'line_end'
 		else:
 			return f'repr({opcode})'
 		raise RuntimeError(f'This opcode not found: {opcode}')

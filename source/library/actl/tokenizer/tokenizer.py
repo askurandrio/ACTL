@@ -1,5 +1,6 @@
 import pyparsing
 
+from ..Buffer import Buffer
 from .tokens import INDENT, VARIABLE, STRING, OPERATOR, NUMBER
 
 
@@ -11,7 +12,7 @@ class Tokenizer:
 		self.buff = str(buff)
 		self.rules = self.__get_rules()
 		self.indents = []
-		self.prev_code = OPERATOR(None)
+		self.prev_code = None
 
 	def __delete_indents(self, force=False):
 		if (self.prev_code != OPERATOR('line_end')) and (not force):
@@ -48,6 +49,7 @@ class Tokenizer:
 		if self.buff[:start]:
 			raise RuntimeError(f'This token not found: "{self.buff[:start]}"')
 
+	@Buffer.of
 	def tokenize(self):
 		yield OPERATOR('code_open')
 		yield from self.__delete_indents(force=True)

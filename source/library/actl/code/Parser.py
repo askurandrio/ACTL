@@ -1,13 +1,13 @@
 
+from ..Buffer import Buffer
 from ..tokenizer import tokens
+from ..syntax import Command
 from .Code import Code, Definition
 
 
 class Parser:
 	def __init__(self, buff, scope, rules):
-		from actl import Buffer
-
-		self.buff = Buffer(buff)
+		self.buff = buff
 		self.scope = scope
 		self.rules = rules
 
@@ -24,17 +24,16 @@ class Parser:
 			self.__apply_rule()
 		while self.__after_compile():
 			pass
-		yield from self.buff
+		return self.buff
 
 	def get_definition(self, idx):
 		while (idx > 0) and \
-				(tokens.OPERATOR('line_end') != self.buff.get(idx)) and \
-				(tokens.INDENT != self.buff.get(idx)):
+				(tokens.OPERATOR('line_end') != self.buff[idx]):
 			idx -= 1
-		if idx != 0:
+		if idx > 0:
 			idx += 1
-		if not isinstance(self.buff[idx], list):
-			self.buff.insert(idx, Code())
+		if Definition != self.buff.get(idx):
+			self.buff.insert(idx, Definition())
 		return self.buff[idx]
 
 	def __apply_rule(self):
@@ -42,30 +41,38 @@ class Parser:
 			for rule in self.rules:
 				result_match = rule.match(self.scope, self.buff[idx_start:])
 				if result_match:
-					result = rule(self.scope, self.buff.proxy(idx_start))
+					result = rule(self.scope, self.buff.child(idx_start))
 					if rule.in_context:
 						return True
 					self.__insert_result(idx_start, result)
 					return True
 
 	def __insert_result(self, idx_start, result):
+		src_idx_start = idx_start
 		definition = None
 		for opcode in result:
-			if isinstance(opcode, Definition):
+			if Definition == opcode:
 				if definition is None:
-					definition = self.get_definition(idx_start)
-					if not definition:
-						idx_start += 1
-				definition.append(opcode.elem)
+					definition = Definition()
+				definition.extend(opcode)
+			elif isinstance(opcode, Command):
+				self.__execute_command(opcode)
 			else:
 				self.buff.insert(idx_start, opcode)
 				idx_start += 1
+		if definition is not None:
+			self.get_definition(src_idx_start).extend(definition)
 
 	def __after_compile(self):
 		for idx, opcode in enumerate(self.buff):
-			if tokens.OPERATOR('line_end') == opcode:
-				del self.buff[idx]
-				return True
-			elif isinstance(opcode, Code):
-				type(self)(opcode, self.scope, self.rules).parse()
-				return True
+			if Code == opcode:
+				self.buff[idx] = self.__execute_command(Command('compile', opcode))
+
+	def __execute_command(self, command):
+		if command.command == 'compile':
+			parser = type(self)(Buffer(*command.args), self.scope, self.rules)
+			code = type(*command.args)()
+			code.extend(parser.parse())
+			return code
+		else:
+			raise RuntimeError(f'This command not found: {command}')

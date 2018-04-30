@@ -18,7 +18,7 @@ class SyntaxRule(Template):
 			elif key == 'buff':
 				yield buff
 			else:
-				raise RuntimeError(f'This key not found: {key}')
+				raise RuntimeError(f'This key not found: {key}, rule: {self}')
 
 	def __call__(self, scope, buff):
 		if hasattr(self.__func, 'args'):
@@ -52,3 +52,15 @@ class SyntaxRules:
 
 	def __repr__(self):
 		return f'SyntaxRules(rules={self.rules})'
+
+
+class Command:
+	def __init__(self, command, *args):
+		self.command = command
+		self.args = args
+
+	def __eq__(self, command):
+		return self.command == command.command
+
+	def __repr__(self):
+		return f'{type(self).__name__}("{self.command}", *{args})'

@@ -1,10 +1,10 @@
 Code:
    Definition:
-      __IV11 = "create"
-      __IV12 = operator(".")(def, __IV11)
-      f = __IV12(typeb=OPERATOR("("), args=[VARIABLE(name=a), VARIABLE(name=b)])
+      f = def(typeb=(, args=[VARIABLE(name=a), VARIABLE(name=b)])
    SAVE_CODE(f)
    Code:
       Definition:
-         __IV13 = operator("+")(a, b)
-      return __IV13
+         __IV11 = operator("+")(a, b)
+      return __IV11
+      line_end
+   line_end

@@ -2,9 +2,12 @@ Code:
    Definition:
       __IV11 = f()
    __IV11
+   line_end
    Definition:
       __IV12 = f(a)
    __IV12
+   line_end
    Definition:
       __IV13 = f(a, b)
    __IV13
+   line_end
