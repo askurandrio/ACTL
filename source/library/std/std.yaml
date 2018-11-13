@@ -1,64 +1,34 @@
-- tokenizer:
-    pfunction:
-      function: "__import__('actl').tokenizer.Tokenizer"
-      kwargs:
-        buff:
-          pget: "this['buff',]"
+- pypropl tokenizer:
+    pydef get(): |
+      import actl
+      raise actl
+      return actl.tokenizer.Tokenizer()
 
 
-- make_scope:
-    def pfunction: |
-      actl = __import__('actl')
-      std = __import__('std')
-      this['scope',] = std.Scope()
-      this['scope',].update({"stack":[], "codes":[], actl.tokens.VARIABLE("print"):'print'})
-      this['scope',].update(__import__('std.abuiltins').abuiltins.abuiltins)
+- pypropl scope:
+    pydef get(): |
+      import std
+      import actl
+      scope = std.Scope()
+      scope.update({'stack':[], 'codes':[], actl.tokens.VARIABLE('print'):'print'})
+      scope.update(__import__('std.abuiltins').abuiltins.abuiltins)
+      return scope
 
 
-- rules:
-    pget: "__import__('std').RULES"
+- pypropl rules:
+    pydef get(): |
+      import std
+      return std.RULES
+
+- pypropl parser:
+    pydef get(): |
+      import actl
+      return actl.code.Parser(
+        buff=this[('tokenizer',)].tokenize(),
+        scope=this[('scope',)],
+        rules=this[('rules',)]
+      )
 
 
-- parser:
-    pfunction:
-      function: "__import__('actl').code.Parser"
-      kwargs:
-        buff:
-          pget: "this['tokenizer',].tokenize()"
-        scope:
-          pget: this['scope',]
-        rules:
-          pget: "this['rules',]"
-
-
-- sexecutor:
-    pfunction:
-      function: "__import__('std').SExecutor"
-      kwargs:
-        code:
-          pget: "this['code',]"
-
-
-- translator:
-    pfunction:
-      function: "__import__('adb').TranslateToString"
-      kwargs:
-        code:
-          pget: "this['code',]"
-
-
-- pydef build:
-
-    def pfunction: |
-      this['make_scope',]()
-
-      Code = __import__('actl').code.Code
-      this['code',] = Code(list(this['parser',].parse()))
-
-      LinkerLayer = __import__('actl').project.LinkerLayer
-      llayer = LinkerLayer(this['translator',])
-      llayer.link()
-
-
-- mainf:
-    pfset: "lambda path: this.__setitem__(('buff',), open(path).read())"
+- pydef build(): |
+    print(this[('parser',)])

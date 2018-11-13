@@ -39,14 +39,4 @@
 - pydef rbuild(): |
     import actl
     this[('tokenizer',)] = actl.tokenizer.Tokenizer(this[('uinput',)])
-    this[('std',)][('build',)]()
-
-
-- get_scope:
-    def pfunction: |
-      try:
-        return this['__scope',]
-      except KeyError:
-        std = __import__('std')
-        this['__scope',] = std.Scope()
-      return this['get_scope',]()
+    print(this[('parser',)].parse())

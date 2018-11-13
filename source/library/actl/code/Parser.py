@@ -71,6 +71,7 @@ class Parser:
 	def __execute_command(self, command):
 		if command.command == 'compile':
 			parser = type(self)(Buffer(*command.args), self.scope, self.rules)
+			parser = type(self)(Buffer(*command.args), self.scope, self.rules)
 			code = type(*command.args)()
 			code.extend(parser.parse())
 			return code

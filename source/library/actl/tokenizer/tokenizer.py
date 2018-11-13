@@ -51,13 +51,12 @@ class Tokenizer:
 
 	@Buffer.of
 	def tokenize(self):
-		yield OPERATOR('code_open')
 		yield from self.__delete_indents(force=True)
 		while self.buff:
 			yield from self.__find_opcode()
 			yield from self.__delete_indents()
+
 		yield OPERATOR('line_end')
-		yield OPERATOR('code_close')
 
 	def __get_rules(self):
 		rules = []
