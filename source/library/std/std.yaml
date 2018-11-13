@@ -1,63 +1,64 @@
-tokenizer:
-  pfunction:
-    function: "__import__('actl').tokenizer.Tokenizer"
-    kwargs:
-      buff:
-        pget: "this['buff',]"
+- tokenizer:
+    pfunction:
+      function: "__import__('actl').tokenizer.Tokenizer"
+      kwargs:
+        buff:
+          pget: "this['buff',]"
 
 
-make_scope:
-  def pfunction: |
-    actl = __import__('actl')
-    std = __import__('std')
-    this['scope',] = std.Scope()
-    this['scope',].update({"stack":[], "codes":[], actl.tokens.VARIABLE("print"):'print'})
-    this['scope',].update(__import__('std.abuiltins').abuiltins.abuiltins)
+- make_scope:
+    def pfunction: |
+      actl = __import__('actl')
+      std = __import__('std')
+      this['scope',] = std.Scope()
+      this['scope',].update({"stack":[], "codes":[], actl.tokens.VARIABLE("print"):'print'})
+      this['scope',].update(__import__('std.abuiltins').abuiltins.abuiltins)
 
 
-rules:
-  pget: "__import__('std').RULES"
+- rules:
+    pget: "__import__('std').RULES"
 
 
-parser:
-  pfunction:
-    function: "__import__('actl').code.Parser"
-    kwargs:
-      buff:
-        pget: "this['tokenizer',].tokenize()"
-      scope:
-        pget: this['scope',]
-      rules:
-        pget: "this['rules',]"
+- parser:
+    pfunction:
+      function: "__import__('actl').code.Parser"
+      kwargs:
+        buff:
+          pget: "this['tokenizer',].tokenize()"
+        scope:
+          pget: this['scope',]
+        rules:
+          pget: "this['rules',]"
 
 
-sexecutor:
-  pfunction:
-    function: "__import__('std').SExecutor"
-    kwargs:
-      code:
-        pget: "this['code',]"
+- sexecutor:
+    pfunction:
+      function: "__import__('std').SExecutor"
+      kwargs:
+        code:
+          pget: "this['code',]"
 
 
-translator:
-  pfunction:
-    function: "__import__('adb').TranslateToString"
-    kwargs:
-      code:
-        pget: "this['code',]"
+- translator:
+    pfunction:
+      function: "__import__('adb').TranslateToString"
+      kwargs:
+        code:
+          pget: "this['code',]"
 
 
-build:
-  def pfunction: |
-    this['make_scope',]()
+- pydef build:
 
-    Code = __import__('actl').code.Code
-    this['code',] = Code(list(this['parser',].parse()))
+    def pfunction: |
+      this['make_scope',]()
 
-    LinkerLayer = __import__('actl').project.LinkerLayer
-    llayer = LinkerLayer(this['translator',])
-    llayer.link()
+      Code = __import__('actl').code.Code
+      this['code',] = Code(list(this['parser',].parse()))
+
+      LinkerLayer = __import__('actl').project.LinkerLayer
+      llayer = LinkerLayer(this['translator',])
+      llayer.link()
 
 
-mainf:
-  pfset: "lambda path: this.__setitem__(('buff',), open(path).read())"
+- mainf:
+    pfset: "lambda path: this.__setitem__(('buff',), open(path).read())"

@@ -2,7 +2,6 @@
 import os
 import sys
 import argparse
-import traceback
 
 try:
 	import actl
@@ -13,49 +12,17 @@ except ImportError:
 	import actl
 
 
-
-def repl(project):
-	while True:
-		print('>>> ', end='')
-		sys.stdout.flush()
-		uinput = ''
-		try:
-			project['is_mathcing',] = False
-			while True:
-				line = input('')
-				uinput += line
-				if line and ((line[-1] == ':') or (line[0] == ' ')):
-					print('... ', end='')
-					continue
-				break
-			project['uinput',] = uinput
-			project['build',]()
-			project['run',]()
-		except EOFError:
-			project['uinput',] = uinput
-			project['build',]()
-			project['run',]()
-			break
-		except Exception: #pylint: disable=W0703
-			traceback.print_exc()
-			break
-
-
 def main(args):
 	if args.projectf and args.mainf:
 		project = actl.Project(projectf=args.projectf)
 		project['mainf',] = args.mainf
 	elif args.projectf:
-		project = actl.Project(data={'from':'std'})
+		project = actl.Project(source=[{'import': 'std'}])
 		project['mainf',] = args.projectf
 	else:
-		project = actl.Project(data={'from':'repl'})
+		project = actl.Project(source=[{'import': 'repl'}])
 		args.repl = True
-
-	if args.repl:
-		repl(project)
-	else:		
-		project['build',]()
+	project[('build',)]()
 
 
 def build_argparser():

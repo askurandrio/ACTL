@@ -1,46 +1,52 @@
-from: std
-
-translator:
-  pfunction:
-    kwargs:
-      out_file:
-        pget: "__import__('sys').stdout"
+- import: std
 
 
-get_scope:
-  def pfunction: |
-    try:
-      return this['__scope',]
-    except KeyError:
-      this['__scope',] = this['scope',]()
-    return this['get_scope',]()
+- pydef build(): |
+    import sys
+    import traceback
+    while True:
+      print('>>> ', end='')
+      sys.stdout.flush()
+      try:
+        this[('reset_user_input',)]()
+        this[('add_user_input',)](input())
+        while this[('is_parsing',)]():
+          print('... ', end='')
+          this[('add_user_input',)](input())
+      except EOFError:
+        this[('rbuild',)]()
+        this[('run',)]()
+        break
+      except Exception: #pylint: disable=W0703
+        traceback.print_exc()
+        break
+      this[('rbuild',)]()
+      this[('run',)]()
 
 
-build:
-  def pfunction: |
-    Code = __import__('actl').code.Code
-    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['get_scope',]())
-
-    LinkerLayer = __import__('actl').project.LinkerLayer
-    llayer = LinkerLayer(this['parser',])
-    llayer.link()
+- pydef reset_user_input(): |
+    this[('uinput',)] = ''
 
 
-run:
-  def pfunction: |
-    Code = __import__('actl').code.Code
-    this['code',] = Code(buff=list(this['tokenizer',].tokenize()), scope=this['get_scope',]())
-
-    LinkerLayer = __import__('actl').project.LinkerLayer
-    llayer = LinkerLayer(this['parser',],
-                         this['sexecutor',])
-    llayer.link()
+- pydef add_user_input(inp): |
+    this[('uinput',)] += inp
 
 
-uinput:
-  pfset: "lambda string: this.__setitem__(('buff',), string)"
+- pydef is_parsing(): |
+    return False
 
 
-out_file:
-  pget:
-    __import__('sys').stdout
+- pydef rbuild(): |
+    import actl
+    this[('tokenizer',)] = actl.tokenizer.Tokenizer(this[('uinput',)])
+    this[('std',)][('build',)]()
+
+
+- get_scope:
+    def pfunction: |
+      try:
+        return this['__scope',]
+      except KeyError:
+        std = __import__('std')
+        this['__scope',] = std.Scope()
+      return this['get_scope',]()
