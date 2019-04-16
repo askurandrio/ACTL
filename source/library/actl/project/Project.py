@@ -9,126 +9,67 @@ import yaml
 
 LOGGER = logging.getLogger('actl')
 DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
-def add_orderd_dict_yaml():
-
-	dict_representer = lambda dumper, data: dumper.represent_dict(data.iteritems())
-	dict_constructor = lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))
-
-	yaml.add_representer(collections.OrderedDict, dict_representer)
-	yaml.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, dict_constructor)
-add_orderd_dict_yaml()
-
-
-def recursice_update(base, update_dict):
-	for key, value in update_dict.items():
-		if isinstance(value, collections.Mapping):
-			base[key] = base.get(key, {})
-			recursice_update(base[key], value)
-		else:
-			base[key] = value
+yaml.add_representer(
+	collections.OrderedDict, lambda dumper, data: dumper.represent_dict(data.iteritems())
+)
+yaml.add_constructor(
+	yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+	lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))
+)
 
 
 class Project:
-	this = None
-	__data = collections.OrderedDict()
-	__data['handlers'] = {}
-	add_syntax = property(lambda self: self[('rules',)].add)
+	_DEFAULT_HANDLERS = {}
 
-	def __init__(self, projectf=None, source=None, data=None):
-		if type(self).this is None:
-			type(self).this = self
-		self.__data = copy.deepcopy(self.__data)
-		self.source = []
-		if data is not None:
-			self.update(data)
-		if projectf is not None:
-			self.source.extend(yaml.load(open(projectf)))
-		if source is not None:
-			self.source.extend(source)
-		self.__init()
+	def __init__(self, projectf=None, source=None):
+		if projectf:
+			projectf = os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
+			assert source is None
+			source = yaml.load(open(projectf))
+		self.data = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
+		self._init(source)
 
-	def update(self, data):
-		self.__data.update(data)
+	def _init(self, source):
+		while source:
+			cmd = list(source.pop(0).items())
+			key, arg = cmd.pop(0)
+			assert not cmd
+			self['handlers'][key](self, key, arg)
 
-	def __init(self):
-		while self.source:
-			elem = list(self.source.pop(0).items())
-			assert len(elem) == 1, elem
-			key, value = elem[0]
-			handlers = self[('handlers',)]
-			if ' ' in key:
-				key = key.split(' ')
-				classes, key = key[:-1], key[-1]
-				for cls in classes:
-					handlers[cls](self, key, value)
-			else:
-				if key in handlers:
-					handlers[key](self, key, value)
-				else:
-					self[(key,)] = value
-
-	def __iter__(self):
-		return iter(self.__data.items())
-
-	def __getitem__(self, keys, data=None):
-		value = data or self.__data
+	def __getitem__(self, *keys):
+		value = self.data
 		for key in keys:
 			value = value[key]
-		if isinstance(value, VirtualProjectItem) and hasattr(value, 'get'):
-			value = value.get()
 		return value
 
-	def __setitem__(self, keys, value, base=None):
-		base = base or self[keys[:-1]]
-		key = keys[-1]
-		if (key in base) and isinstance(base[key], VirtualProjectItem) and hasattr(value, 'set'):
-			base[key].set(value)
-		else:
-			base[key] = value
+	def __setitem__(self, *keys, value):
+		base = self.data
+		for key in keys[:-1]:
+			base = base[key]
+		base[keys[-1]] = value
 
 	def __delitem__(self, keys):
-		base = self[keys[:-1]]
-		key = keys[-1]
-		if isinstance(base[key], VirtualProjectItem) and hasattr(base[key], 'delete'):
-			base[key].delete()
-		else:
-			del base[key]
+		base = self.data
+		for key in keys[:-1]:
+			base = base[key]
+		del base[keys[-1]]
 
 	@classmethod
-	def add_handler(cls, key):
-		def decorator(value):
-			cls.__data['handlers'][key] = value
-			return value
+	def add_default_handler(cls, name):
+		def decorator(func):
+			cls._DEFAULT_HANDLERS[name] = func
+			return func
 		return decorator
 
 	def __repr__(self):
-		return f'{type(self).__name__}({self.__data})'
+		return f'{type(self).__name__}(source={self.data})'
 
 
-class SubProject(Project):
-	def __init__(self, project, source):
-		self.__data = {}
-		super().__init__(data=project, source=source)
+@Project.add_default_handler('include')
+def _(project, _, arg):
+	sub_project = type(project)(projectf=arg)
+	_recursive_update(sub_project.data, sub_project.data)
 
-	def update(self, data):
-		self.__data.update(data)
-
-	def __iter__(self):
-		return iter(self.__data.items())
-
-	def __getitem__(self, keys):
-		try:
-			return super().__getitem__(keys)
-		except KeyError:
-			return super().__getitem__(keys, data=self.__data)
-
-	def __setitem__(self, keys, value):
-		super().__setitem__(keys, value, base=self[keys[:-1]])
-
-	def __repr__(self):
-		return f'{type(self).__name__}(project={super().__repr__()}, data={self.__data})'
 
 class VirtualProjectItem:
 	def __init__(self, project, key, value):
@@ -141,7 +82,7 @@ class VirtualProjectItem:
 		return f'{type(self).__name__}(key={self._key}, value={self._value})'
 
 
-@Project.add_handler('import')
+#@Project.add_handler('import')
 def _(project, _, project_name):
 	child_project = type(project)(
 		projectf=os.path.join(DIR_LIBRARY, 'std', f'{project_name}.yaml')
@@ -150,7 +91,7 @@ def _(project, _, project_name):
 	project[(project_name,)] = child_project
 
 
-@Project.add_handler('pydef')
+#@Project.add_handler('pydef')
 def _(project, key, body):
 	body = body.replace('\n', '\n  ')
 	body = f'def {key}:\n  {body}'
@@ -165,7 +106,7 @@ def _(project, key, body):
 	project[(key,)] = lc_scope[key]
 
 
-@Project.add_handler('pypropl')
+#@Project.add_handler('pypropl')
 class ProjectItemPyPropLazy(VirtualProjectItem):
 	def __init__(self, project, key, value):
 		super().__init__(project, key, value)
@@ -179,6 +120,15 @@ class ProjectItemPyPropLazy(VirtualProjectItem):
 			)
 			self.__self = subproject[('get',)]()
 			return self.get()
+
+
+def _recursive_update(base, new):
+	for key, value in new.items():
+		if isinstance(value, dict):
+			base[key] = base.get(key, {})
+			_recursive_update(base[key], value)
+		else:
+			base[key] = value
 
 
 class LinkerLayer:
