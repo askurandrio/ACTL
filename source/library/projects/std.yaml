@@ -1,0 +1,34 @@
+- pypropl tokenizer:
+    pydef get(): |
+      import actl
+      raise actl
+      return actl.tokenizer.Tokenizer()
+
+
+- pypropl scope:
+    pydef get(): |
+      import std
+      import actl
+      scope = std.Scope()
+      scope.update({'stack':[], 'codes':[], actl.tokens.VARIABLE('print'):'print'})
+      scope.update(__import__('std.abuiltins').abuiltins.abuiltins)
+      return scope
+
+
+- pypropl rules:
+    pydef get(): |
+      import std
+      return std.RULES
+
+- pypropl parser:
+    pydef get(): |
+      import actl
+      return actl.code.Parser(
+        buff=this[('tokenizer',)].tokenize(),
+        scope=this[('scope',)],
+        rules=this[('rules',)]
+      )
+
+
+- pydef build(): |
+    print(this[('parser',)])
