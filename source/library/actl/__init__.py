@@ -3,9 +3,8 @@ import sys
 import logging
 
 from .Buffer import Buffer
-from .code import *
-from .tokenizer import *
-from .project.Project import Project
+from .Parser import parser
+from .Project import Project
 
 
 def __make_loggers():

@@ -1,8 +1,48 @@
-- pypropl tokenizer:
-    pydef get(): |
+- py-code: |
+   def py_func(project, data):
+      data = type(project)(source=data).data
+      name = data['name']
+      args = ', '.join(data.get('args', ()))
+      code = data['code'].replace('\n', '\n  ')
+      code = (
+         f"def {name}({args}):\n"
+         f"  {code}"
+      )
+      lc_scope = {}
+      exec(code, globals(), lc_scope)
+      project[name] = lc_scope[name]
+
+   def py_key(project, data):
+      data = type(project)(source=data).data
+      name = data['name']
+      code = data['code'].replace('\n', '\n  ')
+      code = (
+        f"def {name}():\n"
+        f"  {code}"
+      )
+      lc_scope = {}
+      exec(code, globals(), lc_scope)
+      project[name] = lc_scope[name]()
+   project['handlers', 'py-key'] = py_key
+   project['handlers', 'py-func'] = py_func
+
+
+- py-func:
+   name: build
+   code: |
       import actl
-      raise actl
-      return actl.tokenizer.Tokenizer()
+
+      uinput = this['uinput']
+      rules = this['rules']
+      parser = actl.parser(uinput, rules)
+      print(list(parser.extract()))
+
+
+- py-key:
+   name: rules
+   code: |
+      from std import rules
+      return rules
 
 
 - pypropl scope:

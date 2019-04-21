@@ -5,8 +5,14 @@ import itertools
 
 class Buffer:
 	def __init__(self, head=iter('')):
-		self.__head = iter(head)
-		self.__cache = []
+		self._buff = []
+		self._head = iter(head)
+	
+	def extract(self):
+		while True:
+			if self._buff:
+				yield self._buff.pop(0)
+			yield next(self._head)
 
 	def child(self, idx_start):
 		return BufferChild(idx_start, self)
@@ -25,13 +31,11 @@ class Buffer:
 		self.load(index)
 		return self.__cache.insert(index, elem)
 
-	def load(self, index):
-		if index is not None:
-			index -= len(self.__cache)
-			if index < 10:
-				index = 10
-		if (index is None) or (index >= 0):
-			self.__cache.extend(itertools.islice(self.__head, None, index, None))
+	def _load(self, quantity):
+		if quantity is not None:
+			quantity -= len(self._buff)
+			if quantity > 0:
+				self._buff.extend(itertools.islice(self._head, None, quantity, None))
 
 	def __getitem__(self, index):
 		if isinstance(index, slice):
@@ -61,18 +65,18 @@ class Buffer:
 				return ex
 
 	def __bool__(self):
-		self.load(1)
-		return bool(self.__cache)
+		self._load(1)
+		return bool(self._buff)
 
 	def __repr__(self):
-		self.load(20)
+		l = self.copy(20)[:10]
 		return f'{type(self).__name__}<{self.__cache[:20]}>'
 
 	@classmethod
 	def of(cls, func):
-		def temp(*args, **kwargs):
-			return cls(iter(func(*args, **kwargs)))
-		return temp
+		def wrapper(*args, **kwargs):
+			return cls(func(*args, **kwargs))
+		return wrapper
 
 
 class BufferChild:
