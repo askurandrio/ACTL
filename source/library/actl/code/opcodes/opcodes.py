@@ -1,5 +1,5 @@
 
-from .AnyOpCode import AnyOpCode, DynamicOpCode
+from .AnyOpCode import DynamicOpCode
 
 
 class Making(DynamicOpCode):
@@ -11,6 +11,7 @@ class Making(DynamicOpCode):
 		return self.opcode == other.opcode #pylint: disable=E1101
 
 
+VARIABLE = DynamicOpCode.create('VARIABLE', 'name')
 PASS = DynamicOpCode.create('PASS')
 JUMP = DynamicOpCode.create('JUMP', 'label')
 RETURN = DynamicOpCode.create('RETURN', 'var')

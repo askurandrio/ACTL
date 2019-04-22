@@ -1,3 +1,3 @@
 
 from .SyntaxRules import SyntaxRules
-from .modules import *
+from .Template import *

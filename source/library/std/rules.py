@@ -1,10 +1,27 @@
 
-from actl.syntax import SyntaxRules, Rule
+from actl.syntax import SyntaxRules, Template, CustomRule, Many, Or
+from actl.code.opcodes import VARIABLE
 
 
 RULES = SyntaxRules()
 
-@RULES.add()
+
+_is_acceptable_name = CustomRule(
+	lambda token: isinstance(token, str) and (token.isalnum() or token in ('_',))
+)
+
+
+@RULES.add(
+	_is_acceptable_name,
+	Many(
+		Or(_is_acceptable_name, CustomRule(lambda token: isinstance(token, str) and token.isdigit())),
+		min_matches=0
+	)
+)
+def _(*tokens):
+	return [VARIABLE(''.join(tokens))]
+
+
 #
 # @RULES.add(tokens.VARIABLE('pass'))
 # def _(buff):

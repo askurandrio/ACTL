@@ -1,9 +1,4 @@
 
-import copy
-import itertools
-
-from ..code import opcodes
-from ..tokenizer import tokens
 from .Template import Template, ResultMatch
 
 

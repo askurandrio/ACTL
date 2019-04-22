@@ -6,8 +6,9 @@ from .Buffer import Buffer
 def parser(buff, rules):
 	while buff:
 		for rule in rules:
-			if rule(buff):
-				rule.apply(buff)
+			res = rule(buff)
+			if res:
+				res(buff)
 				break
 		else:
-			yield from buff.pop(0)
+			yield buff.pop(0)

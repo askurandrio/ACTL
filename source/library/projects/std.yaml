@@ -41,8 +41,8 @@
 - py-key:
    name: rules
    code: |
-      from std import rules
-      return rules
+      import std.rules
+      return std.rules.RULES
 
 
 - pypropl scope:
