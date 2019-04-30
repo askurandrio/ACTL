@@ -10,7 +10,7 @@
 
       while True:
          try:
-            this['uinput'] = Buffer(input('>>> '))
+            this['uinput'] = Buffer(input('>>> ') + '\n')
          except EOFError:
             break
          except Exception: #pylint: disable=W0703

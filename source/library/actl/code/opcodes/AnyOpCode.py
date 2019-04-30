@@ -1,11 +1,21 @@
 
 class MetaAnyOpCode(type):
+	__cache = {}
+
 	def __eq__(self, item):
 		if isinstance(item, self):
 			return True
 		if isinstance(item, type):
 			return issubclass(item, self)
 		return False
+
+	def __call__(self, *args, **kwargs):
+		inst = super().__call__(*args, **kwargs)
+		key = str(inst)
+		if key in self.__cache:
+			return self.__cache[key]
+		self.__cache[key] = inst
+		return inst
 
 	def __ne__(self, item):
 		return not (self == item)

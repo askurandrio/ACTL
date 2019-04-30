@@ -8,10 +8,12 @@ class Making(DynamicOpCode):
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):
 			return False
-		return self.opcode == other.opcode #pylint: disable=E1101
+		return self.opcode == other.opcode  # pylint: disable=E1101
 
 
 VARIABLE = DynamicOpCode.create('VARIABLE', 'name')
+END_LINE = DynamicOpCode.create('END_LINE')()
+
 PASS = DynamicOpCode.create('PASS')
 JUMP = DynamicOpCode.create('JUMP', 'label')
 RETURN = DynamicOpCode.create('RETURN', 'var')

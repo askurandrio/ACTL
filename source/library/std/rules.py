@@ -1,25 +1,47 @@
 
-from actl.syntax import SyntaxRules, Template, CustomRule, Many, Or
-from actl.code.opcodes import VARIABLE
+from actl.syntax import SyntaxRules, Template, CustomRule, IsInstance, Many, Or, Pdb, SimpleToken
+from actl.code.opcodes import VARIABLE, END_LINE, SET_VARIABLE
 
 
 RULES = SyntaxRules()
 
 
 _is_acceptable_name = CustomRule(
-	lambda token: isinstance(token, str) and (token.isalnum() or token in ('_',))
+	'is_acceptable_name',
+	lambda token: isinstance(token, str) and (token.isalpha() or token in ('_',))
 )
 
 
 @RULES.add(
 	_is_acceptable_name,
 	Many(
-		Or(_is_acceptable_name, CustomRule(lambda token: isinstance(token, str) and token.isdigit())),
+		Or(
+			[_is_acceptable_name],
+			[CustomRule(
+				'is_acceptable_continues_name',
+				lambda token: isinstance(token, str) and token.isdigit()
+			)]
+		),
 		min_matches=0
 	)
 )
 def _(*tokens):
 	return [VARIABLE(''.join(tokens))]
+
+
+@RULES.add(SimpleToken('\n'))
+def _(token):
+	return [END_LINE]
+
+
+@RULES.add(
+	IsInstance(VARIABLE),
+	SimpleToken('='),
+	IsInstance(VARIABLE),
+	SimpleToken(END_LINE)
+)
+def _(src, _, dst, _1):
+	return [SET_VARIABLE(src, dst), END_LINE]
 
 
 #

@@ -80,7 +80,6 @@ class Many(Template):
 				result += result_match
 			else:
 				return result
-		return ResultMatch(None, False)
 
 
 class Range(Template):

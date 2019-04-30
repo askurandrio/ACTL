@@ -1,4 +1,6 @@
-from .Result import Result
+import pdb
+
+from actl import Buffer
 
 
 class Template:
@@ -6,61 +8,111 @@ class Template:
 		self._template = template
 
 	def __call__(self, buff):
-		res = None
+		res = Buffer()
 		for tmpl in self._template:
-			if res is None:
-				res = tmpl(buff)
-			else:
-				res += tmpl(buff)
-			if not res:
-				break
-			buff = res.shift(buff)
+			tmpl_res = tmpl(buff)
+			if tmpl_res is None:
+				return None
+			res += tmpl_res
 		return res
 
 	def __repr__(self):
 		return f'{type(self).__name__}({self._template})'
 
 
-def CustomRule(func):
+def Pdb():
 	def rule(buff):
-		try:
-			token = buff[0]
-		except IndexError:
-			return Result(None)
-		if func(token):
-			return Result(1)
-		return Result(None)
+		pdb.set_trace()
+		return Buffer()
 	return rule
 
 
-def Many(*template, min_matches=1):
-	template = Template(*template)
+class Rule:
+	def __init__(self, *args, **kwargs):
+		kwargs.update(zip(self.__slots__, args))
+		for key, value in kwargs.items():
+			setattr(self, key, value)
+		for key in self.__slots__:
+			assert hasattr(self, key), f'{self} has no attribute {key}'
 	
-	def rule(buff):
-		base_res = template(buff)
-		if not base_res:
-			if min_matches < 1:
-				return Result(0)
-			return base_res
-		matches = 1
+	def __repr__(self):
+		args = ', '.join(str(getattr(self, key)) for key in self.__slots__)
+		return f'{type(self).__name__}({args})'
+
+
+class CustomRule(Rule):
+	__slots__ = ('name', 'func')
+	
+	def __call__(self, buff):
+		try:
+			token = buff.pop(0)
+		except IndexError:
+			return None
+		if self.func(token):
+			return Buffer([token])
+		return None
+
+	def __repr__(self):
+		return f'{type(self).__name__}({self.name})'
+
+
+class SimpleToken(Rule):
+	__slots__ = ('token',)
+	
+	def __call__(self, buff):
+		try:
+			val = buff.pop(0)
+		except IndexError:
+			return None
+		if self.token == val:
+			return Buffer([val])
+		return None
+	
+
+class IsInstance(Rule):
+	__slots__ = ('cls',)
+	
+	def __call__(self, buff):
+		try:
+			token = buff.pop(0)
+		except IndexError:
+			return None
+		if isinstance(token, self.cls):
+			return Buffer([token])
+		return None
+
+
+class Many(Rule):
+	__slots__ = ('template', 'min_matches')
+	
+	def __init__(self, *template, min_matches=1):
+		super().__init__(Template(*template), min_matches)
+		
+	def __call__(self, buff):
+		matches = 0
+		res = Buffer()
 		while True:
-			buff = base_res.shift(buff)
-			res = template(buff)
-			if res:
-				matches += 1
-				base_res += res
-			else:
-				if matches < min_matches:
-					return Result(None)
-				return base_res
-	return rule
-
-
-def Or(*templates):
-	def rule(buff):
-		for template in templates:
-			res = template(buff)
-			if res:
+			tmpl_res = self.template(buff)
+			if tmpl_res is None:
+				if matches < self.min_matches:
+					return None
 				return res
-		return Result(None)
-	return rule
+			res += tmpl_res
+
+
+class Or(Rule):
+	__slots__ = ('templates',)
+	
+	def __init__(self, *templates):
+		super().__init__(templates)
+	
+	def __call__(self, buff):
+		inp = buff
+		for template in self.templates:
+			buff = inp.copy()
+			template = Template(*template)
+			res = template(buff)
+			if res:
+				inp.set(buff)
+				return res
+		return None
