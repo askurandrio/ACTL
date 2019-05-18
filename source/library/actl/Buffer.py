@@ -26,9 +26,6 @@ class Buffer:
 		while self:
 			yield self.pop()
 
-	def set(self, other):
-		self._buff = []
-		self._head = iter(other)
 
 	def index(self, value):
 		for idx, elem in enumerate(self):
@@ -64,6 +61,14 @@ class Buffer:
 
 	def __setitem__(self, index, elem):
 		if isinstance(index, slice):
+			if (
+				(index.start is None)
+				and (index.stop is None)
+				and (index.step is None)
+			):
+				self._buff = []
+				self._head = iter(elem)
+				return
 			self._load(index.stop)
 		self._buff[index] = elem
 
@@ -114,3 +119,14 @@ class Buffer:
 		def wrapper(*args, **kwargs):
 			return cls(func(*args, **kwargs))
 		return wrapper
+
+	@classmethod
+	def inf(cls, initf, stepf, contf=None):
+		contf = (lambda _: True) if contf is None else contf
+		@cls.make
+		def func():
+			val = initf()
+			while contf(val):
+				yield val
+				val = stepf(val)
+		return func()

@@ -1,6 +1,8 @@
 
-from actl.syntax import SyntaxRules, Template, CustomRule, IsInstance, Many, Or, Pdb, SimpleToken
-from actl.code.opcodes import VARIABLE, END_LINE, SET_VARIABLE, BUILD_STRING
+from actl.syntax import \
+	SyntaxRules, Template, CustomRule, IsInstance, Many, Or, Pdb, SimpleToken, Maybe
+from actl.code.opcodes import \
+	VARIABLE, END_LINE, SET_VARIABLE, BUILD_STRING, BUILD_NUMBER
 
 
 RULES = SyntaxRules()
@@ -44,7 +46,7 @@ def _(src, _, dst, _1):
 	return [SET_VARIABLE(src, dst), END_LINE]
 
 
-@RULES.add(Or([SimpleToken('"')], [SimpleToken("'")]), manual_apply=True)
+@RULES.add(Or([SimpleToken('"')], [SimpleToken("'")]), manual_apply=True, use_parser=True)
 def _(inp, parser):
 	def _pop_start_token():
 		start = [inp.pop()]
@@ -54,15 +56,26 @@ def _(inp, parser):
 		return start
 	
 	start = _pop_start_token()
-	out = ''
+	string = ''
 	while not inp.startswith(start):
-		out += inp.pop()
+		string += inp.pop()
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = VARIABLE.temp()
-	parser.define(BUILD_STRING(dst, out))
+	parser.define(BUILD_STRING(dst, string))
 	inp[:0] = [dst]
 	
+	
+_is_digit = CustomRule('is_digit', lambda token: isinstance(token, str) and token.isdigit())
+
+
+@RULES.add(Many(_is_digit), Maybe(SimpleToken('.'), Many(_is_digit)), use_parser=True)
+def _(*args, parser=None):
+	number = ''.join(args)
+	dst = VARIABLE.temp()
+	parser.define(BUILD_NUMBER(dst, number))
+	return [dst]
+
 
 #
 # @RULES.add(tokens.VARIABLE('pass'))

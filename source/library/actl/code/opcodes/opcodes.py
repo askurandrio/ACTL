@@ -24,11 +24,11 @@ class VARIABLE(DynamicOpCode):
 END_LINE = DynamicOpCode.create('END_LINE')()
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
 BUILD_STRING = DynamicOpCode.create('BUILD_STRING', 'dst', 'string')
+BUILD_NUMBER = DynamicOpCode.create('BUILD_NUMBER', 'dst', 'number')
 
 PASS = DynamicOpCode.create('PASS')
 JUMP = DynamicOpCode.create('JUMP', 'label')
 RETURN = DynamicOpCode.create('RETURN', 'var')
 SAVE_CODE = DynamicOpCode.create('SAVE_CODE', 'function')
-BUILD_NUMBER = DynamicOpCode.create('BUILD_NUMBER', 'dst', 'number')
 CALL_OPERATOR = DynamicOpCode.create('CALL_OPERATOR', 'dst', 'operator', 'args')
 CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'dst', 'function', 'typeb', 'args', 'kwargs')
