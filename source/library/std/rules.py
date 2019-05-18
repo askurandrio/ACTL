@@ -45,22 +45,23 @@ def _(src, _, dst, _1):
 
 
 @RULES.add(Or([SimpleToken('"')], [SimpleToken("'")]), manual_apply=True)
-def _(inp):
+def _(inp, parser):
 	def _pop_start_token():
-		start = [inp.pop(0)]
-		if start == inp.get(0):
+		start = [inp.pop()]
+		if start == inp.get():
 			if start == inp.get(1):
-				start.extend((inp.pop(0), inp.pop(0)))
+				start.extend((inp.pop(), inp.pop()))
 		return start
 	
 	start = _pop_start_token()
 	out = ''
 	while not inp.startswith(start):
-		out += inp.pop(0)
+		out += inp.pop()
 	while start:
-		assert start.pop(0) == inp.pop(0)
+		assert start.pop(0) == inp.pop()
 	dst = VARIABLE.temp()
-	inp[:0] = [BUILD_STRING(dst, out)]
+	parser.define(BUILD_STRING(dst, out))
+	inp[:0] = [dst]
 	
 
 #

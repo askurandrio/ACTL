@@ -43,8 +43,8 @@ class _ResultManualApply:
 		self._func = func
 		self._inp = inp
 
-	def __call__(self):
-		self._func(self._inp)
+	def __call__(self, parser):
+		self._func(self._inp, parser)
 
 
 class _Result(_ResultManualApply):
@@ -53,6 +53,6 @@ class _Result(_ResultManualApply):
 		self._buff = buff
 		self._res = res
 
-	def __call__(self):
+	def __call__(self, _):
 		self._inp.set(self._buff)
 		self._inp[:0] = self._func(*self._res)
