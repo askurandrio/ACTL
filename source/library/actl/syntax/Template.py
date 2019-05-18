@@ -45,7 +45,7 @@ class CustomRule(Rule):
 	
 	def __call__(self, buff):
 		try:
-			token = buff.pop(0)
+			token = buff.pop()
 		except IndexError:
 			return None
 		if self.func(token):
@@ -61,7 +61,7 @@ class SimpleToken(Rule):
 	
 	def __call__(self, buff):
 		try:
-			val = buff.pop(0)
+			val = buff.pop()
 		except IndexError:
 			return None
 		if self.token == val:
@@ -74,7 +74,7 @@ class IsInstance(Rule):
 	
 	def __call__(self, buff):
 		try:
-			token = buff.pop(0)
+			token = buff.pop()
 		except IndexError:
 			return None
 		if isinstance(token, self.cls):

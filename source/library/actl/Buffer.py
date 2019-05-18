@@ -6,7 +6,11 @@ class Buffer:
 		self._buff = []
 		self._head = iter(head)
 	
-	def pop(self, index):
+	def get(self, index):
+		self._load(index)
+		return self._buff[index]
+
+	def pop(self, index=0):
 		self._load(index)
 		return self._buff.pop(index)
 
@@ -20,7 +24,7 @@ class Buffer:
 
 	def extract(self):
 		while self:
-			yield self.pop(0)
+			yield self.pop()
 
 	def set(self, other):
 		self._buff = []
@@ -34,6 +38,11 @@ class Buffer:
 
 	def append(self, *items):
 		self += items
+
+	def startswith(self, tmpl):
+		tmpl = list(tmpl)
+		src = list(self[:len(tmpl)])
+		return src == tmpl
 
 	def _load(self, quantity):
 		quantity = (quantity + 1) - len(self._buff)
@@ -74,8 +83,9 @@ class Buffer:
 			return True
 
 	def __iter__(self):
+		yield from iter(self._buff)
 		self._head, head = itertools.tee(self._head)
-		return itertools.chain(iter(self._buff), head)
+		yield from head
 
 	def __iadd__(self, other):
 		self._head = itertools.chain(iter(self._head), iter(other))

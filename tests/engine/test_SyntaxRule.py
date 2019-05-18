@@ -60,7 +60,7 @@ class test_SyntaxRule(unittest.TestCase):
 
 		@parser.rules.add(tokens.VARIABLE('b'), tokens.VARIABLE('c'))
 		def _(buff):
-			yield tokens.VARIABLE(buff.pop(0).name + buff.pop(0).name)
+			yield tokens.VARIABLE(buff.pop().name + buff.pop().name)
 
 		code = list(parser.parse())
 		self.assertEqual(code, [tokens.VARIABLE('a'),
@@ -72,7 +72,7 @@ class test_SyntaxRule(unittest.TestCase):
 
 		@parser.rules.add(Or((tokens.VARIABLE('b'),), (tokens.VARIABLE('d'),)))
 		def _(buff):
-			yield tokens.VARIABLE(f'Or({buff.pop(0).name})')
+			yield tokens.VARIABLE(f'Or({buff.pop().name})')
 
 		code = list(parser.parse())
 		self.assertEqual(code, [tokens.VARIABLE('a'),
@@ -85,11 +85,11 @@ class test_SyntaxRule(unittest.TestCase):
 
 		@parser.rules.add(tokens.VARIABLE('b'))
 		def _(buff):
-			yield tokens.VARIABLE(f'Single({buff.pop(0).name})')
+			yield tokens.VARIABLE(f'Single({buff.pop().name})')
 
 		@parser.rules.add(Maybe(tokens.VARIABLE('a')), tokens.VARIABLE('b'))
 		def _(buff):
-			yield tokens.VARIABLE(f'Maybe({buff.pop(0).name}, {buff.pop(0).name})')
+			yield tokens.VARIABLE(f'Maybe({buff.pop().name}, {buff.pop().name})')
 
 		code = list(parser.parse())
 		self.assertEqual(code, [tokens.VARIABLE('Maybe(a, b)'),
@@ -103,14 +103,14 @@ class test_SyntaxRule(unittest.TestCase):
 		def _(buff):
 			name = ''
 			while tokens.VARIABLE('a') == buff.get(0):
-				name += buff.pop(0).name
+				name += buff.pop().name
 			yield tokens.VARIABLE(f'Many({name})')
 
 		@parser.rules.add(Many(tokens.VARIABLE('b'), minimum=2))
 		def _(buff):
 			name = ''
 			while tokens.VARIABLE('b') == buff.get(0):
-				name += buff.pop(0).name
+				name += buff.pop().name
 			yield tokens.VARIABLE(f'Many({name})')
 
 		code = list(parser.parse())
@@ -125,10 +125,10 @@ class test_SyntaxRule(unittest.TestCase):
 		@parser.rules.add(Range((tokens.VARIABLE('['),), lambda _: (tokens.VARIABLE(']'),)))
 		def _(buff):
 			name = ''
-			name += buff.pop(0).name
+			name += buff.pop().name
 			count = 1
 			while count:
-				elem = buff.pop(0)
+				elem = buff.pop()
 				if tokens.VARIABLE('[') == elem:
 					count += 1
 				elif tokens.VARIABLE(']') == elem:
@@ -146,7 +146,7 @@ class test_SyntaxRule(unittest.TestCase):
 
 		@parser.rules.add(Value(1), args=('scope', 'buff'))
 		def _(scope, buff):
-			value = parser.scope[buff.pop(0)]
+			value = parser.scope[buff.pop()]
 			yield tokens.VARIABLE(f'Value({value})')
 
 		code = list(parser.parse())

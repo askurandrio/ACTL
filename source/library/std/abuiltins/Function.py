@@ -30,24 +30,24 @@ class Function:
 																lambda op: (op.get_mirror(),)),
 										args=('buff',))
 def _(buff):
-	cfunction = buff.pop(0)
+	cfunction = buff.pop()
 
 	if actl.tokens.VARIABLE == buff[0]:
-		function = buff.pop(0)
+		function = buff.pop()
 	else:
 		function = actl.tokens.VARIABLE.get_temp()
 
 	close_bracket_op = buff[0].get_mirror()
-	function_typeb = buff.pop(0).operator
+	function_typeb = buff.pop().operator
 
 	function_args = []
 	while True:
 		if actl.tokens.VARIABLE == buff[0]:
-			function_args.append(buff.pop(0))
+			function_args.append(buff.pop())
 			if actl.tokens.OPERATOR(',') == buff[0]:
-				buff.pop(0)
+				buff.pop()
 		elif close_bracket_op == buff[0]:
-			buff.pop(0)
+			buff.pop()
 			break
 		else:
 			raise RuntimeError(buff[0])

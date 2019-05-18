@@ -11,15 +11,24 @@ class Making(DynamicOpCode):
 		return self.opcode == other.opcode  # pylint: disable=E1101
 
 
-VARIABLE = DynamicOpCode.create('VARIABLE', 'name')
+class VARIABLE(DynamicOpCode):
+	__slots__ = ('name',)
+	__counts = 10
+	
+	@classmethod
+	def temp(cls):
+		cls.__counts += 1
+		return cls(f'__IV{cls.__counts}')
+
+
 END_LINE = DynamicOpCode.create('END_LINE')()
+SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
+BUILD_STRING = DynamicOpCode.create('BUILD_STRING', 'dst', 'string')
 
 PASS = DynamicOpCode.create('PASS')
 JUMP = DynamicOpCode.create('JUMP', 'label')
 RETURN = DynamicOpCode.create('RETURN', 'var')
 SAVE_CODE = DynamicOpCode.create('SAVE_CODE', 'function')
-SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
-BUILD_STRING = DynamicOpCode.create('BUILD_STRING', 'dst', 'string')
 BUILD_NUMBER = DynamicOpCode.create('BUILD_NUMBER', 'dst', 'number')
 CALL_OPERATOR = DynamicOpCode.create('CALL_OPERATOR', 'dst', 'operator', 'args')
 CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'dst', 'function', 'typeb', 'args', 'kwargs')
