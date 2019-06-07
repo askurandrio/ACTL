@@ -1,5 +1,5 @@
 
-from actl.code.opcodes import END_LINE
+from actl.opcodes import END_LINE
 from .Buffer import Buffer
 from .util import ResultIsBuffer
 

@@ -1,8 +1,8 @@
 
 from actl.syntax import \
-	SyntaxRules, Template, CustomRule, IsInstance, Many, Or, Pdb, SimpleToken, Maybe
-from actl.code.opcodes import \
-	VARIABLE, END_LINE, SET_VARIABLE, BUILD_STRING, BUILD_NUMBER
+	SyntaxRules, Template, CustomRule, IsInstance, Many, Or, Pdb, Token, Maybe
+from actl.opcodes import \
+	VARIABLE, END_LINE, SET_VARIABLE, BUILD_STRING, BUILD_NUMBER, CALL_FUNCTION
 
 
 RULES = SyntaxRules()
@@ -31,22 +31,22 @@ def _(*tokens):
 	return [VARIABLE(''.join(tokens))]
 
 
-@RULES.add(SimpleToken('\n'))
+@RULES.add(Token('\n'))
 def _(token):
 	return [END_LINE]
 
 
 @RULES.add(
 	IsInstance(VARIABLE),
-	SimpleToken('='),
+	Token('='),
 	IsInstance(VARIABLE),
-	SimpleToken(END_LINE)
+	Token(END_LINE)
 )
 def _(src, _, dst, _1):
 	return [SET_VARIABLE(src, dst), END_LINE]
 
 
-@RULES.add(Or([SimpleToken('"')], [SimpleToken("'")]), manual_apply=True, use_parser=True)
+@RULES.add(Or([Token('"')], [Token("'")]), manual_apply=True, use_parser=True)
 def _(inp, parser):
 	def _pop_start_token():
 		start = [inp.pop()]
@@ -69,11 +69,25 @@ def _(inp, parser):
 _is_digit = CustomRule('is_digit', lambda token: isinstance(token, str) and token.isdigit())
 
 
-@RULES.add(Many(_is_digit), Maybe(SimpleToken('.'), Many(_is_digit)), use_parser=True)
+@RULES.add(Many(_is_digit), Maybe(Token('.'), Many(_is_digit)), use_parser=True)
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = VARIABLE.temp()
 	parser.define(BUILD_NUMBER(dst, number))
+	return [dst]
+
+
+@RULES.add(
+	IsInstance(VARIABLE),
+	Token('('),
+	Many(IsInstance(VARIABLE), min_matches=0),
+	Token(')'),
+	use_parser=True
+)
+def _(function, op_token, *args, parser=None):
+	*args, _ = args
+	dst = VARIABLE.temp()
+	parser.define(CALL_FUNCTION(dst, function, op_token, args, {}))
 	return [dst]
 
 

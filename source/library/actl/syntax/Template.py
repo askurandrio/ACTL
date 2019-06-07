@@ -21,12 +21,6 @@ class Template:
 		return f'{type(self).__name__}({repr_template})'
 
 
-def Pdb():
-	def rule(buff):
-		pdb.set_trace()
-		return Buffer()
-	return rule
-
 
 class Rule:
 	def __init__(self, *args, **kwargs):
@@ -39,6 +33,14 @@ class Rule:
 	def __repr__(self):
 		args = ', '.join(str(getattr(self, key)) for key in self.__slots__)
 		return f'{type(self).__name__}({args})'
+
+
+class Pdb(Rule):
+	__slots__ = ()
+	
+	def __call__(self, inp):
+		pdb.set_trace()
+		return Buffer()
 
 
 class CustomRule(Rule):
@@ -57,7 +59,7 @@ class CustomRule(Rule):
 		return f'{type(self).__name__}({self.name})'
 
 
-class SimpleToken(Rule):
+class Token(Rule):
 	__slots__ = ('token',)
 	
 	def __call__(self, inp):
