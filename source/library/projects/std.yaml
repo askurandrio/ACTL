@@ -53,7 +53,8 @@
       import actl
       import std
       scope = std.Scope()
-      scope[actl.opcodes.VARIABLE('print')] = actl.objects.Function.fromPy(print)
+      scope['print'] = actl.objects.PyToA.fromPy(print)
+      scope['String'] = actl.objects.String
       return scope
 
 

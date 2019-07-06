@@ -10,39 +10,39 @@ def Executor(code, scope):
 		handler = _HANDLERS[type(opcode)]
 		handler(scope, opcode)
 
-
-def _add_handler(opcode):
+		
+def _addHandler(opcode):
 	def decorator(handler):
 		_HANDLERS[opcode] = handler
 	return decorator
 
 
-@_add_handler(type(actl.opcodes.END_LINE))
+@_addHandler(type(actl.opcodes.END_LINE))
 def _(_, _1):
 	pass
 
 
-@_add_handler(actl.opcodes.VARIABLE)
+@_addHandler(actl.opcodes.VARIABLE)
 def _(scope, opcode):
-	scope[opcode]
+	scope[opcode.name]
 
 
-@_add_handler(actl.opcodes.BUILD_STRING)
+@_addHandler(actl.opcodes.BUILD_STRING)
 def _(scope, opcode):
-	stringCls = scope[actl.tokens.VARIABLE('String')]
-	scope[opcode.dst] = stringCls.fromPy(opcode.string)
+	stringCls = scope[actl.opcodes.VARIABLE('String').name]
+	scope[opcode.dst.name] = stringCls.fromPy(opcode.string)
 
 
-@_add_handler(actl.opcodes.BUILD_NUMBER)
+@_addHandler(actl.opcodes.BUILD_NUMBER)
 def _(scope, opcode):
-	numberCls = scope[actl.tokens.VARIABLE('Number')]
-	scope[opcode.dst] = numberCls.fromPy(opcode.number)
+	numberCls = scope[actl.opcodes.VARIABLE('Number').name]
+	scope[opcode.dst.name] = numberCls.fromPy(opcode.number)
 
 
-@_add_handler(actl.opcodes.CALL_FUNCTION)
+@_addHandler(actl.opcodes.CALL_FUNCTION)
 def _(scope, opcode):
 	function = scope[opcode.function]
 	assert opcode.typeb == '('
 	assert not opcode.args
 	assert not opcode.kwargs
-	scope[opcode.dst] = function.call()
+	scope[opcode.dst.name] = function.call()

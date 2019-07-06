@@ -30,12 +30,12 @@ class Function:
 																lambda op: (op.get_mirror(),)),
 										args=('buff',))
 def _(buff):
-	cfunction = buff.pop()
+	function = buff.pop()
 
 	if actl.tokens.VARIABLE == buff[0]:
-		function = buff.pop()
+		dst = buff.pop()
 	else:
-		function = actl.tokens.VARIABLE.get_temp()
+		dst = actl.tokens.VARIABLE.get_temp()
 
 	close_bracket_op = buff[0].get_mirror()
 	function_typeb = buff.pop().operator
@@ -52,10 +52,11 @@ def _(buff):
 		else:
 			raise RuntimeError(buff[0])
 
-	yield actl.Definition(actl.opcodes.CALL_FUNCTION(dst=function,
-																	 function=cfunction,
-																	 typeb='(',
-																	 args=[],
-																	 kwargs={'typeb': function_typeb,
-																				'args': function_args}))
+	yield actl.Definition(actl.opcodes.CALL_FUNCTION(
+		dst=dst,
+		function=function.name,
+		typeb='(',
+		args=[],
+		kwargs={'typeb': function_typeb, 'args': function_args}
+	))
 	yield function
