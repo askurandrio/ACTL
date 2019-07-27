@@ -1,7 +1,58 @@
 import weakref
 
 import sys
-sys.setrecursionlimit(100)
+sys.setrecursionlimit(500)
+
+
+class AGenericKeyError(Exception):
+	def __init__(self, msg='', key=None):
+		if (key is not None) and (not msg):
+			msg = self.MSG.format(key=key)
+		super().__init__(msg)
+
+
+class ANotFoundAttribute(AGenericKeyError):
+	MSG = 'This attribute not found: {key}'
+
+
+class AKeyNotFound(AGenericKeyError):
+	MSG = 'This key not found: {key}'
+
+
+def _loadPropIfNeed(self, val):
+	try:
+		prop = val.get
+	except (ANotFoundAttribute, AttributeError):
+		return val
+	else:
+		return prop(self)
+
+
+def _getSpecialAttr(self, key):
+	if key in ('__class__', '__self__'):
+		return self._scope[key]
+
+	if key == '__super__':
+		try:
+			super_ = self._scope[key]
+		except KeyError:
+			self_ = self.getAttr('__class__').getAttr('__self__')
+			super_ = self_.getItem(key)
+		return super_.get(self)
+
+	if key == '__getAttr__':
+		try:
+			res = self._scope['__getAttr__']
+		except KeyError:
+			cls = self.getAttr('__class__')
+			self_ = cls.getAttr('__self__')
+			try:
+				res = self_.getItem('__getAttr__')
+			except AKeyNotFound:
+				super_ = self.getAttr('__super__')
+				return super_.getAttr('__getAttr__')
+		return res.get(self)
+	raise ANotFoundAttribute(f'This is not special attrribute: {key}')
 
 
 class _Object:
@@ -11,7 +62,11 @@ class _Object:
 		self._scope = initScope
 
 	def getAttr(self, key):
-		return self._getAttr(key)
+		try:
+			return _getSpecialAttr(self, key)
+		except ANotFoundAttribute:
+			pass
+		return self.getAttr('__getAttr__').call(key)
 
 	def setAttr(self, key, value):
 		self._scope[key] = value
@@ -35,44 +90,42 @@ class _Object:
 	def _findAttr(self, key):
 		try:
 			return self._scope[key]
-		except KeyError as ex:
-			pEx = ex
-		if key == '__class__':
-			raise pEx
+		except KeyError:
+			ex = ANotFoundAttribute(key=key)
 		if self is Object:
-			raise pEx
+			raise ex
 		self_ = self.getAttr('__class__').getAttr('__self__')
 		try:
-			return self_._findAttr(key)
-		except KeyError:
+			return self_.getItem(key)
+		except AKeyNotFound:
 			pass
-		if key == '__super__':
-			raise pEx
 		try:
 			super_ = self.getAttr('__super__')
 			return super_._findAttr(key)
-		except KeyError:
-			raise pEx
-	
-	def _getAttr(self, key):
-		val = self._findAttr(key)
-		try:
-			val = val.get
-		except (KeyError, AttributeError):
-			pass
-		else:
-			val = val(self)
-		return val
+		except ANotFoundAttribute:
+			raise ex
 
 	def __repr__(self):
 		return str(self)
 	
 	def __str__(self):
+		if ('__name__' in self._scope) and (('__parents__' in self._scope) or (self is Object)):
+			return f"class {self._scope['__name__']}"
+		#Todo: remove
 		try:
-			return self.toStr()
-		except RecursionError:
-			import pdb; pdb.set_trace()
-			self.toStr()
+			_Object.__stack
+			parent = False
+		except AttributeError:
+			_Object.__stack = set()
+			parent = True
+		if self in _Object.__stack:
+			return '{...}'
+		else:
+			_Object.__stack.add(self)
+			selfInStr = f'{type(self).__name__}<{self._scope}>'
+		if parent:
+			del _Object.__stack
+		return selfInStr
 
 	
 Object = _Object()
@@ -82,37 +135,18 @@ Object.setAttr('__class__', weakref.proxy(Object))
 
 class _NativeClass(_Object):
 	def __init__(self, initScope=None):
-		try:
-			cls = self.__cls
-		except AttributeError:
-			self._makeCls()
-			cls = self.__cls
 		if initScope is None:
 			initScope = {}
-		initScope.update({'__class__': cls})
+		initScope.update({'__class__': self.__aCls})
 		super().__init__(initScope)
-		
-	@classmethod
-	def _makeCls(cls):
-		child = _Object()
-		child.setAttr('__class__', Object)
-		child.setAttr('__parents__', [Object])
-		child.setAttr('__name__', cls.__name__)
-		cls.__cls = child
 
-
-class _Self(_NativeClass):
-	def __init__(self, scope):
-		super().__init__(scope)
-
-	def _findAttr(self, key):
-		return self._scope[key]
-
-	def toStr(self):
-		return f'{type(self).__name__}<{self._scope}>'
-
-
-Object.setAttr('__self__', _Self({}))
+	def __init_subclass__(cls):
+		super().__init_subclass__()
+		aCls = _Object()
+		aCls.setAttr('__class__', Object)
+		aCls.setAttr('__parents__', [Object])
+		aCls.setAttr('__name__', cls.__name__)
+		cls.__aCls = aCls
 
 
 class _NativeFunc(_NativeClass):
@@ -124,8 +158,8 @@ class _NativeFunc(_NativeClass):
 	def call(self, *args, **kwargs):
 		return self._func(*args, **kwargs)
 
-	def toStr(self):
-		return self._name
+	def __str__(self):
+		return f'{type(self).__name__}<{self._name}>'
 
 	@classmethod
 	def wrap(cls, name):
@@ -142,7 +176,7 @@ class _NativeProperty(_NativeClass):
 	def get(self, instance):
 		return self._fget.call(instance)
 
-	def toStr(self):
+	def __str__(self):
 		return f'{type(self).__name__}({self._fget})'
 
 
@@ -157,6 +191,40 @@ def _makeMethod(name, func):
 	return _NativeProperty(fget)
 
 
+class _Self(_NativeClass):
+	def __init__(self, initHead):
+		super().__init__()
+		self._head = initHead
+
+	def setItem(self, key, value):
+		self._head[key] = value
+
+	def getItem(self, key):
+		try:
+			return self._head[key]
+		except KeyError:
+			raise AKeyNotFound(key=key)
+
+	def __str__(self):
+		return f'{type(self).__name__}<{self._head}>'
+
+
+def _Object__getAttr__(self, key):
+	try:
+		return _getSpecialAttr(self, key)
+	except ANotFoundAttribute:
+		pass
+	attr = self._findAttr(key)
+	return _loadPropIfNeed(self, attr)
+
+
+Object.setAttr('__getAttr__', _makeMethod('Object.__getAttr__', _Object__getAttr__))
+Object.setAttr('__self__', _Self({}))
+Object.getAttr('__self__').setItem(
+	'__getAttr__', _makeMethod('Object.__self__.__getAttr__', _Object__getAttr__)
+)
+
+
 class BuildClass(_Object):
 	def __init__(self, name, parents=None):
 		super().__init__()
@@ -166,15 +234,15 @@ class BuildClass(_Object):
 		self.setAttr('__class__', Object)
 		self.setAttr('__parents__', parents)
 		self.setAttr('__name__', name)
-		self.setAttr('__super__', _Super(self))
-		self.setAttr('__self__', _Self({'__super__': _SuperSelf}))
+		self.setAttr('__super__', _Super.make(parents))
+		self.setAttr('__self__', _Self({'__super__': _SuperSelf.make(parents)}))
 	
 	def addMethod(self, name):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
 			cls_name = cls_name[0].lower() + cls_name[1:]
 			method = _makeMethod(f'{cls_name}.{name}', func)
-			self.getAttr('__self__').setAttr(name, method)
+			self.getAttr('__self__').setItem(name, method)
 			return func
 		
 		return decorator
@@ -220,33 +288,42 @@ def _(self):
 
 
 class _Super(_NativeClass):
-	def __init__(self, instance):
+	def __init__(self, parents, aSelf):
 		super().__init__()
-		self._instance = instance
+		self._parents = parents
+		self._aSelf = aSelf
 
 	def _findAttr(self, key):
-		for parent in self._instance.getAttr('__parents__'):
+		for parent in self._parents:
 			try:
 				return parent._findAttr(key)
-			except KeyError:
+			except ANotFoundAttribute:
 				pass
-		raise KeyError(f'Super doesnt have key: {key}')
-	
-	def toStr(self):
-		return f'{type(self).__name__}<>'
+		raise ANotFoundAttribute(key=key)
+
+	def getAttr(self, key):
+		return _loadPropIfNeed(self._aSelf, self._findAttr(key))
+
+	@classmethod
+	def make(cls, parents):
+		@_NativeFunc.wrap(f'fget_{cls.__name__}')
+		def fget(aSelf):
+			return cls(parents, aSelf)
+		return _NativeProperty(fget)
+
+	def __str__(self):
+		return f'{type(self).__name__}<{self._parents}>'
 
 
-def _wrapSuperSelf(cls):
-	return _NativeProperty(_NativeFunc('fget_SuperSelf', lambda self_: cls(self_)))
-
-
-@_wrapSuperSelf
 class _SuperSelf(_Super):
+	def __init__(self, parents, aSelf):
+		super().__init__(parents, aSelf)
+		self._parents = [parent.getAttr('__self__') for parent in self._parents]
+
 	def _findAttr(self, key):
-		for parent in self._instance.getAttr('__class__').getAttr('__parents__'):
-			self_ = parent.getAttr('__self__')
+		for parent in self._parents:
 			try:
-				return self_._findAttr(key)
-			except KeyError:
-				continue
-		raise KeyError(f'Super doesnt have key: {key}')
+				return parent.getItem(key)
+			except ANotFoundAttribute:
+				pass
+		raise ANotFoundAttribute(key=key)

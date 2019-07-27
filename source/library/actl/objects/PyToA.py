@@ -1,4 +1,4 @@
-from .Object import BuildClass
+from .Object import BuildClass, ANotFoundAttribute
 
 
 PyToA = BuildClass('PyToA')
@@ -6,12 +6,17 @@ PyToA = BuildClass('PyToA')
 
 @PyToA.addMethod('__call__')
 def _(self, *args, **kwargs):
-	return self._val(*args, **kwargs)
+	self._val(*args, **kwargs)
 
 
-@PyToA.addMethod('__getattr__')
-def _(self, *args, **kwargs):
-	print('getattr')
+@PyToA.addMethod('__getAttr__')
+def _(self, key):
+	try:
+		return self.getAttr('__super__').getAttr('__getAttr__').call(key)
+	except ANotFoundAttribute:
+		pass
+	val = getattr(self._val, key)
+	return PyToA.fromPy(val)
 
 
 @PyToA.addMethod('__toStr__')
