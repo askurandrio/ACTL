@@ -1,7 +1,7 @@
 import pytest
 
 from actl import Parser, Buffer
-from actl.syntax import SyntaxRules, Token, CustomRule, Many, IsInstance, Or
+from actl.syntax import SyntaxRules, Token, CustomRule, Many, IsInstance, Or, Maybe
 
 
 @pytest.fixture
@@ -18,12 +18,12 @@ def parse():
 
 
 def test_simple_replace(rules, parse):
-	@rules.add(Token('a'))
-	@_expect('a')
+	@rules.add(Token('b'))
+	@_expect('b')
 	def _(_):
 		return 'r'
 
-	assert parse(rules, ['a']) == ['r']
+	assert parse(rules, ['a', 'b', 'c']) == ['a', 'r', 'c']
 
 
 def test_replace_pattern(rules, parse):
@@ -41,7 +41,7 @@ def test_custom_func(rules, parse):
 	def _(_):
 		return 'r'
 
-	assert parse(rules, ['a', 'b']) == ['a', 'r']
+	assert parse(rules, ['a', 'b', 'c']) == ['a', 'r', 'c']
 
 
 def test_isinstance(rules, parse):
@@ -59,16 +59,7 @@ def test_many(rules, parse):
 	def _(*_):
 		return 'r'
 
-	assert parse(rules, ['a', 'b', 'b']) == ['a', 'r']
-
-
-def test_many_with_zero_min_matches(rules, parse):
-	@rules.add(Token('('), Many(Token('not_found'), min_matches=0), Token(')'))
-	@_expect('(', ')')
-	def _(*_):
-		return 'r'
-
-	assert parse(rules, ['a', '(', ')', 'b']) == ['a', 'r', 'b']
+	assert parse(rules, ['a', 'b', 'b', 'c']) == ['a', 'r', 'c']
 
 
 def test_or(rules, parse):
@@ -83,14 +74,34 @@ def test_or(rules, parse):
 		assert parse(rules, ['a', or_token, 'd']) == ['a', 'r', 'd']
 
 
-# def test_call(rules, parse):
-# 	@rules.add(
-# 		IsInstance(VARIABLE),
-# 		Token('('),
-# 		Many(IsInstance(VARIABLE), min_matches=0),
-# 		Token(')'),
-# 		use_parser=True
-# 	)
+def test_maybe(rules, parse):
+	@rules.add(Or([Token('b')], [Token('c')]), Maybe(Token('d')))
+	def _(first_token, second_token=None):
+		if first_token == 'b':
+			assert second_token is None
+		elif first_token == 'c':
+			assert second_token == 'd'
+		else:
+			assert False, second_token
+		return 'r'
+
+	assert parse(rules, ['a', 'b', 'e']) == ['a', 'r', 'e']
+	assert parse(rules, ['a', 'c', 'd', 'e']) == ['a', 'r', 'e']
+
+
+def test_replace_after_replace(rules, parse):
+	@rules.add(Token('b'))
+	@_expect('b')
+	def _(_):
+		return 'd'
+
+	@rules.add(Token('d'))
+	@_expect('d')
+	def _(_):
+		return 'r'
+
+	assert parse(rules, ['a', 'b', 'c']) == ['a', 'r', 'c']
+
 
 def _expect(*expect):
 	def decorator(func):
@@ -99,7 +110,3 @@ def _expect(*expect):
 			return func(*args, **kwargs)
 		return wrapper
 	return decorator
-
-# def test_dreplace_pattern(rules, parse):
-# 	from std import RULES
-# 	assert parse(RULES, "print('1')") == [1]

@@ -21,7 +21,6 @@ class Template:
 		return f'{type(self).__name__}({repr_template})'
 
 
-
 class Rule:
 	def __init__(self, *args, **kwargs):
 		kwargs.update(zip(self.__slots__, args))
@@ -89,11 +88,12 @@ class Many(Rule):
 	__slots__ = ('template', 'min_matches')
 	
 	def __init__(self, *template, min_matches=1):
+		assert min_matches != 0, f'min_matched<{min_matches}> == 0. Use Maybe for this case'
 		super().__init__(Template(*template), min_matches)
 		
 	def __call__(self, inp):
 		res = Buffer()
-		for matches in Buffer.inf(lambda: 0, lambda val: val+1):
+		for matches in Buffer.inf():
 			buff = inp.copy()
 			tmpl_res = self.template(buff)
 			if tmpl_res is None:

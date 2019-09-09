@@ -26,7 +26,6 @@ class Buffer:
 		while self:
 			yield self.pop()
 
-
 	def index(self, value):
 		for idx, elem in enumerate(self):
 			if elem == value:
@@ -97,7 +96,9 @@ class Buffer:
 		return self
 
 	def __add__(self, other):
-		return type(self)(itertools.chain(iter(self), iter(other)))
+		res = type(self)()
+		res += self
+		return res
 
 	def __bool__(self):
 		self._load(1)
@@ -121,15 +122,23 @@ class Buffer:
 		return wrapper
 
 	@classmethod
-	def inf(cls, init_f, step_f, while_f=None):
-		if while_f is None:
-			def while_f(_):
+	def inf(cls, init_f=None, step_f=None, condition=None):
+		if init_f is None:
+			def init_f():
+				return 0
+
+		if step_f is None:
+			def step_f(value):
+				return value + 1
+
+		if condition is None:
+			def condition(_):
 				return True
 
 		@cls.make
 		def func():
-			val = init_f()
-			while while_f(val):
-				yield val
-				val = step_f(val)
+			value = init_f()
+			while condition(value):
+				yield value
+				value = step_f(value)
 		return func()

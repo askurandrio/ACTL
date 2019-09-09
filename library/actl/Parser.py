@@ -15,7 +15,7 @@ class Parser:
 	def _apply_rule(self, buff):
 		for rule in self._rules:
 			res = rule(buff)
-			if res:
+			if res is not None:
 				res(self)
 				return True
 		return False
@@ -30,6 +30,7 @@ class Parser:
 		flush = Buffer()
 		while self._buff:
 			if self._apply_rule(self._buff):
+				#self._buff = Buffer(list(flush + self._buff))
 				continue
 			flush.append(self._buff.pop())
 			if END_LINE in flush:

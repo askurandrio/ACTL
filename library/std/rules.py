@@ -1,6 +1,6 @@
 
 from actl.syntax import \
-	SyntaxRules, Template, CustomRule, IsInstance, Many, Or, Pdb, Token, Maybe
+	SyntaxRules, CustomRule, IsInstance, Many, Or, Token, Maybe
 from actl.opcodes import \
 	VARIABLE, END_LINE, SET_VARIABLE, BUILD_STRING, BUILD_NUMBER, CALL_FUNCTION
 
@@ -16,16 +16,15 @@ _is_acceptable_name = CustomRule(
 
 @RULES.add(
 	_is_acceptable_name,
-	Many(
+	Maybe(Many(
 		Or(
 			[_is_acceptable_name],
 			[CustomRule(
 				'is_acceptable_continues_name',
 				lambda token: isinstance(token, str) and token.isdigit()
 			)]
-		),
-		min_matches=0
-	)
+		)
+	))
 )
 def _(*tokens):
 	return [VARIABLE(''.join(tokens))]
@@ -80,7 +79,7 @@ def _(*args, parser=None):
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token('('),
-	Many(IsInstance(VARIABLE), min_matches=0),
+	Maybe(Many(IsInstance(VARIABLE), min_matches=1)),
 	Token(')'),
 	use_parser=True
 )
