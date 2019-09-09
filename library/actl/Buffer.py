@@ -23,8 +23,10 @@ class Buffer:
 		return [type(self)(head) for head in res]
 
 	def extract(self):
-		while self:
-			yield self.pop()
+		head = type(self)(itertools.chain(self._buff, self._head))
+		self._buff = []
+		self._head = iter('')
+		return head
 
 	def index(self, value):
 		for idx, elem in enumerate(self):
@@ -40,7 +42,11 @@ class Buffer:
 		src = list(self[:len(tmpl)])
 		return src == tmpl
 
-	def _load(self, quantity):
+	def _load(self, quantity=None):
+		if quantity is None:
+			self._buff.extend(self._head)
+			return
+
 		quantity = (quantity + 1) - len(self._buff)
 		if quantity > 0:
 			self._buff.extend(itertools.islice(self._head, None, quantity, None))
@@ -98,11 +104,16 @@ class Buffer:
 	def __add__(self, other):
 		res = type(self)()
 		res += self
+		res += other
 		return res
 
 	def __bool__(self):
 		self._load(1)
 		return bool(self._buff)
+
+	def __len__(self):
+		self._load()
+		return len(self._buff)
 
 	def __repr__(self):
 		lst = list(self[:11])

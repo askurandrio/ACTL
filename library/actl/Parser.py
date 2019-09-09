@@ -20,24 +20,19 @@ class Parser:
 				return True
 		return False
 
-	def _parse_definition(self):
-		while self._definition:
-			if self._apply_rule(self._definition):
-				continue
-			yield self._definition.pop()
-		
 	def __iter__(self):
 		flush = Buffer()
+
 		while self._buff:
 			if self._apply_rule(self._buff):
-				#self._buff = Buffer(list(flush + self._buff))
+				self._buff = flush.extract() + self._buff
 				continue
 			flush.append(self._buff.pop())
 			if END_LINE in flush:
 				idx_end_line = flush.index(END_LINE)
 				res = flush[:idx_end_line]
 				del flush[:idx_end_line]
-				yield from self._parse_definition()
+				yield from self._definition.extract()
 				yield from res
-		yield from self._parse_definition()
+		yield from self._definition
 		yield from flush

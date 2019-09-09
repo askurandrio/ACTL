@@ -84,9 +84,9 @@ def _(*args, parser=None):
 	use_parser=True
 )
 def _(function, op_token, *args, parser=None):
-	args = args[:-1]
+	args = [arg.name for arg in args[:-1]]
 	dst = VARIABLE.temp()
-	parser.define(CALL_FUNCTION(dst, function.name, op_token, args, {}))
+	parser.define(CALL_FUNCTION(dst.name, function.name, op_token, args, {}))
 	return [dst]
 
 
