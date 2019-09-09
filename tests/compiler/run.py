@@ -7,7 +7,6 @@ import itertools
 import subprocess
 
 
-
 WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 CASES_DIR = os.path.join(WORK_DIR, 'cases')
 DIR_SOURCE = os.path.join(os.path.dirname(os.path.dirname(WORK_DIR)), 'source')
@@ -40,19 +39,11 @@ def assertEqFile(first, second):
 
 
 class TestCompiler(unittest.TestCase):
-	@classmethod 
-	def setUpClass(cls):
-		warnings.simplefilter("ignore")
-
-		cls.pfname = os.path.join(CASES_DIR, 'test_compiler.yaml')
-		cls.out_fname = TempFile().name
-		os.environ['out_fname'] = cls.out_fname
-		warnings.simplefilter("ignore")
-
 	def compile(self, filename):
+		projectf = os.path.join(CASES_DIR, 'project.yaml')
 		filename = os.path.join(CASES_DIR, filename)
 		tmpl_filename = os.path.splitext(filename)[0] + '.a.cout'
-		process = subprocess.Popen(f'python {DIR_SOURCE}/main.py {self.pfname} {filename}')
+		process = subprocess.Popen(f'python {DIR_SOURCE}/actl {projectf} {filename}')
 		process.wait()
 		assert process.returncode == 0
 		assertEqFile(self.out_fname, tmpl_filename)
@@ -60,14 +51,19 @@ class TestCompiler(unittest.TestCase):
 	@staticmethod
 	def build():
 		for filename in sorted(os.listdir(CASES_DIR)):
-			if os.path.splitext(filename)[1] == '.a':
-				test_name = f'test_{os.path.splitext(filename)[0]}'
-				test_func = lambda self, filename=filename: self.compile(filename)
-				setattr(TestCompiler, test_name, test_func)
+			if os.path.splitext(filename)[1] != '.a':
+				continue
+
+			def test_func(self, filename=filename):
+				self.compile(filename)
+			test_name = f'test_{os.path.splitext(filename)[0]}'
+			setattr(TestCompiler, test_name, test_func)
 
 
 TestCompiler.build()
 
 
 if __name__ == '__main__':
+	warnings.simplefilter("ignore")
+	warnings.simplefilter("ignore")
 	unittest.main()

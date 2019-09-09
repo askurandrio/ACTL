@@ -1,6 +1,0 @@
-from: std
-translator:
-  pfunction:
-    kwargs:
-      out_file:
-        pget: "open(__import__('os').environ['out_fname'], 'w')"
