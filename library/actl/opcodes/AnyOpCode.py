@@ -12,8 +12,7 @@ class MetaAnyOpCode(type):
 	def __call__(self, *args, **kwargs):
 		inst = super().__call__(*args, **kwargs)
 		key = str(inst)
-		if key in self.__cache:
-			return self.__cache[key]
+		assert key not in self.__cache
 		self.__cache[key] = inst
 		return inst
 
@@ -27,7 +26,7 @@ class MetaAnyOpCode(type):
 		return f"opcodes.{self.__name__}"
 
 
-class AnyOpCode(metaclass=MetaAnyOpCode): #pylint: disable=R0903
+class AnyOpCode(metaclass=MetaAnyOpCode):  # pylint: disable=R0903
 
 	def __eq__(self, item):
 		return isinstance(item, type(self))

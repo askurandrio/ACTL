@@ -26,9 +26,9 @@ class Project:
 		if not hasattr(cls, 'this'):
 			cls.this = self
 		if projectf:
-			projectf = os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
 			assert source is None
-			source = yaml.load(open(projectf), Loader=yaml.SafeLoader)
+			projectf = self.__resolve_projectf(projectf)
+			source = self.yaml_load(open(projectf))
 		self.data = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
 		self._init(source)
 
@@ -72,13 +72,35 @@ class Project:
 			return func
 		return decorator
 
+	@classmethod
+	def __resolve_projectf(cls, projectf):
+		for suggestion in (
+			lambda: os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml'),
+			lambda: os.path.abspath(projectf)
+		):
+			path = suggestion()
+			if os.path.exists(path):
+				return path
+		raise RuntimeError(f'Can not resolve this projectf: {projectf}')
+
+	@staticmethod
+	def yaml_load(arg):
+		return yaml.load(arg, Loader=yaml.SafeLoader)
+
 	def __repr__(self):
 		return f'{type(self).__name__}(source={self.data})'
 
 
 @Project.add_default_handler('include')
 def _(project, arg):
-	sub_project = type(project)(projectf=arg)
+	kwargs = {}
+	if isinstance(arg, str):
+		kwargs['projectf'] = arg
+	elif isinstance(arg, Project):
+		kwargs['source'] = arg.data
+	else:
+		kwargs['source'] = arg
+	sub_project = type(project)(**kwargs)
 	project[arg] = sub_project
 	_recursive_update(project.data, sub_project.data)
 

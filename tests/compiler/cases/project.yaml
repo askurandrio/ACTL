@@ -1,0 +1,26 @@
+- include: std
+
+
+- py-func:
+   name: build
+   code: |
+      import actl
+
+      inp = open(this['inp']).read()
+      out = open(this['out']).read()
+
+      code = actl.parser(inp, this['rules'])
+      code = this['toString'](code)
+
+
+      print(code)
+      this['executorCls'](code, this['scope'])
+
+- py-func:
+   name: toString
+   args: code
+   code: |
+      res = []
+      for opcode in code:
+         res.append(opcode)
+      return res.join('\n')
