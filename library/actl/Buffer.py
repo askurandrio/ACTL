@@ -121,12 +121,15 @@ class Buffer:
 		return wrapper
 
 	@classmethod
-	def inf(cls, initf, stepf, contf=None):
-		contf = (lambda _: True) if contf is None else contf
+	def inf(cls, init_f, step_f, while_f=None):
+		if while_f is None:
+			def while_f(_):
+				return True
+
 		@cls.make
 		def func():
-			val = initf()
-			while contf(val):
+			val = init_f()
+			while while_f(val):
 				yield val
-				val = stepf(val)
+				val = step_f(val)
 		return func()
