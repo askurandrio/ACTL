@@ -1,10 +1,9 @@
 
 from actl.opcodes import END_LINE
 from actl.Buffer import Buffer
-from actl.util import ResultIsBuffer
 
 
-class Parser(metaclass=ResultIsBuffer):
+class Parser:
 	def __init__(self, rules, buff):
 		self._rules = rules
 		self._buff = buff
