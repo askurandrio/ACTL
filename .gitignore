@@ -1,3 +1,4 @@
 *.pyc
 /IDE
 /.idea
+/.pytest_cache
