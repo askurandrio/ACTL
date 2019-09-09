@@ -9,7 +9,7 @@
       inp = open(this['inp']).read()
       out = open(this['out']).read()
 
-      code = actl.parser(inp, this['rules'])
+      code = actl.Parser(this['rules'], inp)
       code = this['toString'](code)
 
 

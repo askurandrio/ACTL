@@ -34,7 +34,7 @@
 
       uinput = this['uinput']
       rules = this['rules']
-      parser = actl.parser(uinput, rules)
+      parser = actl.Parser(rules, uinput)
       code = list(parser.extract())
       print(code)
       this['executorCls'](code, this['scope'])

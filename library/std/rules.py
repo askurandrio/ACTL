@@ -32,7 +32,7 @@ def _(*tokens):
 
 
 @RULES.add(Token('\n'))
-def _(token):
+def _(_):
 	return [END_LINE]
 
 

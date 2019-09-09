@@ -1,13 +1,13 @@
 
 from actl.opcodes import END_LINE
-from .Buffer import Buffer
-from .util import ResultIsBuffer
+from actl.Buffer import Buffer
+from actl.util import ResultIsBuffer
 
 
-class parser(metaclass=ResultIsBuffer):
-	def __init__(self, buff, rules):
-		self._buff = buff
+class Parser(metaclass=ResultIsBuffer):
+	def __init__(self, rules, buff):
 		self._rules = rules
+		self._buff = buff
 		self._definition = Buffer()
 
 	def define(self, *opcodes):
