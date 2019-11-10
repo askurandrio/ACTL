@@ -43,5 +43,6 @@ def _(scope, opcode):
 def _(scope, opcode):
 	function = scope[opcode.function]
 	assert opcode.typeb == '('
-	assert not opcode.kwargs
-	scope[opcode.dst] = function.call(*opcode.args)
+	args = (scope[key] for key in opcode.args)
+	kwargs = {key:scope[key] for key in opcode.kwargs}
+	scope[opcode.dst] = function.call(*args, **kwargs)

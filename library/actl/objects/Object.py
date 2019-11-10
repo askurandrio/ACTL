@@ -84,7 +84,7 @@ class _Object:
 		return self.getAttr('__toStr__').call
 
 	def addFromPy(self, func):
-		self.fromPy = func
+		self.fromPy = lambda *args, **kwargs: func(self, *args, **kwargs)
 		return func
 
 	def _findAttr(self, key):
@@ -130,7 +130,6 @@ class _Object:
 	
 Object = _Object()
 Object.setAttr('__name__', 'Object')
-Object.setAttr('__class__', weakref.proxy(Object))
 
 
 class _NativeClass(_Object):

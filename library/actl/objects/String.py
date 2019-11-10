@@ -2,18 +2,19 @@ from .Object import BuildClass
 
 
 String = BuildClass('String')
+_default = object()
 
 
 @String.addMethodToClass('__init__')
-def _(cls):
+def _(cls, value=_default):
 	self = cls.getAttr('__super__').getAttr('__init__').call()
-	self._val = ''
+	if value is _default:
+		self._val = ''
+	else:
+		self._val = value
 	return self
 
 
 @String.addFromPy
-def _(val=''):
-	val = str(val)
-	string = String.call()
-	string._val = val
-	return string
+def _(cls, value):
+	return cls.call(value)
