@@ -103,12 +103,6 @@ def test_replace_after_replace(rules, parse):
 	assert parse(rules, ['a', 'b', 'c']) == ['a', 'r', 'c']
 
 
-def test_call(parse):
-	from std import RULES
-
-	assert parse(RULES, "print('')") == []
-
-
 def _expect(*expect):
 	def decorator(func):
 		def wrapper(*args, **kwargs):
