@@ -11,14 +11,26 @@ class Making(DynamicOpCode):
 		return self.opcode == other.opcode  # pylint: disable=E1101
 
 
+class _Counter:
+	def __init__(self, count):
+		self._init = count
+		self._count = self._init
+
+	def reset(self):
+		self._count = self._init
+
+	def __call__(self):
+		self._count += 1
+		return self._count
+
+
 class VARIABLE(DynamicOpCode):
 	__slots__ = ('name',)
-	__counts = 10
+	counter = _Counter(10)
 	
 	@classmethod
 	def temp(cls):
-		cls.__counts += 1
-		return cls(f'__IV{cls.__counts}')
+		return cls(f'__IV{cls.counter()}')
 
 
 END_LINE = DynamicOpCode.create('END_LINE')()
