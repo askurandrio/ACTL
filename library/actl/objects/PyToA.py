@@ -12,8 +12,9 @@ def _(cls, value):
 
 
 @PyToA.addMethod('__call__')
-def _(self, *args, **kwargs):
-	self._value(*args, **kwargs)
+def _(self, *args):
+	args = (arg._val for arg in args)
+	self._value(*args)
 
 
 @PyToA.addMethod('__getAttr__')

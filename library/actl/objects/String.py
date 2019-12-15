@@ -2,16 +2,12 @@ from .Object import BuildClass
 
 
 String = BuildClass('String')
-_default = object()
 
 
 @String.addMethodToClass('__init__')
-def _(cls, value=_default):
+def _(cls, value=''):
 	self = cls.getAttr('__super__').getAttr('__init__').call()
-	if value is _default:
-		self._val = ''
-	else:
-		self._val = value
+	self._val = value
 	return self
 
 
