@@ -35,9 +35,10 @@ class VARIABLE(DynamicOpCode):
 
 END_LINE = DynamicOpCode.create('END_LINE')()
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
-BUILD_STRING = DynamicOpCode.create('BUILD_STRING', 'dst', 'string')
-BUILD_NUMBER = DynamicOpCode.create('BUILD_NUMBER', 'dst', 'number')
-CALL_FUNCTION = DynamicOpCode.create('CALL_FUNCTION', 'dst', 'function', 'typeb', 'args', 'kwargs')
+CALL_FUNCTION = DynamicOpCode.create(
+	'CALL_FUNCTION', 'dst', 'function', typeb='(', args=[], kwargs={}
+)
+CALL_FUNCTION_STATIC = CALL_FUNCTION.create('CALL_FUNCTION_STATIC')
 
 PASS = DynamicOpCode.create('PASS')
 JUMP = DynamicOpCode.create('JUMP', 'label')

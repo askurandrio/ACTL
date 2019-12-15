@@ -30,8 +30,10 @@ class AnyOpCode(metaclass=MetaAnyOpCode):  # pylint: disable=R0903
 
 class DynamicOpCode(AnyOpCode):
 	__slots__ = ()
+	_defaults = {}
 
 	def __init__(self, *args, **kwargs):
+		kwargs = {**self._defaults, **kwargs}
 		for key, value in zip(self.__slots__, args):
 			setattr(self, key, value)
 		for key, value in kwargs.items():
@@ -51,6 +53,8 @@ class DynamicOpCode(AnyOpCode):
 		return '{}({})'.format(type(self).__name__, attributes)
 
 	@classmethod
-	def create(cls, name, *attributes):
-		class_ = type(name, (cls,), {'__slots__': attributes})
+	def create(cls, name, *attributes, **defaults):
+		attributes = cls.__slots__ + attributes
+		defaults = {**cls._defaults, **defaults}
+		class_ = type(name, (cls,), {'__slots__': attributes, '_defaults': defaults})
 		return class_

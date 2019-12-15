@@ -13,7 +13,7 @@
             this['uinput'] = Buffer(input('>>> ') + '\n')
          except EOFError:
             break
-         except Exception: #pylint: disable=W0703
+         except Exception:
             traceback.print_exc()
             break
          this['std', 'build']()

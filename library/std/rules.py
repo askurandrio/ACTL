@@ -2,7 +2,7 @@
 from actl.syntax import \
 	SyntaxRules, CustomRule, IsInstance, Many, Or, Token, Maybe
 from actl.opcodes import \
-	VARIABLE, END_LINE, SET_VARIABLE, BUILD_STRING, BUILD_NUMBER, CALL_FUNCTION
+	VARIABLE, END_LINE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
 
 
 RULES = SyntaxRules()
@@ -61,7 +61,7 @@ def _(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = VARIABLE.temp()
-	parser.define(BUILD_STRING(dst, string))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='String', typeb='(', args=[string]))
 	inp[:0] = [dst]
 	
 	
@@ -72,7 +72,7 @@ _is_digit = CustomRule('is_digit', lambda token: isinstance(token, str) and toke
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = VARIABLE.temp()
-	parser.define(BUILD_NUMBER(dst, number))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='Number', typeb='(', args=[number]))
 	return [dst]
 
 

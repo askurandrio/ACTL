@@ -27,16 +27,11 @@ def _(scope, opcode):
 	scope[opcode.name]
 
 
-@_addHandler(actl.opcodes.BUILD_STRING)
+@_addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
 def _(scope, opcode):
-	stringCls = scope[actl.opcodes.VARIABLE('String').name]
-	scope[opcode.dst.name] = stringCls.fromPy(opcode.string)
-
-
-@_addHandler(actl.opcodes.BUILD_NUMBER)
-def _(scope, opcode):
-	numberCls = scope[actl.opcodes.VARIABLE('Number').name]
-	scope[opcode.dst.name] = numberCls.fromPy(opcode.number)
+	function = scope[opcode.function]
+	assert opcode.typeb == '('
+	scope[opcode.dst] = function.call(*opcode.args, **opcode.kwargs)
 
 
 @_addHandler(actl.opcodes.CALL_FUNCTION)
