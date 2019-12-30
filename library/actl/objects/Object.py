@@ -240,7 +240,8 @@ class BuildClass(_Object):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
 			cls_name = cls_name[0].lower() + cls_name[1:]
-			method = _makeMethod(f'{cls_name}.{name}', func)
+			func.__name__ = f'{cls_name}.{name}'
+			method = _makeMethod(func.__name__, func)
 			self.getAttr('__self__').setItem(name, method)
 			return func
 		
@@ -249,7 +250,8 @@ class BuildClass(_Object):
 	def addMethodToClass(self, name):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
-			method = _makeMethod(f'{cls_name}.{name}', func)
+			func.__name__ = f'{cls_name}.{name}'
+			method = _makeMethod(func.__name__, func)
 			self.setAttr(name, method)
 			return func
 		

@@ -1,16 +1,17 @@
 import pdb
 
-from actl import Buffer
+from actl.Buffer import Buffer
+from actl.opcodes import VARIABLE
 
 
 class Template:
 	def __init__(self, *template):
 		self._template = template
 
-	def __call__(self, buff):
+	def __call__(self, scope, buff):
 		res = Buffer()
 		for tmpl in self._template:
-			tmpl_res = tmpl(buff)
+			tmpl_res = tmpl(scope, buff)
 			if tmpl_res is None:
 				return None
 			res += tmpl_res
@@ -37,7 +38,7 @@ class Rule:
 class Pdb(Rule):
 	__slots__ = ()
 	
-	def __call__(self, inp):
+	def __call__(self, _, inp):
 		pdb.set_trace()
 		return Buffer()
 
@@ -45,7 +46,7 @@ class Pdb(Rule):
 class CustomRule(Rule):
 	__slots__ = ('name', 'func')
 	
-	def __call__(self, inp):
+	def __call__(self, _, inp):
 		try:
 			token = inp.pop()
 		except IndexError:
@@ -61,7 +62,7 @@ class CustomRule(Rule):
 class Token(Rule):
 	__slots__ = ('token',)
 	
-	def __call__(self, inp):
+	def __call__(self, _, inp):
 		try:
 			val = inp.pop()
 		except IndexError:
@@ -74,7 +75,7 @@ class Token(Rule):
 class IsInstance(Rule):
 	__slots__ = ('cls',)
 	
-	def __call__(self, inp):
+	def __call__(self, _, inp):
 		try:
 			token = inp.pop()
 		except IndexError:
@@ -91,11 +92,11 @@ class Many(Rule):
 		assert min_matches != 0, f'min_matched<{min_matches}> == 0. Use Maybe for this case'
 		super().__init__(Template(*template), min_matches)
 		
-	def __call__(self, inp):
+	def __call__(self, scope, inp):
 		res = Buffer()
 		for matches in Buffer.inf():
 			buff = inp.copy()
-			tmpl_res = self.template(buff)
+			tmpl_res = self.template(scope, buff)
 			if tmpl_res is None:
 				if matches < self.min_matches:
 					return None
@@ -111,11 +112,11 @@ class Or(Rule):
 	def __init__(self, *templates):
 		super().__init__(templates)
 	
-	def __call__(self, inp):
+	def __call__(self, scope, inp):
 		for template in self.templates:
 			buff = inp.copy()
 			template = Template(*template)
-			res = template(buff)
+			res = template(scope, buff)
 			if res is not None:
 				inp[:] = buff
 				return res
@@ -128,10 +129,20 @@ class Maybe(Rule):
 	def __init__(self, *template):
 		super().__init__(Template(*template))
 	
-	def __call__(self, buff):
+	def __call__(self, scope, buff):
 		inp = buff.copy()
-		res = self.template(inp)
+		res = self.template(scope, inp)
 		if res is not None:
 			buff[:] = inp
 			return res
 		return Buffer()
+
+
+class Value(Rule):
+	__slots__ = ('value',)
+
+	def __call__(self, scope, buff):
+		if (VARIABLE != buff[0]) or (scope.get(buff[0].name) != self.value):
+			return None
+
+		return Buffer.of(buff.pop(0))

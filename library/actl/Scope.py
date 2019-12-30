@@ -1,8 +1,11 @@
 
 
 class Scope:
-	def __init__(self):
-		self.__head = {}
+	def __init__(self, head):
+		self.__head = head
+
+	def get(self, key, default=None):
+		return self.__head.get(key, default)
 
 	def __getitem__(self, key):
 		return self.__head[key]
@@ -17,7 +20,7 @@ class Scope:
 class __ScopeChild(Scope):
 	def __init__(self, parent):
 		self.__parent = parent
-		super().__init__()
+		super().__init__({})
 
 	def __contains__(self, key):
 		if key in self.__parent:

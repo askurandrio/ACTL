@@ -6,9 +6,10 @@ from . import objects
 from .Buffer import Buffer
 from .Parser import Parser
 from .Project import Project
+from .Scope import Scope
 
 
-def __make_loggers():
+def _make_logger():
 	logger = logging.getLogger('actl')
 	formatter = logging.Formatter('%(process)d %(asctime)s: [%(levelname)s] %(message)s')
 
@@ -17,4 +18,4 @@ def __make_loggers():
 	logger.addHandler(stdout)
 
 
-__make_loggers()
+_make_logger()
