@@ -31,13 +31,13 @@
    name: build
    code: |
       import actl
+      import std
 
-      uinput = this['uinput']
-      rules = this['rules']
-      parser = actl.Parser(rules, uinput)
+      scope = this['scope']
+      parser = actl.Parser(scope, this['rules'], this['uinput'])
       code = list(parser)
       print(code)
-      this['executorCls'](code, this['scope'])
+      std.Executor(code, scope)
 
 
 - py-key:
@@ -52,24 +52,24 @@
    code: |
       import actl
       import std
-      scope = std.Scope()
-      scope['print'] = actl.objects.PyToA.fromPy(print)
-      scope['String'] = actl.objects.String
-      return scope
 
 
-- py-key:
-   name: executorCls
-   code: |
-      import std
-      return std.Executor
+      def _getPyToAVars():
+         for varName in ('True', 'False', 'print'):
+            var = eval(varName)
+            yield varName, actl.objects.PyToA.fromPy(var)
 
 
-- pypropl scope:
-    pydef get(): |
-      import std
-      import actl
-      scope = std.Scope()
-      scope.update({'stack':[], 'codes':[], actl.tokens.VARIABLE('print'):'print'})
-      scope.update(__import__('std.abuiltins').abuiltins.abuiltins)
-      return scope
+      def _getAVars():
+         for varName, clsName in (
+            ('String', 'String'),
+            ('while', 'While')
+         ):
+            var = getattr(actl.objects, clsName)
+            yield varName, var
+
+
+      return std.Scope({
+         **dict(_getPyToAVars())
+         **dict(_getAVars())
+      })

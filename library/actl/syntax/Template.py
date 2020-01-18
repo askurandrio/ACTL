@@ -46,17 +46,22 @@ class Pdb(Rule):
 class CustomRule(Rule):
 	__slots__ = ('name', 'func')
 	
-	def __call__(self, _, inp):
+	def __call__(self, scope, inp):
 		try:
 			token = inp.pop()
 		except IndexError:
 			return None
-		if self.func(token):
+		if self.func(scope, token):
 			return Buffer([token])
 		return None
 
 	def __repr__(self):
 		return f'{type(self).__name__}({self.name})'
+
+	@classmethod
+	def create(cls, func, name=None):
+		name = func.__name__ if name is None else name
+		return cls(name, func)
 
 
 class Token(Rule):
