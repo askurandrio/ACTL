@@ -1,6 +1,6 @@
 
 from actl.syntax import \
-	SyntaxRules, CustomRule, IsInstance, Many, Or, Token, Maybe
+	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe
 from actl.opcodes import \
 	VARIABLE, END_LINE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
 
@@ -8,10 +8,14 @@ from actl.opcodes import \
 RULES = SyntaxRules()
 
 
-_is_acceptable_name = CustomRule(
-	'is_acceptable_name',
-	lambda token: isinstance(token, str) and (token.isalpha() or token in ('_',))
-)
+@CustomTemplate.create
+def _is_acceptable_name(_, token):
+	return isinstance(token, str) and (token.isalpha() or token in ('_',))
+
+
+@CustomTemplate.create
+def _is_acceptable_continues_name(_, token):
+	return isinstance(token, str) and token.isdigit()
 
 
 @RULES.add(
@@ -19,10 +23,7 @@ _is_acceptable_name = CustomRule(
 	Maybe(Many(
 		Or(
 			[_is_acceptable_name],
-			[CustomRule(
-				'is_acceptable_continues_name',
-				lambda token: isinstance(token, str) and token.isdigit()
-			)]
+			[_is_acceptable_continues_name]
 		)
 	))
 )
@@ -63,9 +64,11 @@ def _(inp, parser):
 	dst = VARIABLE.temp()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='String', typeb='(', args=[string]))
 	inp[:0] = [dst]
-	
-	
-_is_digit = CustomRule('is_digit', lambda token: isinstance(token, str) and token.isdigit())
+
+
+@CustomTemplate.create
+def _is_digit(_, token):
+	return isinstance(token, str) and token.isdigit()
 
 
 @RULES.add(Many(_is_digit), Maybe(Token('.'), Many(_is_digit)), use_parser=True)

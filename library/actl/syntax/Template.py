@@ -4,9 +4,24 @@ from actl.Buffer import Buffer
 from actl.opcodes import VARIABLE
 
 
-class Template:
+class AbstractTemplate:
+	def __init__(self, *args, **kwargs):
+		kwargs.update(zip(self.__slots__, args))
+		for key, value in kwargs.items():
+			setattr(self, key, value)
+		for key in self.__slots__:
+			assert hasattr(self, key), f'{self} has no attribute {key}'
+
+	def __repr__(self):
+		args = ', '.join(str(getattr(self, key)) for key in self.__slots__)
+		return f'{type(self).__name__}({args})'
+
+
+class Template(AbstractTemplate):
+	__slots__ = ('_template',)
+
 	def __init__(self, *template):
-		self._template = template
+		super().__init__(template)
 
 	def __call__(self, scope, buff):
 		res = Buffer()
@@ -22,20 +37,7 @@ class Template:
 		return f'{type(self).__name__}({repr_template})'
 
 
-class Rule:
-	def __init__(self, *args, **kwargs):
-		kwargs.update(zip(self.__slots__, args))
-		for key, value in kwargs.items():
-			setattr(self, key, value)
-		for key in self.__slots__:
-			assert hasattr(self, key), f'{self} has no attribute {key}'
-	
-	def __repr__(self):
-		args = ', '.join(str(getattr(self, key)) for key in self.__slots__)
-		return f'{type(self).__name__}({args})'
-
-
-class Pdb(Rule):
+class Pdb(AbstractTemplate):
 	__slots__ = ()
 	
 	def __call__(self, _, inp):
@@ -43,7 +45,7 @@ class Pdb(Rule):
 		return Buffer()
 
 
-class CustomRule(Rule):
+class CustomTemplate(AbstractTemplate):
 	__slots__ = ('name', 'func')
 	
 	def __call__(self, scope, inp):
@@ -51,12 +53,10 @@ class CustomRule(Rule):
 			token = inp.pop()
 		except IndexError:
 			return None
+
 		if self.func(scope, token):
 			return Buffer([token])
 		return None
-
-	def __repr__(self):
-		return f'{type(self).__name__}({self.name})'
 
 	@classmethod
 	def create(cls, func, name=None):
@@ -64,7 +64,7 @@ class CustomRule(Rule):
 		return cls(name, func)
 
 
-class Token(Rule):
+class Token(AbstractTemplate):
 	__slots__ = ('token',)
 	
 	def __call__(self, _, inp):
@@ -77,7 +77,7 @@ class Token(Rule):
 		return None
 	
 
-class IsInstance(Rule):
+class IsInstance(AbstractTemplate):
 	__slots__ = ('cls',)
 	
 	def __call__(self, _, inp):
@@ -90,7 +90,7 @@ class IsInstance(Rule):
 		return None
 
 
-class Many(Rule):
+class Many(AbstractTemplate):
 	__slots__ = ('template', 'min_matches')
 	
 	def __init__(self, *template, min_matches=1):
@@ -111,7 +111,7 @@ class Many(Rule):
 			res += tmpl_res
 
 
-class Or(Rule):
+class Or(AbstractTemplate):
 	__slots__ = ('templates',)
 	
 	def __init__(self, *templates):
@@ -128,7 +128,7 @@ class Or(Rule):
 		return None
 
 
-class Maybe(Rule):
+class Maybe(AbstractTemplate):
 	__slots__ = ('template',)
 	
 	def __init__(self, *template):
@@ -143,7 +143,7 @@ class Maybe(Rule):
 		return Buffer()
 
 
-class Value(Rule):
+class Value(AbstractTemplate):
 	__slots__ = ('value',)
 
 	def __call__(self, scope, buff):
