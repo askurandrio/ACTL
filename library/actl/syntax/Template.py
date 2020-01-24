@@ -25,10 +25,10 @@ class Template(AbstractTemplate):
 	def __init__(self, *template):
 		super().__init__(template)
 
-	def __call__(self, scope, buff):
+	def __call__(self, parser, buff):
 		res = Buffer()
 		for tmpl in self._template:
-			tmpl_res = tmpl(scope, buff)
+			tmpl_res = tmpl(parser, buff)
 			if tmpl_res is None:
 				return None
 			res += tmpl_res
@@ -50,13 +50,13 @@ class Pdb(AbstractTemplate):
 class CustomTemplate(AbstractTemplate):
 	__slots__ = ('name', 'func')
 
-	def __call__(self, scope, inp):
+	def __call__(self, parser, inp):
 		try:
 			token = inp.pop()
 		except IndexError:
 			return None
 
-		if self.func(scope, token):
+		if self.func(parser, token):
 			return Buffer([token])
 		return None
 
@@ -99,11 +99,11 @@ class Many(AbstractTemplate):
 		assert min_matches != 0, f'min_matched<{min_matches}> == 0. Use Maybe for this case'
 		super().__init__(Template(*template), min_matches)
 
-	def __call__(self, scope, inp):
+	def __call__(self, parser, inp):
 		res = Buffer()
 		for matches in Buffer.inf():
 			buff = inp.copy()
-			tmpl_res = self.template(scope, buff)
+			tmpl_res = self.template(parser, buff)
 			if tmpl_res is None:
 				if matches < self.min_matches:
 					return None
@@ -118,11 +118,11 @@ class Or(AbstractTemplate):
 	def __init__(self, *templates):
 		super().__init__(templates)
 
-	def __call__(self, scope, inp):
+	def __call__(self, parser, inp):
 		for template in self.templates:
 			buff = inp.copy()
 			template = Template(*template)
-			res = template(scope, buff)
+			res = template(parser, buff)
 			if res is not None:
 				inp[:] = buff
 				return res
@@ -135,9 +135,9 @@ class Maybe(AbstractTemplate):
 	def __init__(self, *template):
 		super().__init__(Template(*template))
 
-	def __call__(self, scope, buff):
+	def __call__(self, parser, buff):
 		inp = buff.copy()
-		res = self.template(scope, inp)
+		res = self.template(parser, inp)
 		if res is not None:
 			buff[:] = inp
 			return res
@@ -147,11 +147,16 @@ class Maybe(AbstractTemplate):
 class Value(AbstractTemplate):
 	__slots__ = ('value',)
 
-	def __call__(self, scope, buff):
-		if (VARIABLE != buff[0]) or (scope.get(buff[0].name) != self.value):
+	def __call__(self, parser, buff):
+		if (VARIABLE != buff[0]) or (parser.scope.get(buff[0].name) != self.value):
 			return None
 
 		return Buffer.of(buff.pop(0))
+
+
+class Frame(AbstractTemplate):
+	def __call__(self, parser, buff):
+		pass
 
 
 class _End(AbstractTemplate):

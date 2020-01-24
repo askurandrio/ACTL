@@ -5,7 +5,7 @@ from actl.Buffer import Buffer
 
 class Parser:
 	def __init__(self, scope, rules, buff):
-		self._scope = scope
+		self.scope = scope
 		self._rules = rules
 		self._buff = buff
 		self._definition = Buffer()
@@ -15,7 +15,7 @@ class Parser:
 
 	def _apply_rule(self):
 		for rule in self._rules:
-			res = rule(self._scope, self._buff)
+			res = rule(self, self._buff)
 			if res is not None:
 				res(self)
 				return True

@@ -8,8 +8,9 @@ from actl.opcodes import \
 RULES = SyntaxRules()
 
 
-def _runtimeRule(scope, inp):
+def _runtimeRule(parser, inp):
 	var = inp[0]
+	scope = parser.scope
 
 	if not (
 		(VARIABLE == var) and
@@ -19,7 +20,7 @@ def _runtimeRule(scope, inp):
 		return
 
 	syntaxRule = scope[var.name].getAttr('__syntaxRule__')
-	return syntaxRule(scope, inp)
+	return syntaxRule(parser, inp)
 
 
 RULES.rawAdd(_runtimeRule)
