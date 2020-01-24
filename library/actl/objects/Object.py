@@ -139,9 +139,9 @@ class _Object:
 			parent = True
 		if self in _Object.__stack:
 			return '{...}'
-		else:
-			_Object.__stack.add(self)
-			selfInStr = f'{type(self).__name__}<{self._scope}>'
+
+		_Object.__stack.add(self)
+		selfInStr = f'{type(self).__name__}<{self._scope}>'
 		if parent:
 			del _Object.__stack
 		return selfInStr

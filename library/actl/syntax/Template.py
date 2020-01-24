@@ -108,8 +108,7 @@ class Many(AbstractTemplate):
 				if matches < self.min_matches:
 					return None
 				return res
-			else:
-				inp[:] = buff
+			inp[:] = buff
 			res += tmpl_res
 
 

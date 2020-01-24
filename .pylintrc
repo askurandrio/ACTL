@@ -1,4 +1,4 @@
 [MESSAGES CONTROL]
-    disable=missing-module-docstring,missing-function-docstring,missing-class-docstring,too-few-public-methods,invalid-name,bad-continuation
+    disable=missing-module-docstring,missing-function-docstring,missing-class-docstring,too-few-public-methods,invalid-name,bad-continuation,fixme
 [FORMAT]
     indent-string='	'

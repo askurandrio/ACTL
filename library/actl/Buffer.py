@@ -135,15 +135,15 @@ class Buffer:
 	@classmethod
 	def inf(cls, init_f=None, step_f=None, condition=None):
 		if init_f is None:
-			def init_f():
+			def init_f():  # pylint: disable=function-redefined
 				return 0
 
 		if step_f is None:
-			def step_f(value):
+			def step_f(value):  # pylint: disable=function-redefined
 				return value + 1
 
 		if condition is None:
-			def condition(_):
+			def condition(_):  # pylint: disable=function-redefined
 				return True
 
 		@cls.make
