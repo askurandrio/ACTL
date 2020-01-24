@@ -6,6 +6,8 @@ _default = object()
 
 
 class AGenericKeyError(Exception):
+	MSG = 'Generic Error: {key}'
+
 	def __init__(self, msg='', key=None):
 		if (key is not None) and (not msg):
 			msg = self.MSG.format(key=key)
@@ -29,53 +31,26 @@ def _loadPropIfNeed(self, val):
 		return prop(self)
 
 
-def _getSpecialAttr(self, key):
-	if key in ('__class__', '__self__'):
-		return self._scope[key]
-
-	if key == '__super__':
-		try:
-			super_ = self._scope[key]
-		except KeyError:
-			self_ = self.getAttr('__class__').getAttr('__self__')
-			super_ = self_.getItem(key)
-		return super_.get(self)
-
-	if key == '__getAttr__':
-		try:
-			res = self._scope['__getAttr__']
-		except KeyError:
-			cls = self.getAttr('__class__')
-			self_ = cls.getAttr('__self__')
-			try:
-				res = self_.getItem('__getAttr__')
-			except AKeyNotFound:
-				super_ = self.getAttr('__super__')
-				return super_.getAttr('__getAttr__')
-		return res.get(self)
-	raise ANotFoundAttribute(f'This is not special attrribute: {key}')
-
-
 class _Object:
-	def __init__(self, initScope=None):
-		if initScope is None:
-			initScope = {}
-		self._scope = initScope
+	def __init__(self, head=None):
+		if head is None:
+			head = {}
+		self._head = head
 
 	def getAttr(self, key):
 		try:
-			return _getSpecialAttr(self, key)
+			return self._getSpecialAttr(key)
 		except ANotFoundAttribute:
 			pass
 		return self.getAttr('__getAttr__').call(key)
 
 	def setAttr(self, key, value=_default):
 		if value is not _default:
-			self._scope[key] = value
+			self._head[key] = value
 			return None
 
 		def decorator(value):
-			self._scope[key] = value
+			self._head[key] = value
 			return value
 
 		return decorator
@@ -92,23 +67,22 @@ class _Object:
 		return self.getAttr('__call__').call(*args, **kwargs)
 
 	def equal(self, other):
-		return self._scope == other._scope
+		return self._head == other._head  # pylint: disable=protected-access
 
-	@property
-	def get(self, *args, **kwargs):
-		return self.getAttr('__get__').call
+	def get(self, instance):
+		return self.getAttr('__get__').call(instance)
 
-	@property
 	def toStr(self):
-		return self.getAttr('__toStr__').call
+		return self.getAttr('__toStr__').call()
 
 	def addFromPy(self, func):
-		self.fromPy = lambda *args, **kwargs: func(self, *args, **kwargs)
+		fromPy = lambda *args, **kwargs: func(self, *args, **kwargs)
+		self.fromPy = fromPy  # pylint: disable=attribute-defined-outside-init
 		return func
 
-	def _findAttr(self, key):
+	def findAttr(self, key):
 		try:
-			return self._scope[key]
+			return self._head[key]
 		except KeyError:
 			ex = ANotFoundAttribute(key=key)
 		if self is Object:
@@ -120,28 +94,53 @@ class _Object:
 			pass
 		try:
 			super_ = self.getAttr('__super__')
-			return super_._findAttr(key)
+			return super_.findAttr(key)  # pylint: disable=protected-access
 		except ANotFoundAttribute:
 			raise ex
+
+	def _getSpecialAttr(self, key):
+		if key in ('__class__', '__self__'):
+			return self._head[key]
+
+		if key == '__super__':
+			try:
+				super_ = self._head[key]
+			except KeyError:
+				self_ = self.getAttr('__class__').getAttr('__self__')
+				super_ = self_.getItem(key)
+			return super_.get(self)
+
+		if key == '__getAttr__':
+			try:
+				res = self._head['__getAttr__']
+			except KeyError:
+				cls = self.getAttr('__class__')
+				self_ = cls.getAttr('__self__')
+				try:
+					res = self_.getItem('__getAttr__')
+				except AKeyNotFound:
+					super_ = self.getAttr('__super__')
+					return super_.getAttr('__getAttr__')
+			return res.get(self)
+		raise ANotFoundAttribute(f'This is not special attrribute: {key}')
 
 	def __repr__(self):
 		return str(self)
 
 	def __str__(self):
-		if ('__name__' in self._scope) and (('__parents__' in self._scope) or (self is Object)):
-			return f"class {self._scope['__name__']}"
+		if ('__name__' in self._head) and (('__parents__' in self._head) or (self is Object)):
+			return f"class {self._head['__name__']}"
 		#Todo: remove
-		try:
-			_Object.__stack
+		if hasattr(_Object, '__stack'):
 			parent = False
-		except AttributeError:
+		else:
 			_Object.__stack = set()
 			parent = True
 		if self in _Object.__stack:
 			return '{...}'
 
 		_Object.__stack.add(self)
-		selfInStr = f'{type(self).__name__}<{self._scope}>'
+		selfInStr = f'{type(self).__name__}<{self._head}>'
 		if parent:
 			del _Object.__stack
 		return selfInStr
@@ -229,10 +228,10 @@ class _Self(_NativeClass):
 
 def _Object__getAttr__(self, key):
 	try:
-		return _getSpecialAttr(self, key)
+		return self._getSpecialAttr(key)
 	except ANotFoundAttribute:
 		pass
-	attr = self._findAttr(key)
+	attr = self.findAttr(key)
 	return _loadPropIfNeed(self, attr)
 
 
@@ -290,20 +289,15 @@ def _(cls, *args, **kwargs):
 
 
 @BuildClass.addMethodToClass(Object, '__toStr__')
+def _(self):
+	name = self.getAttr('__name__')
+	return f"class '{name}'"
+
+
 @BuildClass.addMethod(Object, '__toStr__')
 def _(self):
-	def isClass():
-		try:
-			self.getAttr('__self__')
-			(self is Object) or self.getAttr('__parents__')
-		except KeyError:
-			return False
-		return True
-	if isClass():
-		name = self.getAttr('__name__')
-		return f"class '{name}'"
 	name = self.getAttr('__class__').getAttr('__name__')
-	scope = self._scope
+	scope = self._head
 	return f'{name}<{scope}>'
 
 
@@ -313,16 +307,16 @@ class _Super(_NativeClass):
 		self._parents = parents
 		self._aSelf = aSelf
 
-	def _findAttr(self, key):
+	def findAttr(self, key):
 		for parent in self._parents:
 			try:
-				return parent._findAttr(key)
+				return parent.findAttr(key)
 			except ANotFoundAttribute:
 				pass
 		raise ANotFoundAttribute(key=key)
 
 	def getAttr(self, key):
-		return _loadPropIfNeed(self._aSelf, self._findAttr(key))
+		return _loadPropIfNeed(self._aSelf, self.findAttr(key))
 
 	@classmethod
 	def make(cls, parents):
@@ -340,7 +334,7 @@ class _SuperSelf(_Super):
 		super().__init__(parents, aSelf)
 		self._parents = [parent.getAttr('__self__') for parent in self._parents]
 
-	def _findAttr(self, key):
+	def findAttr(self, key):
 		for parent in self._parents:
 			try:
 				return parent.getItem(key)

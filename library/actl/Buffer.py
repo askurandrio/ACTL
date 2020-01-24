@@ -34,7 +34,7 @@ class Buffer:
 				return idx
 		raise IndexError(f'Cant search this value: {value}')
 
-	def append(self, *items):
+	def append(self, *items):  # pylint: disable=no-self-use
 		self += items
 
 	def startswith(self, tmpl):

@@ -1,5 +1,4 @@
-
-from .opcodes import AnyOpCode
+from actl.opcodes import AnyOpCode
 
 
 class Code(AnyOpCode, list):

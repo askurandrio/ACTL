@@ -107,7 +107,7 @@ def _(project, arg):
 
 @Project.add_default_handler('py-code')
 def _(project, arg):
-	exec(arg, {'this': Project.view, 'project': project}, None)
+	exec(arg, {'this': Project.view, 'project': project}, None)  # pylint: disable=exec-used
 
 
 class ProjectView:

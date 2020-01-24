@@ -8,7 +8,7 @@ class MetaAnyOpCode(type):
 		return False
 
 	def __ne__(self, item):
-		return not (self == item)
+		return not self == item
 
 	def __hash__(self):
 		return hash(repr(self))
@@ -19,7 +19,7 @@ class MetaAnyOpCode(type):
 
 class AnyOpCode(metaclass=MetaAnyOpCode):  # pylint: disable=R0903
 	def __ne__(self, item):
-		return not (self == item)
+		return not self == item
 
 	def __hash__(self):
 		return hash(repr(self))
@@ -44,7 +44,7 @@ class DynamicOpCode(AnyOpCode):
 		return {key: getattr(self, key) for key in self.__slots__}
 
 	def __eq__(self, other):
-		if type(self) != type(other):
+		if type(self) != type(other):  # pylint: disable=unidiomatic-typecheck
 			return False
 		return self._getAttributes() == other._getAttributes()
 
