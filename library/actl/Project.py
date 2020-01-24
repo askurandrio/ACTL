@@ -16,7 +16,7 @@ yaml.add_constructor(
 	yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
 	lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))
 )
-	
+
 
 class Project:
 	_DEFAULT_HANDLERS = {}
@@ -64,7 +64,7 @@ class Project:
 		for key in keys[:-1]:
 			base = base[key]
 		base[keys[-1]] = value
-		
+
 	@classmethod
 	def add_default_handler(cls, name):
 		def decorator(func):

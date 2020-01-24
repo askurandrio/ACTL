@@ -41,7 +41,7 @@ class Template(AbstractTemplate):
 
 class Pdb(AbstractTemplate):
 	__slots__ = ()
-	
+
 	def __call__(self, _, inp):
 		pdb.set_trace()
 		return Buffer()
@@ -49,7 +49,7 @@ class Pdb(AbstractTemplate):
 
 class CustomTemplate(AbstractTemplate):
 	__slots__ = ('name', 'func')
-	
+
 	def __call__(self, scope, inp):
 		try:
 			token = inp.pop()
@@ -68,7 +68,7 @@ class CustomTemplate(AbstractTemplate):
 
 class Token(AbstractTemplate):
 	__slots__ = ('token',)
-	
+
 	def __call__(self, _, inp):
 		try:
 			val = inp.pop()
@@ -77,11 +77,11 @@ class Token(AbstractTemplate):
 		if self.token == val:
 			return Buffer([val])
 		return None
-	
+
 
 class IsInstance(AbstractTemplate):
 	__slots__ = ('cls',)
-	
+
 	def __call__(self, _, inp):
 		try:
 			token = inp.pop()
@@ -94,11 +94,11 @@ class IsInstance(AbstractTemplate):
 
 class Many(AbstractTemplate):
 	__slots__ = ('template', 'min_matches')
-	
+
 	def __init__(self, *template, min_matches=1):
 		assert min_matches != 0, f'min_matched<{min_matches}> == 0. Use Maybe for this case'
 		super().__init__(Template(*template), min_matches)
-		
+
 	def __call__(self, scope, inp):
 		res = Buffer()
 		for matches in Buffer.inf():
@@ -115,10 +115,10 @@ class Many(AbstractTemplate):
 
 class Or(AbstractTemplate):
 	__slots__ = ('templates',)
-	
+
 	def __init__(self, *templates):
 		super().__init__(templates)
-	
+
 	def __call__(self, scope, inp):
 		for template in self.templates:
 			buff = inp.copy()
@@ -132,10 +132,10 @@ class Or(AbstractTemplate):
 
 class Maybe(AbstractTemplate):
 	__slots__ = ('template',)
-	
+
 	def __init__(self, *template):
 		super().__init__(Template(*template))
-	
+
 	def __call__(self, scope, buff):
 		inp = buff.copy()
 		res = self.template(scope, inp)

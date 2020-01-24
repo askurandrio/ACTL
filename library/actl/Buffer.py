@@ -5,7 +5,7 @@ class Buffer:
 	def __init__(self, head=iter('')):
 		self._buff = []
 		self._head = iter(head)
-	
+
 	def get(self, index=0):
 		self._load(index)
 		return self._buff[index]

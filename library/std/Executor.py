@@ -10,7 +10,7 @@ def Executor(code, scope):
 		handler = _HANDLERS[type(opcode)]
 		handler(scope, opcode)
 
-		
+
 def _addHandler(opcode):
 	def decorator(handler):
 		_HANDLERS[opcode] = handler

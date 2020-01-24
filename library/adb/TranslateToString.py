@@ -8,7 +8,7 @@ class TranslateToString:
 		self.__out_file = out_file
 		self.__code = code
 
-	def link(self):		
+	def link(self):
 		self.__out_file.write(''.join(self.__translate(self.__code)))
 		return 'next'
 

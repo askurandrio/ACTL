@@ -27,7 +27,7 @@ class _Counter:
 class VARIABLE(DynamicOpCode):
 	__slots__ = ('name',)
 	counter = _Counter(10)
-	
+
 	@classmethod
 	def temp(cls):
 		return cls(f'__IV{cls.counter()}')

@@ -126,7 +126,7 @@ class _Object:
 
 	def __repr__(self):
 		return str(self)
-	
+
 	def __str__(self):
 		if ('__name__' in self._scope) and (('__parents__' in self._scope) or (self is Object)):
 			return f"class {self._scope['__name__']}"
@@ -146,7 +146,7 @@ class _Object:
 			del _Object.__stack
 		return selfInStr
 
-	
+
 Object = _Object()
 Object.setAttr('__name__', 'Object')
 
@@ -172,7 +172,7 @@ class _NativeFunc(_NativeClass):
 		super().__init__()
 		self._name = name
 		self._func = func
-	
+
 	def call(self, *args, **kwargs):
 		return self._func(*args, **kwargs)
 
@@ -190,7 +190,7 @@ class _NativeProperty(_NativeClass):
 	def __init__(self, fget):
 		super().__init__()
 		self._fget = fget
-	
+
 	def get(self, instance):
 		return self._fget.call(instance)
 
@@ -254,7 +254,7 @@ class BuildClass(_Object):
 		self.setAttr('__name__', name)
 		self.setAttr('__super__', _Super.make(parents))
 		self.setAttr('__self__', _Self({'__super__': _SuperSelf.make(parents)}))
-	
+
 	def addMethod(self, name):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
@@ -263,9 +263,9 @@ class BuildClass(_Object):
 			method = _makeMethod(func.__name__, func)
 			self.getAttr('__self__').setItem(name, method)
 			return func
-		
+
 		return decorator
-	
+
 	def addMethodToClass(self, name):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
@@ -273,7 +273,7 @@ class BuildClass(_Object):
 			method = _makeMethod(func.__name__, func)
 			self.setAttr(name, method)
 			return func
-		
+
 		return decorator
 
 
