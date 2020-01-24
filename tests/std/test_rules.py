@@ -1,17 +1,22 @@
 import pytest
 
-from actl import Parser, Buffer, opcodes, Scope
-from std import RULES
+from actl import Parser, opcodes, Project, Buffer
+from actl.objects import While
+from actl.opcodes import VARIABLE
 
 
 @pytest.fixture
 def parse():
+	project = Project('std')
+	scope = project['scope']
+
 	def _parse(inp):
 		opcodes.VARIABLE.counter.reset()
-		scope = Scope({})
 		inp = Buffer(inp)
-		return list(Parser(scope, RULES, inp))
+		result = list(Parser(scope, project['rules'], inp))
+		return result
 
+	_parse.scope = scope
 	return _parse
 
 
@@ -36,3 +41,10 @@ def test_call_with_string(parse):
 		opcodes.CALL_FUNCTION(dst='__IV12', function='print', typeb='(', args=['__IV11'], kwargs={}),
 		opcodes.VARIABLE(name='__IV12')
 	]
+
+
+def test_while(parse):
+	cycle = parse('while True')[0]
+
+	assert cycle.getAttr('__class__').equal(While)
+	assert cycle.getAttr('condition') == VARIABLE(name='True')

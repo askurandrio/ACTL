@@ -5,6 +5,9 @@ class SyntaxRules:
 	def __init__(self, rules=None):
 		self._rules = [] if rules is None else rules
 
+	def rawAdd(self, rule):
+		self._rules.append(rule)
+
 	def add(self, *template, manual_apply=False, use_parser=False):
 		def decorator(func):
 			rule = SyntaxRule.wrap(*template, manual_apply=manual_apply, use_parser=use_parser)(func)

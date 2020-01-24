@@ -51,7 +51,6 @@
    name: scope
    code: |
       import actl
-      import std
 
 
       def _getPyToAVars():
@@ -69,7 +68,7 @@
             yield varName, var
 
 
-      return std.Scope({
-         **dict(_getPyToAVars())
+      return actl.Scope({
+         **dict(_getPyToAVars()),
          **dict(_getAVars())
       })

@@ -23,7 +23,10 @@ def _(self, key):
 		return self.getAttr('__super__').getAttr('__getAttr__').call(key)
 	except ANotFoundAttribute:
 		pass
-	value = getattr(self._value, key)
+	try:
+		value = getattr(self._value, key)
+	except AttributeError as ex:
+		raise ANotFoundAttribute(ex)
 	return PyToA.fromPy(value)
 
 

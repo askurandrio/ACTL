@@ -1,7 +1,8 @@
-import weakref
-
 import sys
+
+
 sys.setrecursionlimit(500)
+_default = object()
 
 
 class AGenericKeyError(Exception):
@@ -68,12 +69,30 @@ class _Object:
 			pass
 		return self.getAttr('__getAttr__').call(key)
 
-	def setAttr(self, key, value):
-		self._scope[key] = value
+	def setAttr(self, key, value=_default):
+		if value is not _default:
+			self._scope[key] = value
+			return None
 
-	@property
+		def decorator(value):
+			self._scope[key] = value
+			return value
+
+		return decorator
+
+	def hasAttr(self, key):
+		try:
+			self.getAttr(key)
+		except ANotFoundAttribute:
+			return False
+		else:
+			return True
+
 	def call(self, *args, **kwargs):
-		return self.getAttr('__call__').call
+		return self.getAttr('__call__').call(*args, **kwargs)
+
+	def equal(self, other):
+		return self._scope == other._scope
 
 	@property
 	def get(self, *args, **kwargs):
@@ -325,6 +344,6 @@ class _SuperSelf(_Super):
 		for parent in self._parents:
 			try:
 				return parent.getItem(key)
-			except ANotFoundAttribute:
+			except AKeyNotFound:
 				pass
 		raise ANotFoundAttribute(key=key)

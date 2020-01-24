@@ -5,6 +5,8 @@ from actl.opcodes import VARIABLE
 
 
 class AbstractTemplate:
+	__slots__ = ()
+
 	def __init__(self, *args, **kwargs):
 		kwargs.update(zip(self.__slots__, args))
 		for key, value in kwargs.items():
@@ -151,3 +153,14 @@ class Value(AbstractTemplate):
 			return None
 
 		return Buffer.of(buff.pop(0))
+
+
+class _End(AbstractTemplate):
+	def __call__(self, _, buff):
+		if buff:
+			return None
+
+		return Buffer()
+
+
+End = _End()

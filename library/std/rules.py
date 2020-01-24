@@ -1,11 +1,28 @@
 
 from actl.syntax import \
-	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe
+	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, SyntaxRule
 from actl.opcodes import \
 	VARIABLE, END_LINE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
 
 
 RULES = SyntaxRules()
+
+
+def _runtimeRule(scope, inp):
+	var = inp[0]
+
+	if not (
+		(VARIABLE == var) and
+		(var.name in scope) and
+		(scope[var.name].hasAttr('__syntaxRule__'))
+	):
+		return
+
+	syntaxRule = scope[var.name].getAttr('__syntaxRule__')
+	return syntaxRule(scope, inp)
+
+
+RULES.rawAdd(_runtimeRule)
 
 
 @CustomTemplate.create
@@ -54,7 +71,7 @@ def _(inp, parser):
 			if start == inp.get(1):
 				start.extend((inp.pop(), inp.pop()))
 		return start
-	
+
 	start = _pop_start_token()
 	string = ''
 	while not inp.startswith(start):
