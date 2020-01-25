@@ -46,17 +46,17 @@ def test_while(parse):
 	cycle = parse('while True')[0]
 
 	assert cycle.getAttr('__class__').equal(While)
-	assert cycle.getAttr('conditionFrame') == (
-		opcodes.VARIABLE(name='True'),
-	)
+	assert cycle.getAttr('conditionFrame') == [
+		opcodes.VARIABLE(name='True')
+	]
 
 
 def test_while_with_condition_is_call_function(parse):
 	cycle = parse('while print("")')[0]
 
 	assert cycle.getAttr('__class__').equal(While)
-	assert cycle.getAttr('conditionFrame') == (
+	assert cycle.getAttr('conditionFrame') == [
 		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function='String'),
 		opcodes.CALL_FUNCTION(dst='__IV12', function='print'),
 		opcodes.VARIABLE(name='__IV12')
-	)
+	]

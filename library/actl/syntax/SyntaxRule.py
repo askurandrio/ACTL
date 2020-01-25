@@ -1,4 +1,5 @@
 from actl.Buffer import Buffer
+from actl.syntax.NamedResult import NamedResult
 from actl.syntax.Template import Template
 
 
@@ -20,7 +21,11 @@ class SyntaxRule:
 			inp.set_(res + inp)
 			self._func(inp, **kwargs)
 		else:
-			res = self._func(*res, **kwargs)
+			args = tuple(arg for arg in res if not isinstance(arg, NamedResult))
+			kwargs.update({
+				arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)
+			})
+			res = self._func(*args, **kwargs)
 			inp.set_(Buffer(res) + inp)
 		return True
 

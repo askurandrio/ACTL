@@ -2,17 +2,28 @@ import pdb
 
 from actl.Buffer import Buffer
 from actl.opcodes import VARIABLE
+from actl.syntax.NamedResult import NamedResult
 
 
 class AbstractTemplate:
-	__slots__ = ()
+	__slots__ = ('arg',)
 
 	def __init__(self, *args, **kwargs):
+		kwargs.setdefault('arg', None)
 		kwargs.update(zip(self.__slots__, args))
 		for key, value in kwargs.items():
 			setattr(self, key, value)
 		for key in self.__slots__:
 			assert hasattr(self, key), f'{self} has no attribute {key}'
+
+	def asArg(self, arg):
+		def asArg(parser, inp):
+			res = self(parser, inp)
+			if res is None:
+				return res
+			return Buffer.of(NamedResult(arg, res))
+
+		return CustomTemplate(f'{self}.asArg({arg})', asArg)
 
 	def __repr__(self):
 		args = ', '.join(str(getattr(self, key)) for key in self.__slots__)

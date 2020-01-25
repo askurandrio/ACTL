@@ -13,7 +13,7 @@ def _(cls, conditionFrame):
 
 
 @While.setAttr('__syntaxRule__')
-@SyntaxRule.wrap(Value(While), Token(' '), Frame, Or((End,), (Token(':'),)))
-def _(_, _1, *frame):
-	res = Buffer.of(While.call(frame))
+@SyntaxRule.wrap(Value(While), Token(' '), Frame.asArg('conditionFrame'), Or((End,), (Token(':'),)))
+def _(_, _1, conditionFrame):
+	res = Buffer.of(While.call(list(conditionFrame)))
 	return res
