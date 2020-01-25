@@ -13,7 +13,7 @@ def _(cls, value):
 
 @PyToA.addMethod('__call__')
 def _(self, *args):
-	args = (arg._val for arg in args)
+	args = (arg._value for arg in args)
 	self._value(*args)
 
 
@@ -32,7 +32,7 @@ def _(self, key):
 
 @PyToA.addMethod('__toStr__')
 def _(self):
-	return self._val.__name__
+	return self._value.__name__
 
 
 @PyToA.addFromPy
