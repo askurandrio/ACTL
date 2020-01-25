@@ -26,12 +26,12 @@ def _runtimeRule(parser, inp):
 RULES.rawAdd(_runtimeRule)
 
 
-@CustomTemplate.create
+@CustomTemplate.createToken
 def _is_acceptable_name(_, token):
 	return isinstance(token, str) and (token.isalpha() or token in ('_',))
 
 
-@CustomTemplate.create
+@CustomTemplate.createToken
 def _is_acceptable_continues_name(_, token):
 	return isinstance(token, str) and token.isdigit()
 
@@ -68,7 +68,7 @@ def _(src, _, dst, _1):
 def _(inp, parser):
 	def _pop_start_token():
 		start = [inp.pop()]
-		if start == inp.get():
+		if start != inp.get():
 			if start == inp.get(1):
 				start.extend((inp.pop(), inp.pop()))
 		return start
@@ -84,7 +84,7 @@ def _(inp, parser):
 	inp[:0] = [dst]
 
 
-@CustomTemplate.create
+@CustomTemplate.createToken
 def _is_digit(_, token):
 	return isinstance(token, str) and token.isdigit()
 

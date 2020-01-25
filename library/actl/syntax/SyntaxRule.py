@@ -1,3 +1,4 @@
+from actl.Buffer import Buffer
 from actl.syntax.Template import Template
 
 
@@ -8,13 +9,20 @@ class SyntaxRule:
 		self._manual_apply = manual_apply
 		self._use_parser = use_parser
 
-	def __call__(self, scope, inp):
-		res = self._template(scope, inp.copy())
+	def __call__(self, parser, inp):
+		res = self._template(parser, inp)
 		if res is None:
 			return None
+		kwargs = {}
+		if self._use_parser:
+			kwargs['parser'] = parser
 		if self._manual_apply:
-			return _ResultManualApply(self._func, self._use_parser, inp)
-		return _Result(self._func, self._use_parser, inp, res)
+			inp.set_(res + inp)
+			self._func(inp, **kwargs)
+		else:
+			res = self._func(*res, **kwargs)
+			inp.set_(Buffer(res) + inp)
+		return True
 
 	def __repr__(self):
 		return f'{type(self).__name__}({self._template, self._func})'
@@ -25,25 +33,3 @@ class SyntaxRule:
 			return cls(Template(*template), func, manual_apply, use_parser)
 
 		return decorator
-
-
-class _ResultManualApply:
-	def __init__(self, func, use_parser, inp):
-		self._func = func
-		self._inp = inp
-		self._use_parser = use_parser
-
-	def __call__(self, parser):
-		kwargs = {}
-		if self._use_parser:
-			kwargs['parser'] = parser
-		self._func(self._inp, **kwargs)
-
-
-class _Result(_ResultManualApply):
-	def __init__(self, func, use_parser, inp, res):
-		def apply(self_inp, **kwargs):
-			del self_inp[:len(res)]
-			self_inp[:0] = func(*res, **kwargs)
-
-		super().__init__(apply, use_parser, inp)

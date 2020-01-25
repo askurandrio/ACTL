@@ -26,10 +26,12 @@ class Template(AbstractTemplate):
 		super().__init__(template)
 
 	def __call__(self, parser, buff):
+		backup = buff.copy()
 		res = Buffer()
 		for tmpl in self._template:
 			tmpl_res = tmpl(parser, buff)
 			if tmpl_res is None:
+				buff.set_(backup)
 				return None
 			res += tmpl_res
 		return res
@@ -39,57 +41,33 @@ class Template(AbstractTemplate):
 		return f'{type(self).__name__}({repr_template})'
 
 
-class Pdb(AbstractTemplate):
-	__slots__ = ()
-
-	def __call__(self, _, inp):
-		pdb.set_trace()
-		return Buffer()
-
-
 class CustomTemplate(AbstractTemplate):
 	__slots__ = ('name', 'func')
 
 	def __call__(self, parser, inp):
-		try:
-			token = inp.pop()
-		except IndexError:
-			return None
-
-		if self.func(parser, token):
-			return Buffer([token])
-		return None
+		return self.func(parser, inp)
 
 	@classmethod
 	def create(cls, func, name=None):
 		name = func.__name__ if name is None else name
 		return cls(name, func)
 
-
-class Token(AbstractTemplate):
-	__slots__ = ('token',)
-
-	def __call__(self, _, inp):
-		try:
-			val = inp.pop()
-		except IndexError:
+	@classmethod
+	def createToken(cls, func, name=None):
+		def template(parser, inp):
+			if not inp:
+				return None
+			token = inp.get(0)
+			if func(parser, token):
+				inp.pop(0)
+				return Buffer.of(token)
 			return None
-		if self.token == val:
-			return Buffer([val])
-		return None
 
+		name = func.__name__ if name is None else name
+		return cls.create(template, name)
 
-class IsInstance(AbstractTemplate):
-	__slots__ = ('cls',)
-
-	def __call__(self, _, inp):
-		try:
-			token = inp.pop()
-		except IndexError:
-			return None
-		if isinstance(token, self.cls):
-			return Buffer([token])
-		return None
+	def __repr__(self):
+		return f'{type(self).__name__}({self.name})'
 
 
 class Many(AbstractTemplate):
@@ -154,17 +132,37 @@ class Value(AbstractTemplate):
 		return Buffer.of(buff.pop(0))
 
 
-class Frame(AbstractTemplate):
-	def __call__(self, parser, buff):
-		pass
+def Token(token):
+	def rule(_, val):
+		return token == val
+
+	return CustomTemplate.createToken(rule, f'Token({token})')
 
 
-class _End(AbstractTemplate):
-	def __call__(self, _, buff):
-		if buff:
-			return None
+def IsInstance(cls):
+	def rule(_, val):
+		return isinstance(val, cls)
 
-		return Buffer()
+	return CustomTemplate.createToken(rule, f'IsInstance({cls})')
 
 
-End = _End()
+@CustomTemplate.create
+def pdb(_, _1):
+	pdb.set_trace()
+	return Buffer()
+
+
+@CustomTemplate.create
+def End(_, buff):
+	if buff:
+		return None
+
+	return Buffer()
+
+
+@CustomTemplate.create
+def Frame(parser, buff):
+	assert buff
+	res, newBuff = parser.subParse(buff)
+	buff.set_(newBuff)
+	return res

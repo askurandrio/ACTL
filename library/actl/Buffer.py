@@ -4,7 +4,12 @@ import itertools
 class Buffer:
 	def __init__(self, head=iter('')):
 		self._buff = []
-		self._head = iter(head)
+		self._head = None
+		self.set_(head)
+
+	def set_(self, it):
+		self._buff = []
+		self._head = iter(it)
 
 	def get(self, index=0):
 		self._load(index)
@@ -22,12 +27,6 @@ class Buffer:
 			return type(self)(res[0])
 		return [type(self)(head) for head in res]
 
-	def extract(self):
-		head = type(self)(itertools.chain(self._buff, self._head))
-		self._buff = []
-		self._head = iter('')
-		return head
-
 	def index(self, value):
 		for idx, elem in enumerate(self):
 			if elem == value:
@@ -39,8 +38,8 @@ class Buffer:
 
 	def startswith(self, tmpl):
 		tmpl = list(tmpl)
-		src = list(self[:len(tmpl)])
-		return src == tmpl
+		self._load(len(tmpl))
+		return self._buff[:len(tmpl)] == tmpl
 
 	def _load(self, quantity=None):
 		if quantity is None:
@@ -93,9 +92,8 @@ class Buffer:
 			return True
 
 	def __iter__(self):
-		yield from iter(self._buff)
 		self._head, head = itertools.tee(self._head)
-		yield from head
+		return itertools.chain(iter(self._buff), head)
 
 	def __iadd__(self, other):
 		self._head = itertools.chain(iter(self._head), iter(other))
@@ -111,14 +109,10 @@ class Buffer:
 		self._load(1)
 		return bool(self._buff)
 
-	def __len__(self):
-		self._load()
-		return len(self._buff)
-
 	def __repr__(self):
-		lst = list(self[:11])
-		res = str(lst[:10])
-		if len(lst) == 11:
+		self._load(10)
+		res = str(self._buff[:10])
+		if len(self._buff) == 11:
 			res = res[:-1] + ', ...]'
 		return f'{type(self).__name__}({res})'
 

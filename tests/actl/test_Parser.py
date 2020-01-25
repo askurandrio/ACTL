@@ -2,8 +2,8 @@ import pytest
 
 from actl import Parser, Buffer, Scope
 from actl.opcodes import VARIABLE
-from actl.syntax import SyntaxRules, Token, CustomTemplate, Many, IsInstance, Or, Maybe, Value, \
-	SyntaxRule
+from actl.syntax import SyntaxRules, Token, Many, IsInstance, Or, Maybe, Value, \
+	SyntaxRule, CustomTemplate
 
 
 @pytest.fixture
@@ -36,8 +36,8 @@ def test_replace_pattern(parse):
 	assert parse({}, [rule], ['a', 'b', 'c', 'd']) == ['a', 'r', 'd']
 
 
-def test_custom_func(parse):
-	@SyntaxRule.wrap(CustomTemplate('test', lambda _, token: token == 'b'))
+def test_custom_template(parse):
+	@SyntaxRule.wrap(CustomTemplate.createToken(lambda _, token: token == 'b', 'token'))
 	@_expect('b')
 	def rule(_):
 		return 'r'

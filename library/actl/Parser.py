@@ -13,27 +13,41 @@ class Parser:
 	def define(self, *opcodes):
 		self._definition.append(*opcodes)
 
-	def _apply_rule(self):
+	def subParse(self, buff):
+		parser = type(self)(self.scope, self._rules, None)
+		return parser.parseLine(buff)
+
+	def _apply_rule(self, buff):
 		for rule in self._rules:
-			res = rule(self, self._buff)
-			if res is not None:
-				res(self)
+			res = rule(self, buff)
+			if res:
 				return True
 		return False
 
-	def __iter__(self):
+	def parseLine(self, buff):
 		flush = Buffer()
-
-		while self._buff:
-			if self._apply_rule():
-				self._buff = flush.extract() + self._buff
+		while buff and (END_LINE not in flush):
+			if self._apply_rule(buff):
+				buff = flush + buff
+				flush = Buffer()
 				continue
-			flush.append(self._buff.pop())
-			if END_LINE in flush:
-				idx_end_line = flush.index(END_LINE)
-				res = flush[:idx_end_line]
-				del flush[:idx_end_line]
-				yield from self._definition.extract()
-				yield from res
-		yield from self._definition
-		yield from flush
+
+			flush.append(buff.pop())
+
+		if END_LINE in flush:
+			idx_end_line = flush.index(END_LINE)
+			res = flush[:idx_end_line]
+			del flush[:idx_end_line]
+		else:
+			res = flush
+			flush = Buffer()
+
+		res = self._definition + res
+		self._definition = Buffer()
+		newBuff = flush + buff
+		return res, newBuff
+
+	def __iter__(self):
+		while self._buff:
+			res, self._buff = self.parseLine(self._buff)
+			yield from res
