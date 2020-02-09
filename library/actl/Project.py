@@ -112,10 +112,10 @@ def _(project, arg):
 
 class ProjectView:
 	def __getitem__(self, key):
-		return Project.this[key]
+		return Project.this[key]  # pylint: disable=no-member
 
 	def __setitem__(self, key, value):
-		Project.this[key] = value
+		Project.this[key] = value  # pylint: disable=no-member
 
 
 Project.view = ProjectView()

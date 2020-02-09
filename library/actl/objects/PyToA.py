@@ -1,3 +1,5 @@
+# pylint: disable=protected-access
+
 from actl.objects.String import String
 from actl.objects.Object import BuildClass, ANotFoundAttribute
 
@@ -33,7 +35,7 @@ def _(self, key):
 		value = getattr(self._value, key)
 	except AttributeError as ex:
 		raise ANotFoundAttribute(ex)
-	return PyToA.fromPy(value)
+	return PyToA.call(value)
 
 
 @PyToA.addMethod('__toStr__')

@@ -1,4 +1,6 @@
-from .Object import BuildClass
+# pylint: disable=protected-access
+
+from actl.objects.Object import BuildClass
 
 
 String = BuildClass('String')

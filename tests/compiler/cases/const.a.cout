@@ -1,9 +1,0 @@
-Code:
-   Definition:
-      __IV11 = "string"
-   s = __IV11
-   line_end
-   Definition:
-      __IV12 = 1
-   n = __IV12
-   line_end

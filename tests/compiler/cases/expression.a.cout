@@ -1,8 +1,0 @@
-Code:
-   Definition:
-      __IV11 = 1
-      __IV15 = 3
-      __IV16 = operator("+")(__IV11, __IV15)
-      __IV17 = operator("/")(__IV16, repr(NUMBER(number=5)))
-   a = __IV17
-   line_end

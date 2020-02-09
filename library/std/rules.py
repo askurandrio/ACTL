@@ -1,6 +1,8 @@
+# pylint: disable=no-member
+
 from actl.objects import Object
 from actl.syntax import \
-	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, SyntaxRule, Buffer
+	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer
 from actl.opcodes import \
 	VARIABLE, END_LINE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
 
@@ -24,7 +26,7 @@ def _hasAttr(attr):
 
 def _runtimeRule(parser, inp):
 	if not _hasAttr('__syntaxRule__')(parser, inp.copy()):
-		return
+		return None
 
 	syntaxRule = parser.scope[inp[0].name].getAttr('__syntaxRule__')
 	return syntaxRule(parser, inp)

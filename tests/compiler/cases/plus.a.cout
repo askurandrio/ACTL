@@ -1,7 +1,0 @@
-Code:
-   Definition:
-      __IV11 = 1
-      __IV12 = 2
-      __IV13 = operator("+")(__IV11, __IV12)
-   a = __IV13
-   line_end

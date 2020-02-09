@@ -24,29 +24,29 @@ class Executor:
 		return decorator
 
 
-@Executor._addHandler(type(Object))
+@Executor._addHandler(type(Object))  # pylint: disable=protected-access
 def _(executor, opcode):
 	assert opcode.getAttr('__class__').equal(While)
 
 	while True:
 		executor.execute(opcode.getAttr('conditionFrame'))
-		assert executor.lastValue.equal(PyToA.fromPy(True))
+		assert executor.lastValue.equal(PyToA.fromPy(True))  # pylint: disable=no-member
 		executor.execute(opcode.getAttr('code'))
 
 
-@Executor._addHandler(actl.opcodes.VARIABLE)
+@Executor._addHandler(actl.opcodes.VARIABLE)  # pylint: disable=protected-access
 def _(executor, opcode):
 	return executor.scope[opcode.name]
 
 
-@Executor._addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
+@Executor._addHandler(actl.opcodes.CALL_FUNCTION_STATIC)  # pylint: disable=protected-access
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('
 	executor.scope[opcode.dst] = function.call(*opcode.args, **opcode.kwargs)
 
 
-@Executor._addHandler(actl.opcodes.CALL_FUNCTION)
+@Executor._addHandler(actl.opcodes.CALL_FUNCTION)  # pylint: disable=protected-access
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('

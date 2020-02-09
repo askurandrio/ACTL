@@ -1,4 +1,4 @@
-import pdb
+# pylint: disable=no-member
 
 from actl.Buffer import Buffer
 from actl.opcodes import VARIABLE
@@ -18,7 +18,7 @@ class AbstractTemplate:
 
 	def asArg(self, arg):
 		def asArg(parser, inp):
-			res = self(parser, inp)
+			res = self(parser, inp)  # pylint: disable=not-callable
 			if res is None:
 				return res
 			return Buffer.of(NamedResult(arg, res))
@@ -100,6 +100,8 @@ class Many(AbstractTemplate):
 			inp[:] = buff
 			res += tmpl_res
 
+		raise RuntimeError('Unexpected branch')
+
 
 class Or(AbstractTemplate):
 	__slots__ = ('templates',)
@@ -167,8 +169,8 @@ def IsInstance(cls):
 
 
 @CustomTemplate.create
-def pdb(_, _1):
-	pdb.set_trace()
+def BreakPoint(_, _1):
+	breakpoint()
 	return Buffer()
 
 
