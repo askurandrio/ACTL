@@ -8,14 +8,13 @@ class Executor:
 
 	def __init__(self, code, scope):
 		self.scope = scope
-		self.lastValue = None
 
 		self.execute(code)
 
 	def execute(self, code):
 		for opcode in code:
 			handler = self._HANDLERS[type(opcode)]
-			self.lastValue = handler(self, opcode)
+			handler(self, opcode)
 
 	@classmethod
 	def _addHandler(cls, opcode):
@@ -30,13 +29,13 @@ def _(executor, opcode):
 
 	while True:
 		executor.execute(opcode.getAttr('conditionFrame'))
-		assert executor.lastValue.equal(PyToA.fromPy(True))  # pylint: disable=no-member
+		assert executor.scope['_'].equal(PyToA.fromPy(True))  # pylint: disable=no-member
 		executor.execute(opcode.getAttr('code'))
 
 
 @Executor._addHandler(actl.opcodes.VARIABLE)  # pylint: disable=protected-access
 def _(executor, opcode):
-	return executor.scope[opcode.name]
+	executor.scope['_'] = executor.scope[opcode.name]
 
 
 @Executor._addHandler(actl.opcodes.CALL_FUNCTION_STATIC)  # pylint: disable=protected-access

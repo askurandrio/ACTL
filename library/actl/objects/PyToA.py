@@ -1,7 +1,7 @@
 # pylint: disable=protected-access
-
 from actl.objects.String import String
-from actl.objects.Object import BuildClass, ANotFoundAttribute
+from actl.objects.AToPy import AToPy
+from actl.objects.Object import BuildClass, AAttributeNotFound
 
 
 PyToA = BuildClass('PyToA')
@@ -16,31 +16,27 @@ def _(cls, value):
 
 @PyToA.addMethod('__call__')
 def _(self, *args):
-	def toPyValue(arg):
-		if arg.getAttr('__class__').equal(PyToA) or arg.getAttr('__class__').equal(String):
-			return arg._value
-		return str(arg)
-
-	args = tuple(toPyValue(arg) for arg in args)
-	self._value(*args)
+	args = tuple(AToPy(arg) for arg in args)
+	res = self._value(*args)
+	return PyToA.call(res)
 
 
 @PyToA.addMethod('__getAttr__')
 def _(self, key):
 	try:
 		return self.getAttr('__super__').getAttr('__getAttr__').call(key)
-	except ANotFoundAttribute:
+	except AAttributeNotFound:
 		pass
 	try:
 		value = getattr(self._value, key)
 	except AttributeError as ex:
-		raise ANotFoundAttribute(ex)
+		raise AAttributeNotFound(ex)
 	return PyToA.call(value)
 
 
 @PyToA.addMethod('__toStr__')
 def _(self):
-	return self._value.__name__
+	return String.call(self._value.__name__)
 
 
 @PyToA.addPyMethod('fromPy')

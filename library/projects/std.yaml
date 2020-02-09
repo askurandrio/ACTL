@@ -62,6 +62,7 @@
       def _getAVars():
          for varName, clsName in (
             ('String', 'String'),
+            ('Number', 'Number'),
             ('while', 'While')
          ):
             var = getattr(actl.objects, clsName)

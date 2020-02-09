@@ -14,7 +14,7 @@ class AGenericKeyError(Exception):
 		super().__init__(msg)
 
 
-class ANotFoundAttribute(AGenericKeyError):
+class AAttributeNotFound(AGenericKeyError):
 	MSG = 'This attribute not found: {key}'
 
 
@@ -25,7 +25,7 @@ class AKeyNotFound(AGenericKeyError):
 def _loadPropIfNeed(self, val):
 	try:
 		prop = val.get
-	except (ANotFoundAttribute, AttributeError):
+	except (AAttributeNotFound, AttributeError):
 		return val
 	else:
 		return prop(self)
@@ -40,7 +40,7 @@ class _Object:
 	def getAttr(self, key):
 		try:
 			return self._getSpecialAttr(key)
-		except ANotFoundAttribute:
+		except AAttributeNotFound:
 			pass
 		return self.getAttr('__getAttr__').call(key)
 
@@ -58,7 +58,7 @@ class _Object:
 	def hasAttr(self, key):
 		try:
 			self.getAttr(key)
-		except ANotFoundAttribute:
+		except AAttributeNotFound:
 			return False
 		else:
 			return True
@@ -87,7 +87,7 @@ class _Object:
 		try:
 			return self._head[key]
 		except KeyError:
-			ex = ANotFoundAttribute(key=key)
+			ex = AAttributeNotFound(key=key)
 		if self is Object:
 			raise ex
 		self_ = self.getAttr('__class__').getAttr('__self__')
@@ -98,7 +98,7 @@ class _Object:
 		try:
 			super_ = self.getAttr('__super__')
 			return super_.findAttr(key)  # pylint: disable=protected-access
-		except ANotFoundAttribute:
+		except AAttributeNotFound:
 			raise ex
 
 	def _getSpecialAttr(self, key):
@@ -125,7 +125,7 @@ class _Object:
 					super_ = self.getAttr('__super__')
 					return super_.getAttr('__getAttr__')
 			return res.get(self)
-		raise ANotFoundAttribute(f'This is not special attrribute: {key}')
+		raise AAttributeNotFound(f'This is not special attrribute: {key}')
 
 	def __repr__(self):
 		return str(self)
@@ -237,7 +237,7 @@ class _Self(_NativeClass):
 def _Object__getAttr__(self, key):
 	try:
 		return self._getSpecialAttr(key)  # pylint: disable=protected-access
-	except ANotFoundAttribute:
+	except AAttributeNotFound:
 		pass
 	attr = self.findAttr(key)
 	return _loadPropIfNeed(self, attr)
@@ -298,15 +298,19 @@ def _(cls, *args, **kwargs):
 
 @BuildClass.addMethodToClass(Object, '__toStr__')
 def _(self):
+	from actl.objects import String
+
 	name = self.getAttr('__name__')
-	return f"class '{name}'"
+	return String.call(f"class '{name}'")
 
 
 @BuildClass.addMethod(Object, '__toStr__')
 def _(self):
+	from actl.objects import String
+
 	name = self.getAttr('__class__').getAttr('__name__')
 	scope = self._head   # pylint: disable=protected-access
-	return f'{name}<{scope}>'
+	return String.call(f'{name}<{scope}>')
 
 
 class _Super(_NativeClass):
@@ -319,9 +323,9 @@ class _Super(_NativeClass):
 		for parent in self._parents:
 			try:
 				return parent.findAttr(key)
-			except ANotFoundAttribute:
+			except AAttributeNotFound:
 				pass
-		raise ANotFoundAttribute(key=key)
+		raise AAttributeNotFound(key=key)
 
 	def getAttr(self, key):
 		return _loadPropIfNeed(self._aSelf, self.findAttr(key))
@@ -348,4 +352,4 @@ class _SuperSelf(_Super):
 				return parent.getItem(key)
 			except AKeyNotFound:
 				pass
-		raise ANotFoundAttribute(key=key)
+		raise AAttributeNotFound(key=key)

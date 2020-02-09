@@ -16,4 +16,7 @@
          except Exception:
             traceback.print_exc()
             break
-         this['std', 'build']()
+         try:
+            this['std', 'build']()
+         except Exception:
+            traceback.print_exc()
