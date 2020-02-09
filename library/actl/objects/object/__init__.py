@@ -1,3 +1,4 @@
-from actl.objects.object.init import *
-from actl.objects.object.Object import *
+import actl.objects.object.init
+from actl.objects.object.Object import Object
+from actl.objects.object.BuildClass import BuildClass
 from actl.objects.object.exceptions import *

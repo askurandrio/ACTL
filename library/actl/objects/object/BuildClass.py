@@ -1,8 +1,8 @@
 from actl.objects.object.NativeDict import NativeDict
+from actl.objects.object.NativeProperty import NativeProperty
 from actl.objects.object.Object import Object
 from actl.objects.object.Super import Super
 from actl.objects.object.SuperSelf import SuperSelf
-from actl.objects.object.utils import makeMethod
 
 
 class BuildClass(type(Object)):
@@ -22,7 +22,7 @@ class BuildClass(type(Object)):
 			cls_name = self.getAttr('__name__')
 			cls_name = cls_name[0].lower() + cls_name[1:]
 			func.__name__ = f'{cls_name}.{name}'
-			method = makeMethod(func.__name__, func)
+			method = NativeProperty.makeMethod(func.__name__, func)
 			self.getAttr('__self__').setItem(name, method)
 			return func
 
@@ -32,7 +32,7 @@ class BuildClass(type(Object)):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
 			func.__name__ = f'{cls_name}.{name}'
-			method = makeMethod(func.__name__, func)
+			method = NativeProperty.makeMethod(func.__name__, func)
 			self.setAttr(name, method)
 			return func
 
