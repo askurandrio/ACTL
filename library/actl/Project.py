@@ -2,20 +2,12 @@
 import os
 import copy
 import logging
-import collections
 
 import yaml
 
 
 LOGGER = logging.getLogger('actl')
 DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-yaml.add_representer(
-	collections.OrderedDict, lambda dumper, data: dumper.represent_dict(data.iteritems())
-)
-yaml.add_constructor(
-	yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-	lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))
-)
 
 
 class Project:
@@ -119,6 +111,7 @@ class ProjectView:
 
 
 Project.view = ProjectView()
+
 
 def _recursive_update(base, new):
 	for key, value in new.items():
