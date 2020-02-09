@@ -1,6 +1,7 @@
 
 import actl
-from actl.objects import While, Object, PyToA
+from actl.objects import While, Object, Bool
+from actl.objects.AToPy import AToPy
 
 
 class Executor:
@@ -27,9 +28,13 @@ class Executor:
 def _(executor, opcode):
 	assert opcode.getAttr('__class__').equal(While)
 
-	while True:
+	def condition():
 		executor.execute(opcode.getAttr('conditionFrame'))
-		assert executor.scope['_'].equal(PyToA.fromPy(True))  # pylint: disable=no-member
+		res = executor.scope['_']
+		res = Bool.call(res)
+		return AToPy(res)
+
+	while condition():
 		executor.execute(opcode.getAttr('code'))
 
 

@@ -4,7 +4,7 @@ from actl.objects.object.NativeFunc import NativeFunc
 
 class NativeProperty(NativeClass):
 	def __init__(self, fget):
-		super().__init__({'__get__': fget})
+		super().__init__({})
 		self._fget = fget
 
 	def get(self, instance):

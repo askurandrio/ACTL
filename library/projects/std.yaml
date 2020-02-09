@@ -54,13 +54,16 @@
 
 
       def _getPyToAVars():
-         for varName in ('True', 'False', 'print'):
+         for varName in ('print',):
             var = eval(varName)
             yield varName, actl.objects.PyToA.fromPy(var)
 
 
       def _getAVars():
          for varName, clsName in (
+            ('True', 'ATrue'),
+            ('False', 'AFalse'),
+            ('Bool', 'Bool'),
             ('String', 'String'),
             ('Number', 'Number'),
             ('while', 'While')
