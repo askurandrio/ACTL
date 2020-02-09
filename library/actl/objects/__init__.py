@@ -1,5 +1,5 @@
 
-from .Object import Object
+from .object import Object
 from .PyToA import PyToA
 from .String import String
 from .While import While

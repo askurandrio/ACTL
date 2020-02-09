@@ -1,7 +1,7 @@
 # pylint: disable=protected-access
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.Object import BuildClass, AAttributeNotFound
+from actl.objects.object import BuildClass, AAttributeNotFound
 
 
 PyToA = BuildClass('PyToA')

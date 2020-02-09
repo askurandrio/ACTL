@@ -1,4 +1,4 @@
-from actl.objects.Object import BuildClass
+from actl.objects.object import BuildClass
 from actl.syntax import SyntaxRule, Value, Token, Buffer, Or, End, Frame
 
 

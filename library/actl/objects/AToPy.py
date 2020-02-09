@@ -1,4 +1,4 @@
-from actl.objects.Object import Object
+from actl.objects.object import Object
 
 
 class _MetaAToPy(type):

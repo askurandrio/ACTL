@@ -1,6 +1,6 @@
 # pylint: disable=protected-access
 from actl.objects.AToPy import AToPy
-from actl.objects.Object import BuildClass
+from actl.objects.object import BuildClass
 
 
 String = BuildClass('String')
