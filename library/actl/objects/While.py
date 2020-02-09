@@ -12,8 +12,23 @@ def _(cls, conditionFrame):
 	return self
 
 
+@While.addMethod('__useCodeBlock__')
+def _(self, parser):
+	cls = self.getAttr('__class__')
+	newSelf = cls.call(self.getAttr('conditionFrame'))
+	newSelf.setAttr('code', list(parser))
+	return newSelf
+
+
 @While.setAttr('__syntaxRule__')
-@SyntaxRule.wrap(Value(While), Token(' '), Frame.asArg('conditionFrame'), Or((End,), (Token(':'),)))
-def _(_, _1, conditionFrame):
+@SyntaxRule.wrap(
+	Value(While),
+	Token(' '),
+	Frame(':').asArg('conditionFrame'),
+	Or((End,), (Token(':'),)).asArg('end')
+)
+def _(_, _1, conditionFrame, end):
 	res = Buffer.of(While.call(list(conditionFrame)))
+	if end:
+		res.append(end.one())
 	return res

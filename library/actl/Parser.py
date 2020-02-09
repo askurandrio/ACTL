@@ -6,25 +6,25 @@ from actl.Buffer import Buffer
 class Parser:
 	def __init__(self, scope, rules, buff):
 		self.scope = scope
-		self._rules = rules
-		self._buff = buff
+		self.rules = rules
+		self.buff = buff
 		self._definition = Buffer()
 
 	def define(self, *opcodes):
 		self._definition.append(*opcodes)
 
-	def subParse(self, buff):
-		parser = type(self)(self.scope, self._rules, None)
-		return parser.parseLine(buff)
+	def subParser(self):
+		return type(self)(self.scope, self.rules, None)
 
 	def _apply_rule(self, buff):
-		for rule in self._rules:
+		for rule in self.rules:
 			res = rule(self, buff)
 			if res:
 				return True
 		return False
 
 	def parseLine(self, buff):
+		print(buff)
 		flush = Buffer()
 		while buff and (END_LINE not in flush):
 			if self._apply_rule(buff):
@@ -48,6 +48,6 @@ class Parser:
 		return res, newBuff
 
 	def __iter__(self):
-		while self._buff:
-			res, self._buff = self.parseLine(self._buff)
+		while self.buff:
+			res, self.buff = self.parseLine(self.buff)
 			yield from res

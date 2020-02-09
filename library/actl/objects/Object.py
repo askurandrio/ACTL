@@ -75,10 +75,13 @@ class _Object:
 	def toStr(self):
 		return self.getAttr('__toStr__').call()
 
-	def addFromPy(self, func):
-		fromPy = lambda *args, **kwargs: func(self, *args, **kwargs)
-		self.fromPy = fromPy  # pylint: disable=attribute-defined-outside-init
-		return func
+	def addPyMethod(self, name):
+		def decorator(func):
+			method = lambda *args, **kwargs: func(self, *args, **kwargs)
+			setattr(self, name, method)
+			return method
+
+		return decorator
 
 	def findAttr(self, key):
 		try:
@@ -148,6 +151,11 @@ class _Object:
 
 Object = _Object()
 Object.setAttr('__name__', 'Object')
+
+
+@Object.addPyMethod('fromPy')
+def _(_, head):
+	return _Object(head)
 
 
 class _NativeClass(_Object):
@@ -228,7 +236,7 @@ class _Self(_NativeClass):
 
 def _Object__getAttr__(self, key):
 	try:
-		return self._getSpecialAttr(key)
+		return self._getSpecialAttr(key)  # pylint: disable=protected-access
 	except ANotFoundAttribute:
 		pass
 	attr = self.findAttr(key)
@@ -297,7 +305,7 @@ def _(self):
 @BuildClass.addMethod(Object, '__toStr__')
 def _(self):
 	name = self.getAttr('__class__').getAttr('__name__')
-	scope = self._head
+	scope = self._head   # pylint: disable=protected-access
 	return f'{name}<{scope}>'
 
 

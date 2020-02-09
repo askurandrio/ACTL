@@ -11,6 +11,6 @@ def _(cls, value=''):
 	return self
 
 
-@String.addFromPy
+@String.addPyMethod('fromPy')
 def _(cls, value):
 	return cls.call(value)

@@ -1,6 +1,6 @@
-
+from actl.objects import Object
 from actl.syntax import \
-	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, SyntaxRule
+	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, SyntaxRule, Buffer
 from actl.opcodes import \
 	VARIABLE, END_LINE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
 
@@ -8,18 +8,25 @@ from actl.opcodes import \
 RULES = SyntaxRules()
 
 
-def _runtimeRule(parser, inp):
-	var = inp[0]
-	scope = parser.scope
+def _hasAttr(attr):
+	def rule(parser, token):
+		scope = parser.scope
 
-	if not (
-		(VARIABLE == var) and
-		(var.name in scope) and
-		(scope[var.name].hasAttr('__syntaxRule__'))
-	):
+		if not isinstance(token, type(Object)):
+			if not ((VARIABLE == token) and (token.name in scope)):
+				return None
+			token = scope[token.name]
+
+		return token.hasAttr(attr)
+
+	return CustomTemplate.createToken(rule, f'_hasAttr({attr})')
+
+
+def _runtimeRule(parser, inp):
+	if not _hasAttr('__syntaxRule__')(parser, inp.copy()):
 		return
 
-	syntaxRule = scope[var.name].getAttr('__syntaxRule__')
+	syntaxRule = parser.scope[inp[0].name].getAttr('__syntaxRule__')
 	return syntaxRule(parser, inp)
 
 
@@ -68,8 +75,8 @@ def _(src, _, dst, _1):
 def _(inp, parser):
 	def _pop_start_token():
 		start = [inp.pop()]
-		if start != inp.get():
-			if start == inp.get(1):
+		if start != inp[0]:
+			if start == inp[1]:
 				start.extend((inp.pop(), inp.pop()))
 		return start
 
@@ -109,6 +116,23 @@ def _(function, op_token, *args, parser=None):
 	dst = VARIABLE.temp()
 	parser.define(CALL_FUNCTION(dst.name, function.name, op_token, args, {}))
 	return [dst]
+
+
+@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manual_apply=True, use_parser=True)
+def _(inp, parser):
+	var = inp.pop()
+	assert inp.pop() == ':'
+	code = Buffer()
+
+	assert inp[0] != END_LINE
+	while inp[0] == ' ':
+		inp.pop()
+
+	while inp and (inp[0] != END_LINE):
+		code.append(inp.pop(0))
+
+	var = var.getAttr('__useCodeBlock__').call(type(parser)(parser.scope, parser.rules, code))
+	inp.set_(Buffer.of(var) + inp)
 
 
 #

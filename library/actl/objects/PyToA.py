@@ -35,6 +35,6 @@ def _(self):
 	return self._value.__name__
 
 
-@PyToA.addFromPy
+@PyToA.addPyMethod('fromPy')
 def _(cls, obj):
 	return cls.call(obj)

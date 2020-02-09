@@ -68,7 +68,7 @@ class CustomTemplate(AbstractTemplate):
 		def template(parser, inp):
 			if not inp:
 				return None
-			token = inp.get(0)
+			token = inp[0]
 			if func(parser, token):
 				inp.pop(0)
 				return Buffer.of(token)
@@ -143,6 +143,18 @@ class Value(AbstractTemplate):
 		return Buffer.of(buff.pop(0))
 
 
+class Frame(AbstractTemplate):
+	__slots__ = ('until',)
+
+	def __call__(self, parser, buff):
+		parserRes, newBuff = parser.subParser().parseLine(buff)
+		res = Buffer()
+		while parserRes and (self.until != parserRes[0]):
+			res.append(parserRes.pop())
+		buff.set_(parserRes + newBuff)
+		return res
+
+
 def Token(token):
 	def rule(_, val):
 		return token == val
@@ -169,11 +181,3 @@ def End(_, buff):
 		return None
 
 	return Buffer()
-
-
-@CustomTemplate.create
-def Frame(parser, buff):
-	assert buff
-	res, newBuff = parser.subParse(buff)
-	buff.set_(newBuff)
-	return res

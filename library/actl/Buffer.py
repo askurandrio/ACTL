@@ -11,9 +11,11 @@ class Buffer:
 		self._buff = []
 		self._head = iter(it)
 
-	def get(self, index=0):
-		self._load(index)
-		return self._buff[index]
+	def one(self):
+		self._load()
+		res, = self._buff
+		self._buff = []
+		return res
 
 	def pop(self, index=0):
 		self._load(index)

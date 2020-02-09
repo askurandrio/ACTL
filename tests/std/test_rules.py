@@ -1,7 +1,7 @@
 import pytest
 
 from actl import Parser, opcodes, Project, Buffer
-from actl.objects import While
+from actl.objects import While, Object
 
 
 @pytest.fixture
@@ -60,3 +60,12 @@ def test_while_with_condition_is_call_function(parse):
 		opcodes.CALL_FUNCTION(dst='__IV12', function='print'),
 		opcodes.VARIABLE(name='__IV12')
 	]
+
+
+def test_while_with_code(parse):
+	cycle = parse('while True: True')[0]
+	assert cycle.equal(Object.fromPy({
+		'__class__': While,
+		'conditionFrame': [opcodes.VARIABLE(name='True')],
+		'code': [opcodes.VARIABLE(name='True')]
+	}))
