@@ -23,10 +23,9 @@ class Parser:
 				return True
 		return False
 
-	def parseLine(self, buff):
-		print(buff)
+	def parseLine(self, buff, until):
 		flush = Buffer()
-		while buff and (END_LINE not in flush):
+		while buff and (until not in flush):
 			if self._apply_rule(buff):
 				buff = flush + buff
 				flush = Buffer()
@@ -34,8 +33,8 @@ class Parser:
 
 			flush.append(buff.pop())
 
-		if END_LINE in flush:
-			idx_end_line = flush.index(END_LINE)
+		if until in flush:
+			idx_end_line = flush.index(until)
 			res = flush[:idx_end_line]
 			del flush[:idx_end_line]
 		else:
@@ -49,5 +48,7 @@ class Parser:
 
 	def __iter__(self):
 		while self.buff:
-			res, self.buff = self.parseLine(self.buff)
+			res, self.buff = self.parseLine(self.buff, END_LINE)
+			if self.buff and (self.buff[0] == END_LINE):
+				self.buff.pop()
 			yield from res

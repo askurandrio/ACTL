@@ -3,6 +3,7 @@ import sys
 import logging
 
 from . import objects
+from . import opcodes
 from .Buffer import Buffer
 from .Parser import Parser
 from .Project import Project

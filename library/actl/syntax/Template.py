@@ -147,11 +147,8 @@ class Frame(AbstractTemplate):
 	__slots__ = ('until',)
 
 	def __call__(self, parser, buff):
-		parserRes, newBuff = parser.subParser().parseLine(buff)
-		res = Buffer()
-		while parserRes and (self.until != parserRes[0]):
-			res.append(parserRes.pop())
-		buff.set_(parserRes + newBuff)
+		res, newBuff = parser.subParser().parseLine(buff, self.until)
+		buff.set_(newBuff)
 		return res
 
 

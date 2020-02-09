@@ -33,11 +33,17 @@ class DynamicOpCode(AnyOpCode):
 	_defaults = {}
 
 	def __init__(self, *args, **kwargs):
-		kwargs = {**self._defaults, **kwargs}
-		for key, value in zip(self.__slots__, args):
-			setattr(self, key, value)
+		args = dict(zip(self.__slots__, args))
+		assert not (set(args) & set(kwargs)), \
+			f'This attributes already declared: {set(args) & set(kwargs)}'
+
+		kwargs = {
+			**self._defaults,
+			**args,
+			**kwargs
+		}
+
 		for key, value in kwargs.items():
-			assert (not hasattr(self, key)), f'This attribute already exist: {key}, {self}'
 			setattr(self, key, value)
 
 	def _getAttributes(self):
@@ -54,7 +60,7 @@ class DynamicOpCode(AnyOpCode):
 
 	@classmethod
 	def create(cls, name, *attributes, **defaults):
-		attributes = cls.__slots__ + attributes
+		attributes = cls.__slots__ + attributes + tuple(defaults.keys())
 		defaults = {**cls._defaults, **defaults}
 		class_ = type(name, (cls,), {'__slots__': attributes, '_defaults': defaults})
 		return class_

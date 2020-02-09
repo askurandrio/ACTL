@@ -7,7 +7,7 @@ String = BuildClass('String')
 @String.addMethodToClass('__init__')
 def _(cls, value=''):
 	self = cls.getAttr('__super__').getAttr('__init__').call()
-	self._val = value
+	self._value = value
 	return self
 
 

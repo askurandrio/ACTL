@@ -1,4 +1,5 @@
-from .Object import BuildClass, ANotFoundAttribute
+from actl.objects.String import String
+from actl.objects.Object import BuildClass, ANotFoundAttribute
 
 
 PyToA = BuildClass('PyToA')
@@ -13,7 +14,12 @@ def _(cls, value):
 
 @PyToA.addMethod('__call__')
 def _(self, *args):
-	args = (arg._value for arg in args)
+	def toPyValue(arg):
+		if arg.getAttr('__class__').equal(PyToA) or arg.getAttr('__class__').equal(String):
+			return arg._value
+		return str(arg)
+
+	args = tuple(toPyValue(arg) for arg in args)
 	self._value(*args)
 
 
