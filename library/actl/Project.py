@@ -41,13 +41,8 @@ class Project:
 			else:
 				self[key] = arg
 
-	def __getitem__(self, keys):
-		if not isinstance(keys, tuple):
-			keys = (keys,)
-		value = self.data
-		for key in keys:
-			value = value[key]
-		return value
+	def __getitem__(self, key):
+		return self.data[key]
 
 	def __setitem__(self, keys, value):
 		if isinstance(keys, str):

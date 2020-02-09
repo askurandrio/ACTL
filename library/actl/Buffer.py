@@ -21,13 +21,11 @@ class Buffer:
 		self._load(index)
 		return self._buff.pop(index)
 
-	def copy(self, quantity=1):
+	def copy(self):
 		buff, self._buff = self._buff, []
 		self._head = itertools.chain(iter(buff), self._head)
-		self._head, *res = itertools.tee(self._head, quantity+1)
-		if quantity == 1:
-			return type(self)(res[0])
-		return [type(self)(head) for head in res]
+		self._head, *res = itertools.tee(self._head, 2)
+		return type(self)(res[0])
 
 	def index(self, value):
 		for idx, elem in enumerate(self):
@@ -57,32 +55,13 @@ class Buffer:
 
 	def __getitem__(self, index):
 		if isinstance(index, slice):
-			if (index.stop is not None) and (index.stop < len(self._buff)):
-				return self._buff[index]
-			tmp = self.copy()
-			tmp._head = itertools.islice(tmp._head, index.start, index.stop, index.step)
-			return tmp
+			res = itertools.islice(self.copy(), index.start, index.stop, index.step)
+			return type(self)(res)
 		self._load(index)
 		return self._buff[index]
 
-	def __setitem__(self, index, elem):
-		if isinstance(index, slice):
-			if (
-				(index.start is None)
-				and (index.stop is None)
-				and (index.step is None)
-			):
-				self._buff = []
-				self._head = iter(elem)
-				return
-			self._load(index.stop)
-		self._buff[index] = elem
-
 	def __delitem__(self, index):
-		if isinstance(index, slice):
-			self._load(index.stop)
-		else:
-			self._load(index)
+		self._load(index.stop)
 		del self._buff[index]
 
 	def __contains__(self, value):
@@ -129,23 +108,12 @@ class Buffer:
 		return wrapper
 
 	@classmethod
-	def inf(cls, init_f=None, step_f=None, condition=None):
-		if init_f is None:
-			def init_f():  # pylint: disable=function-redefined
-				return 0
-
-		if step_f is None:
-			def step_f(value):  # pylint: disable=function-redefined
-				return value + 1
-
-		if condition is None:
-			def condition(_):  # pylint: disable=function-redefined
-				return True
-
+	def inf(cls):
 		@cls.make
-		def func():
-			value = init_f()
-			while condition(value):
+		def gen():
+			value = 0
+			while True:
 				yield value
-				value = step_f(value)
-		return func()
+				value += 1
+
+		return gen()

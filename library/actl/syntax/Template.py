@@ -97,7 +97,7 @@ class Many(AbstractTemplate):
 				if matches < self.min_matches:
 					return None
 				return res
-			inp[:] = buff
+			inp.set_(buff)
 			res += tmpl_res
 
 		raise RuntimeError('Unexpected branch')
@@ -115,7 +115,7 @@ class Or(AbstractTemplate):
 			template = Template(*template)
 			res = template(parser, buff)
 			if res is not None:
-				inp[:] = buff
+				inp.set_(buff)
 				return res
 		return None
 
@@ -130,7 +130,7 @@ class Maybe(AbstractTemplate):
 		inp = buff.copy()
 		res = self.template(parser, inp)
 		if res is not None:
-			buff[:] = inp
+			buff.set_(inp)
 			return res
 		return Buffer()
 

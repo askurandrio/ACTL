@@ -90,7 +90,7 @@ def _(inp, parser):
 		assert start.pop(0) == inp.pop()
 	dst = VARIABLE.temp()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='String', typeb='(', args=[string]))
-	inp[:0] = [dst]
+	inp.set_(Buffer.of(dst) + inp)
 
 
 @CustomTemplate.createToken
