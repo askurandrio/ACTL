@@ -1,6 +1,6 @@
 from actl.objects.object.BuildClass import BuildClass
 from actl.objects.object.NativeDict import NativeDict
-from actl.objects.object.NativeProperty import NativeProperty
+from actl.objects.object.NativeObject import NativeObject
 from actl.objects.object.exceptions import AAttributeIsNotSpecial
 from actl.objects.object.utils import loadPropIfNeed
 from actl.objects.object.Object import Object
@@ -24,10 +24,10 @@ def _Object__getAttr__(self, key):
 	return loadPropIfNeed(self, attr)
 
 
-Object.setAttr('__getAttr__', NativeProperty.makeMethod('Object.__getAttr__', _Object__getAttr__))
+Object.setAttr('__getAttr__', NativeObject.nativeMethod('Object.__getAttr__', _Object__getAttr__))
 Object.setAttr('__self__', NativeDict({}))
 Object.getAttr('__self__').setItem(
-	'__getAttr__', NativeProperty.makeMethod('Object.__self__.__getAttr__', _Object__getAttr__)
+	'__getAttr__', NativeObject.nativeMethod('Object.__self__.__getAttr__', _Object__getAttr__)
 )
 
 

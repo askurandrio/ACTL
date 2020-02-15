@@ -1,7 +1,6 @@
-from actl.objects.object.NativeFunc import NativeFunc
 from actl.objects.object.utils import loadPropIfNeed
 from actl.objects.object.exceptions import AAttributeNotFound
-from actl.objects.object.NativeProperty import NativeProperty
+from actl.objects.object.NativeObject import NativeObject
 from actl.objects.object.NativeClass import NativeClass
 
 
@@ -24,10 +23,10 @@ class Super(NativeClass):
 
 	@classmethod
 	def make(cls, parents):
-		@NativeFunc(f'fget_{cls.__name__}')
+		@NativeObject.nativeFunc(f'fget_{cls.__name__}')
 		def fget(aSelf):
 			return cls(parents, aSelf)
-		return NativeProperty(fget)
+		return NativeObject.nativeProperty(fget)
 
 	def __str__(self):
 		return f'{type(self).__name__}<{self._parents}>'
