@@ -1,5 +1,5 @@
 from actl.objects.object.BuildClass import BuildClass
-from actl.objects.object.native import nativeMethod, nativeDict
+from actl.objects.object.native import nativeMethod, nativeDict, NativeObject
 from actl.objects.object.exceptions import AAttributeIsNotSpecial
 from actl.objects.object.utils import loadPropIfNeed
 from actl.objects.object.Object import Object

@@ -79,7 +79,10 @@ class _Object:
 
 	def _getSpecialAttr(self, key):
 		if key in ('__class__', '__self__'):
-			return self._head[key]
+			try:
+				return self._head[key]
+			except KeyError:
+				raise AAttributeNotFound(key)
 
 		if key == '__super__':
 			try:

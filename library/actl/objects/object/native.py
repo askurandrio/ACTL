@@ -1,11 +1,10 @@
-from actl.objects.object.exceptions import AKeyNotFound
+from actl.objects.object.exceptions import AKeyNotFound, AAttributeNotFound
 from actl.objects.object.Object import Object
 
 
 class NativeObject(type(Object)):
 	aCls = type(Object)({})
 	aCls.setAttr('__class__', Object)
-	aCls.setAttr('__parents__', [Object])
 	aCls.setAttr('__name__', 'NativeObject')
 
 	def __init__(self, aAttributes, pyAttibutes):
@@ -13,6 +12,23 @@ class NativeObject(type(Object)):
 		for key, value in pyAttibutes.items():
 			setattr(self, key, value)
 		super().__init__(aAttributes)
+
+	def getAttr(self, key):
+		from actl.objects.String import String
+
+		try:
+			return self._head[key]
+		except KeyError:
+			pass
+
+		if key == String:
+			@nativeFunc('NativeObject.asStr')
+			def asStr():
+				return String.fromPy(self.asStr())
+
+			return asStr
+
+		raise AAttributeNotFound(key)
 
 
 def nativeFunc(name):

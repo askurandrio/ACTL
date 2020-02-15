@@ -26,9 +26,3 @@ def _(self):
 def _(self):
 	name = self.getAttr('__name__')
 	return String.call(f"class '{name}'")
-
-
-@BuildClass.addMethodToClass(NativeObject.aCls, String)
-def _(self):
-	asStr = self.asStr()
-	return String.call(asStr)
