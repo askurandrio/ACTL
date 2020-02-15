@@ -27,19 +27,6 @@
    project['handlers', 'py-func'] = py_func
 
 
-- py-func:
-   name: build
-   code: |
-      import actl
-      import std
-
-      scope = this['scope']
-      parser = actl.Parser(scope, this['rules'], this['uinput'])
-      code = list(parser)
-      print(code)
-      std.Executor(code, scope)
-
-
 - py-key:
    name: rules
    code: |
@@ -76,3 +63,29 @@
          **dict(_getPyToAVars()),
          **dict(_getAVars())
       })
+
+
+- py-func:
+   name: parse
+   code: |
+      import actl
+
+      return actl.Parser(this['scope'], this['rules'], this['uinput'])
+
+
+- py-func:
+   name: execute
+   code: |
+      import std
+
+      std.Executor(this['code'], this['scope'])
+
+
+- py-func:
+   name: build
+   code: |
+      code = this['parse']()
+      code = list(code)
+      print(code)
+      this['code'] = code
+      this['execute']()

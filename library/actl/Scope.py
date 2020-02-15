@@ -7,6 +7,9 @@ class Scope:
 	def get(self, key, default=None):
 		return self.__head.get(key, default)
 
+	def update(self, head):
+		self.__head.update(head)
+
 	def __contains__(self, key):
 		return key in self.__head
 

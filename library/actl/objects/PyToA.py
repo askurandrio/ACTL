@@ -34,9 +34,14 @@ def _(self, key):
 	return PyToA.call(value)
 
 
-@PyToA.addMethod('__toStr__')
+@PyToA.addMethod(AToPy)
 def _(self):
-	return String.call(self._value.__name__)
+	return self._value
+
+
+@PyToA.addMethod(String)
+def _(self):
+	return String.call(str(self._value))
 
 
 @PyToA.addPyMethod('fromPy')
