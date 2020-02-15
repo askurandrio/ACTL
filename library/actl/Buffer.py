@@ -12,8 +12,11 @@ class Buffer:
 		self._head = iter(it)
 
 	def one(self):
-		self._load()
-		res, = self._buff
+		self._load(1)
+		try:
+			res, = self._buff
+		except ValueError:
+			raise ValueError(self)
 		self._buff = []
 		return res
 
@@ -42,7 +45,7 @@ class Buffer:
 		return self._buff[:len(tmpl)] == tmpl
 
 	def _load(self, quantity=None):
-		if quantity is None:
+		if (quantity is None) or (quantity < 0):
 			self._buff.extend(self._head)
 			return
 

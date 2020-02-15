@@ -63,14 +63,18 @@ def _(_):
 	return [END_LINE]
 
 
-@RULES.add(
-	IsInstance(VARIABLE),
-	Token('='),
-	IsInstance(VARIABLE),
-	Token(END_LINE)
-)
-def _(src, _, dst, _1):
-	return [SET_VARIABLE(src, dst), END_LINE]
+@RULES.add(IsInstance(VARIABLE), Token(' '), Token('='), manual_apply=True, use_parser=True)
+def _(inp, parser):
+	dst = inp.pop()
+	assert inp.pop() == ' '
+	assert inp.pop() == '='
+	assert inp.pop() == ' '
+
+	parsed, newInp = parser.parseUntil(inp, END_LINE)
+	src = parsed.pop(-1)
+	assert isinstance(src, VARIABLE)
+
+	inp.set_(parsed + Buffer.of(SET_VARIABLE(dst.name, src.name)) + newInp)
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manual_apply=True, use_parser=True)

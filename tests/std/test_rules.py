@@ -107,3 +107,13 @@ def testWhileWithStringPrint(parse):
 		opcodes.CALL_FUNCTION(dst='__IV12', function='print', typeb='(', args=['__IV11'], kwargs={}),
 		opcodes.VARIABLE(name='__IV12')
 	]
+
+
+def testSetVariable(parse):
+	code = parse('a = 1')
+	assert code == [
+		opcodes.CALL_FUNCTION_STATIC(
+			dst='__IV11', function='Number', typeb='(', args=['1'], kwargs={}
+		),
+		opcodes.SET_VARIABLE(dst='a', src='__IV11')
+	]
