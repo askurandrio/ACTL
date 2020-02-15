@@ -1,3 +1,4 @@
+from actl.objects.String import String
 from actl.objects.object import Object
 
 
@@ -17,5 +18,5 @@ class AToPy(metaclass=_MetaAToPy):
 		self._value = value
 
 	def __str__(self):
-		res = self._value.getAttr('__toStr__').call()
+		res = self._value.getAttr(String).call()
 		return type(self)(res)

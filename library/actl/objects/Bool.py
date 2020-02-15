@@ -17,6 +17,7 @@ AFalse._value = False
 def _(_, val):
 	if val in (ATrue, AFalse):
 		return val
+
 	return val.getAttr(Bool).call()
 
 

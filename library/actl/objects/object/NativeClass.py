@@ -10,7 +10,7 @@ class NativeClass(type(Object)):
 
 	def __init_subclass__(cls):
 		super().__init_subclass__()
-		aCls = type(Object)()
+		aCls = type(Object)({})
 		aCls.setAttr('__class__', Object)
 		aCls.setAttr('__parents__', [Object])
 		aCls.setAttr('__name__', cls.__name__)

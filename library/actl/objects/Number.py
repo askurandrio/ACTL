@@ -20,4 +20,4 @@ def _(cls, value):
 
 @Number.addMethod(AToPy)
 def _(self):
-	return AToPy(self._value)
+	return self._value

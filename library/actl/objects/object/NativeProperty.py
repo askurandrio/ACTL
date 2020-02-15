@@ -15,9 +15,9 @@ class NativeProperty(NativeClass):
 
 	@classmethod
 	def makeMethod(cls, name, func):
-		@NativeFunc.wrap(f'fget_{name}')
+		@NativeFunc(f'fget_{name}')
 		def fget(instance):
-			@NativeFunc.wrap(f'fgetWrapper_{name}')
+			@NativeFunc(f'fgetWrapper_{name}')
 			def wrapper(*args, **kwargs):
 				return func(instance, *args, **kwargs)
 			return wrapper

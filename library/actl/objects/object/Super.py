@@ -24,7 +24,7 @@ class Super(NativeClass):
 
 	@classmethod
 	def make(cls, parents):
-		@NativeFunc.wrap(f'fget_{cls.__name__}')
+		@NativeFunc(f'fget_{cls.__name__}')
 		def fget(aSelf):
 			return cls(parents, aSelf)
 		return NativeProperty(fget)

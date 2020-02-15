@@ -7,7 +7,7 @@ from actl.objects.object.SuperSelf import SuperSelf
 
 class BuildClass(type(Object)):
 	def __init__(self, name, parents=None):
-		super().__init__()
+		super().__init__({})
 		if parents is None:
 			parents = []
 		parents.append(Object)
@@ -17,23 +17,23 @@ class BuildClass(type(Object)):
 		self.setAttr('__super__', Super.make(parents))
 		self.setAttr('__self__', NativeDict({'__super__': SuperSelf.make(parents)}))
 
-	def addMethod(self, name):
+	def addMethod(self, attr):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
 			cls_name = cls_name[0].lower() + cls_name[1:]
-			func.__name__ = f'{cls_name}.{name}'
-			method = NativeProperty.makeMethod(func.__name__, func)
-			self.getAttr('__self__').setItem(name, method)
+			methodName = f'{cls_name}.{attr}'
+			method = NativeProperty.makeMethod(methodName, func)
+			self.getAttr('__self__').setItem(attr, method)
 			return func
 
 		return decorator
 
-	def addMethodToClass(self, name):
+	def addMethodToClass(self, attr):
 		def decorator(func):
 			cls_name = self.getAttr('__name__')
-			func.__name__ = f'{cls_name}.{name}'
-			method = NativeProperty.makeMethod(func.__name__, func)
-			self.setAttr(name, method)
+			methodName = f'{cls_name}.{attr}'
+			method = NativeProperty.makeMethod(methodName, func)
+			self.setAttr(attr, method)
 			return func
 
 		return decorator

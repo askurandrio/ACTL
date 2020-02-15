@@ -1,6 +1,6 @@
 import sys
 
-from actl.objects.object.exceptions import AAttributeNotFound, AKeyNotFound
+from actl.objects.object.exceptions import AAttributeNotFound, AKeyNotFound, AAttributeIsNotSpecial
 
 
 sys.setrecursionlimit(500)
@@ -8,17 +8,17 @@ _default = object()
 
 
 class _Object:
-	def __init__(self, head=None):
-		if head is None:
-			head = {}
+	def __init__(self, head):
 		self._head = head
 
 	def getAttr(self, key):
 		try:
 			return self._getSpecialAttr(key)
-		except AAttributeNotFound:
+		except AAttributeIsNotSpecial:
 			pass
-		return self.getAttr('__getAttr__').call(key)
+
+		getAttr = self.getAttr('__getAttr__')
+		return getAttr.call(key)
 
 	def setAttr(self, key, value=_default):
 		if value is not _default:
@@ -86,7 +86,10 @@ class _Object:
 				super_ = self._head[key]
 			except KeyError:
 				self_ = self.getAttr('__class__').getAttr('__self__')
-				super_ = self_.getItem(key)
+				try:
+					super_ = self_.getItem(key)
+				except AKeyNotFound:
+					raise AAttributeNotFound(key)
 			return super_.get(self)
 
 		if key == '__getAttr__':
@@ -101,28 +104,33 @@ class _Object:
 					super_ = self.getAttr('__super__')
 					return super_.getAttr('__getAttr__')
 			return res.get(self)
-		raise AAttributeNotFound(f'This is not special attrribute: {key}')
+
+		raise AAttributeIsNotSpecial(key)
 
 	def __repr__(self):
 		return str(self)
 
 	def __str__(self):
-		if ('__name__' in self._head) and (('__parents__' in self._head) or (self is Object)):
-			return f"class {self._head['__name__']}"
-		#Todo: remove
-		if hasattr(_Object, '__stack'):
-			parent = False
-		else:
-			_Object.__stack = set()
-			parent = True
-		if self in _Object.__stack:
-			return '{...}'
+		def toStr():
+			from actl.objects.AToPy import \
+				AToPy  # pylint: disable=cyclic-import, import-outside-toplevel
 
-		_Object.__stack.add(self)
-		selfInStr = f'{type(self).__name__}<{self._head}>'
-		if parent:
-			del _Object.__stack
-		return selfInStr
+			if id(self) in _Object._stack:
+				return '{...}'
+			_Object._stack.add(id(self))
+
+			pyView = AToPy(self)
+			asStr = str(pyView)
+			return asStr
+
+		if hasattr(_Object, '_stack'):
+			return toStr()
+
+		_Object._stack = set()
+		asStr = toStr()
+		del _Object._stack
+
+		return asStr
 
 
-Object = _Object()
+Object = _Object({})

@@ -1,7 +1,8 @@
 
-from .object import Object
-from .PyToA import PyToA
-from .String import String
-from .While import While
-from .Number import Number
-from .Bool import ATrue, AFalse, Bool
+import actl.objects.init
+from actl.objects.object import Object
+from actl.objects.PyToA import PyToA
+from actl.objects.String import String
+from actl.objects.While import While
+from actl.objects.Number import Number
+from actl.objects.Bool import ATrue, AFalse, Bool

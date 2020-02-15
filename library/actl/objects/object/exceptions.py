@@ -7,6 +7,10 @@ class AGenericKeyError(Exception):
 		super().__init__(msg)
 
 
+class AAttributeIsNotSpecial(AGenericKeyError):
+	MSG = 'This atribute is not special: {key}'
+
+
 class AAttributeNotFound(AGenericKeyError):
 	MSG = 'This attribute not found: {key}'
 
