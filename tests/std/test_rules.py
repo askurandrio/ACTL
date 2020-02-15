@@ -21,13 +21,13 @@ def parse():
 	return _parse
 
 
-def testOnlyVar(parse):
+def test_onlyVar(parse):
 	res = parse('var')
 
 	assert res == [opcodes.VARIABLE(name='var')]
 
 
-def testVarWithEndLine(parse):
+def test_varWithEndLine(parse):
 	res = parse('var\n')
 
 	assert res == [opcodes.VARIABLE(name='var')]
@@ -95,7 +95,7 @@ def test_while_with_simple_print(parse):
 	]
 
 
-def testWhileWithStringPrint(parse):
+def test_whileWithStringPrint(parse):
 	cycle = parse('while True: print("1")').one()
 
 	assert cycle.getAttr('__class__').equal(While)
@@ -109,7 +109,7 @@ def testWhileWithStringPrint(parse):
 	]
 
 
-def testSetVariable(parse):
+def test_setVariable(parse):
 	code = parse('a = 1')
 	assert code == [
 		opcodes.CALL_FUNCTION_STATIC(
