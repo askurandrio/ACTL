@@ -1,12 +1,21 @@
+from actl.objects.object.Object import Object
 from actl.objects.object.utils import loadPropIfNeed
 from actl.objects.object.exceptions import AAttributeNotFound
-from actl.objects.object.NativeObject import NativeObject
-from actl.objects.object.NativeClass import NativeClass
+from actl.objects.object.native import nativeProperty, nativeFunc
 
 
-class Super(NativeClass):
+class _MetaSuper(type):
+	def __call__(self, parents):
+		@nativeFunc(f'fget_{self.__name__}')
+		def fget(aSelf):
+			return type.__call__(self, parents, aSelf)
+
+		return nativeProperty(fget)
+
+
+class Super(type(Object), metaclass=_MetaSuper):
 	def __init__(self, parents, aSelf):
-		super().__init__()
+		super().__init__({})
 		self._parents = parents
 		self._aSelf = aSelf
 
@@ -20,13 +29,6 @@ class Super(NativeClass):
 
 	def getAttr(self, key):
 		return loadPropIfNeed(self._aSelf, self.findAttr(key))
-
-	@classmethod
-	def make(cls, parents):
-		@NativeObject.nativeFunc(f'fget_{cls.__name__}')
-		def fget(aSelf):
-			return cls(parents, aSelf)
-		return NativeObject.nativeProperty(fget)
 
 	def __str__(self):
 		return f'{type(self).__name__}<{self._parents}>'

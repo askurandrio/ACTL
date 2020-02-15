@@ -6,7 +6,7 @@ from actl.objects.String import String
 
 @String.addMethod(AToPy)
 def _(self):
-	return self._value  # pylint: protected-access
+	return self._value  # pylint: disable=protected-access
 
 
 @BuildClass.addMethodToClass(Object, String)
