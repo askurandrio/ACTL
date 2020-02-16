@@ -1,7 +1,4 @@
-from actl.objects.object.Object import Object
-from actl.objects.object.utils import loadPropIfNeed
-from actl.objects.object.exceptions import AAttributeNotFound
-from actl.objects.object.native import nativeProperty, nativeFunc
+from actl.objects.object import Object, loadPropIfNeed, AAttributeNotFound, nativeProperty, nativeFunc
 
 
 class _MetaSuper(type):

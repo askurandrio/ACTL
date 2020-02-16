@@ -1,23 +1,18 @@
-from actl.objects.object.native import nativeDict, nativeMethod
-from actl.objects.object.Object import Object
-from actl.objects.object.Super import Super
-from actl.objects.object.SuperSelf import SuperSelf
+from actl.objects.SuperSelf import SuperSelf
+from actl.objects.object import Object, nativeMethod
+from actl.objects.Super import Super
 
 
 class BuildClass(type(Object)):
 	def __init__(self, name, parents=None):
-		super().__init__({})
+		cls = Object.getAttr('__class__').call(name)
+		super().__init__(cls._head)
 		if parents is None:
 			parents = []
 		parents.append(Object)
-		self.setAttr('__class__', Object)
 		self.setAttr('__parents__', parents)
-		self.setAttr('__name__', name)
 		self.setAttr('__super__', Super(parents))  # pylint: disable=no-value-for-parameter
-		self.setAttr(
-			'__self__',
-			nativeDict({'__super__': SuperSelf(parents)})  # pylint: disable=no-value-for-parameter
-		)
+		self.getAttr('__self__').setItem('__super__', SuperSelf(parents))  # pylint: disable=no-value-for-parameter
 
 	def addMethod(self, attr):
 		def decorator(func):

@@ -14,6 +14,7 @@ class Executor:
 
 	def execute(self, code):
 		for opcode in code:
+			print(opcode)
 			handler = self._HANDLERS[type(opcode)]
 			handler(self, opcode)
 
@@ -34,6 +35,7 @@ def _(executor, opcode):
 		res = Bool.call(res)
 		return AToPy(res)
 
+	breakpoint()
 	while condition():
 		executor.execute(opcode.getAttr('code'))
 

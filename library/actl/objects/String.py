@@ -1,5 +1,5 @@
 # pylint: disable=protected-access
-from actl.objects.object import BuildClass
+from actl.objects.BuildClass import BuildClass
 
 
 class _BuildClassString(BuildClass):
@@ -11,9 +11,10 @@ class _BuildClassString(BuildClass):
 String = _BuildClassString('String')
 
 
-@String.addMethodToClass('__init__')
+@String.addMethodToClass('__call__')
 def _(cls, value=''):
-	self = cls.getAttr('__super__').getAttr('__init__').call()
+	s = cls.getAttr('__super__').getAttr('__call__')
+	self = s.call()
 	self._value = value
 	return self
 

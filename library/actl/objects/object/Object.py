@@ -1,139 +1,48 @@
-import sys
-
-from actl.objects.object.exceptions import AAttributeNotFound, AKeyNotFound, AAttributeIsNotSpecial
-
-
-sys.setrecursionlimit(500)
-_default = object()
+from actl.objects.object.native import nativeMethod, nativeDict
+from actl.objects.object.exceptions import AAttributeIsNotSpecial
+from actl.objects.object.utils import loadPropIfNeed
+from actl.objects.object._Object import Object as pyObjectCls
 
 
-class _Object:
-	def __init__(self, head):
-		self._head = head
+def getAttr(self, key):
+	try:
+		return self._getSpecialAttr(key)  # pylint: disable=protected-access
+	except AAttributeIsNotSpecial:
+		pass
 
-	def getAttr(self, key):
-		try:
-			return self._getSpecialAttr(key)
-		except AAttributeIsNotSpecial:
-			pass
-
-		getAttr = self.getAttr('__getAttr__')
-		return getAttr.call(key)
-
-	def setAttr(self, key, value=_default):
-		if value is not _default:
-			self._head[key] = value
-			return None
-
-		def decorator(value):
-			self._head[key] = value
-			return value
-
-		return decorator
-
-	def hasAttr(self, key):
-		try:
-			self.getAttr(key)
-		except AAttributeNotFound:
-			return False
-		else:
-			return True
-
-	def call(self, *args, **kwargs):
-		return self.getAttr('__call__').call(*args, **kwargs)
-
-	def equal(self, other):
-		return self._head == other._head  # pylint: disable=protected-access
-
-	def get(self, instance):
-		return self.getAttr('__get__').call(instance)
-
-	def toStr(self):
-		return self.getAttr('__toStr__').call()
-
-	def addPyMethod(self, name):
-		def decorator(func):
-			method = lambda *args, **kwargs: func(self, *args, **kwargs)
-			setattr(self, name, method)
-			return method
-
-		return decorator
-
-	def findAttr(self, key):
-		try:
-			return self._head[key]
-		except KeyError:
-			ex = AAttributeNotFound(key=key)
-		if self is Object:
-			raise ex
-		self_ = self.getAttr('__class__').getAttr('__self__')
-		try:
-			return self_.getItem(key)
-		except AKeyNotFound:
-			pass
-		try:
-			super_ = self.getAttr('__super__')
-			return super_.findAttr(key)  # pylint: disable=protected-access
-		except AAttributeNotFound:
-			raise ex
-
-	def _getSpecialAttr(self, key):
-		if key in ('__class__', '__self__'):
-			try:
-				return self._head[key]
-			except KeyError:
-				raise AAttributeNotFound(key)
-
-		if key == '__super__':
-			try:
-				super_ = self._head[key]
-			except KeyError:
-				self_ = self.getAttr('__class__').getAttr('__self__')
-				try:
-					super_ = self_.getItem(key)
-				except AKeyNotFound:
-					raise AAttributeNotFound(key)
-			return super_.get(self)
-
-		if key == '__getAttr__':
-			try:
-				res = self._head['__getAttr__']
-			except KeyError:
-				cls = self.getAttr('__class__')
-				self_ = cls.getAttr('__self__')
-				try:
-					res = self_.getItem('__getAttr__')
-				except AKeyNotFound:
-					super_ = self.getAttr('__super__')
-					return super_.getAttr('__getAttr__')
-			return res.get(self)
-
-		raise AAttributeIsNotSpecial(key)
-
-	def __repr__(self):
-		return str(self)
-
-	def __str__(self):
-		def toStr():
-			from actl.objects.AToPy import \
-				AToPy  # pylint: disable=cyclic-import, import-outside-toplevel
-
-			if id(self) in _Object._stack:
-				return '{...}'
-			_Object._stack.add(id(self))
-
-			pyView = AToPy(self)
-			asStr = str(pyView)
-			return asStr
-
-		if hasattr(_Object, '_stack'):
-			return toStr()
-
-		_Object._stack = set()
-		asStr = toStr()
-		del _Object._stack
-
-		return asStr
+	attr = self.findAttr(key)
+	return loadPropIfNeed(self, attr)
 
 
-Object = _Object({})
+def selfCall(cls):
+	self = pyObjectCls({})
+	self.setAttr('__class__', cls)
+	return self
+
+
+def clsCall(cls, name):
+	self = pyObjectCls({})
+	self.setAttr('__name__', name)
+	self.setAttr('__class__', cls)
+	self.setAttr('__self__', nativeDict({}))
+	return self
+
+
+_Object = pyObjectCls({
+	'__name__': '_Object',
+	'__call__': nativeMethod('_Object.__call__', clsCall),
+	'__getAttr__': nativeMethod('_Object.__getAttr__', getAttr),
+	'__self__': nativeDict({
+		'__call__': nativeMethod('Object.__call__', selfCall),
+		'__getAttr__': nativeMethod('Object.__getAttr__', getAttr),
+	})
+})
+
+
+Object = _Object.call('Object')
+Object.getAttr('__self__').setItem('__getAttr__', nativeMethod('object.__getAttr__', getAttr))
+
+
+@Object.addPyMethod('fromPy')
+def _(_, head):
+	return type(Object)(head)

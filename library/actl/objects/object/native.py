@@ -1,10 +1,9 @@
 from actl.objects.object.exceptions import AKeyNotFound, AAttributeNotFound
-from actl.objects.object.Object import Object
+from actl.objects.object._Object import Object as pyObjectCls\
 
 
-class NativeObject(type(Object)):
-	aCls = type(Object)({})
-	aCls.setAttr('__class__', Object)
+class _NativeObject(pyObjectCls):
+	aCls = pyObjectCls({})
 	aCls.setAttr('__name__', 'NativeObject')
 
 	def __init__(self, aAttributes, pyAttibutes):
@@ -24,11 +23,14 @@ class NativeObject(type(Object)):
 		if key == String:
 			@nativeFunc('NativeObject.asStr')
 			def asStr():
-				return String.fromPy(self.asStr())
+				return String.fromPy(str(self))
 
 			return asStr
 
 		raise AAttributeNotFound(key)
+
+	def __str__(self):
+		return self.asStr()
 
 
 def nativeFunc(name):
@@ -36,7 +38,7 @@ def nativeFunc(name):
 		def asStr():
 			return f'nativeFunc<{name}>'
 
-		return NativeObject({}, {'call': func, 'asStr': asStr})
+		return _NativeObject({}, {'call': func, 'asStr': asStr})
 
 	return decorator
 
@@ -48,13 +50,13 @@ def nativeProperty(fget):
 	def asStr():
 		return f'nativeProperty({fget})'
 
-	return NativeObject({}, {'get': get, 'asStr': asStr})
+	return _NativeObject({}, {'get': get, 'asStr': asStr})
 
 
 def nativeMethod(name, func):
-	@nativeFunc(f'fget_{name}')
+	@nativeFunc(f'{name}.__get__')
 	def fget(instance):
-		@nativeFunc(f'fgetWrapper_{name}')
+		@nativeFunc(f'{name}.__get__()')
 		def wrapper(*args, **kwargs):
 			return func(instance, *args, **kwargs)
 		return wrapper
@@ -74,4 +76,4 @@ def nativeDict(head):
 		except KeyError:
 			raise AKeyNotFound(key=key)
 
-	return NativeObject({}, {'asStr': asStr, 'setItem': setItem, 'getItem': getItem})
+	return _NativeObject({}, {'asStr': asStr, 'setItem': setItem, 'getItem': getItem})

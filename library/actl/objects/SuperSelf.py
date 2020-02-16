@@ -1,5 +1,5 @@
-from actl.objects.object.exceptions import AKeyNotFound, AAttributeNotFound
-from actl.objects.object.Super import Super
+from actl.objects.object import AKeyNotFound, AAttributeNotFound
+from actl.objects.Super import Super
 
 
 class SuperSelf(Super):

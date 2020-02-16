@@ -14,9 +14,6 @@ class Project:
 	_DEFAULT_HANDLERS = {}
 
 	def __init__(self, projectf=None, source=None):
-		cls = type(self)
-		if not hasattr(cls, 'this'):
-			cls.this = self
 		if projectf:
 			assert source is None
 			projectf = self.__resolve_projectf(projectf)
@@ -95,24 +92,15 @@ def _(project, arg):
 	else:
 		kwargs['source'] = arg
 	sub_project = type(project)(**kwargs)
+	sub_project.this = project
 	project[arg] = sub_project
 	_recursive_update(project.data, sub_project.data)
 
 
 @Project.add_default_handler('py-code')
 def _(project, arg):
-	exec(arg, {'this': Project.view, 'project': project}, None)  # pylint: disable=exec-used
-
-
-class ProjectView:
-	def __getitem__(self, key):
-		return Project.this[key]  # pylint: disable=no-member
-
-	def __setitem__(self, key, value):
-		Project.this[key] = value  # pylint: disable=no-member
-
-
-Project.view = ProjectView()
+	this = getattr(project, 'this', project)
+	exec(arg, {'this': this, 'project': project}, None)  # pylint: disable=exec-used
 
 
 def _recursive_update(base, new):
@@ -122,19 +110,3 @@ def _recursive_update(base, new):
 			_recursive_update(base[key], value)
 		else:
 			base[key] = value
-
-
-class LinkerLayer:
-	def __init__(self, *layers):
-		self.__layers = layers
-
-	def link(self):
-		idx_layer = 0
-		while idx_layer < len(self.__layers):
-			opt = self.__layers[idx_layer].link()
-			if opt == 'back':
-				idx_layer -= 1
-			elif opt == 'next':
-				idx_layer += 1
-			else:
-				raise RuntimeError(f'opt from layer<{self.__layers[idx_layer]}> not found: {opt}')

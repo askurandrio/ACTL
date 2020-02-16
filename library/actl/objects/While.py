@@ -1,13 +1,12 @@
-from actl.objects.object import BuildClass
+from actl.objects.BuildClass import BuildClass
 from actl.syntax import SyntaxRule, Value, Token, Buffer, Or, End, Frame
-
 
 While = BuildClass('While')
 
 
-@While.addMethodToClass('__init__')
+@While.addMethodToClass('__call__')
 def _(cls, conditionFrame):
-	self = cls.getAttr('__super__').getAttr('__init__').call()
+	self = cls.getAttr('__super__').getAttr('__call__').call()
 	self.setAttr('conditionFrame', conditionFrame)
 	return self
 

@@ -1,14 +1,14 @@
 # pylint: disable=protected-access
 from actl.objects.AToPy import AToPy
-from actl.objects.object import BuildClass
+from actl.objects.BuildClass import BuildClass
 
 
 Number = BuildClass('Number')
 
 
-@Number.addMethodToClass('__init__')
+@Number.addMethodToClass('__call__')
 def _(cls, value):
-	self = cls.getAttr('__super__').getAttr('__init__').call()
+	self = cls.getAttr('__super__').getAttr('__call__').call()
 	if isinstance(value, str):
 		if '.' in value:
 			value = float(value)

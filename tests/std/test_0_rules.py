@@ -8,9 +8,8 @@ from actl.objects import While
 
 @pytest.fixture
 def parse():
-	project = Project('std')
-
 	def _parse(inp):
+		project = Project('std')
 		opcodes.VARIABLE.counter.reset()
 		inp = Buffer(inp)
 		result = Buffer(Parser(project['scope'], project['rules'], inp))

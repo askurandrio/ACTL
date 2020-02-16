@@ -1,6 +1,6 @@
 from actl.objects.AToPy import AToPy
-from actl.objects.object import Object, NativeObject
-from actl.objects.object import BuildClass
+from actl.objects.object import Object, nativeMethod
+from actl.objects.BuildClass import BuildClass
 from actl.objects.String import String
 
 
@@ -9,20 +9,23 @@ def _(self):
 	return self._value  # pylint: disable=protected-access
 
 
-@BuildClass.addMethodToClass(Object, String)
-def _(self):
+def clsAsStr(self):
 	name = self.getAttr('__name__')
 	return String.call(f"class '{name}'")
 
 
-@BuildClass.addMethod(Object, String)
-def _(self):
+def selfAsStr(self):
 	name = self.getAttr('__class__').getAttr('__name__')
 	scope = self._head   # pylint: disable=protected-access
 	return String.call(f'{name}<{scope}>')
 
 
-@BuildClass.addMethodToClass(Object, String)
-def _(self):
-	name = self.getAttr('__name__')
-	return String.call(f"class '{name}'")
+Object.getAttr('__class__').setAttr(
+	String, nativeMethod('_Object.__str__', clsAsStr)
+)
+Object.getAttr('__class__').getAttr('__self__').setItem(
+	String, nativeMethod('_Object.__str__', clsAsStr)
+)
+Object.getAttr('__self__').setItem(
+	String, nativeMethod('object.__str__', selfAsStr)
+)
