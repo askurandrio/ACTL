@@ -1,4 +1,5 @@
-from actl.objects.object import Object, loadPropIfNeed, AAttributeNotFound, nativeProperty, nativeFunc
+from actl.objects.object import Object, loadPropIfNeed, AAttributeNotFound, nativeProperty, \
+	nativeFunc
 
 
 class _MetaSuper(type):

@@ -23,7 +23,7 @@ def execute():
 def test_print(execute):
 	print_ = Mock()
 
-	scope = execute({'print': PyToA.fromPy(print_)}, 'print(1)')
+	scope = execute({'print': PyToA.call(print_)}, 'print(1)')
 
 	print_.assert_called_once_with(1)
 	assert AToPy(scope['_']) is print_.return_value
@@ -38,8 +38,8 @@ def test_while(execute):
 	cond = Mock(side_effect=cond_)
 	print_ = Mock()
 
-	scope = execute({'cond': PyToA.fromPy(cond), 'print': print_}, 'while cond(): print(1)')
+	scope = execute({'cond': PyToA.call(cond), 'print': PyToA.call(print_)}, 'while cond(): print(1)')
 
 	assert cond.call_count == 2
-	assert print_.assert_called_once_with(1)
+	print_.assert_called_once_with(1)
 	assert scope['_'].equal(AFalse)

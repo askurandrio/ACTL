@@ -43,7 +43,7 @@
       def _getPyToAVars():
          for varName in ('print',):
             var = eval(varName)
-            yield varName, actl.objects.PyToA.fromPy(var)
+            yield varName, actl.objects.PyToA.call(var)
 
 
       def _getAVars():

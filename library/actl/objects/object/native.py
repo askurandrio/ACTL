@@ -12,8 +12,17 @@ class _NativeObject(pyObjectCls):
 			setattr(self, key, value)
 		super().__init__(aAttributes)
 
+	def asStr(self):
+		return f'{type(self).__name__}<...>'
+
+	def call(self, *args, **kwargs):
+		return super().get(*args, **kwargs)
+
+	def get(self, instance):
+		return super().get(instance)
+
 	def getAttr(self, key):
-		from actl.objects.String import String
+		from actl.objects.String import String  # pylint: disable=cyclic-import
 
 		try:
 			return self._head[key]
@@ -23,7 +32,7 @@ class _NativeObject(pyObjectCls):
 		if key == String:
 			@nativeFunc('NativeObject.asStr')
 			def asStr():
-				return String.fromPy(str(self))
+				return String.fromPy(self.asStr())
 
 			return asStr
 

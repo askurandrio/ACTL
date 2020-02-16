@@ -11,6 +11,9 @@ PyToA = BuildClass('PyToA')
 
 @PyToA.addMethodToClass('__call__')
 def _(cls, value):
+	if isinstance(value, bool):
+		return ATrue if value else AFalse
+
 	self = cls.getAttr('__super__').getAttr('__call__').call()
 	self._value = value
 	return self
@@ -34,6 +37,7 @@ def _(self, key):
 		value = getattr(self._value, key)
 	except (AssertionError, AttributeError) as ex:
 		raise AAttributeNotFound(ex)
+
 	return PyToA.call(value)
 
 
@@ -51,8 +55,3 @@ def _(self):
 @PyToA.addMethod(String)
 def _(self):
 	return String.call(str(self._value))
-
-
-@PyToA.addPyMethod('fromPy')
-def _(cls, obj):
-	return cls.call(obj)

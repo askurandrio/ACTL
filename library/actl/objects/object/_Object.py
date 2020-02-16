@@ -39,14 +39,16 @@ class Object:
 		else:
 			return True
 
-	def call(self, *args, **kwargs):
-		return self.getAttr('__call__').call(*args, **kwargs)
+	@property
+	def call(self):
+		return self.getAttr('__call__').call
 
 	def equal(self, other):
 		return self._head == other._head  # pylint: disable=protected-access
 
-	def get(self, instance):
-		return self.getAttr('__get__').call(instance)
+	@property
+	def get(self):
+		return self.getAttr('__get__').call
 
 	def addPyMethod(self, name):
 		def decorator(func):

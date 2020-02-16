@@ -1,6 +1,5 @@
 from actl.objects.AToPy import AToPy
 from actl.objects.object import Object, nativeMethod
-from actl.objects.BuildClass import BuildClass
 from actl.objects.String import String
 
 
