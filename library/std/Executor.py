@@ -45,6 +45,11 @@ def _(executor, opcode):
 	executor.scope['_'] = executor.scope[opcode.name]
 
 
+@_addHandler(actl.opcodes.SET_VARIABLE)
+def _(executor, opcode):
+	executor.scope[opcode.dst] = executor.scope[opcode.src]
+
+
 @_addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]

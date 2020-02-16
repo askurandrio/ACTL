@@ -42,4 +42,10 @@ def test_while(execute):
 
 	assert cond.call_count == 2
 	print_.assert_called_once_with(1)
-	assert scope['_'].equal(AFalse)
+	assert scope['_'].equal(PyToA.call(False))
+
+
+def test_setVariable(execute):
+	scope = execute({}, 'a = 1')
+
+	assert scope['a'].equal(PyToA.call(1))

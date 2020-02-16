@@ -1,4 +1,5 @@
 # pylint: disable=protected-access
+from actl.objects.Number import Number
 from actl.objects.Bool import Bool, ATrue, AFalse
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
@@ -13,6 +14,9 @@ PyToA = BuildClass('PyToA')
 def _(cls, value):
 	if isinstance(value, bool):
 		return ATrue if value else AFalse
+
+	if isinstance(value, (int, float)):
+		return Number.call(value)
 
 	self = cls.getAttr('__super__').getAttr('__call__').call()
 	self._value = value
