@@ -4,8 +4,10 @@ from actl.objects import While, Object, Bool
 from actl.objects.AToPy import AToPy
 
 
+_HANDLERS = {}
+
+
 class Executor:
-	_HANDLERS = {}
 
 	def __init__(self, code, scope):
 		self.scope = scope
@@ -14,17 +16,17 @@ class Executor:
 
 	def execute(self, code):
 		for opcode in code:
-			handler = self._HANDLERS[type(opcode)]
+			handler = _HANDLERS[type(opcode)]
 			handler(self, opcode)
 
-	@classmethod
-	def _addHandler(cls, opcode):
-		def decorator(handler):
-			cls._HANDLERS[opcode] = handler
-		return decorator
+
+def _addHandler(opcode):
+	def decorator(handler):
+		_HANDLERS[opcode] = handler
+	return decorator
 
 
-@Executor._addHandler(type(Object))  # pylint: disable=protected-access
+@_addHandler(type(Object))
 def _(executor, opcode):
 	assert opcode.getAttr('__class__').equal(While)
 
@@ -38,19 +40,19 @@ def _(executor, opcode):
 		executor.execute(opcode.getAttr('code'))
 
 
-@Executor._addHandler(actl.opcodes.VARIABLE)  # pylint: disable=protected-access
+@_addHandler(actl.opcodes.VARIABLE)
 def _(executor, opcode):
 	executor.scope['_'] = executor.scope[opcode.name]
 
 
-@Executor._addHandler(actl.opcodes.CALL_FUNCTION_STATIC)  # pylint: disable=protected-access
+@_addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('
 	executor.scope[opcode.dst] = function.call(*opcode.args, **opcode.kwargs)
 
 
-@Executor._addHandler(actl.opcodes.CALL_FUNCTION)  # pylint: disable=protected-access
+@_addHandler(actl.opcodes.CALL_FUNCTION)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('
