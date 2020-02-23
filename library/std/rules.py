@@ -133,8 +133,12 @@ class UseCodeBlock:
 		inp.set_(Buffer.of(var) + inp)
 
 	@classmethod
+	def isFullCodeBlock(cls, inp):
+		return inp[0] == '\n'
+
+	@classmethod
 	def popCodeBlock(cls, parser, inp):
-		if inp[0] == '\n':
+		if cls.isFullCodeBlock(inp):
 			code = cls._popFullCodeBlock(inp)
 		else:
 			code = cls._popInlineCodeBlock(inp)
