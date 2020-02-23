@@ -1,5 +1,3 @@
-
-from actl.opcodes import END_LINE
 from actl.Buffer import Buffer
 
 
@@ -48,7 +46,7 @@ class Parser:
 
 	def __iter__(self):
 		while self.buff:
-			res, self.buff = self.parseUntil(self.buff, END_LINE)
-			if self.buff and (self.buff[0] == END_LINE):
+			res, self.buff = self.parseUntil(self.buff, '\n')
+			if self.buff and (self.buff[0] == '\n'):
 				self.buff.pop()
 			yield from res

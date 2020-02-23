@@ -62,7 +62,7 @@ def test_while(parse):
 	]
 
 
-def test_while_with_simple_code(parse):
+def test_whileWithSimpleCode(parse):
 	cycle = parse('while True: True').one()
 
 	assert cycle.getAttr('__class__').equal(While)
@@ -70,7 +70,7 @@ def test_while_with_simple_code(parse):
 	assert cycle.getAttr('code') == [opcodes.VARIABLE(name='True')]
 
 
-def test_while_with_condition_is_call_function(parse):
+def test_whileWithConditionIsCallFunction(parse):
 	cycle = parse('while print("")').one()
 
 	assert cycle.getAttr('__class__').equal(While)
@@ -81,7 +81,7 @@ def test_while_with_condition_is_call_function(parse):
 	]
 
 
-def test_while_with_simple_print(parse):
+def test_whileWithSimplePrint(parse):
 	cycle = parse('while True: print()').one()
 
 	assert cycle.getAttr('__class__').equal(While)
@@ -92,7 +92,7 @@ def test_while_with_simple_print(parse):
 	]
 
 
-def test_whileWithStringPrint(parse):
+def test_whileWithSimpleStringPrint(parse):
 	cycle = parse('while True: print("1")').one()
 
 	assert cycle.getAttr('__class__').equal(While)
@@ -103,6 +103,21 @@ def test_whileWithStringPrint(parse):
 		),
 		opcodes.CALL_FUNCTION(dst='__IV12', function='print', typeb='(', args=['__IV11'], kwargs={}),
 		opcodes.VARIABLE(name='__IV12')
+	]
+
+
+def test_whileWithFullCodeBlock(parse):
+	cycle = parse('while True:\n	print(1)\n	print(2)').one()
+
+	assert cycle.getAttr('__class__').equal(While)
+	assert cycle.getAttr('conditionFrame') == [opcodes.VARIABLE(name='True')]
+	assert cycle.getAttr('code') == [
+		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function='Number', typeb='(', args=['1'], kwargs={}),
+		opcodes.CALL_FUNCTION(dst='__IV12', function='print', typeb='(', args=['__IV11'], kwargs={}),
+		opcodes.VARIABLE(name='__IV12'),
+		opcodes.CALL_FUNCTION_STATIC(dst='__IV13', function='Number', typeb='(', args=['2'], kwargs={}),
+		opcodes.CALL_FUNCTION(dst='__IV14', function='print', typeb='(', args=['__IV13'], kwargs={}),
+		opcodes.VARIABLE(name='__IV14'),
 	]
 
 

@@ -4,7 +4,7 @@ from actl.objects import Object
 from actl.syntax import \
 	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer
 from actl.opcodes import \
-	VARIABLE, END_LINE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
+	VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
 
 
 RULES = SyntaxRules()
@@ -61,11 +61,6 @@ def _(*tokens):
 	return [VARIABLE(''.join(tokens))]
 
 
-@RULES.add(Token('\n'))
-def _(_):
-	return [END_LINE]
-
-
 @RULES.add(IsInstance(VARIABLE), Token(' '), Token('='), manual_apply=True, use_parser=True)
 def _(inp, parser):
 	dst = inp.pop()
@@ -73,7 +68,7 @@ def _(inp, parser):
 	assert inp.pop() == '='
 	assert inp.pop() == ' '
 
-	parsed, newInp = parser.parseUntil(inp, END_LINE)
+	parsed, newInp = parser.parseUntil(inp, '\n')
 	src = parsed.pop(-1)
 	assert isinstance(src, VARIABLE)
 
@@ -129,16 +124,36 @@ def _(function, op_token, *args, parser=None):
 
 @RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manual_apply=True, use_parser=True)
 def _(inp, parser):
+	def _getFirstIndent():
+		firstIndent = ''
+
+		for elem in inp:
+			if elem not in (' ', '\t'):
+				break
+			firstIndent += elem
+
+		assert len(set(firstIndent)) == 1
+		return firstIndent
+
 	var = inp.pop()
 	assert inp.pop() == ':'
 	code = Buffer()
 
-	assert inp[0] != END_LINE
-	while inp[0] == ' ':
+	if inp[0] == '\n':
 		inp.pop()
+		indent = _getFirstIndent()
+		while inp[:len(indent)] == indent:
+			del inp[:len(indent)]
+			while inp and (inp[0] != '\n'):
+				code.append(inp.pop())
+			if inp:
+				code.append(inp.pop())
+	else:
+		while inp[0] == ' ':
+			inp.pop()
 
-	while inp and (inp[0] != END_LINE):
-		code.append(inp.pop(0))
+		while inp and (inp[0] != '\n'):
+			code.append(inp.pop(0))
 
 	var = var.getAttr('__useCodeBlock__').call(type(parser)(parser.scope, parser.rules, code))
 	inp.set_(Buffer.of(var) + inp)

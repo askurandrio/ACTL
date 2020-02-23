@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from actl import Project, Buffer
-from actl.objects import PyToA, AToPy, AFalse
+from actl.objects import PyToA, AToPy
 
 
 @pytest.fixture

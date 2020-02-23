@@ -33,7 +33,6 @@ class VARIABLE(DynamicOpCode):
 		return cls(f'__IV{cls.counter()}')
 
 
-END_LINE = DynamicOpCode.create('END_LINE')()
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
 CALL_FUNCTION = DynamicOpCode.create(
 	'CALL_FUNCTION', 'dst', 'function', typeb='(', args=[], kwargs={}
