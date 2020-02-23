@@ -4,12 +4,10 @@ from actl.objects.Super import Super
 
 
 class BuildClass(type(Object)):
-	def __init__(self, name, parents=None):
+	def __init__(self, name):
 		cls = Object.getAttr('__class__').call(name)
 		super().__init__(cls._head)
-		if parents is None:
-			parents = []
-		parents.append(Object)
+		parents = [Object]
 		self.setAttr('__parents__', parents)
 		self.setAttr('__super__', Super(parents))  # pylint: disable=no-value-for-parameter
 		self.getAttr('__self__').setItem('__super__', SuperSelf(parents))  # pylint: disable=no-value-for-parameter
