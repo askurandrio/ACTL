@@ -23,7 +23,7 @@ class Parser:
 
 	def parseUntil(self, buff, until):
 		flush = Buffer()
-		while buff and (until not in flush):
+		while (until not in flush) and buff:
 			if self._apply_rule(buff):
 				buff = flush + buff
 				flush = Buffer()

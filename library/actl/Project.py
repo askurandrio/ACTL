@@ -13,12 +13,18 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Project:
 	_DEFAULT_HANDLERS = {}
 
-	def __init__(self, projectf=None, source=None):
+	def __init__(self, projectf=None, source=None, this=None):
+		if this is not None:
+			self.this = this
+
+		self.data = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
+
 		if projectf:
 			assert source is None
+			self.data['projectf'] = projectf
 			projectf = self.__resolve_projectf(projectf)
 			source = self.yaml_load(open(projectf))
-		self.data = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
+
 		self._init(source)
 
 	def _init(self, source):
@@ -79,7 +85,11 @@ class Project:
 		return yaml.load(arg, Loader=yaml.SafeLoader)
 
 	def __repr__(self):
-		return f'{type(self).__name__}(source={self.data})'
+		if 'projectf' in self.data:
+			head = 'projectf={!r}'.format(self.data['projectf'])
+		else:
+			head = f'source={self.data}'
+		return f'{type(self).__name__}({head})'
 
 
 @Project.add_default_handler('include')
@@ -91,8 +101,7 @@ def _(project, arg):
 		kwargs['source'] = arg.data
 	else:
 		kwargs['source'] = arg
-	sub_project = type(project)(**kwargs)
-	sub_project.this = project
+	sub_project = type(project)(this=project, **kwargs)
 	project[arg] = sub_project
 	_recursive_update(project.data, sub_project.data)
 
@@ -108,5 +117,5 @@ def _recursive_update(base, new):
 		if isinstance(value, dict):
 			base[key] = base.get(key, {})
 			_recursive_update(base[key], value)
-		else:
+		elif key not in base:
 			base[key] = value

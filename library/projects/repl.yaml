@@ -4,19 +4,40 @@
 - py-func:
    name: build
    code: |
-      import sys
       import traceback
-      from actl import Buffer, Project
+      from actl import Project
+
+      this['uinput'] = this['getInput']()
 
       while True:
          try:
-            this['uinput'] = Buffer(input('>>> ') + '\n')
-         except EOFError:
-            break
-         except Exception:
-            traceback.print_exc()
-            break
-         try:
             this['std', 'build']()
+            break
          except Exception:
             traceback.print_exc()
+            inp = None
+            while inp not in ('y', 'n'):
+               inp = input('Continue?: ')
+            if inp != 'y':
+               break
+            continue
+
+
+- py-key:
+   name: getInput
+   code: |
+      import traceback
+      from actl import Buffer
+
+      @Buffer.wrap
+      def getInput():
+         while True:
+            try:
+               yield from input('>>> ') + '\n'
+            except EOFError:
+               break
+            except Exception:
+               traceback.print_exc()
+               break
+
+      return getInput

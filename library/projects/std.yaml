@@ -23,6 +23,7 @@
       lc_scope = {}
       exec(code, globals(), lc_scope)
       project[name] = lc_scope[name]()
+
    project['handlers', 'py-key'] = py_key
    project['handlers', 'py-func'] = py_func
 
@@ -87,8 +88,9 @@
 - py-func:
    name: build
    code: |
-      code = this['parse']()
-      code = list(code)
-      print(code)
+      from actl import Buffer
+
+      parser = this['parse']()
+      code = Buffer(parser).watch(print)
       this['code'] = code
       this['execute']()

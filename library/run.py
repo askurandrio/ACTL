@@ -17,6 +17,7 @@ def main(args):
 	if args.data:
 		data = actl.Project.yaml_load(args.data)
 		project = actl.Project(source=[{'include': project}, {'include': data}])
+
 	project['build']()
 
 

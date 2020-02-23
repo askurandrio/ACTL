@@ -7,6 +7,13 @@ class Buffer:
 		self._head = None
 		self.set_(head)
 
+	def watch(self, func):
+		def watch(elem):
+			func(elem)
+			return elem
+
+		return type(self)(map(watch, self))
+
 	def set_(self, it):
 		self._buff = []
 		self._head = iter(it)
@@ -44,7 +51,7 @@ class Buffer:
 		self._load(len(tmpl))
 		return self._buff[:len(tmpl)] == tmpl
 
-	def _load(self, quantity=None):
+	def _load(self, quantity):
 		if (quantity is None) or (quantity < 0):
 			self._buff.extend(self._head)
 			return
@@ -90,7 +97,7 @@ class Buffer:
 		return res
 
 	def __bool__(self):
-		self._load(1)
+		self._load(0)
 		return bool(self._buff)
 
 	def __repr__(self):
@@ -105,14 +112,14 @@ class Buffer:
 		return cls(it)
 
 	@classmethod
-	def make(cls, func):
+	def wrap(cls, func):
 		def wrapper(*args, **kwargs):
 			return cls(func(*args, **kwargs))
 		return wrapper
 
 	@classmethod
 	def inf(cls):
-		@cls.make
+		@cls.wrap
 		def gen():
 			value = 0
 			while True:
