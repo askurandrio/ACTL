@@ -12,12 +12,12 @@ class Buffer:
 		self._head = iter(it)
 
 	def one(self):
-		self._load(1)
 		try:
-			res, = self._buff
+			res, = self
 		except ValueError:
 			raise ValueError(self)
-		self._buff = []
+		self._buff = None
+		self._head = None
 		return res
 
 	def pop(self, index=0):

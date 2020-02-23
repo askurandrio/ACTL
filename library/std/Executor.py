@@ -1,6 +1,6 @@
 
 import actl
-from actl.objects import While, Object, Bool
+from actl.objects import While, Object, Bool, If
 from actl.objects.AToPy import AToPy
 
 
@@ -8,7 +8,6 @@ _HANDLERS = {}
 
 
 class Executor:
-
 	def __init__(self, code, scope):
 		self.scope = scope
 
@@ -16,7 +15,13 @@ class Executor:
 
 	def execute(self, code):
 		for opcode in code:
-			handler = _HANDLERS[type(opcode)]
+			try:
+				handler = _HANDLERS[type(opcode)]
+			except KeyError:
+				if not isinstance(opcode, type(Object)):
+					raise
+				handler = _HANDLERS[opcode.getAttr('__class__')]
+
 			handler(self, opcode)
 
 
@@ -26,10 +31,8 @@ def _addHandler(opcode):
 	return decorator
 
 
-@_addHandler(type(Object))
+@_addHandler(While)
 def _(executor, opcode):
-	assert opcode.getAttr('__class__').equal(While)
-
 	def condition():
 		executor.execute(opcode.getAttr('conditionFrame'))
 		res = executor.scope['_']
@@ -38,6 +41,20 @@ def _(executor, opcode):
 
 	while condition():
 		executor.execute(opcode.getAttr('code'))
+
+
+@_addHandler(If)
+def _(executor, opcode):
+	for conditionFrame, code in opcode.getAttr('conditions'):
+		executor.execute(conditionFrame)
+		res = executor.scope['_']
+		res = Bool.call(res)
+		if AToPy(res):
+			executor.execute(code)
+			return
+
+	if opcode.hasAttr('elseCode'):
+		executor.execute(opcode.getAttr('elseCode'))
 
 
 @_addHandler(actl.opcodes.VARIABLE)
