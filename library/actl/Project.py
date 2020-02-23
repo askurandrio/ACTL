@@ -93,16 +93,9 @@ class Project:
 
 
 @Project.add_default_handler('include')
-def _(project, arg):
-	kwargs = {}
-	if isinstance(arg, str):
-		kwargs['projectf'] = arg
-	elif isinstance(arg, Project):
-		kwargs['source'] = arg.data
-	else:
-		kwargs['source'] = arg
-	sub_project = type(project)(this=project, **kwargs)
-	project[arg] = sub_project
+def _(project, projectf):
+	sub_project = type(project)(this=project, projectf=projectf)
+	project[projectf] = sub_project
 	_recursive_update(project.data, sub_project.data)
 
 
