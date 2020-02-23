@@ -123,40 +123,61 @@ def _(function, op_token, *args, parser=None):
 
 
 @RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manual_apply=True, use_parser=True)
-def _(inp, parser):
-	def _getFirstIndent():
-		firstIndent = ''
+class UseCodeBlock:
+	def __init__(self, parser, inp):
+		var = inp.pop()
+		assert inp.pop() == ':'
+		code = self.popCodeBlock(parser, inp)
 
-		for elem in inp:
-			if elem not in (' ', '\t'):
-				break
-			firstIndent += elem
+		var = var.getAttr('__useCodeBlock__').call(code)
+		inp.set_(Buffer.of(var) + inp)
 
-		assert len(set(firstIndent)) == 1
-		return firstIndent
+	@classmethod
+	def popCodeBlock(cls, parser, inp):
+		if inp[0] == '\n':
+			code = cls._popFullCodeBlock(inp)
+		else:
+			code = cls._popInlineCodeBlock(inp)
+		return parser.subParser(code)
 
-	var = inp.pop()
-	assert inp.pop() == ':'
-	code = Buffer()
-
-	if inp[0] == '\n':
+	@classmethod
+	def _popFullCodeBlock(cls, inp):
+		code = Buffer()
 		inp.pop()
-		indent = _getFirstIndent()
+		indent = cls._getFirstIndent(inp)
+
 		while inp[:len(indent)] == indent:
 			del inp[:len(indent)]
 			while inp and (inp[0] != '\n'):
 				code.append(inp.pop())
 			if inp:
 				code.append(inp.pop())
-	else:
+
+		return code
+
+	@staticmethod
+	def _getFirstIndent(inp):
+		indent = ''
+
+		for elem in inp:
+			if elem not in (' ', '\t'):
+				break
+			indent += elem
+
+		assert len(set(indent)) == 1
+		return indent
+
+	@staticmethod
+	def _popInlineCodeBlock(inp):
 		while inp[0] == ' ':
 			inp.pop()
+
+		code = Buffer()
 
 		while inp and (inp[0] != '\n'):
 			code.append(inp.pop(0))
 
-	var = var.getAttr('__useCodeBlock__').call(type(parser)(parser.scope, parser.rules, code))
-	inp.set_(Buffer.of(var) + inp)
+		return code
 
 
 #

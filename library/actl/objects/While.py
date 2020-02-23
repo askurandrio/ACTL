@@ -5,17 +5,20 @@ While = BuildClass('While')
 
 
 @While.addMethodToClass('__call__')
-def _(cls, conditionFrame):
+def _(cls, conditionFrame, code=None):
 	self = cls.getAttr('__super__').getAttr('__call__').call()
+
 	self.setAttr('conditionFrame', conditionFrame)
+	if code is not None:
+		self.setAttr('code', code)
+
 	return self
 
 
 @While.addMethod('__useCodeBlock__')
 def _(self, parser):
 	cls = self.getAttr('__class__')
-	newSelf = cls.call(self.getAttr('conditionFrame'))
-	newSelf.setAttr('code', list(parser))
+	newSelf = cls.call(self.getAttr('conditionFrame'), tuple(parser))
 	return newSelf
 
 
@@ -27,7 +30,7 @@ def _(self, parser):
 	Or((End,), (Token(':'),)).asArg('end')
 )
 def _(_, _1, conditionFrame, end):
-	res = Buffer.of(While.call(list(conditionFrame)))
+	res = Buffer.of(While.call(tuple(conditionFrame)))
 	if end:
 		res.append(end.one())
 	return res

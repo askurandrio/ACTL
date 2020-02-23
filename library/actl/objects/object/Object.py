@@ -8,10 +8,8 @@ def getAttr(self, key):
 	try:
 		return self._getSpecialAttr(key)  # pylint: disable=protected-access
 	except AAttributeIsNotSpecial:
-		pass
-
-	attr = self.findAttr(key)
-	return loadPropIfNeed(self, attr)
+		attr = self.findAttr(key)
+		return loadPropIfNeed(self, attr)
 
 
 def selfCall(cls):

@@ -15,8 +15,9 @@ def clsAsStr(self):
 
 def selfAsStr(self):
 	name = self.getAttr('__class__').getAttr('__name__')
-	scope = self._head   # pylint: disable=protected-access
-	return String.call(f'{name}<{scope}>')
+	head = self._head  # pylint: disable=protected-access
+	head = {key: value for key, value in head.items() if key != '__class__'}
+	return String.call(f'{name}<{head}>')
 
 
 Object.getAttr('__class__').setAttr(

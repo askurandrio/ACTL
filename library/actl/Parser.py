@@ -11,8 +11,8 @@ class Parser:
 	def define(self, *opcodes):
 		self._definition.append(*opcodes)
 
-	def subParser(self):
-		return type(self)(self.scope, self.rules, None)
+	def subParser(self, buff=None):
+		return type(self)(self.scope, self.rules, buff)
 
 	def _apply_rule(self, buff):
 		for rule in self.rules:

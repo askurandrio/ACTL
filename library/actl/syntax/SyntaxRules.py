@@ -11,9 +11,16 @@ class SyntaxRules:
 	def add(self, *template, manual_apply=False, use_parser=False):
 		def decorator(func):
 			rule = SyntaxRule.wrap(*template, manual_apply=manual_apply, use_parser=use_parser)(func)
-			self._rules.append(rule)
+			self.rawAdd(rule)
 			return func
 		return decorator
+
+	def find(self, name):
+		for rule in self._rules:
+			if rule.__name__ == name:
+				return rule
+
+		raise RuntimeError(f'Rule with such name not found: {name}')
 
 	def __iter__(self):
 		return iter(self._rules)

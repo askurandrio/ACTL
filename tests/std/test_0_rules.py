@@ -3,7 +3,7 @@
 import pytest
 
 from actl import Parser, opcodes, Project, Buffer
-from actl.objects import While
+from actl.objects import While, If
 
 
 @pytest.fixture
@@ -129,3 +129,15 @@ def test_setVariable(parse):
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV11')
 	]
+
+
+def test_if(parse):
+	cond = parse('if True: a = 1').one()
+
+	assert cond.getAttr('__class__').equal(If)
+	conditionFrame, code = cond.getAttr('conditions')[0]
+	assert conditionFrame == (opcodes.VARIABLE(name='True'),)
+	assert code == (
+		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function='Number', typeb='(', args=['1'], kwargs={}),
+		opcodes.SET_VARIABLE(dst='a', src='__IV11')
+	)

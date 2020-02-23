@@ -15,10 +15,8 @@ class Object:
 		try:
 			return self._getSpecialAttr(key)
 		except AAttributeIsNotSpecial:
-			pass
-
-		getAttr = self.getAttr('__getAttr__')
-		return getAttr.call(key)
+			getAttr = self.getAttr('__getAttr__')
+			return getAttr.call(key)
 
 	def setAttr(self, key, value=_default):
 		if value is not _default:
