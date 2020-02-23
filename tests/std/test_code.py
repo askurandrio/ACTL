@@ -118,17 +118,20 @@ def test_if(execute):
 		if_ = Buffer(code).one()
 		assert if_.getAttr('__class__').equal(If)
 		conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
-		assert conditionFrame == (opcodes.VARIABLE(name='True'),)
-		assert code == (
+		assert conditionFrame == (
 			opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function='Number', typeb='(', args=['1'], kwargs={}),
-			opcodes.SET_VARIABLE(dst='a', src='__IV11')
+			opcodes.VARIABLE(name='__IV11')
+		)
+		assert code == (
+			opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function='Number', typeb='(', args=['2'], kwargs={}),
+			opcodes.SET_VARIABLE(dst='a', src='__IV12')
 		)
 
 	@execute.setAfterExecute
 	def _():
 		assert execute.scope['a'].equal(PyToA.call(1))
 
-	execute('if True: a = 1')
+	execute('if 1: a = 2')
 
 
 def test_setVariable(execute):
