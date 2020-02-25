@@ -16,14 +16,29 @@ class AbstractTemplate:
 		for key in self.__slots__:
 			assert hasattr(self, key), f'{self} has no attribute {key}'
 
+	def indexMatch(self, parser, buff):
+		index = 0
+		with buff.transaction():
+			while buff:
+				res = self(parser, buff)
+				if res is not None:
+					return index
+
+				index += 1
+				buff.pop()
+		return None
+
 	def asArg(self, arg):
 		def asArg(parser, inp):
-			res = self(parser, inp)  # pylint: disable=not-callable
+			res = self(parser, inp)
 			if res is None:
 				return res
 			return Buffer.of(NamedResult(arg, res))
 
 		return CustomTemplate(f'{self}.asArg({arg})', asArg)
+
+	def __call__(self, parser, inp):
+		raise NotImplementedError
 
 	def __repr__(self):
 		args = ', '.join(str(getattr(self, key)) for key in self.__slots__)
@@ -37,14 +52,14 @@ class Template(AbstractTemplate):
 		super().__init__(template)
 
 	def __call__(self, parser, buff):
-		backup = buff.copy()
-		res = Buffer()
-		for tmpl in self._template:
-			tmpl_res = tmpl(parser, buff)
-			if tmpl_res is None:
-				buff.set_(backup)
-				return None
-			res += tmpl_res
+		with buff.transaction() as tx:
+			res = Buffer()
+			for tmpl in self._template:
+				tmpl_res = tmpl(parser, buff)
+				if tmpl_res is None:
+					return None
+				res += tmpl_res
+			tx.commit()
 		return res
 
 	def __repr__(self):
@@ -139,7 +154,7 @@ class Value(AbstractTemplate):
 	__slots__ = ('value',)
 
 	def __call__(self, parser, buff):
-		if (VARIABLE != buff[0]) or (parser.scope.get(buff[0].name) != self.value):
+		if (not buff) or (VARIABLE != buff[0]) or (parser.scope.get(buff[0].name) != self.value):
 			return None
 
 		return Buffer.of(buff.pop(0))
@@ -148,10 +163,17 @@ class Value(AbstractTemplate):
 class Frame(AbstractTemplate):
 	__slots__ = ('until',)
 
+	def __init__(self, *templates):
+		super().__init__(Template(*templates))
+
 	def __call__(self, parser, buff):
-		res, newBuff = parser.subParser().parseUntil(buff, self.until)
-		buff.set_(newBuff)
-		return res
+		res = parser.subParser(buff, self.until).parseLine()
+		return tuple(res)
+
+	def indexMatch(self, parser, buff):
+		parsed = parser.subParser(buff, self.until).parseLine()
+		buff.set_(parsed + buff)
+		return super().indexMatch(parser, buff)
 
 
 def Token(token):

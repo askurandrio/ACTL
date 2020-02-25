@@ -1,52 +1,56 @@
 from actl.Buffer import Buffer
+from actl.syntax import Token
 
 
 class Parser:
-	def __init__(self, scope, rules, buff):
+
+	def __init__(self, scope, rules, buff, endLine=Token('\n')):
 		self.scope = scope
 		self.rules = rules
 		self.buff = buff
+		self._endLine = endLine
 		self._definition = Buffer()
 
 	def define(self, *opcodes):
 		self._definition.append(*opcodes)
 
-	def subParser(self, buff=None):
-		return type(self)(self.scope, self.rules, buff)
+	def subParser(self, buff, endLine=None):
+		if endLine is None:
+			endLine = self._endLine
 
-	def _apply_rule(self, buff):
+		return type(self)(self.scope, self.rules, buff, endLine)
+
+	def _applyRule(self):
 		for rule in self.rules:
-			res = rule(self, buff)
+			res = rule(self, self.buff)
 			if res:
 				return True
 		return False
 
-	def parseUntil(self, buff, until):
+	def parseLine(self):
 		flush = Buffer()
-		while (until not in flush) and buff:
-			if self._apply_rule(buff):
-				buff = flush + buff
+		while (self._endLine.indexMatch(self, flush) is None) and self.buff:
+			if self._applyRule():
+				self.buff.set_(flush + self.buff)
 				flush = Buffer()
 				continue
 
-			flush.append(buff.pop())
+			flush.append(self.buff.pop())
 
-		if until in flush:
-			idx_end_line = flush.index(until)
-			res = flush[:idx_end_line]
-			del flush[:idx_end_line]
-		else:
+		if self._endLine.indexMatch(self, flush) is None:
 			res = flush
-			flush = Buffer()
+		else:
+			idx_end_line = self._endLine.indexMatch(self, flush)
+			res = flush[:idx_end_line]
+			self.buff.set_(flush[idx_end_line:] + self.buff)
 
 		res = self._definition + res
 		self._definition = Buffer()
-		newBuff = flush + buff
-		return res, newBuff
+		return res
 
 	def __iter__(self):
 		while self.buff:
-			res, self.buff = self.parseUntil(self.buff, '\n')
+			res = self.parseLine()
 			if self.buff and (self.buff[0] == '\n'):
 				self.buff.pop()
 			yield from res

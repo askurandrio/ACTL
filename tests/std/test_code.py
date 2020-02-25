@@ -134,6 +134,32 @@ def test_if(execute):
 	execute('if 1: a = 2')
 
 
+def test_if_else(execute):
+	@execute.setAfterParse
+	def _(code):
+		if_ = Buffer(code).one()
+		assert if_.getAttr('__class__').equal(If)
+		conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
+		assert conditionFrame == (
+			opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function='Number', typeb='(', args=['0'], kwargs={}),
+			opcodes.VARIABLE(name='__IV11')
+		)
+		assert code == (
+			opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function='Number', typeb='(', args=['1'], kwargs={}),
+			opcodes.SET_VARIABLE(dst='a', src='__IV12')
+		)
+		assert if_.getAttr('elseCode') == (
+			opcodes.CALL_FUNCTION_STATIC(dst='__IV13', function='Number', typeb='(', args=['2'], kwargs={}),
+			opcodes.SET_VARIABLE(dst='a', src='__IV13')
+		)
+
+	@execute.setAfterExecute
+	def _():
+		assert execute.scope['a'].equal(PyToA.call(1))
+
+	execute('if 0: a = 1 else: a = 2')
+
+
 def test_setVariable(execute):
 	@execute.setAfterParse
 	def _(code):

@@ -37,11 +37,18 @@ class Buffer:
 		self._head, *res = itertools.tee(self._head, 2)
 		return type(self)(res[0])
 
-	def index(self, value):
+	def index(self, *values):
 		for idx, elem in enumerate(self):
-			if elem == value:
+			if elem in values:
 				return idx
-		raise IndexError(f'Cant search this value: {value}')
+		raise IndexError(f'Cant search any of this value: {values}')
+
+	def includes(self, *values):
+		try:
+			self.index(*values)
+		except IndexError:
+			return False
+		return True
 
 	def append(self, *items):  # pylint: disable=no-self-use
 		self += items
@@ -50,6 +57,9 @@ class Buffer:
 		tmpl = list(tmpl)
 		self._load(len(tmpl))
 		return self._buff[:len(tmpl)] == tmpl
+
+	def transaction(self):
+		return _Transaction(self)
 
 	def _load(self, quantity):
 		if (quantity is None) or (quantity < 0):
@@ -75,12 +85,7 @@ class Buffer:
 		del self._buff[index]
 
 	def __contains__(self, value):
-		try:
-			self.index(value)
-		except IndexError:
-			return False
-		else:
-			return True
+		return self.includes(value)
 
 	def __iter__(self):
 		self._head, head = itertools.tee(self._head)
@@ -127,3 +132,22 @@ class Buffer:
 				value += 1
 
 		return gen()
+
+
+class _Transaction:
+	def __init__(self, buff):
+		self._buff = buff
+		self._backup = None
+		self._commit = False
+
+	def commit(self):
+		self._commit = True
+
+	def __enter__(self):
+		assert self._backup is None
+		self._backup = self._buff.copy()
+		return self
+
+	def __exit__(self, *_):
+		if not self._commit:
+			self._buff.set_(self._backup)

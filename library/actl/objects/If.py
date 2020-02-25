@@ -1,6 +1,6 @@
 from actl.Buffer import Buffer
 from actl.objects.BuildClass import BuildClass
-from actl.syntax import SyntaxRule, Value, Token, Frame
+from actl.syntax import SyntaxRule, Value, Token, Frame, Or, End, Template
 
 If = BuildClass('If')
 elif_ = BuildClass('_Elif').call()
@@ -24,31 +24,86 @@ def _(cls, ifCondition, *elifConditions, elseCode=None):
 @SyntaxRule.wrap(
 	Value(If),
 	Token(' '),
-	Frame(':'),
+	Frame(Token(':')),
 	use_parser=True,
 	manual_apply=True
 )
-def _(parser, inp):
-	inp.pop()
-	inp.pop()
-	frame = Frame(':')(parser, inp)
-	inp.pop()
+class _:
+	def __init__(self, parser, inp):
+		self._parser = parser
+		self._inp = inp
 
-	popCodeBlock = parser.rules.find('UseCodeBlock').func.popCodeBlock
+		self._inp.pop()
+		self._inp.pop()
+		self._firstConditionFrame = Frame(Token(':'))(parser, self._inp)
+		self._inp.pop()
 
-	conditions = [(tuple(frame), tuple(popCodeBlock(parser, inp)))]
+		if self._useCodeBlock.isFullCodeBlock(inp):
+			conditions, elseCode = self._getFromFullCodeBlock()
+		else:
+			conditions, elseCode = self._getFromInlineCodeBlock()
 
-	while inp and (inp[0] == elif_):
-		inp.pop()
-		frame = Frame(':')(parser, inp)
-		inp.pop()
-		conditions.append((tuple(frame), tuple(popCodeBlock(parser, inp))))
+		if_ = If.call(*conditions, elseCode=elseCode)
+		inp.set_(Buffer.of(if_) + inp)
 
-	elseCode = None
-	if inp and (inp[0] == else_):
-		inp.pop()
-		elseCode = tuple(popCodeBlock(parser, inp))
+	@property
+	def _useCodeBlock(self):
+		return self._parser.rules.find('UseCodeBlock').func
 
-	if_ = If.call(*conditions, elseCode=elseCode)
+	def _getFromFullCodeBlock(self):
+		def popCodeBlock():
+			codeBlock = self._useCodeBlock.popFullCodeBlock(self._parser, self._inp)
+			return tuple(codeBlock)
 
-	inp.set_(Buffer.of(if_) + inp)
+		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
+
+		while self._inp and (self._inp[0] == elif_):
+			self._inp.pop()
+			frame = Frame(':')(self._parser, self._inp)
+			self._inp.pop()
+			conditions.append((tuple(frame), popCodeBlock()))
+
+		if self._inp and (self._inp[0] == else_):
+			self._inp.pop()
+			elseCode = popCodeBlock()
+		else:
+			elseCode = None
+
+		return tuple(conditions), elseCode
+
+	def _getFromInlineCodeBlock(self):
+		def popCodeBlock():
+			endLine = Or(
+				(Token(' '), Value(elif_),),
+				(Value(elif_),),
+				(Token(' '), Value(else_),),
+				(Value(else_),),
+				(Token(' '), Token('\n'),),
+				(Token('\n'),),
+				(Token(' '), End,),
+				(End,)
+			)
+			codeBlock = self._parser.subParser(self._inp, endLine).parseLine()
+			return tuple(codeBlock)
+
+		self._inp.pop()
+
+		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
+
+		while Template(Token(' '), Value(elif_)).indexMatch(self._parser, self._inp) == 0:
+			self._inp.pop()
+			frame = Frame(Token(':'))(self._parser, self._inp)
+			self._inp.pop()
+			conditions.append((tuple(frame), popCodeBlock()))
+
+		if Frame(Token(' '), Value(else_)).indexMatch(self._parser, self._inp) == 0:
+			self._inp.pop()
+			self._inp.pop()
+			self._inp.pop()
+			self._inp.pop()
+
+			elseCode = tuple(self._parser.subParser(self._inp, Token('\n')).parseLine())
+		else:
+			elseCode = None
+
+		return tuple(conditions), elseCode

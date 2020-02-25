@@ -68,11 +68,11 @@ def _(inp, parser):
 	assert inp.pop() == '='
 	assert inp.pop() == ' '
 
-	parsed, newInp = parser.parseUntil(inp, '\n')
+	parsed = parser.subParser(inp).parseLine()
 	src = parsed.pop(-1)
 	assert isinstance(src, VARIABLE)
 
-	inp.set_(parsed + Buffer.of(SET_VARIABLE(dst.name, src.name)) + newInp)
+	inp.set_(parsed + Buffer.of(SET_VARIABLE(dst.name, src.name)) + inp)
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manual_apply=True, use_parser=True)
@@ -127,7 +127,7 @@ class UseCodeBlock:
 	def __init__(self, parser, inp):
 		var = inp.pop()
 		assert inp.pop() == ':'
-		code = self.popCodeBlock(parser, inp)
+		code = self._popCodeBlock(parser, inp)
 
 		var = var.getAttr('__useCodeBlock__').call(code)
 		inp.set_(Buffer.of(var) + inp)
@@ -137,15 +137,15 @@ class UseCodeBlock:
 		return inp[0] == '\n'
 
 	@classmethod
-	def popCodeBlock(cls, parser, inp):
+	def _popCodeBlock(cls, parser, inp):
 		if cls.isFullCodeBlock(inp):
-			code = cls._popFullCodeBlock(inp)
+			code = cls.popFullCodeBlock(inp)
 		else:
 			code = cls._popInlineCodeBlock(inp)
 		return parser.subParser(code)
 
 	@classmethod
-	def _popFullCodeBlock(cls, inp):
+	def popFullCodeBlock(cls, inp):
 		code = Buffer()
 		inp.pop()
 		indent = cls._getFirstIndent(inp)

@@ -26,11 +26,11 @@ def _(self, parser):
 @SyntaxRule.wrap(
 	Value(While),
 	Token(' '),
-	Frame(':').asArg('conditionFrame'),
+	Frame(Token(':')).asArg('conditionFrame'),
 	Or((End,), (Token(':'),)).asArg('end')
 )
 def _(_, _1, conditionFrame, end):
-	res = Buffer.of(While.call(tuple(conditionFrame)))
+	res = Buffer.of(While.call(conditionFrame))
 	if end:
 		res.append(end.one())
 	return res
