@@ -43,13 +43,6 @@ class Buffer:
 				return idx
 		raise IndexError(f'Cant search any of this value: {values}')
 
-	def includes(self, *values):
-		try:
-			self.index(*values)
-		except IndexError:
-			return False
-		return True
-
 	def append(self, *items):  # pylint: disable=no-self-use
 		self += items
 
@@ -83,9 +76,6 @@ class Buffer:
 	def __delitem__(self, index):
 		self._load(index.stop)
 		del self._buff[index]
-
-	def __contains__(self, value):
-		return self.includes(value)
 
 	def __iter__(self):
 		self._head, head = itertools.tee(self._head)
