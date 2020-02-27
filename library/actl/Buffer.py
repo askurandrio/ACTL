@@ -2,10 +2,9 @@ import itertools
 
 
 class Buffer:
-	def __init__(self, head=iter('')):
+	def __init__(self, head=''):
 		self._buff = []
-		self._head = None
-		self.set_(head)
+		self._head = iter(head)
 
 	def watch(self, func):
 		def watch(elem):
@@ -19,12 +18,7 @@ class Buffer:
 		self._head = iter(it)
 
 	def one(self):
-		try:
-			res, = self
-		except ValueError:
-			raise ValueError(self)
-		self._buff = None
-		self._head = None
+		res, = self
 		return res
 
 	def pop(self, index=0):
