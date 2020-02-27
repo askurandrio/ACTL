@@ -31,6 +31,5 @@ def _(self, parser):
 )
 def _(_, _1, conditionFrame, end):
 	res = Buffer.of(While.call(conditionFrame))
-	if end:
-		res.append(end.one())
+	res.append(end.one())
 	return res

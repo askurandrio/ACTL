@@ -19,9 +19,6 @@ def _hasAttr(attr):
 				return None
 			token = scope[token.name]
 
-		if not isinstance(token, type(Object)):
-			return None
-
 		return token.hasAttr(attr)
 
 	return CustomTemplate.createToken(rule, f'_hasAttr({attr})')
@@ -77,14 +74,7 @@ def _(inp, parser):
 
 @RULES.add(Or([Token('"')], [Token("'")]), manual_apply=True, use_parser=True)
 def _(inp, parser):
-	def _pop_start_token():
-		start = [inp.pop()]
-		if start != inp[0]:
-			if start == inp[1]:
-				start.extend((inp.pop(), inp.pop()))
-		return start
-
-	start = _pop_start_token()
+	start = [inp.pop()]
 	string = ''
 	while not inp.startswith(start):
 		string += inp.pop()

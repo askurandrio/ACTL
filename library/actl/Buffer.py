@@ -37,12 +37,6 @@ class Buffer:
 		self._head, *res = itertools.tee(self._head, 2)
 		return type(self)(res[0])
 
-	def index(self, *values):
-		for idx, elem in enumerate(self):
-			if elem in values:
-				return idx
-		raise IndexError(f'Cant search any of this value: {values}')
-
 	def append(self, *items):  # pylint: disable=no-self-use
 		self += items
 
@@ -72,10 +66,6 @@ class Buffer:
 			return type(self)(res)
 		self._load(index)
 		return self._buff[index]
-
-	def __delitem__(self, index):
-		self._load(index.stop)
-		del self._buff[index]
 
 	def __iter__(self):
 		self._head, head = itertools.tee(self._head)
