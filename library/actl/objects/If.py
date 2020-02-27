@@ -1,6 +1,7 @@
 from actl.Buffer import Buffer
 from actl.objects.BuildClass import BuildClass
-from actl.syntax import SyntaxRule, Value, Token, Frame, Or, End, Template
+from actl.syntax import SyntaxRule, Value, Token, Frame, Or, Template
+
 
 If = BuildClass('If')
 elif_ = BuildClass('_Elif').call()
@@ -29,6 +30,15 @@ def _(cls, ifCondition, *elifConditions, elseCode=None):
 	manual_apply=True
 )
 class _:
+	_INLINE_IF_END = Or(
+		(Token(' '), Value(elif_),),
+		(Value(elif_),),
+		(Token(' '), Value(else_),),
+		(Value(else_),),
+		(Token(' '), Token('\n'),),
+		(Token('\n'),)
+	)
+
 	def __init__(self, parser, inp):
 		self._parser = parser
 		self._inp = inp
@@ -73,30 +83,22 @@ class _:
 
 	def _getFromInlineCodeBlock(self):
 		def popCodeBlock():
-			endLine = Or(
-				(Token(' '), Value(elif_),),
-				(Value(elif_),),
-				(Token(' '), Value(else_),),
-				(Value(else_),),
-				(Token(' '), Token('\n'),),
-				(Token('\n'),),
-				(Token(' '), End,),
-				(End,)
-			)
-			codeBlock = self._parser.subParser(self._inp, endLine).parseLine()
+			codeBlock = self._parser.subParser(self._inp, self._INLINE_IF_END).parseLine()
 			return tuple(codeBlock)
 
 		self._inp.pop()
-
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 
 		while Template(Token(' '), Value(elif_)).indexMatch(self._parser, self._inp) == 0:
 			self._inp.pop()
+			self._inp.pop()
+			self._inp.pop()
 			frame = Frame(Token(':'))(self._parser, self._inp)
+			self._inp.pop()
 			self._inp.pop()
 			conditions.append((tuple(frame), popCodeBlock()))
 
-		if Frame(Token(' '), Value(else_)).indexMatch(self._parser, self._inp) == 0:
+		if Template(Token(' '), Value(else_)).indexMatch(self._parser, self._inp) == 0:
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()

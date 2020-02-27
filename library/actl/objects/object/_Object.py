@@ -115,7 +115,7 @@ class Object:
 			from actl.objects.AToPy import AToPy  # pylint: disable=cyclic-import, import-outside-toplevel
 
 			if id(self) in Object._stack:
-				return 'library/actl/objects/Number.py{...}'
+				return '{...}'
 			Object._stack.add(id(self))
 
 			pyView = AToPy(self)

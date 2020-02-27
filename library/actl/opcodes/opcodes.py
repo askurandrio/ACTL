@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 
 from .AnyOpCode import DynamicOpCode
 
@@ -19,6 +20,12 @@ class _Counter:
 	def reset(self):
 		self._count = self._init
 
+	@contextmanager
+	def transaction(self):
+		prev = self._count
+		yield
+		self._count = prev
+
 	def __call__(self):
 		self._count += 1
 		return self._count
@@ -30,7 +37,8 @@ class VARIABLE(DynamicOpCode):
 
 	@classmethod
 	def temp(cls):
-		return cls(f'__IV{cls.counter()}')
+		t = cls.counter()
+		return cls(f'__IV{t}')
 
 
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')

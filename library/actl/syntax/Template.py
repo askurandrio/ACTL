@@ -170,11 +170,6 @@ class Frame(AbstractTemplate):
 		res = parser.subParser(buff, self.until).parseLine()
 		return tuple(res)
 
-	def indexMatch(self, parser, buff):
-		parsed = parser.subParser(buff, self.until).parseLine()
-		buff.set_(parsed + buff)
-		return super().indexMatch(parser, buff)
-
 
 def Token(token):
 	def rule(_, val):
