@@ -39,8 +39,3 @@ _Object = pyObjectCls({
 
 Object = _Object.call('Object')
 Object.getAttr('__self__').setItem('__getAttr__', nativeMethod('object.__getAttr__', getAttr))
-
-
-@Object.addPyMethod('fromPy')
-def _(_, head):
-	return type(Object)(head)
