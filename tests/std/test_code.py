@@ -37,7 +37,7 @@ def test_setVariable(execute):
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV11')
 	]
-	assert execute.executed.scope['a'].equal(PyToA.call(1))
+	assert AToPy(execute.executed.scope['a']) == 1
 
 
 def test_call(execute):
@@ -110,7 +110,7 @@ def test_while(execute):
 		opcodes.VARIABLE(name='__IV13')
 	)
 
-	assert execute.executed.scope['_'].equal(PyToA.call(False))
+	assert not AToPy(execute.executed.scope['_'])
 	assert cond.call_count == 2
 	print_.assert_called_once_with(1)
 
@@ -142,7 +142,7 @@ def test_whileWithFullCodeBlock(execute):
 		opcodes.VARIABLE(name='__IV13')
 	)
 
-	assert execute.executed.scope['_'].equal(PyToA.call(False))
+	assert not AToPy(execute.executed.scope['_'])
 	assert cond.call_count == 2
 	print_.assert_called_once_with(1)
 
@@ -204,7 +204,7 @@ def test_ifElif(execute):
 			)
 		)
 	)
-	assert execute.executed.scope['a'].equal(PyToA.call(2.2))
+	assert AToPy(execute.executed.scope['a']) == 2
 
 
 def test_ifElse(execute):
@@ -231,7 +231,7 @@ def test_ifElse(execute):
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV13')
 	)
-	assert execute.executed.scope['a'].equal(PyToA.call(2.2))
+	assert AToPy(execute.executed.scope['a']) == 2
 
 
 @pytest.fixture
