@@ -43,6 +43,8 @@ class Buffer:
 		return _Transaction(self)
 
 	def _load(self, quantity):
+		if isinstance(quantity, slice):
+			quantity = quantity.stop
 		if (quantity is None) or (quantity < 0):
 			self._buff.extend(self._head)
 			return
@@ -60,6 +62,10 @@ class Buffer:
 			return type(self)(res)
 		self._load(index)
 		return self._buff[index]
+
+	def __delitem__(self, index):
+		self._load(index)
+		self._buff.__delitem__(index)
 
 	def __iter__(self):
 		self._head, head = itertools.tee(self._head)
