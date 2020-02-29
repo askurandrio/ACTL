@@ -71,14 +71,7 @@ class Project:
 
 	@classmethod
 	def __resolve_projectf(cls, projectf):
-		for suggestion in (
-			lambda: os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml'),
-			lambda: os.path.abspath(projectf)
-		):
-			path = suggestion()
-			if os.path.exists(path):
-				return path
-		raise RuntimeError(f'Can not resolve this projectf: {projectf}')
+		return os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
 
 	@staticmethod
 	def yaml_load(arg):
