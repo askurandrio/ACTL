@@ -38,6 +38,11 @@ class _:
 		(Token(' '), Token('\n'),),
 		(Token('\n'),)
 	)
+	_ELIF_OR_ELSE_OR_ENDLINE = Or(
+		(Value(elif_),),
+		(Value(else_),),
+		(Token('\n'),)
+	)
 
 	def __init__(self, parser, inp):
 		self._parser = parser
@@ -62,18 +67,26 @@ class _:
 
 	def _getFromFullCodeBlock(self):
 		def popCodeBlock():
-			codeBlock = self._useCodeBlock.popFullCodeBlock(self._parser, self._inp)
-			return tuple(codeBlock)
+			code = self._useCodeBlock.popFullCodeBlock(self._inp)
+			code = Buffer(self._parser.subParser(code))
+			return tuple(code)
+
+		def parseLine():
+			line = self._parser.subParser(self._inp, self._ELIF_OR_ELSE_OR_ENDLINE).parseLine()
+			self._inp.set_(line + self._inp)
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
-
-		while self._inp and (self._inp[0] == elif_):
+		parseLine()
+		while Template(Value(elif_)).indexMatch(self._parser, self._inp) == 0:
 			self._inp.pop()
-			frame = Frame(':')(self._parser, self._inp)
+			self._inp.pop()
+			frame = Frame(Token(':'))(self._parser, self._inp)
 			self._inp.pop()
 			conditions.append((tuple(frame), popCodeBlock()))
+			parseLine()
 
-		if self._inp and (self._inp[0] == else_):
+		if Template(Value(else_)).indexMatch(self._parser, self._inp) == 0:
+			self._inp.pop()
 			self._inp.pop()
 			elseCode = popCodeBlock()
 		else:

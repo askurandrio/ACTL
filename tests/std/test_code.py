@@ -234,6 +234,50 @@ def test_ifElse(execute):
 	assert AToPy(execute.executed.scope['a']) == 2
 
 
+def test_ifElifElseWithFullCodeBlock(execute):
+	execute('if 0:\n a = 1\nelif 0:\n a = 2\nelse:\n a = 3')
+
+	if_ = Buffer(execute.parsed.code).one()
+	assert if_.getAttr('__class__').equal(If)
+	assert if_.getAttr('conditions') == (
+		(
+			(
+				opcodes.CALL_FUNCTION_STATIC(
+					dst='__IV11', function='Number', typeb='(', args=['0'], kwargs={}
+				),
+				opcodes.VARIABLE(name='__IV11')
+			),
+			(
+				opcodes.CALL_FUNCTION_STATIC(
+					dst='__IV12', function='Number', typeb='(', args=['1'], kwargs={}
+				),
+				opcodes.SET_VARIABLE(dst='a', src='__IV12')
+			)
+		),
+		(
+			(
+				opcodes.CALL_FUNCTION_STATIC(
+					dst='__IV13', function='Number', typeb='(', args=['0'], kwargs={}
+				),
+				opcodes.VARIABLE(name='__IV13')
+			),
+			(
+				opcodes.CALL_FUNCTION_STATIC(
+					dst='__IV14', function='Number', typeb='(', args=['2'], kwargs={}
+				),
+				opcodes.SET_VARIABLE(dst='a', src='__IV14')
+			)
+		)
+	)
+	assert if_.getAttr('elseCode') == (
+		opcodes.CALL_FUNCTION_STATIC(
+			dst='__IV15', function='Number', typeb='(', args=['3'], kwargs={}
+		),
+		opcodes.SET_VARIABLE(dst='a', src='__IV15')
+	)
+	assert AToPy(execute.executed.scope['a']) == 3
+
+
 @pytest.fixture
 def execute():
 	return _Execute()
