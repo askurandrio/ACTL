@@ -1,5 +1,5 @@
 from actl.Buffer import Buffer
-from actl.syntax import Token
+from actl.syntax import Token, BufferRule
 
 
 class Parser:
@@ -29,7 +29,7 @@ class Parser:
 
 	def parseLine(self):
 		flush = Buffer()
-		while (self._endLine.indexMatch(self, flush) is None) and self.buff:
+		while (self._endLine not in BufferRule(self, flush)) and self.buff:
 			if self._applyRule():
 				self.buff.set_(flush + self.buff)
 				flush = Buffer()
@@ -37,12 +37,12 @@ class Parser:
 
 			flush.append(self.buff.pop())
 
-		if self._endLine.indexMatch(self, flush) is None:
-			res = flush
-		else:
-			idx_end_line = self._endLine.indexMatch(self, flush)
+		if self._endLine in BufferRule(self, flush):
+			idx_end_line = BufferRule(self, flush).index(self._endLine)
 			res = flush[:idx_end_line]
 			self.buff.set_(flush[idx_end_line:] + self.buff)
+		else:
+			res = flush
 
 		res = self._definition + res
 		self._definition = Buffer()

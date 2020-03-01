@@ -16,18 +16,6 @@ class AbstractTemplate:
 		for key in self.__slots__:
 			assert hasattr(self, key), f'{self} has no attribute {key}'
 
-	def indexMatch(self, parser, buff):
-		index = 0
-		with buff.transaction():
-			while buff:
-				res = self(parser, buff)
-				if res is not None:
-					return index
-
-				index += 1
-				buff.pop()
-		return None
-
 	def asArg(self, arg):
 		def asArg(parser, inp):
 			res = self(parser, inp)
@@ -45,7 +33,14 @@ class AbstractTemplate:
 		return f'{type(self).__name__}({args})'
 
 
-class Template(AbstractTemplate):
+class _MetaTemplate(type(AbstractTemplate)):
+	def __call__(self, *template):
+		if (len(template) == 1) and isinstance(template[0], AbstractTemplate):
+			return template[0]
+		return super().__call__(*template)
+
+
+class Template(AbstractTemplate, metaclass=_MetaTemplate):
 	__slots__ = ('_template',)
 
 	def __init__(self, *template):

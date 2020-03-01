@@ -1,21 +1,24 @@
 # pylint: disable=unexpected-special-method-signature
+import sys
+from contextlib import contextmanager
+from functools import partial
+from traceback import format_stack
 
 
-class Lazy:
-	_default = object()
+@contextmanager
+def setAttrForBlock(obj, attr, value):
+	prevValue = getattr(obj, attr)
+	setattr(obj, attr, value)
+	yield
+	setattr(obj, attr, prevValue)
 
-	def __init__(self, func):
-		self._func = func
-		self._val = self._default
 
-	def _evaluate(self):
-		if self._val is not self._default:
-			return
-		self._val = self._func()
+class SlotsViaGetAttr:
+	def __init__(self, value):
+		self._value = value
 
 	def __getattr__(self, key):
-		self._evaluate()
-		return getattr(self._val, key)
+		return getattr(self._value, key)
 
 	@property
 	def __call__(self):
@@ -31,7 +34,7 @@ class Lazy:
 
 	@property
 	def __setitem__(self):
-		return self.__getattr__('__setitem__')\
+		return self.__getattr__('__setitem__')
 
 	@property
 	def __contains__(self):
@@ -48,3 +51,20 @@ class Lazy:
 	@property
 	def __str__(self):
 		return self.__getattr__('__str__')
+
+
+class Lazy(SlotsViaGetAttr):
+	_default = object()
+
+	def __init__(self, func):
+		self._func = func
+		super().__init__(self._default)
+
+	def _evaluate(self):
+		if self._value is not Lazy._default:
+			return
+		self._value = self._func()
+
+	def __getattr__(self, key):
+		self._evaluate()
+		return super().__getattr__(key)

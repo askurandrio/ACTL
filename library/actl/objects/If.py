@@ -1,7 +1,6 @@
 from actl.Buffer import Buffer
 from actl.objects.BuildClass import BuildClass
-from actl.syntax import SyntaxRule, Value, Token, Frame, Or, Template
-
+from actl.syntax import SyntaxRule, Value, Token, Frame, Or, Template, BufferRule
 
 If = BuildClass('If')
 elif_ = BuildClass('_Elif').call()
@@ -77,7 +76,7 @@ class _:
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 		parseLine()
-		while Template(Value(elif_)).indexMatch(self._parser, self._inp) == 0:
+		while BufferRule(self._parser, self._inp).startsWith(Value(elif_)):
 			self._inp.pop()
 			self._inp.pop()
 			frame = Frame(Token(':'))(self._parser, self._inp)
@@ -85,7 +84,7 @@ class _:
 			conditions.append((tuple(frame), popCodeBlock()))
 			parseLine()
 
-		if Template(Value(else_)).indexMatch(self._parser, self._inp) == 0:
+		if BufferRule(self._parser, self._inp).startsWith(Value(else_)):
 			self._inp.pop()
 			self._inp.pop()
 			elseCode = popCodeBlock()
@@ -102,7 +101,7 @@ class _:
 		self._inp.pop()
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 
-		while Template(Token(' '), Value(elif_)).indexMatch(self._parser, self._inp) == 0:
+		while BufferRule(self._parser, self._inp).startsWith(Token(' '), Value(elif_)):
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
@@ -111,7 +110,7 @@ class _:
 			self._inp.pop()
 			conditions.append((tuple(frame), popCodeBlock()))
 
-		if Template(Token(' '), Value(else_)).indexMatch(self._parser, self._inp) == 0:
+		if BufferRule(self._parser, self._inp).startsWith(Token(' '), Value(else_)):
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()

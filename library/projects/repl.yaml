@@ -1,13 +1,20 @@
 - include: std
 
 
+- py-key:
+   name: parser
+   code: |
+      from std import Parser
+
+      uinput = this['uinput'].watch(lambda elem: print(repr(elem)))
+      return Parser(this['scope'], this['rules'], uinput)
+
+
 - py-func:
    name: build
    code: |
       import traceback
       from actl import Project
-
-      this['uinput'] = this['getInput']()
 
       while True:
          try:
@@ -20,24 +27,27 @@
                inp = input('Continue?: ')
             if inp != 'y':
                break
-            continue
 
 
 - py-key:
-   name: getInput
+   name: uinput
    code: |
       import traceback
       from actl import Buffer
 
       @Buffer.wrap
       def getInput():
+         parser = this['parser']
+
          while True:
+            if parser.applyingRule:
+               msg = '... '
+            else:
+               msg = '>>> '
             try:
-               yield from input('>>> ') + '\n'
+               yield from input(msg)
+               yield '\n'
             except EOFError:
                break
-            except Exception:
-               traceback.print_exc()
-               break
 
-      return getInput
+      return getInput()
