@@ -58,7 +58,8 @@
             ('if', 'If'),
             ('elif', 'elif_'),
             ('else', 'else_'),
-            ('def', 'Function')
+            ('def', 'Function'),
+            ('None', 'ANone')
          ):
             var = getattr(actl.objects, clsName)
             yield varName, var

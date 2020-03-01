@@ -22,4 +22,4 @@ def _(_, val):
 
 @Bool.addMethod(AToPy)
 def _(self):
-	return AToPy(self._value)
+	return self._value

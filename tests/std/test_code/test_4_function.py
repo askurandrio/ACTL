@@ -36,6 +36,9 @@ def test_callWithString(execute):
 
 
 def test_function(execute):
+	mock = Mock()
+	execute.scope['print'] = PyToA.call(mock)
+
 	execute('def f(): print()\nf()')
 
 	setVar, _, _1 = execute.parsed.code
@@ -43,5 +46,8 @@ def test_function(execute):
 	assert setVar.val.getAttr('signature') == ()
 	assert setVar.val.getAttr('body') == (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='print', typeb='(', args=[], kwargs={}),
-		opcodes.VARIABLE(name='__IV11'))
-	assert execute.executed.isExecuted
+		opcodes.VARIABLE(name='__IV11'),
+		opcodes.RETURN(var='None')
+	)
+	assert AToPy(execute.executed.scope['_']) is None
+	mock.assert_called_once_with()

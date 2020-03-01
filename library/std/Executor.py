@@ -1,5 +1,4 @@
-
-import actl
+from actl import opcodes
 from actl.objects import While, Object, Bool, If, Function, AToPy
 
 
@@ -8,25 +7,26 @@ class Executor:
 
 	def __init__(self, code, scope):
 		self.scope = scope
-		self._frames = [iter(code)]
+		self.stack = []
+		self.frames = [iter(code)]
 		self._execute()
 
 	def _execute(self):
-		while self._frames:
+		while self.frames:
 			try:
-				opcode = next(self._frames[-1])
+				opcode = next(self.frames[-1])
 			except StopIteration:
-				self._frames.pop(-1)
+				self.frames.pop(-1)
 				continue
 
 			if isinstance(opcode, _Frame):
-				self._frames.append(iter(opcode))
+				self.frames.append(iter(opcode))
 				continue
 
 			handler = self.HANDLERS[type(opcode)]
 			res = handler(self, opcode)
 			if isinstance(res, _Frame):
-				self._frames.append(iter(res))
+				self.frames.append(iter(res))
 
 	@classmethod
 	def addHandler(cls, opcode):
@@ -50,10 +50,57 @@ class _Frame:
 		return wrapper
 
 
+class _CallFrame:
+	def __init__(self, frames, returnVar):
+		self.frames = frames
+		self.returnVar = returnVar
+
+
 @Executor.addHandler(type(Object))
 def _(executor, opcode):
 	handler = Executor.HANDLERS[opcode.getAttr('__class__')]
 	return handler(executor, opcode)
+
+
+@Executor.addHandler(opcodes.VARIABLE)
+def _(executor, opcode):
+	executor.scope['_'] = executor.scope[opcode.name]
+
+
+@Executor.addHandler(opcodes.SET_VARIABLE)
+def _(executor, opcode):
+	if opcode.val is not None:
+		val = opcode.val
+	elif opcode.src is not None:
+		val = executor.scope[opcode.src]
+	executor.scope[opcode.dst] = val
+
+
+@Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
+def _(executor, opcode):
+	function = executor.scope[opcode.function]
+	assert opcode.typeb == '('
+	executor.scope[opcode.dst] = function.call(*opcode.args, **opcode.kwargs)
+
+
+@Executor.addHandler(opcodes.CALL_FUNCTION)
+def _(executor, opcode):
+	function = executor.scope[opcode.function]
+	if function.getAttr('__class__') is Function:
+		return Executor.HANDLERS[Function](executor, opcode)
+
+	assert opcode.typeb == '('
+	args = (executor.scope[key] for key in opcode.args)
+	kwargs = {key: executor.scope[key] for key in opcode.kwargs}
+	executor.scope[opcode.dst] = function.call(*args, **kwargs)
+	return None
+
+
+@Executor.addHandler(opcodes.RETURN)
+def _(executor, opcode):
+	callFrame = executor.stack.pop(-1)
+	executor.frames = callFrame.frames
+	executor.scope[callFrame.returnVar] = executor.scope[opcode.var]
 
 
 @Executor.addHandler(While)
@@ -83,36 +130,8 @@ def _(executor, opcode):
 		yield _Frame(opcode.getAttr('elseCode'))
 
 
-@Executor.addHandler(actl.opcodes.VARIABLE)
-def _(executor, opcode):
-	executor.scope['_'] = executor.scope[opcode.name]
-
-
-@Executor.addHandler(actl.opcodes.SET_VARIABLE)
-def _(executor, opcode):
-	if opcode.val is not None:
-		val = opcode.val
-	elif opcode.src is not None:
-		val = executor.scope[opcode.src]
-	executor.scope[opcode.dst] = val
-
-
-@Executor.addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
+@Executor.addHandler(Function)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
-	assert opcode.typeb == '('
-	executor.scope[opcode.dst] = function.call(*opcode.args, **opcode.kwargs)
-
-
-@Executor.addHandler(actl.opcodes.CALL_FUNCTION)
-@_Frame.wrap
-def _(executor, opcode):
-	function = executor.scope[opcode.function]
-	if function.getAttr('__class__') is Function:
-		yield _Frame(function.getAttr('body'))
-		executor.scope[opcode.dst] = executor.scope['_']
-	else:
-		assert opcode.typeb == '('
-		args = (executor.scope[key] for key in opcode.args)
-		kwargs = {key: executor.scope[key] for key in opcode.kwargs}
-		executor.scope[opcode.dst] = function.call(*args, **kwargs)
+	executor.stack.append(_CallFrame(executor.frames, opcode.dst))
+	executor.frames = [iter(function.getAttr('body'))]
