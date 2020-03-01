@@ -57,7 +57,8 @@
             ('while', 'While'),
             ('if', 'If'),
             ('elif', 'elif_'),
-            ('else', 'else_')
+            ('else', 'else_'),
+            ('def', 'Function')
          ):
             var = getattr(actl.objects, clsName)
             yield varName, var

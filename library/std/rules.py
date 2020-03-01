@@ -117,7 +117,7 @@ class UseCodeBlock:
 	def __init__(self, parser, inp):
 		var = inp.pop()
 		assert inp.pop() == ':'
-		code = self._popCodeBlock(parser, inp)
+		code = self.popCodeBlock(parser, inp)
 
 		var = var.getAttr('__useCodeBlock__').call(code)
 		inp.set_(Buffer.of(var) + inp)
@@ -127,7 +127,7 @@ class UseCodeBlock:
 		return inp[0] == '\n'
 
 	@classmethod
-	def _popCodeBlock(cls, parser, inp):
+	def popCodeBlock(cls, parser, inp):
 		if cls.isFullCodeBlock(inp):
 			code = cls.popFullCodeBlock(inp)
 		else:

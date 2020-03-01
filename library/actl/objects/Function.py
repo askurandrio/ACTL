@@ -1,5 +1,7 @@
+from actl.Buffer import Buffer
 from actl.objects.BuildClass import BuildClass
-from actl.syntax import SyntaxRule, Value, Token, VARIABLE
+from actl.opcodes import SET_VARIABLE
+from actl.syntax import SyntaxRule, Value, Token, VARIABLE, IsInstance
 
 
 Function = BuildClass('Function')
@@ -19,12 +21,21 @@ def _(cls, signature, body):
 @SyntaxRule.wrap(
 	Value(Function),
 	Token(' '),
-	VARIABLE,
+	IsInstance(VARIABLE),
 	Token('('),
 	useParser=True,
 	manualApply=True
 )
-def _(_, _1, conditionFrame, end):
-	res = Buffer.of(While.call(conditionFrame))
-	res.append(end.one())
-	return res
+def _(parser, inp):
+	inp.pop()
+	inp.pop()
+	name = inp.pop().name
+	inp.pop()
+	inp.pop()
+	inp.pop()
+	inp.pop()
+	body = tuple(parser.rules.find('UseCodeBlock').func.popCodeBlock(parser, inp))
+
+	function = Function.call((), body)
+
+	inp.set_(Buffer.of(SET_VARIABLE(dst=name, val=function)) + inp)

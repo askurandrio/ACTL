@@ -278,6 +278,19 @@ def test_ifElifElseWithFullCodeBlock(execute):
 	assert AToPy(execute.executed.scope['a']) == 3
 
 
+def test_function(execute):
+	execute('def f(): print()\nf()')
+
+	setVar, _, _1 = execute.parsed.code
+	assert setVar.dst == 'f'
+	assert setVar.val.getAttr('signature') == ()
+	assert setVar.val.getAttr('body') == (
+		opcodes.CALL_FUNCTION(dst='__IV11', function='print', typeb='(', args=[], kwargs={}),
+		opcodes.VARIABLE(name='__IV11')
+	)
+	assert execute.executed.isExecuted
+
+
 @pytest.fixture
 def execute():
 	return _Execute()
@@ -305,7 +318,7 @@ class _Execute:
 			return self
 
 		code = self._project['parse']()  # pylint: disable=not-callable
-		self._project['code'] = Buffer(tuple(code))
+		self._project['code'] = Buffer(code)
 		self.isParsed = True
 		return self.parsed
 

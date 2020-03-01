@@ -1,7 +1,6 @@
 
 import actl
-from actl.objects import While, Object, Bool, If
-from actl.objects.AToPy import AToPy
+from actl.objects import While, Object, Bool, If, Function, AToPy
 
 
 class Executor:
@@ -91,7 +90,11 @@ def _(executor, opcode):
 
 @Executor.addHandler(actl.opcodes.SET_VARIABLE)
 def _(executor, opcode):
-	executor.scope[opcode.dst] = executor.scope[opcode.src]
+	if opcode.val is not None:
+		val = opcode.val
+	elif opcode.src is not None:
+		val = executor.scope[opcode.src]
+	executor.scope[opcode.dst] = val
 
 
 @Executor.addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
@@ -102,9 +105,14 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(actl.opcodes.CALL_FUNCTION)
+@_Frame.wrap
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
-	assert opcode.typeb == '('
-	args = (executor.scope[key] for key in opcode.args)
-	kwargs = {key: executor.scope[key] for key in opcode.kwargs}
-	executor.scope[opcode.dst] = function.call(*args, **kwargs)
+	if function.getAttr('__class__') is Function:
+		yield _Frame(function.getAttr('body'))
+		executor.scope[opcode.dst] = executor.scope['_']
+	else:
+		assert opcode.typeb == '('
+		args = (executor.scope[key] for key in opcode.args)
+		kwargs = {key: executor.scope[key] for key in opcode.kwargs}
+		executor.scope[opcode.dst] = function.call(*args, **kwargs)

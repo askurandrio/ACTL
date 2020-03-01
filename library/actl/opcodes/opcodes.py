@@ -41,7 +41,9 @@ class VARIABLE(DynamicOpCode):
 		return cls(f'__IV{t}')
 
 
-SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
+SET_VARIABLE = DynamicOpCode.create(
+	'SET_VARIABLE', 'dst', src=None, val=None
+)
 CALL_FUNCTION = DynamicOpCode.create(
 	'CALL_FUNCTION', 'dst', 'function', typeb='(', args=[], kwargs={}
 )
