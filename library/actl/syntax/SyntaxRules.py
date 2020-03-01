@@ -8,9 +8,9 @@ class SyntaxRules:
 	def rawAdd(self, rule):
 		self._rules.append(rule)
 
-	def add(self, *template, manual_apply=False, use_parser=False):
+	def add(self, *template, manualApply=False, useParser=False):
 		def decorator(func):
-			rule = SyntaxRule.wrap(*template, manual_apply=manual_apply, use_parser=use_parser)(func)
+			rule = SyntaxRule.wrap(*template, manualApply=manualApply, useParser=useParser)(func)
 			self.rawAdd(rule)
 			return func
 		return decorator

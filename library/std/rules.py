@@ -58,7 +58,7 @@ def _(*tokens):
 	return [VARIABLE(''.join(tokens))]
 
 
-@RULES.add(IsInstance(VARIABLE), Token(' '), Token('='), manual_apply=True, use_parser=True)
+@RULES.add(IsInstance(VARIABLE), Token(' '), Token('='), manualApply=True, useParser=True)
 def _(inp, parser):
 	dst = inp.pop()
 	assert inp.pop() == ' '
@@ -72,7 +72,7 @@ def _(inp, parser):
 	inp.set_(parsed + Buffer.of(SET_VARIABLE(dst.name, src.name)) + inp)
 
 
-@RULES.add(Or([Token('"')], [Token("'")]), manual_apply=True, use_parser=True)
+@RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
 def _(inp, parser):
 	start = [inp.pop()]
 	string = ''
@@ -90,7 +90,7 @@ def _is_digit(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
-@RULES.add(Many(_is_digit), Maybe(Token('.'), Many(_is_digit)), use_parser=True)
+@RULES.add(Many(_is_digit), Maybe(Token('.'), Many(_is_digit)), useParser=True)
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = VARIABLE.temp()
@@ -103,7 +103,7 @@ def _(*args, parser=None):
 	Token('('),
 	Maybe(Many(IsInstance(VARIABLE), min_matches=1)),
 	Token(')'),
-	use_parser=True
+	useParser=True
 )
 def _(function, op_token, *args, parser=None):
 	args = [arg.name for arg in args[:-1]]
@@ -112,7 +112,7 @@ def _(function, op_token, *args, parser=None):
 	return [dst]
 
 
-@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manual_apply=True, use_parser=True)
+@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
 class UseCodeBlock:
 	def __init__(self, parser, inp):
 		var = inp.pop()

@@ -4,11 +4,11 @@ from actl.syntax.Template import Template
 
 
 class SyntaxRule:
-	def __init__(self, template, func, manual_apply=False, use_parser=False):
+	def __init__(self, template, func, manualApply=False, useParser=False):
 		self._template = template
 		self.func = func
-		self._manual_apply = manual_apply
-		self._use_parser = use_parser
+		self._manualApply = manualApply
+		self._useParser = useParser
 
 	@property
 	def __name__(self):
@@ -19,9 +19,9 @@ class SyntaxRule:
 		if res is None:
 			return None
 		kwargs = {}
-		if self._use_parser:
+		if self._useParser:
 			kwargs['parser'] = parser
-		if self._manual_apply:
+		if self._manualApply:
 			inp.set_(res + inp)
 			kwargs = {
 				**kwargs,
@@ -41,8 +41,8 @@ class SyntaxRule:
 		return f'{type(self).__name__}({self._template, self.func})'
 
 	@classmethod
-	def wrap(cls, *template, manual_apply=False, use_parser=False):
+	def wrap(cls, *template, manualApply=False, useParser=False):
 		def decorator(func):
-			return cls(Template(*template), func, manual_apply, use_parser)
+			return cls(Template(*template), func, manualApply, useParser)
 
 		return decorator

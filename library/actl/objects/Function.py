@@ -21,8 +21,8 @@ def _(cls, signature, body):
 	Token(' '),
 	VARIABLE,
 	Token('('),
-	use_parser=True,
-	manual_apply=True
+	useParser=True,
+	manualApply=True
 )
 def _(_, _1, conditionFrame, end):
 	res = Buffer.of(While.call(conditionFrame))

@@ -26,8 +26,8 @@ def _(cls, ifCondition, *elifConditions, elseCode=None):
 	Value(If),
 	Token(' '),
 	Frame(Token(':')),
-	use_parser=True,
-	manual_apply=True
+	useParser=True,
+	manualApply=True
 )
 class _:
 	_INLINE_IF_END = Or(
