@@ -4,77 +4,104 @@ from actl.objects import While, Object, Bool, If
 from actl.objects.AToPy import AToPy
 
 
-_HANDLERS = {}
-
-
 class Executor:
+	HANDLERS = {}
+
 	def __init__(self, code, scope):
 		self.scope = scope
+		self._frames = [iter(code)]
+		self._execute()
 
-		self.execute(code)
-
-	def execute(self, code):
-		for opcode in code:
+	def _execute(self):
+		while self._frames:
 			try:
-				handler = _HANDLERS[type(opcode)]
-			except KeyError:
-				if not isinstance(opcode, type(Object)):
-					raise
-				handler = _HANDLERS[opcode.getAttr('__class__')]
+				opcode = next(self._frames[-1])
+			except StopIteration:
+				self._frames.pop(-1)
+				continue
 
-			handler(self, opcode)
+			if isinstance(opcode, _Frame):
+				self._frames.append(iter(opcode))
+				continue
+
+			handler = self.HANDLERS[type(opcode)]
+			res = handler(self, opcode)
+			if isinstance(res, _Frame):
+				self._frames.append(iter(res))
+
+	@classmethod
+	def addHandler(cls, opcode):
+		def decorator(handler):
+			cls.HANDLERS[opcode] = handler
+		return decorator
 
 
-def _addHandler(opcode):
-	def decorator(handler):
-		_HANDLERS[opcode] = handler
-	return decorator
+class _Frame:
+	def __init__(self, head):
+		self._head = head
+
+	def __iter__(self):
+		yield from self._head
+
+	@classmethod
+	def wrap(cls, func):
+		def wrapper(*args, **kwargs):
+			return cls(func(*args, **kwargs))
+
+		return wrapper
 
 
-@_addHandler(While)
+@Executor.addHandler(type(Object))
 def _(executor, opcode):
-	def condition():
-		executor.execute(opcode.getAttr('conditionFrame'))
-		res = executor.scope['_']
-		res = Bool.call(res)
-		return AToPy(res)
-
-	while condition():
-		executor.execute(opcode.getAttr('code'))
+	handler = Executor.HANDLERS[opcode.getAttr('__class__')]
+	return handler(executor, opcode)
 
 
-@_addHandler(If)
+@Executor.addHandler(While)
+@_Frame.wrap
+def _(executor, opcode):
+	while True:
+		yield _Frame(opcode.getAttr('conditionFrame'))
+		res = Bool.call(executor.scope['_'])
+		if not AToPy(res):
+			break
+
+		yield _Frame(opcode.getAttr('code'))
+
+
+@Executor.addHandler(If)
+@_Frame.wrap
 def _(executor, opcode):
 	for conditionFrame, code in opcode.getAttr('conditions'):
-		executor.execute(conditionFrame)
+		yield _Frame(conditionFrame)
 		res = executor.scope['_']
 		res = Bool.call(res)
 		if AToPy(res):
-			executor.execute(code)
+			yield _Frame(code)
 			return
 
 	if opcode.hasAttr('elseCode'):
-		executor.execute(opcode.getAttr('elseCode'))
+		yield _Frame(opcode.getAttr('elseCode'))
 
 
-@_addHandler(actl.opcodes.VARIABLE)
+@Executor.addHandler(actl.opcodes.VARIABLE)
 def _(executor, opcode):
 	executor.scope['_'] = executor.scope[opcode.name]
 
 
-@_addHandler(actl.opcodes.SET_VARIABLE)
+@Executor.addHandler(actl.opcodes.SET_VARIABLE)
 def _(executor, opcode):
 	executor.scope[opcode.dst] = executor.scope[opcode.src]
 
 
-@_addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
+@Executor.addHandler(actl.opcodes.CALL_FUNCTION_STATIC)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('
 	executor.scope[opcode.dst] = function.call(*opcode.args, **opcode.kwargs)
 
 
-@_addHandler(actl.opcodes.CALL_FUNCTION)
+@Executor.addHandler(actl.opcodes.CALL_FUNCTION)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('

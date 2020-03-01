@@ -287,8 +287,8 @@ class _Execute:
 	def __init__(self):
 		opcodes.VARIABLE.counter.reset()
 
-		self._isParsed = False
-		self._isExecuted = False
+		self.isParsed = False
+		self.isExecuted = False
 		self._project = Project('std')
 
 	@property
@@ -301,21 +301,21 @@ class _Execute:
 
 	@property
 	def parsed(self):
-		if self._isParsed:
+		if self.isParsed:
 			return self
 
 		code = self._project['parse']()  # pylint: disable=not-callable
 		self._project['code'] = Buffer(tuple(code))
-		self._isParsed = True
+		self.isParsed = True
 		return self.parsed
 
 	@property
 	def executed(self):
-		if self._isExecuted:
+		if self.parsed.isExecuted:
 			return self
 
 		self._project['execute']()  # pylint: disable=not-callable
-		self._isExecuted = True
+		self.isExecuted = True
 		return self.executed
 
 	def __call__(self, code):
