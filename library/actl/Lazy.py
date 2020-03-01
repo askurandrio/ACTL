@@ -36,3 +36,15 @@ class Lazy:
 	@property
 	def __contains__(self):
 		return self.__getattr__('__contains__')
+
+	@property
+	def __bool__(self):
+		return self.__getattr__('__bool__')
+
+	@property
+	def __repr__(self):
+		return self.__getattr__('__repr__')
+
+	@property
+	def __str__(self):
+		return self.__getattr__('__str__')
