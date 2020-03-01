@@ -1,6 +1,7 @@
 import pytest
 
 from actl import Buffer, opcodes, Project
+from std import Executor
 
 
 @pytest.fixture
@@ -29,8 +30,7 @@ class _Execute:
 		if self.isParsed:
 			return self
 
-		code = self._project['parse']()  # pylint: disable=not-callable
-		self._project['code'] = Buffer(code)
+		self._project['code'] = Buffer(self._project['parser'])
 		self.isParsed = True
 		return self.parsed
 
@@ -39,7 +39,7 @@ class _Execute:
 		if self.parsed.isExecuted:
 			return self
 
-		self._project['execute']()  # pylint: disable=not-callable
+		Executor(self._project['code'], self._project['scope'])
 		self.isExecuted = True
 		return self.executed
 
