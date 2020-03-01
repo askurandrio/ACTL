@@ -41,9 +41,6 @@ class Object:
 	def call(self):
 		return self.getAttr('__call__').call
 
-	def equal(self, other):
-		return self._head == other._head  # pylint: disable=protected-access
-
 	@property
 	def get(self):
 		return self.getAttr('__get__').call
@@ -106,6 +103,14 @@ class Object:
 			return res.get(self)
 
 		raise AAttributeIsNotSpecial(key)
+
+	def __eq__(self, other):
+		if not isinstance(other, Object):
+			return False
+		return self._head == other._head
+
+	def __hash__(self):
+		return hash(str(self))
 
 	def __repr__(self):
 		return str(self)

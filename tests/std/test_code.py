@@ -97,7 +97,7 @@ def test_while(execute):
 	execute('while cond(): print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttr('__class__').equal(While)
+	assert cycle.getAttr('__class__') is While
 	assert cycle.getAttr('conditionFrame') == (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='cond', typeb='(', args=[], kwargs={}),
 		opcodes.VARIABLE(name='__IV11')
@@ -129,7 +129,7 @@ def test_whileWithFullCodeBlock(execute):
 	execute('while cond():\n print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttr('__class__').equal(While)
+	assert cycle.getAttr('__class__') is While
 	assert cycle.getAttr('conditionFrame') == (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='cond', typeb='(', args=[], kwargs={}),
 		opcodes.VARIABLE(name='__IV11')
@@ -151,7 +151,7 @@ def test_if(execute):
 	execute('if 1: a = 2')
 
 	if_ = Buffer(execute.parsed.code).one()
-	assert if_.getAttr('__class__').equal(If)
+	assert if_.getAttr('__class__') is If
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
@@ -166,14 +166,14 @@ def test_if(execute):
 		opcodes.SET_VARIABLE(dst='a', src='__IV12')
 	)
 
-	assert execute.executed.scope['a'].equal(PyToA.call(1))
+	assert AToPy(execute.executed.scope['a']) == 2
 
 
 def test_ifElif(execute):
 	execute('if 0: a = 1 elif 1: a = 2')
 
 	if_ = Buffer(execute.parsed.code).one()
-	assert if_.getAttr('__class__').equal(If)
+	assert if_.getAttr('__class__') is If
 	assert if_.getAttr('conditions') == (
 		(
 			(
@@ -211,7 +211,7 @@ def test_ifElse(execute):
 	execute('if 0: a = 1 else: a = 2')
 
 	if_ = Buffer(execute.parsed.code).one()
-	assert if_.getAttr('__class__').equal(If)
+	assert if_.getAttr('__class__') is If
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
@@ -238,7 +238,7 @@ def test_ifElifElseWithFullCodeBlock(execute):
 	execute('if 0:\n a = 1\nelif 0:\n a = 2\nelse:\n a = 3')
 
 	if_ = Buffer(execute.parsed.code).one()
-	assert if_.getAttr('__class__').equal(If)
+	assert if_.getAttr('__class__') is If
 	assert if_.getAttr('conditions') == (
 		(
 			(
