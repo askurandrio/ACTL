@@ -69,11 +69,7 @@ def _(executor, opcode):
 
 @Executor.addHandler(opcodes.SET_VARIABLE)
 def _(executor, opcode):
-	if opcode.val is not None:
-		val = opcode.val
-	elif opcode.src is not None:
-		val = executor.scope[opcode.src]
-	executor.scope[opcode.dst] = val
+	executor.scope[opcode.dst] = executor.scope[opcode.src]
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)

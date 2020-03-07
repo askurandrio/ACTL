@@ -41,13 +41,11 @@ def test_function(execute):
 
 	execute('def f(): print()\nf()')
 
-	setVar, _, _1 = execute.parsed.code
-	assert setVar.dst == 'f'
-	assert setVar.val.getAttr('signature') == ()
-	assert setVar.val.getAttr('body') == (
+	callStaticFunction, _, _1 = execute.parsed.code
+	assert callStaticFunction.dst == 'f'
+	assert callStaticFunction.args == ('f', (), (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='print', typeb='(', args=[], kwargs={}),
-		opcodes.VARIABLE(name='__IV11'),
-		opcodes.RETURN(var='None')
-	)
+		opcodes.VARIABLE(name='__IV11')
+	))
 	assert AToPy(execute.executed.scope['_']) is None
 	mock.assert_called_once_with()
