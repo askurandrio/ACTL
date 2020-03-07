@@ -100,15 +100,20 @@ class Many(AbstractTemplate):
 
 	def __call__(self, parser, inp):
 		res = Buffer()
-		for matches in Buffer.inf():
-			buff = inp.copy()
-			tmpl_res = self.template(parser, buff)
-			if tmpl_res is None:
-				if matches < self.min_matches:
-					return None
-				return res
-			inp.set_(buff)
-			res += tmpl_res
+		with inp.transaction() as mainTx:
+			for matches in Buffer.inf():
+				with inp.transaction() as iterationTx:
+					tmpl_res = self.template(parser, inp)
+					if tmpl_res is None:
+						if matches < self.min_matches:
+							return None
+
+						mainTx.commit()
+						return res
+
+					iterationTx.commit()
+
+				res += tmpl_res
 
 		raise RuntimeError('Unexpected branch')
 
@@ -117,16 +122,16 @@ class Or(AbstractTemplate):
 	__slots__ = ('templates',)
 
 	def __init__(self, *templates):
+		templates = tuple(Template(*template) for template in templates)
 		super().__init__(templates)
 
 	def __call__(self, parser, inp):
 		for template in self.templates:
-			buff = inp.copy()
-			template = Template(*template)
-			res = template(parser, buff)
-			if res is not None:
-				inp.set_(buff)
-				return res
+			with inp.transaction() as tx:
+				res = template(parser, inp)
+				if res is not None:
+					tx.commit()
+					return res
 		return None
 
 
@@ -136,12 +141,12 @@ class Maybe(AbstractTemplate):
 	def __init__(self, *template):
 		super().__init__(Template(*template))
 
-	def __call__(self, parser, buff):
-		inp = buff.copy()
-		res = self.template(parser, inp)
-		if res is not None:
-			buff.set_(inp)
-			return res
+	def __call__(self, parser, inp):
+		with inp.transaction() as tx:
+			res = self.template(parser, inp)
+			if res is not None:
+				tx.commit()
+				return res
 		return Buffer()
 
 

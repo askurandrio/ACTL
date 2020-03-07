@@ -1,6 +1,7 @@
 from actl.Buffer import Buffer
 from actl.objects.BuildClass import BuildClass
-from actl.syntax import SyntaxRule, Value, Token, Frame, Or, Template, BufferRule
+from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
+
 
 If = BuildClass('If')
 elif_ = BuildClass('_Elif').call()

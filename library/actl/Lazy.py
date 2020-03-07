@@ -1,8 +1,6 @@
-# pylint: disable=unexpected-special-method-signature
-import sys
+# pylint: disable=unexpected-special-method-signature, invalid-overridden-method
+
 from contextlib import contextmanager
-from functools import partial
-from traceback import format_stack
 
 
 @contextmanager
@@ -25,7 +23,7 @@ class SlotsViaGetAttr:
 		return self.__getattr__('__call__')
 
 	@property
-	def __iter__(self):
+	def __iter__(self):  # pylint: disable=non-iterator-returned
 		return self.__getattr__('__iter__')
 
 	@property

@@ -38,7 +38,7 @@ class BufferRule(SlotsViaGetAttr):
 			res = template(self._parser, self._value)
 			return res is not None
 
-	def __contains__(self, rule):
+	def __contains__(self, rule):  # pylint: disable=invalid-overridden-method
 		try:
 			self.index(rule)
 		except IndexError:

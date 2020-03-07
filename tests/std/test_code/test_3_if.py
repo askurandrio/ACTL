@@ -24,6 +24,28 @@ def test_if(execute):
 	assert AToPy(execute.executed.scope['a']) == 2
 
 
+def test_ifFalse(execute):
+	execute('if 0: a = 1')
+
+	if_ = execute.parsed.code.one()
+	assert if_.getAttr('__class__') is If
+	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
+	assert conditionFrame == (
+		opcodes.CALL_FUNCTION_STATIC(
+			dst='__IV11', function=Number.call, typeb='(', args=['0'], kwargs={}
+		),
+		opcodes.VARIABLE(name='__IV11')
+	)
+	assert code == (
+		opcodes.CALL_FUNCTION_STATIC(
+			dst='__IV12', function=Number.call, typeb='(', args=['1'], kwargs={}
+		),
+		opcodes.SET_VARIABLE(dst='a', src='__IV12')
+	)
+
+	assert not AToPy(execute.executed.scope['_'])
+
+
 def test_ifElif(execute):
 	execute('if 0: a = 1 elif 1: a = 2')
 

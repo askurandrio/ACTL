@@ -58,7 +58,7 @@ class Buffer:
 
 	def __getitem__(self, index):
 		if isinstance(index, slice):
-			res = itertools.islice(self.copy(), index.start, index.stop, index.step)
+			res = itertools.islice(self, index.start, index.stop, index.step)
 			return type(self)(res)
 		self._load(index)
 		return self._buff[index]

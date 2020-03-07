@@ -1,9 +1,18 @@
 from actl.objects import Object, While
 
 
-def test_str_object():
+def test_ObjectAsPyStr():
 	assert str(Object) == "class 'Object'"
+
+
+def test_objectAsPyStr():
 	assert str(Object.call()) == "Object<{}>"
+
+
+def test_recursiveObjectAsStr():
+	obj = Object.call()
+	obj.setAttr('obj', obj)
+	assert str(obj) == "Object<{'obj': {...}}>"
 
 
 def test_str_while():
