@@ -1,22 +1,6 @@
-# pylint: disable=unexpected-special-method-signature, invalid-overridden-method
-
-from contextlib import contextmanager
-
-
-@contextmanager
-def setAttrForBlock(obj, attr, value):
-	prevValue = getattr(obj, attr)
-	setattr(obj, attr, value)
-	yield
-	setattr(obj, attr, prevValue)
-
-
 class SlotsViaGetAttr:
-	def __init__(self, value):
-		self._value = value
-
 	def __getattr__(self, key):
-		return getattr(self._value, key)
+		raise NotImplementedError
 
 	@property
 	def __call__(self):

@@ -1,5 +1,5 @@
 - py-code: |
-   from actl.Lazy import Lazy
+   from actl.utils.Lazy import Lazy
 
    def py_func(project, data):
       data = type(project)(source=data).data
