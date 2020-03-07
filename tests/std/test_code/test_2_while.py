@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 from actl import opcodes
-from actl.objects import PyToA, While, AToPy
+from actl.objects import PyToA, While, AToPy, Number
 
 
 def test_while(execute):
@@ -24,7 +24,7 @@ def test_while(execute):
 		opcodes.VARIABLE(name='__IV11')
 	)
 	assert cycle.getAttr('code') == (
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function='Number', args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='__IV13', function='print', typeb='(', args=['__IV12'], kwargs={}
 		),
@@ -56,7 +56,7 @@ def test_whileWithFullCodeBlock(execute):
 		opcodes.VARIABLE(name='__IV11')
 	)
 	assert cycle.getAttr('code') == (
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function='Number', args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='__IV13', function='print', typeb='(', args=['__IV12'], kwargs={}
 		),

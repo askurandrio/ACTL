@@ -67,10 +67,19 @@ def nativeProperty(fget):
 def nativeMethod(name, func):
 	@nativeFunc(f'{name}.__get__')
 	def fget(instance):
-		@nativeFunc(f'{name}.__get__()')
+		attr = f'{name}.__get__()'
+		try:
+			return getattr(instance, attr)
+		except AttributeError:
+			pass
+
+		@nativeFunc(attr)
 		def wrapper(*args, **kwargs):
 			return func(instance, *args, **kwargs)
-		return wrapper
+
+		setattr(instance, attr, wrapper)
+		return fget.call(instance)
+
 	return nativeProperty(fget)
 
 

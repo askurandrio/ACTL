@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from actl.objects import AToPy, PyToA
+from actl.objects import AToPy, PyToA, String
 from actl.opcodes import opcodes
 
 
@@ -25,7 +25,7 @@ def test_callWithString(execute):
 	execute('print("s")')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function='String', args=['s']),
+		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function=String.call, args=['s']),
 		opcodes.CALL_FUNCTION(
 			dst='__IV12', function='print', typeb='(', args=['__IV11'], kwargs={}
 		),

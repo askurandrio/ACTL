@@ -27,7 +27,7 @@ def test_setVariable(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function='Number', typeb='(', args=['1'], kwargs={}
+			dst='__IV11', function=Number.call, typeb='(', args=['1'], kwargs={}
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV11')
 	]
@@ -39,7 +39,7 @@ def test_float(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function='Number', typeb='(', args=['1.1'], kwargs={}
+			dst='__IV11', function=Number.call, typeb='(', args=['1.1'], kwargs={}
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV11')
 	]

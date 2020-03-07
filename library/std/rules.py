@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 
-from actl.objects import Object
+from actl.objects import Object, String, Number
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer, \
 	Template, BufferRule
 from actl.opcodes import \
@@ -81,7 +81,7 @@ def _(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = VARIABLE.temp()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='String', typeb='(', args=[string]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, typeb='(', args=[string]))
 	inp.set_(Buffer.of(dst) + inp)
 
 
@@ -94,7 +94,7 @@ def _is_digit(_, token):
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = VARIABLE.temp()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='Number', typeb='(', args=[number]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, typeb='(', args=[number]))
 	return [dst]
 
 

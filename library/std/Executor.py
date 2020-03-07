@@ -78,9 +78,8 @@ def _(executor, opcode):
 
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
 def _(executor, opcode):
-	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('
-	executor.scope[opcode.dst] = function.call(*opcode.args, **opcode.kwargs)
+	executor.scope[opcode.dst] = opcode.function(*opcode.args, **opcode.kwargs)
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION)
