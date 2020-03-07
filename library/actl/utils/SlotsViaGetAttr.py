@@ -2,55 +2,29 @@ class SlotsViaGetAttr:
 	def __getattr__(self, key):
 		raise NotImplementedError
 
-	@property
-	def __call__(self):
-		return self.__getattr__('__call__')
+	def __call__(self, *args, **kwargs):
+		return self.__getattr__('__call__')(*args, **kwargs)
 
-	@property
-	def __iter__(self):  # pylint: disable=non-iterator-returned
-		return self.__getattr__('__iter__')
+	def __iter__(self):
+		return self.__getattr__('__iter__')()
 
-	@property
-	def __getitem__(self):
-		return self.__getattr__('__getitem__')
+	def __getitem__(self, key):
+		return self.__getattr__('__getitem__')(key)
 
-	@property
-	def __setitem__(self):
-		return self.__getattr__('__setitem__')
+	def __setitem__(self, key, value):
+		self.__getattr__('__setitem__')(key, value)
 
-	@property
-	def __delitem__(self):
-		return self.__getattr__('__delitem__')
+	def __delitem__(self, key):
+		self.__getattr__('__delitem__')(key)
 
-	@property
-	def __contains__(self):
-		return self.__getattr__('__contains__')
+	def __contains__(self, key):
+		return self.__getattr__('__contains__')(key)
 
-	@property
 	def __bool__(self):
-		return self.__getattr__('__bool__')
+		return self.__getattr__('__bool__')()
 
-	@property
 	def __repr__(self):
-		return self.__getattr__('__repr__')
+		return self.__getattr__('__repr__')()
 
-	@property
 	def __str__(self):
-		return self.__getattr__('__str__')
-
-
-class Lazy(SlotsViaGetAttr):
-	_default = object()
-
-	def __init__(self, func):
-		self._func = func
-		super().__init__(self._default)
-
-	def _evaluate(self):
-		if self._value is not Lazy._default:
-			return
-		self._value = self._func()
-
-	def __getattr__(self, key):
-		self._evaluate()
-		return super().__getattr__(key)
+		return self.__getattr__('__str__')()
