@@ -37,6 +37,10 @@ class SlotsViaGetAttr:
 		return self.__getattr__('__setitem__')
 
 	@property
+	def __delitem__(self):
+		return self.__getattr__('__delitem__')
+
+	@property
 	def __contains__(self):
 		return self.__getattr__('__contains__')
 

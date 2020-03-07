@@ -52,7 +52,7 @@ class _:
 		self._firstConditionFrame = Frame(Token(':'))(parser, self._inp)
 		self._inp.pop()
 
-		if self._useCodeBlock.isFullCodeBlock(inp):
+		if self._useCodeBlock.isFullCodeBlock(parser, inp):
 			conditions, elseCode = self._getFromFullCodeBlock()
 		else:
 			conditions, elseCode = self._getFromInlineCodeBlock()
@@ -66,8 +66,7 @@ class _:
 
 	def _getFromFullCodeBlock(self):
 		def popCodeBlock():
-			code = self._useCodeBlock.popFullCodeBlock(self._inp)
-			code = Buffer(self._parser.subParser(code))
+			code = self._useCodeBlock.parseFullCodeBlock(self._parser, self._inp)
 			return tuple(code)
 
 		def parseLine():

@@ -6,7 +6,7 @@
    code: |
       from std import Parser
 
-      uinput = this['uinput'].watch(lambda elem: print(repr(elem)))
+      uinput = this['uinput']
       return Parser(this['scope'], this['rules'], uinput)
 
 

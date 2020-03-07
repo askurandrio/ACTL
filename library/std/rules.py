@@ -1,8 +1,8 @@
 # pylint: disable=no-member
 
 from actl.objects import Object
-from actl.syntax import \
-	SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer
+from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer, \
+	Template, BufferRule
 from actl.opcodes import \
 	VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
 
@@ -123,46 +123,40 @@ class UseCodeBlock:
 		inp.set_(Buffer.of(var) + inp)
 
 	@classmethod
-	def isFullCodeBlock(cls, inp):
-		return inp[0] == '\n'
+	def isFullCodeBlock(cls, parser, inp):
+		return BufferRule(parser, inp).startsWith(Token('\n'))
 
 	@classmethod
 	def popCodeBlock(cls, parser, inp):
-		if cls.isFullCodeBlock(inp):
-			code = cls.popFullCodeBlock(inp)
-		else:
-			code = cls._popInlineCodeBlock(inp)
-		return parser.subParser(code)
+		if cls.isFullCodeBlock(parser, inp):
+			return cls.parseFullCodeBlock(parser, inp)
+		return cls._parseInlineCodeBlock(parser, inp)
 
 	@classmethod
-	def popFullCodeBlock(cls, inp):
+	def parseFullCodeBlock(cls, parser, inp):
 		code = Buffer()
 		inp.pop()
-		indent = cls._getFirstIndent(inp)
+		indent = cls._getFirstIndent(parser, inp)
 
-		while inp[:len(indent)] == indent:
-			del inp[:len(indent)]
-			while inp and (inp[0] != '\n'):
+		while BufferRule(parser, inp).startsWith(indent):
+			BufferRule(parser, inp).pop(indent)
+			while inp and (not BufferRule(parser, inp).startsWith(Token('\n'))):
 				code.append(inp.pop())
 			if inp:
 				code.append(inp.pop())
 
-		return code
+		return parser.subParser(code)
 
 	@staticmethod
-	def _getFirstIndent(inp):
-		indent = ''
-
-		for elem in inp:
-			if elem not in (' ', '\t'):
-				break
-			indent += elem
+	def _getFirstIndent(parser, inp):
+		indent = BufferRule(parser, inp).get(Many(Token(' '))) or \
+			BufferRule(parser, inp).get(Many(Token('\t')))
 
 		assert len(set(indent)) == 1
-		return indent
+		return Template(*map(Token, indent))
 
 	@staticmethod
-	def _popInlineCodeBlock(inp):
+	def _parseInlineCodeBlock(parser, inp):
 		while inp[0] == ' ':
 			inp.pop()
 
@@ -171,4 +165,4 @@ class UseCodeBlock:
 		while inp and (inp[0] != '\n'):
 			code.append(inp.pop(0))
 
-		return code
+		return parser.subParser(code)
