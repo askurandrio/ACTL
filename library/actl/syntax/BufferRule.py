@@ -15,7 +15,10 @@ class BufferRule(SlotsViaGetAttr):
 
 	def pop(self, *template):
 		template = Template(*template)
-		template(self._parser, self._buff)
+		buff = template(self._parser, self._buff)
+		if buff is None:
+			raise IndexError(f'{self}.pop({template}) is None')
+		return buff
 
 	def index(self, *template):
 		template = Template(*template)

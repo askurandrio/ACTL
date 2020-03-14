@@ -113,8 +113,10 @@ def _(function, op_token, *args, parser=None):
 @RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
 class UseCodeBlock:
 	def __init__(self, parser, inp):
-		var = inp.pop()
-		assert inp.pop() == ':'
+		inpRule = BufferRule(parser, inp)
+		var = inpRule.pop(_hasAttr('__useCodeBlock__')).one()
+		inpRule.pop(Token(':'))
+
 		code = self.popCodeBlock(parser, inp)
 
 		var = var.getAttr('__useCodeBlock__').call(code)
@@ -132,23 +134,26 @@ class UseCodeBlock:
 
 	@classmethod
 	def parseFullCodeBlock(cls, parser, inp):
+		inpRule = BufferRule(parser, inp)
 		code = Buffer()
-		inp.pop()
-		indent = cls._getFirstIndent(parser, inp)
+		inpRule.pop(Token('\n'))
+		indent = cls._getFirstIndent(inpRule)
 
-		while BufferRule(parser, inp).startsWith(indent):
-			BufferRule(parser, inp).pop(indent)
-			while inp and (not BufferRule(parser, inp).startsWith(Token('\n'))):
+		while inpRule.startsWith(indent):
+			inpRule.pop(indent)
+			while inp and (not inpRule.startsWith(Token('\n'))):
 				code.append(inp.pop())
 			if inp:
 				code.append(inp.pop())
 
+		if code[-1] == '\n':
+			inp.set_(Buffer.of(code.pop(-1)) + inp)
+
 		return parser.subParser(code)
 
 	@staticmethod
-	def _getFirstIndent(parser, inp):
-		indent = BufferRule(parser, inp).get(Many(Token(' '))) or \
-			BufferRule(parser, inp).get(Many(Token('\t')))
+	def _getFirstIndent(inpRule):
+		indent = inpRule.get(Many(Token(' '))) or inpRule.get(Many(Token('\t')))
 
 		assert len(set(indent)) == 1
 		return Template(*map(Token, indent))

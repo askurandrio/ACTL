@@ -55,7 +55,11 @@ class DynamicOpCode(AnyOpCode):
 		return self._getAttributes() == other._getAttributes()
 
 	def __repr__(self):
-		attributes = ', '.join(f'{key}={value!r}' for key, value in self._getAttributes().items())
+		attributes = ', '.join(
+			f'{key}={value!r}'
+			for key, value in self._getAttributes().items()
+			if not ((key in self._defaults) and (self._defaults[key] == value))
+		)
 		return '{}({})'.format(type(self).__name__, attributes)
 
 	@classmethod

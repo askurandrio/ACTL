@@ -31,11 +31,11 @@ class _:
 	def __init__(self, parser, inp):
 		self._parser = parser
 		self._inp = inp
+		self._inpRule = BufferRule(parser, inp)
 
-		self._inp.pop()
-		self._inp.pop()
+		self._inpRule.pop(Value(If), Token(' '))
 		self._firstConditionFrame = Frame(Token(':'))(parser, self._inp)
-		self._inp.pop()
+		self._inpRule.pop(Token(':'))
 
 		if self._useCodeBlock.isFullCodeBlock(parser, inp):
 			conditions, elseCode = self._getFromFullCodeBlock()
@@ -51,7 +51,9 @@ class _:
 
 	def _getFromFullCodeBlock(self):
 		def popCodeBlock():
-			code = self._useCodeBlock.parseFullCodeBlock(self._parser, self._inp)
+			code = Buffer(self._useCodeBlock.parseFullCodeBlock(self._parser, self._inp))
+			if self._inp.startswith('\n'):
+				self._inp.pop()
 			return tuple(code)
 
 		def parseLine():
@@ -60,17 +62,15 @@ class _:
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 		parseLine()
-		while BufferRule(self._parser, self._inp).startsWith(Value(objects.elif_)):
-			self._inp.pop()
-			self._inp.pop()
+		while self._inpRule.startsWith(Value(objects.elif_)):
+			self._inpRule.pop(Value(objects.elif_), Token(' '))
 			frame = Frame(Token(':'))(self._parser, self._inp)
-			self._inp.pop()
+			self._inpRule.pop(Token(':'))
 			conditions.append((tuple(frame), popCodeBlock()))
 			parseLine()
 
-		if BufferRule(self._parser, self._inp).startsWith(Value(objects.else_)):
-			self._inp.pop()
-			self._inp.pop()
+		if self._inpRule.startsWith(Value(objects.else_)):
+			self._inpRule.pop(Value(objects.else_), Token(':'))
 			elseCode = popCodeBlock()
 		else:
 			elseCode = None
@@ -85,7 +85,7 @@ class _:
 		self._inp.pop()
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 
-		while BufferRule(self._parser, self._inp).startsWith(Token(' '), Value(objects.elif_)):
+		while self._inpRule.startsWith(Token(' '), Value(objects.elif_)):
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
@@ -94,7 +94,7 @@ class _:
 			self._inp.pop()
 			conditions.append((tuple(frame), popCodeBlock()))
 
-		if BufferRule(self._parser, self._inp).startsWith(Token(' '), Value(objects.else_)):
+		if self._inpRule.startsWith(Token(' '), Value(objects.else_)):
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
