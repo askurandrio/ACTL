@@ -1,14 +1,16 @@
 # pylint: disable=arguments-differ, invalid-overridden-method, useless-super-delegation
-
+from actl.objects.object.ClassObject import ClassObject
 from actl.objects.object.exceptions import AKeyNotFound, AAttributeNotFound
 from actl.objects.object.InstanceObject import InstanceObject
 
 
-class _NativeObject(InstanceObject):
+class NativeObject(InstanceObject):
+	aCls = ClassObject({'__name__': '_NativeObject'})
+
 	def __init__(self, aAttributes, pyAttibutes):
 		for key, value in pyAttibutes.items():
 			setattr(self, key, value)
-		super().__init__(aAttributes)
+		super().__init__({'__class__': self.aCls, **aAttributes})
 
 	def asStr(self):
 		return f'{type(self).__name__}<...>'
@@ -30,7 +32,7 @@ class _NativeObject(InstanceObject):
 		if key == String:
 			@nativeFunc('NativeObject.asStr')
 			def asStr():
-				return String.fromPy(self.asStr())
+				return String.call(self.asStr())
 
 			return asStr
 
@@ -45,7 +47,7 @@ def nativeFunc(name):
 		def asStr():
 			return f'nativeFunc<{name}>'
 
-		return _NativeObject({}, {'call': func, 'asStr': asStr})
+		return NativeObject({}, {'call': func, 'asStr': asStr})
 
 	return decorator
 
@@ -57,7 +59,7 @@ def nativeProperty(fget):
 	def asStr():
 		return f'nativeProperty({fget})'
 
-	return _NativeObject({}, {'get': get, 'asStr': asStr})
+	return NativeObject({}, {'get': get, 'asStr': asStr})
 
 
 def nativeMethod(name, func):
@@ -92,4 +94,4 @@ def nativeDict(head):
 		except KeyError:
 			raise AKeyNotFound(key=key)
 
-	return _NativeObject({}, {'asStr': asStr, 'setItem': setItem, 'getItem': getItem})
+	return NativeObject({}, {'asStr': asStr, 'setItem': setItem, 'getItem': getItem})

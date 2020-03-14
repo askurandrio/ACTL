@@ -24,8 +24,9 @@ def _(cls, value):
 
 
 @PyToA.addMethodToClass('eval')
-def _(code):
-	return PyToA.call(eval(code))
+def _(cls, code):
+	code = str(AToPy(code))
+	return cls.call(eval(code))
 
 
 @PyToA.addMethod('__call__')

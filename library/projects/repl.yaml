@@ -13,6 +13,7 @@
 - py-func:
    name: build
    code: |
+      import pdb
       import traceback
       from actl import Project
 
@@ -22,11 +23,7 @@
             break
          except Exception:
             traceback.print_exc()
-            inp = None
-            while inp not in ('y', 'n'):
-               inp = input('Continue?: ')
-            if inp != 'y':
-               break
+            pdb.post_mortem()
 
 
 - py-key:

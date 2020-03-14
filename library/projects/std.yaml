@@ -59,7 +59,8 @@
             ('Number', 'Number'),
             ('elif', 'elif_'),
             ('else', 'else_'),
-            ('None', 'ANone')
+            ('None', 'ANone'),
+            ('PyToA', 'PyToA')
          ):
             var = getattr(actl.objects, clsName)
             yield varName, var

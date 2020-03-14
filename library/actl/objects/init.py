@@ -1,6 +1,7 @@
 from actl.objects.AToPy import AToPy
 from actl.objects.object import Object, nativeMethod
 from actl.objects.String import String
+from actl.objects.object import NativeObject
 
 
 @String.addMethod(AToPy)
@@ -26,3 +27,4 @@ Object.setAttr(
 Object.getAttr('__self__').setItem(
 	String, nativeMethod('object.__str__', selfAsStr)
 )
+NativeObject.aCls.setAttr('__parents__', (Object,))
