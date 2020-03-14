@@ -102,6 +102,14 @@ def _(executor, opcode):
 	executor.scope[callFrame.returnVar] = executor.scope[opcode.var]
 
 
+@Executor.addHandler(opcodes.CALL_OPERATOR)
+def _(executor, opcode):
+	first = executor.scope[opcode.first]
+	assert opcode.operator == '.'
+	second = executor.scope[opcode.second]
+	executor.scope[opcode.dst] = first.getAttr(str(AToPy(second)))
+
+
 @Executor.addHandler(While)
 @_Frame.wrap
 def _(executor, opcode):

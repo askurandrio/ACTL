@@ -3,9 +3,7 @@
 from actl.objects import String, Number, AbstractObject
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer, \
 	Template, BufferRule
-from actl.opcodes import \
-	VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC
-
+from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR
 
 RULES = SyntaxRules()
 
@@ -166,3 +164,20 @@ class UseCodeBlock:
 			code.append(inp.pop(0))
 
 		return parser.subParser(code)
+
+
+@RULES.add(IsInstance(VARIABLE), Token('.'), IsInstance(VARIABLE), useParser=True)
+def _(first, token, attribute, parser):
+	attributeVar = VARIABLE.temp()
+	dst = VARIABLE.temp()
+
+	parser.define(
+		CALL_FUNCTION_STATIC(
+			dst=attributeVar.name, function=String.call, typeb='(', args=[attribute.name]
+		),
+		CALL_OPERATOR(
+			dst=dst.name, first=first.name, operator=token, second=attributeVar.name
+		)
+	)
+
+	return [dst]
