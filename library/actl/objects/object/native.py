@@ -1,15 +1,11 @@
 # pylint: disable=arguments-differ, invalid-overridden-method, useless-super-delegation
 
 from actl.objects.object.exceptions import AKeyNotFound, AAttributeNotFound
-from actl.objects.object._Object import Object as pyObjectCls\
+from actl.objects.object.InstanceObject import InstanceObject
 
 
-class _NativeObject(pyObjectCls):
-	aCls = pyObjectCls({})
-	aCls.setAttr('__name__', 'NativeObject')
-
+class _NativeObject(InstanceObject):
 	def __init__(self, aAttributes, pyAttibutes):
-		aAttributes['__class__'] = self.aCls
 		for key, value in pyAttibutes.items():
 			setattr(self, key, value)
 		super().__init__(aAttributes)
@@ -24,12 +20,12 @@ class _NativeObject(pyObjectCls):
 		return super().get(instance)
 
 	def getAttr(self, key):
-		from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
-
 		try:
 			return self._head[key]
 		except KeyError:
 			pass
+
+		from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 
 		if key == String:
 			@nativeFunc('NativeObject.asStr')

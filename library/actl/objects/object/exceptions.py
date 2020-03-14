@@ -1,10 +1,13 @@
 class AGenericKeyError(Exception):
 	MSG = 'Generic Error: {key}'
 
-	def __init__(self, msg='', key=None):
-		if (key is not None) and (not msg):
-			msg = self.MSG.format(key=key)
-		super().__init__(msg)
+	def __init__(self, key=None):
+		self.key = key
+		super().__init__(self.MSG.format(key=self.key))
+
+	def check(self, key):
+		if self.key != key:
+			raise self
 
 
 class AAttributeIsNotSpecial(AGenericKeyError):

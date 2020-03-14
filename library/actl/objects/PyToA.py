@@ -4,7 +4,7 @@ from actl.objects.Bool import Bool, ATrue, AFalse
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
 from actl.objects.BuildClass import BuildClass
-from actl.objects.object import AAttributeNotFound, Object
+from actl.objects.object import AAttributeNotFound
 
 
 PyToA = BuildClass('PyToA')
@@ -18,9 +18,14 @@ def _(cls, value):
 	if isinstance(value, (int, float)):
 		return Number.call(value)
 
-	self = cls.getAttr('__super__').getAttr('__call__').call()
+	self = cls.super_(PyToA, '__call__').call()
 	self._value = value
 	return self
+
+
+@PyToA.addMethodToClass('eval')
+def _(code):
+	return PyToA.call(eval(code))
 
 
 @PyToA.addMethod('__call__')
@@ -33,16 +38,18 @@ def _(self, *args):
 @PyToA.addMethod('__getAttr__')
 def _(self, key):
 	try:
-		return self.getAttr('__super__').getAttr('__getAttr__').call(key)
-	except AAttributeNotFound:
-		pass
-	try:
-		assert not isinstance(key, type(Object))
-		value = getattr(self._value, key)
-	except (AssertionError, AttributeError) as ex:
-		raise AAttributeNotFound(ex)
+		return self.super_(PyToA, '__getAttr__').call(key)
+	except AAttributeNotFound as ex:
+		ex.check(key)
 
-	return PyToA.call(value)
+	if isinstance(key, str):
+		try:
+			value = getattr(self._value, key)
+		except AttributeError:
+			pass
+		else:
+			return PyToA.call(value)
+	raise AAttributeNotFound(key)
 
 
 @PyToA.addMethod(AToPy)

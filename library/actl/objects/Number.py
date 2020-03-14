@@ -9,7 +9,7 @@ Number = BuildClass('Number')
 
 @Number.addMethodToClass('__call__')
 def _(cls, value):
-	self = cls.getAttr('__super__').getAttr('__call__').call()
+	self = cls.super_(Number, '__call__').call()
 	if isinstance(value, str):
 		if '.' in value:
 			value = float(value)

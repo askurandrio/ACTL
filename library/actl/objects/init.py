@@ -14,17 +14,14 @@ def clsAsStr(self):
 
 
 def selfAsStr(self):
-	name = self.getAttr('__class__').getAttr('__name__')
+	name = self.class_.getAttr('__name__')
 	head = self._head  # pylint: disable=protected-access
 	head = {key: value for key, value in head.items() if key != '__class__'}
 	return String.call(f'{name}<{head}>')
 
 
-Object.getAttr('__class__').setAttr(
-	String, nativeMethod('_Object.__str__', clsAsStr)
-)
-Object.getAttr('__class__').getAttr('__self__').setItem(
-	String, nativeMethod('_Object.__str__', clsAsStr)
+Object.setAttr(
+	String, nativeMethod('Object.__str__', clsAsStr)
 )
 Object.getAttr('__self__').setItem(
 	String, nativeMethod('object.__str__', selfAsStr)

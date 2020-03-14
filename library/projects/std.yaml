@@ -41,6 +41,7 @@
    name: scope
    code: |
       import actl
+      import std
 
 
       def _getPyToAVars():
@@ -49,27 +50,35 @@
             yield varName, actl.objects.PyToA.call(var)
 
 
-      def _getAVars():
+      def _getACTLVars():
          for varName, clsName in (
             ('True', 'ATrue'),
             ('False', 'AFalse'),
             ('Bool', 'Bool'),
             ('String', 'String'),
             ('Number', 'Number'),
-            ('while', 'While'),
-            ('if', 'If'),
             ('elif', 'elif_'),
             ('else', 'else_'),
-            ('def', 'Function'),
             ('None', 'ANone')
          ):
             var = getattr(actl.objects, clsName)
             yield varName, var
 
 
+      def _getSTDVars():
+         for varName, clsName in (
+            ('if', 'If'),
+            ('while', 'While'),
+            ('def', 'Function')
+         ):
+            var = getattr(std.objects, clsName)
+            yield varName, var
+
+
       return actl.Scope({
          **dict(_getPyToAVars()),
-         **dict(_getAVars())
+         **dict(_getACTLVars()),
+         **dict(_getSTDVars())
       })
 
 

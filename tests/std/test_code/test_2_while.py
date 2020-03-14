@@ -1,7 +1,8 @@
 from unittest.mock import Mock
 
 from actl import opcodes
-from actl.objects import PyToA, While, AToPy, Number
+from actl.objects import PyToA, AToPy, Number
+from std.objects import While
 
 
 def test_while(execute):
@@ -18,7 +19,7 @@ def test_while(execute):
 	execute('while cond(): print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttr('__class__') is While
+	assert cycle.class_ is While
 	assert cycle.getAttr('conditionFrame') == (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='cond', typeb='(', args=[], kwargs={}),
 		opcodes.VARIABLE(name='__IV11')
@@ -50,7 +51,7 @@ def test_whileWithFullCodeBlock(execute):
 	execute('while cond():\n print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttr('__class__') is While
+	assert cycle.class_ is While
 	assert cycle.getAttr('conditionFrame') == (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='cond', typeb='(', args=[], kwargs={}),
 		opcodes.VARIABLE(name='__IV11')

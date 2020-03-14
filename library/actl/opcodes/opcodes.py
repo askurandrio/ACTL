@@ -1,15 +1,6 @@
 from .AnyOpCode import DynamicOpCode
 
 
-class Making(DynamicOpCode):
-	__slots__ = ('opcode',)
-
-	def __eq__(self, other):
-		if not isinstance(other, type(self)):
-			return False
-		return self.opcode == other.opcode  # pylint: disable=E1101
-
-
 class _Counter:
 	def __init__(self, count):
 		self._init = count

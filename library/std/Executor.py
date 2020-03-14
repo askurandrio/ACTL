@@ -1,5 +1,5 @@
-from actl import opcodes
-from actl.objects import While, Object, Bool, If, Function, AToPy
+from actl import opcodes, objects
+from actl.objects import While, Bool, If, Function, AToPy
 
 
 class Executor:
@@ -56,9 +56,13 @@ class _CallFrame:
 		self.returnVar = returnVar
 
 
-@Executor.addHandler(type(Object))
+@Executor.addHandler(objects.InstanceObject)  # TODO: Rework this
 def _(executor, opcode):
-	handler = Executor.HANDLERS[opcode.getAttr('__class__')]
+	parents = list(opcode.class_.parents)
+	while parents[0] not in Executor.HANDLERS:
+		parents.pop(0)
+
+	handler = Executor.HANDLERS[parents[0]]
 	return handler(executor, opcode)
 
 
@@ -81,8 +85,8 @@ def _(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
-	if function.getAttr('__class__') is Function:
-		return Executor.HANDLERS[Function](executor, opcode)
+	if Function in function.class_.parents:
+		return _executeFunction(executor, opcode)
 
 	assert opcode.typeb == '('
 	args = (executor.scope[key] for key in opcode.args)
@@ -125,8 +129,7 @@ def _(executor, opcode):
 		yield _Frame(opcode.getAttr('elseCode'))
 
 
-@Executor.addHandler(Function)
-def _(executor, opcode):
+def _executeFunction(executor, opcode):
 	function = executor.scope[opcode.function]
 	executor.stack.append(_CallFrame(executor.frames, opcode.dst))
 	executor.frames = [iter(function.getAttr('body'))]

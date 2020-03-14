@@ -1,6 +1,6 @@
 
 import actl.objects.init
-from actl.objects.object import Object
+from actl.objects.object import Object, AbstractObject, InstanceObject
 from actl.objects.PyToA import PyToA
 from actl.objects.AToPy import AToPy
 from actl.objects.String import String
@@ -10,3 +10,4 @@ from actl.objects.Bool import ATrue, AFalse, Bool
 from actl.objects.If import If, else_, elif_
 from actl.objects.Function import Function
 from actl.objects.ANone import ANone
+from actl.objects.BuildClass import BuildClass

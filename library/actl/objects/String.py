@@ -13,8 +13,7 @@ String = _BuildClassString('String')
 
 @String.addMethodToClass('__call__')
 def _(cls, value=''):
-	s = cls.getAttr('__super__').getAttr('__call__')
-	self = s.call()
+	self = cls.super_(String, '__call__').call()
 	self._value = value
 	return self
 
