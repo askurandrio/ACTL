@@ -21,6 +21,12 @@ def test_delSlice():
 
 
 def test_repr():
+	buff = Buffer([1])
+
+	assert repr(buff) == 'Buffer([1])'
+
+
+def test_bigRepr():
 	buff = Buffer(range(1, 12))
 
 	assert repr(buff) == 'Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...])'
