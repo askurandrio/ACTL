@@ -23,7 +23,8 @@
             break
          except Exception:
             traceback.print_exc()
-            pdb.post_mortem()
+            #pdb.post_mortem()
+            break
 
 
 - py-key:
@@ -43,6 +44,7 @@
                msg = '>>> '
             try:
                yield from input(msg)
+               print('')
                yield '\n'
             except EOFError:
                break

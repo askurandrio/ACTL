@@ -25,9 +25,6 @@ class AbstractTemplate:
 
 		return CustomTemplate(f'{self}.asArg({arg})', asArg)
 
-	def __invert__(self):
-		return _Not(self)
-
 	def __call__(self, parser, inp):
 		raise NotImplementedError
 

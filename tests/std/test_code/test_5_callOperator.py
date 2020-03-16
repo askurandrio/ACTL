@@ -13,4 +13,4 @@ def test_callOperator(execute):
 		opcodes.VARIABLE(name='__IV12')
 	]
 
-	execute.executed.scope
+	assert execute.executed.scope['_'] is execute.scope['print'].getAttr('__call__')

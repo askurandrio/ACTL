@@ -13,23 +13,27 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Project:
 	_DEFAULT_HANDLERS = {}
 
-	def __init__(self, projectf=None, source=None, this=None):
-		if this is not None:
-			self.this = this
-
+	def __init__(self, projectf=None, source=(), this=None):
 		self.data = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
 
-		if projectf:
-			assert source is None
-			self.data['projectf'] = projectf
-			projectf = self.__resolve_projectf(projectf)
-			source = self.yaml_load(open(projectf))
+		if this is not None:
+			self.data = {**self.data, 'this': this}
 
-		self._init(source)
+		if projectf is not None:
+			self.data = {**self.data, 'projectf': projectf}
+			source = ({'include': projectf},) + tuple(source)
 
-	def _init(self, source):
+		self.processSource(source)
+
+	@property
+	def this(self):
+		return self.data.get('this', self)
+
+	def processSource(self, source):
 		if isinstance(source, dict):
-			source = list(source.items())
+			source = source.items()
+
+		source = list(source)
 		while source:
 			cmd = source.pop(0)
 			if isinstance(cmd, dict):
@@ -69,10 +73,6 @@ class Project:
 			return func
 		return decorator
 
-	@classmethod
-	def __resolve_projectf(cls, projectf):
-		return os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
-
 	@staticmethod
 	def yaml_load(arg):
 		return yaml.load(arg, Loader=yaml.SafeLoader)
@@ -87,21 +87,22 @@ class Project:
 
 @Project.add_default_handler('include')
 def _(project, projectf):
-	sub_project = type(project)(this=project, projectf=projectf)
-	project[projectf] = sub_project
-	_recursive_update(project.data, sub_project.data)
+	filename = os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
+	source = Project.yaml_load(open(filename))
+	subProject = type(project)(source=source, this=project.this)
+	project[projectf] = subProject
+	_recursiveUpdate(project.data, subProject.data)
 
 
 @Project.add_default_handler('py-code')
 def _(project, arg):
-	this = getattr(project, 'this', project)
-	exec(arg, {'this': this, 'project': project}, None)  # pylint: disable=exec-used
+	exec(arg, {'this': project.this, 'project': project}, None)  # pylint: disable=exec-used
 
 
-def _recursive_update(base, new):
+def _recursiveUpdate(base, new):
 	for key, value in new.items():
 		if isinstance(value, dict):
 			base[key] = base.get(key, {})
-			_recursive_update(base[key], value)
+			_recursiveUpdate(base[key], value)
 		elif key not in base:
 			base[key] = value

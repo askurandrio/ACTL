@@ -9,9 +9,9 @@ class Executor:
 		self.scope = scope
 		self.stack = []
 		self.frames = [iter(code)]
-		self._execute()
+		self.execute()
 
-	def _execute(self):
+	def execute(self):
 		while self.frames:
 			try:
 				opcode = next(self.frames[-1])

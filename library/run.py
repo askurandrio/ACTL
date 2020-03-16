@@ -1,34 +1,33 @@
 import argparse
 
+import json
+
 import actl
 
 
 def main(args):
-	if args.projectf:
-		if args.mainf:
-			project = actl.Project(projectf=args.projectf)
-			mainf = args.mainf
-		else:
-			project = actl.Project(source=[{'include': 'std'}])
-			mainf = args.projectf
-		project['mainf'] = mainf
+	if args.mainf:
+		projectf = args.projectf or 'std'
+		project = actl.Project(
+			projectf=projectf, source=({'include': projectf}, {'mainf': args.mainf})
+		)
+	elif args.projectf:
+		project = actl.Project(projectf=args.projectf)
 	else:
-		project = actl.Project(source=[{'include': 'repl'}])
-	if args.data:
-		data = actl.Project.yaml_load(args.data)
-		project = actl.Project(source=[{'include': project}, {'include': data}])
+		project = actl.Project(projectf='repl')
+
+	if args.source:
+		extraSource = json.loads(args.source)
+		project.processSource(extraSource)
 
 	project['build']()
 
 
 def build_argparser():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('projectf', help='Project file', nargs='?')
-	parser.add_argument('mainf', help='Code file', nargs='?')
-	parser.add_argument('data', help='Data', nargs='?')
 	parser.add_argument('--projectf', help='Project file')
 	parser.add_argument('--mainf', help='Code file')
-	parser.add_argument('--data', help='Data')
+	parser.add_argument('--source', help='Extra source')
 	return parser
 
 
