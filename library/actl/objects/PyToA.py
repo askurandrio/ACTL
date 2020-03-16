@@ -26,7 +26,7 @@ def _(cls, value):
 @PyToA.addMethodToClass('eval')
 def _(cls, code):
 	code = str(AToPy(code))
-	return cls.call(eval(code))
+	return cls.call(eval(code))  # pylint: disable=eval-used
 
 
 @PyToA.addMethod('__call__')

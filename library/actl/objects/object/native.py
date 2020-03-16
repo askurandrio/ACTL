@@ -1,4 +1,4 @@
-# pylint: disable=arguments-differ, invalid-overridden-method, useless-super-delegation
+# pylint: disable=arguments-differ, useless-super-delegation
 from actl.objects.object.ClassObject import ClassObject
 from actl.objects.object.exceptions import AKeyNotFound, AAttributeNotFound
 from actl.objects.object.InstanceObject import InstanceObject

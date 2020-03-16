@@ -7,7 +7,7 @@ from actl.objects.object.ClassObject import ClassObject
 
 def getAttr(self, key):
 	try:
-		return self.getSpecialAttr(key)  # pylint: disable=protected-access
+		return self.getSpecialAttr(key)
 	except AAttributeIsNotSpecial as ex:
 		ex.check(key)
 
