@@ -1,7 +1,7 @@
 - py-code: |
    from actl.utils.Lazy import Lazy
 
-   def py_func(project, data):
+   def pyFunc(project, data):
       data = type(project)(source=data).data
       name = data['name']
       args = ', '.join(data.get('args', ()))
@@ -10,11 +10,11 @@
          f"def {name}({args}):\n"
          f"  {code}"
       )
-      lc_scope = {}
-      exec(code, globals(), lc_scope)
-      project[name] = lc_scope[name]
+      lcScope = {}
+      exec(code, globals(), lcScope)
+      project[name] = lcScope[name]
 
-   def py_key(project, data):
+   def pyKey(project, data):
       data = type(project)(source=data).data
       name = data['name']
       code = data['code'].replace('\n', '\n  ')
@@ -22,12 +22,12 @@
         f"def {name}():\n"
         f"  {code}"
       )
-      lc_scope = {}
-      exec(code, globals(), lc_scope)
-      project[name] = Lazy(lc_scope[name])
+      lcScope = {}
+      exec(code, globals(), lcScope)
+      project[name] = Lazy(lcScope[name])
 
-   project['handlers', 'py-key'] = py_key
-   project['handlers', 'py-func'] = py_func
+   project['handlers', 'py-key'] = pyKey
+   project['handlers', 'py-func'] = pyFunc
 
 
 - py-key:

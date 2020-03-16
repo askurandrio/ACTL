@@ -20,7 +20,7 @@ def parse():
 	return _parse
 
 
-def test_simple_replace(parse):
+def test_simpleReplace(parse):
 	@SyntaxRule.wrap(Token('b'))
 	@_expect('b')
 	def rule(_):
@@ -29,7 +29,7 @@ def test_simple_replace(parse):
 	assert parse({}, [rule], ['a', 'b', 'c']) == ['a', 'r', 'c']
 
 
-def test_replace_pattern(parse):
+def test_replacePattern(parse):
 	@SyntaxRule.wrap(Token('b'), Token('c'))
 	@_expect('b', 'c')
 	def rule(*_):
@@ -38,7 +38,7 @@ def test_replace_pattern(parse):
 	assert parse({}, [rule], ['a', 'b', 'c', 'd']) == ['a', 'r', 'd']
 
 
-def test_custom_template(parse):
+def test_customTemplate(parse):
 	@SyntaxRule.wrap(CustomTemplate.createToken(lambda _, token: token == 'b', 'token'))
 	@_expect('b')
 	def rule(_):
@@ -66,33 +66,33 @@ def test_many(parse):
 
 
 def test_or(parse):
-	or_tokens = 'b', 'c'
+	orTokens = 'b', 'c'
 
-	@SyntaxRule.wrap(Or(*([Token(or_token)] for or_token in or_tokens)))
+	@SyntaxRule.wrap(Or(*([Token(orToken)] for orToken in orTokens)))
 	def rule(token):
-		assert token in or_tokens
+		assert token in orTokens
 		return 'r'
 
-	for or_token in or_tokens:
-		assert parse({}, [rule], ['a', or_token, 'd']) == ['a', 'r', 'd']
+	for orToken in orTokens:
+		assert parse({}, [rule], ['a', orToken, 'd']) == ['a', 'r', 'd']
 
 
 def test_maybe(parse):
 	@SyntaxRule.wrap(Or([Token('b')], [Token('c')]), Maybe(Token('d')))
-	def rule(first_token, second_token=None):
+	def rule(first_token, secondToken=None):
 		if first_token == 'b':
-			assert second_token is None
+			assert secondToken is None
 		elif first_token == 'c':
-			assert second_token == 'd'
+			assert secondToken == 'd'
 		else:
-			assert False, second_token
+			assert False, secondToken
 		return 'r'
 
 	assert parse({}, [rule], ['a', 'b', 'e']) == ['a', 'r', 'e']
 	assert parse({}, [rule], ['a', 'c', 'd', 'e']) == ['a', 'r', 'e']
 
 
-def test_replace_after_replace(parse):
+def test_replaceAfterReplace(parse):
 	@SyntaxRule.wrap(Token('b'))
 	@_expect('b')
 	def first_rule(_):
@@ -100,24 +100,24 @@ def test_replace_after_replace(parse):
 
 	@SyntaxRule.wrap(Token('d'))
 	@_expect('d')
-	def second_rule(_):
+	def secondRule(_):
 		return 'r'
 
-	assert parse({}, [first_rule, second_rule], ['a', 'b', 'c']) == ['a', 'r', 'c']
+	assert parse({}, [first_rule, secondRule], ['a', 'b', 'c']) == ['a', 'r', 'c']
 
 
 def test_value(parse):
 	@SyntaxRule.wrap(Token('a'))
 	@_expect('a')
-	def token_to_variable(_):
+	def tokenToVariable(_):
 		return [VARIABLE('a')]
 
 	@SyntaxRule.wrap(Value(1))
 	@_expect(VARIABLE('a'))
-	def variable_to_value(_):
+	def variableToValue(_):
 		return 'b'
 
-	assert parse({'a': 1}, [token_to_variable, variable_to_value], ['a']) == ['b']
+	assert parse({'a': 1}, [tokenToVariable, variableToValue], ['a']) == ['b']
 
 
 def _expect(*expect):

@@ -57,9 +57,6 @@ class Buffer:
 		return list(self) == list(other)
 
 	def __getitem__(self, index):
-		if isinstance(index, slice):
-			res = itertools.islice(self, index.start, index.stop, index.step)
-			return type(self)(res)
 		self._load(index)
 		return self._buff[index]
 

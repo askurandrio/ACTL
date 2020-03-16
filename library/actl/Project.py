@@ -67,7 +67,7 @@ class Project:
 		base[keys[-1]] = value
 
 	@classmethod
-	def add_default_handler(cls, name):
+	def addDefaultHandler(cls, name):
 		def decorator(func):
 			cls._DEFAULT_HANDLERS[name] = func
 			return func
@@ -81,7 +81,7 @@ class Project:
 		return f'{type(self).__name__}({head})'
 
 
-@Project.add_default_handler('include')
+@Project.addDefaultHandler('include')
 def _(project, projectf):
 	filename = os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
 	source = yaml.load(open(filename), Loader=yaml.SafeLoader)
@@ -90,7 +90,7 @@ def _(project, projectf):
 	_recursiveUpdate(project.data, subProject.data)
 
 
-@Project.add_default_handler('py-code')
+@Project.addDefaultHandler('py-code')
 def _(project, arg):
 	exec(arg, {'this': project.this, 'project': project}, None)  # pylint: disable=exec-used
 

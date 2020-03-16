@@ -10,9 +10,9 @@ class BuildClass(ClassObject):
 
 	def addMethod(self, attr):
 		def decorator(func):
-			cls_name = self.getAttr('__name__')
-			cls_name = cls_name[0].lower() + cls_name[1:]
-			methodName = f'{cls_name}.{attr}'
+			clsName = self.getAttr('__name__')
+			clsName = clsName[0].lower() + clsName[1:]
+			methodName = f'{clsName}.{attr}'
 			method = nativeMethod(methodName, func)
 			self.getAttr('__self__').setItem(attr, method)
 			return func
@@ -21,8 +21,8 @@ class BuildClass(ClassObject):
 
 	def addMethodToClass(self, attr):
 		def decorator(func):
-			cls_name = self.getAttr('__name__')
-			methodName = f'{cls_name}.{attr}'
+			clsName = self.getAttr('__name__')
+			methodName = f'{clsName}.{attr}'
 			method = nativeMethod(methodName, func)
 			self.setAttr(attr, method)
 			return func

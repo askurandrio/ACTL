@@ -15,6 +15,6 @@ def test_recursiveObjectAsStr():
 	assert str(obj) == "Object<{'obj': {...}}>"
 
 
-def test_str_while():
+def test_strWhile():
 	assert str(While) == "class 'While'"
 	assert str(While.call([])) == "While<{'conditionFrame': []}>"

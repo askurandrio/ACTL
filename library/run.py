@@ -23,7 +23,7 @@ def main(args):
 	project['build']()
 
 
-def build_argparser():
+def buildArgParser():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--projectf', help='Project file')
 	parser.add_argument('--mainf', help='Code file')
@@ -32,4 +32,4 @@ def build_argparser():
 
 
 if __name__ == '__main__':
-	main(build_argparser().parse_args())
+	main(buildArgParser().parse_args())

@@ -20,6 +20,12 @@ class BufferRule(SlotsViaGetAttr):
 			raise IndexError(f'{self}.pop({template}) is None')
 		return buff
 
+	def popUntil(self, *template):
+		res = type(self._buff)()
+		while self._buff and (not self.startsWith(*template)):
+			res.append(self._buff.pop())
+		return res
+
 	def index(self, *template):
 		template = Template(*template)
 		index = 0

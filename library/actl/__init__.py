@@ -10,7 +10,7 @@ from .Project import Project
 from .Scope import Scope
 
 
-def _make_logger():
+def _makeLogger():
 	logger = logging.getLogger('actl')
 	formatter = logging.Formatter('%(process)d %(asctime)s: [%(levelname)s] %(message)s')
 
@@ -19,4 +19,4 @@ def _make_logger():
 	logger.addHandler(stdout)
 
 
-_make_logger()
+_makeLogger()

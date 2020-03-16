@@ -37,12 +37,8 @@ class Parser:
 
 			flush.append(self.buff.pop())
 
-		if self._endLine in BufferRule(self, flush):
-			idx_end_line = BufferRule(self, flush).index(self._endLine)
-			res = flush[:idx_end_line]
-			self.buff.set_(flush[idx_end_line:] + self.buff)
-		else:
-			res = flush
+		res = BufferRule(self, flush).popUntil(self._endLine)
+		self.buff.set_(flush + self.buff)
 
 		res = self._definition + res
 		self._definition = Buffer()

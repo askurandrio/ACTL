@@ -50,16 +50,16 @@ class Template(AbstractTemplate, metaclass=_MetaTemplate):
 		with buff.transaction() as tx:
 			res = Buffer()
 			for tmpl in self._template:
-				tmpl_res = tmpl(parser, buff)
-				if tmpl_res is None:
+				tmplRes = tmpl(parser, buff)
+				if tmplRes is None:
 					return None
-				res += tmpl_res
+				res += tmplRes
 			tx.commit()
 		return res
 
 	def __repr__(self):
-		repr_template = ', '.join(str(tmpl) for tmpl in self._template)
-		return f'{type(self).__name__}({repr_template})'
+		reprTemplate = ', '.join(str(tmpl) for tmpl in self._template)
+		return f'{type(self).__name__}({reprTemplate})'
 
 
 class CustomTemplate(AbstractTemplate):
@@ -92,20 +92,20 @@ class CustomTemplate(AbstractTemplate):
 
 
 class Many(AbstractTemplate):
-	__slots__ = ('template', 'min_matches')
+	__slots__ = ('template', 'minMatches')
 
-	def __init__(self, *template, min_matches=1):
-		assert min_matches != 0, f'min_matched<{min_matches}> == 0. Use Maybe for this case'
-		super().__init__(Template(*template), min_matches)
+	def __init__(self, *template, minMatches=1):
+		assert minMatches != 0, f'minMatches<{minMatches}> == 0. Use Maybe for this case'
+		super().__init__(Template(*template), minMatches)
 
 	def __call__(self, parser, inp):
 		res = Buffer()
 		with inp.transaction() as mainTx:
 			for matches in Buffer.inf():
 				with inp.transaction() as iterationTx:
-					tmpl_res = self.template(parser, inp)
-					if tmpl_res is None:
-						if matches < self.min_matches:
+					tmplRes = self.template(parser, inp)
+					if tmplRes is None:
+						if matches < self.minMatches:
 							return None
 
 						mainTx.commit()
@@ -113,7 +113,7 @@ class Many(AbstractTemplate):
 
 					iterationTx.commit()
 
-				res += tmpl_res
+				res += tmplRes
 
 		raise RuntimeError('Unexpected branch')
 

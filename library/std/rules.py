@@ -34,21 +34,21 @@ RULES.rawAdd(_runtimeRule)
 
 
 @CustomTemplate.createToken
-def _is_acceptable_name(_, token):
+def _isAcceptableName(_, token):
 	return isinstance(token, str) and (token.isalpha() or token in ('_',))
 
 
 @CustomTemplate.createToken
-def _is_acceptable_continues_name(_, token):
+def _isAcceptableContinuesName(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
 @RULES.add(
-	_is_acceptable_name,
+	_isAcceptableName,
 	Maybe(Many(
 		Or(
-			[_is_acceptable_name],
-			[_is_acceptable_continues_name]
+			[_isAcceptableName],
+			[_isAcceptableContinuesName]
 		)
 	))
 )
@@ -84,11 +84,11 @@ def _(inp, parser):
 
 
 @CustomTemplate.createToken
-def _is_digit(_, token):
+def _isDigit(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
-@RULES.add(Many(_is_digit), Maybe(Token('.'), Many(_is_digit)), useParser=True)
+@RULES.add(Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True)
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = VARIABLE.temp()
@@ -99,14 +99,14 @@ def _(*args, parser=None):
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token('('),
-	Maybe(Many(IsInstance(VARIABLE), min_matches=1)),
+	Maybe(Many(IsInstance(VARIABLE), minMatches=1)),
 	Token(')'),
 	useParser=True
 )
-def _(function, op_token, *args, parser=None):
+def _(function, opToken, *args, parser=None):
 	args = [arg.name for arg in args[:-1]]
 	dst = VARIABLE.temp()
-	parser.define(CALL_FUNCTION(dst.name, function.name, op_token, args, {}))
+	parser.define(CALL_FUNCTION(dst.name, function.name, opToken, args, {}))
 	return [dst]
 
 
