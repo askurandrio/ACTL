@@ -9,7 +9,8 @@ _default = object()
 
 class AbstractObject:
 	_specialAttrs = {
-		'__class__': 'class_'
+		'__class__': 'class_',
+		'__getAttr__': '_getAttr'
 	}
 
 	def __init__(self, head):
@@ -19,14 +20,17 @@ class AbstractObject:
 	def class_(self):
 		return self._head['__class__']
 
+	@property
+	def _getAttr(self):
+		return self.findAttr('__getAttr__').get(self)
+
 	def getAttr(self, key):
 		try:
 			return self.getSpecialAttr(key)
 		except AAttributeIsNotSpecial as ex:
 			ex.check(key)
 
-		getAttr = self.getAttr('__getAttr__')
-		return getAttr.call(key)
+		return self._getAttr.call(key)
 
 	def setAttr(self, key, value=_default):
 		if value is not _default:
@@ -71,8 +75,6 @@ class AbstractObject:
 		try:
 			propertyName = self._specialAttrs[key]
 		except KeyError:
-			if key == '__getAttr__':
-				return self.findAttr('__getAttr__').get(self)
 			raise AAttributeIsNotSpecial(key)
 
 		return getattr(self, propertyName)
