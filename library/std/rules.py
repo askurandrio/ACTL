@@ -58,16 +58,15 @@ def _(*tokens):
 
 @RULES.add(IsInstance(VARIABLE), Token(' '), Token('='), manualApply=True, useParser=True)
 def _(inp, parser):
-	dst = inp.pop()
-	assert inp.pop() == ' '
-	assert inp.pop() == '='
-	assert inp.pop() == ' '
+	inpRule = BufferRule(parser, inp)
+	dst = inpRule.pop(IsInstance(VARIABLE)).one().name
+	inpRule.pop(Token(' '), Token('='), Token(' '))
 
 	parsed = parser.subParser(inp).parseLine()
-	src = parsed.pop(-1)
-	assert isinstance(src, VARIABLE)
 
-	inp.set_(parsed + Buffer.of(SET_VARIABLE(dst.name, src.name)) + inp)
+	src = BufferRule(parser, Buffer.of(parsed.pop(-1))).pop(IsInstance(VARIABLE)).one().name
+
+	inp.set_(parsed + Buffer.of(SET_VARIABLE(dst, src)) + inp)
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
