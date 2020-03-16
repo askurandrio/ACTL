@@ -73,10 +73,6 @@ class Project:
 			return func
 		return decorator
 
-	@staticmethod
-	def yaml_load(arg):
-		return yaml.load(arg, Loader=yaml.SafeLoader)
-
 	def __repr__(self):
 		if 'projectf' in self.data:
 			head = 'projectf={!r}'.format(self.data['projectf'])
@@ -88,7 +84,7 @@ class Project:
 @Project.add_default_handler('include')
 def _(project, projectf):
 	filename = os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
-	source = Project.yaml_load(open(filename))
+	source = yaml.load(open(filename), Loader=yaml.SafeLoader)
 	subProject = type(project)(source=source, this=project.this)
 	project[projectf] = subProject
 	_recursiveUpdate(project.data, subProject.data)
