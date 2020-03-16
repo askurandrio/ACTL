@@ -84,6 +84,14 @@
 
 
 - py-key:
+   name: uinput
+   code: |
+      import actl
+
+      return actl.Buffer(char for line in open(this['mainf']) for char in line)
+
+
+- py-key:
    name: parser
    code: |
       import actl
