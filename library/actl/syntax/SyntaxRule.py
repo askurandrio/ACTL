@@ -22,20 +22,18 @@ class SyntaxRule:
 		if self._useParser:
 			kwargs['parser'] = parser
 		if self._manualApply:
-			inp.set_(res + inp)
+			inp = res + inp
 			kwargs = {
 				**kwargs,
 				'inp': inp
 			}
-			self.func(**kwargs)
-		else:
-			args = tuple(arg for arg in res if not isinstance(arg, NamedResult))
-			kwargs.update({
-				arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)
-			})
-			res = self.func(*args, **kwargs)
-			inp.set_(Buffer(res) + inp)
-		return True
+			return self.func(**kwargs)
+
+		args = tuple(arg for arg in res if not isinstance(arg, NamedResult))
+		kwargs.update({
+			arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)
+		})
+		return Buffer(self.func(*args, **kwargs)) + inp
 
 	def __repr__(self):
 		return f'{type(self).__name__}({self._template, self.func})'

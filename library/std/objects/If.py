@@ -1,19 +1,11 @@
 from actl import objects, Buffer
 from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
-
+from std.rules import UseCodeBlock
 
 If = objects.BuildClass('If', objects.If)
 
 
-@If.setAttr('__syntaxRule__')
-@SyntaxRule.wrap(
-	Value(If),
-	Token(' '),
-	Frame(Token(':')),
-	useParser=True,
-	manualApply=True
-)
-class _:
+class IfSyntax:
 	_INLINE_IF_END = Or(
 		(Token(' '), Value(objects.elif_),),
 		(Value(objects.elif_),),
@@ -31,34 +23,33 @@ class _:
 	def __init__(self, parser, inp):
 		self._parser = parser
 		self._inp = inp
-		self._inpRule = BufferRule(parser, inp)
 
 		self._inpRule.pop(Value(If), Token(' '))
 		self._firstConditionFrame = Frame(Token(':'))(parser, self._inp)
 		self._inpRule.pop(Token(':'))
 
-		if self._useCodeBlock.isFullCodeBlock(parser, inp):
+	def parse(self):
+		if UseCodeBlock.isFullCodeBlock(self._parser, self._inp):
 			conditions, elseCode = self._getFromFullCodeBlock()
 		else:
 			conditions, elseCode = self._getFromInlineCodeBlock()
-
 		if_ = If.call(*conditions, elseCode=elseCode)
-		inp.set_(Buffer.of(if_) + inp)
+		return Buffer.of(if_) + self._inp
 
 	@property
-	def _useCodeBlock(self):
-		return self._parser.rules.find('UseCodeBlock').func
+	def _inpRule(self):
+		return BufferRule(self._parser, self._inp)
 
 	def _getFromFullCodeBlock(self):
 		def popCodeBlock():
-			code = Buffer(self._useCodeBlock.parseFullCodeBlock(self._parser, self._inp))
+			code = Buffer(UseCodeBlock.parseFullCodeBlock(self._parser, self._inp))
 			if self._inp.startswith('\n'):
 				self._inp.pop()
 			return tuple(code)
 
 		def parseLine():
 			line = self._parser.subParser(self._inp, self._ELIF_OR_ELSE_OR_ENDLINE).parseLine()
-			self._inp.set_(line + self._inp)
+			self._inp = line + self._inp
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 		parseLine()
@@ -105,3 +96,15 @@ class _:
 			elseCode = None
 
 		return tuple(conditions), elseCode
+
+
+@If.setAttr('__syntaxRule__')
+@SyntaxRule.wrap(
+	Value(If),
+	Token(' '),
+	Frame(Token(':')),
+	useParser=True,
+	manualApply=True
+)
+def _(parser, inp):
+	return IfSyntax(parser, inp).parse()

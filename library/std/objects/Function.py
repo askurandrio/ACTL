@@ -1,6 +1,7 @@
 from actl import objects, Buffer
 from actl.opcodes import CALL_FUNCTION_STATIC
 from actl.syntax import SyntaxRule, Value, Token, VARIABLE, IsInstance, BufferRule
+from std.rules import UseCodeBlock
 
 Function = objects.BuildClass('Function', objects.Function)
 
@@ -19,7 +20,8 @@ def _(parser, inp):
 	inpRule.pop(Value(Function), Token(' '))
 	name = inpRule.pop(IsInstance(VARIABLE)).one().name
 	inpRule.pop(Token('('), Token(')'), Token(':'))
-	body = tuple(parser.rules.find('UseCodeBlock').func.popCodeBlock(parser, inp))
+	body = tuple(UseCodeBlock.popCodeBlock(parser, inp))
 
 	opcode = CALL_FUNCTION_STATIC(dst=name, function=Function.call, args=(name, (), body))
-	inp.set_(Buffer.of(opcode) + inp)
+
+	return Buffer.of(opcode) + inp

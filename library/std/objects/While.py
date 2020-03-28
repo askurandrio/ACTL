@@ -19,6 +19,7 @@ def _(self, parser):
 	Or((End,), (Token(':'),)).asArg('end')
 )
 def _(_, _1, conditionFrame, end):
+	print(conditionFrame)
 	res = Buffer.of(While.call(conditionFrame))
 	res.append(end.one())
 	return res

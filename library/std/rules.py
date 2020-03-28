@@ -66,7 +66,7 @@ def _(inp, parser):
 
 	src = BufferRule(parser, Buffer.of(parsed.pop(-1))).pop(IsInstance(VARIABLE)).one().name
 
-	inp.set_(parsed + Buffer.of(SET_VARIABLE(dst, src)) + inp)
+	return parsed + Buffer.of(SET_VARIABLE(dst, src)) + inp
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
@@ -79,7 +79,8 @@ def _(inp, parser):
 		assert start.pop(0) == inp.pop()
 	dst = VARIABLE.temp()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, typeb='(', args=[string]))
-	inp.set_(Buffer.of(dst) + inp)
+
+	return Buffer.of(dst) + inp
 
 
 @CustomTemplate.createToken
@@ -109,17 +110,15 @@ def _(function, opToken, *args, parser=None):
 	return [dst]
 
 
-@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
 class UseCodeBlock:
-	def __init__(self, parser, inp):
+	@classmethod
+	def parse(cls, parser, inp):
 		inpRule = BufferRule(parser, inp)
 		var = inpRule.pop(_hasAttr('__useCodeBlock__')).one()
 		inpRule.pop(Token(':'))
-
-		code = self.popCodeBlock(parser, inp)
-
+		code = cls.popCodeBlock(parser, inp)
 		var = var.getAttr('__useCodeBlock__').call(code)
-		inp.set_(Buffer.of(var) + inp)
+		return Buffer.of(var) + inp
 
 	@classmethod
 	def isFullCodeBlock(cls, parser, inp):
@@ -168,6 +167,11 @@ class UseCodeBlock:
 			code.append(inp.pop(0))
 
 		return parser.subParser(code)
+
+
+@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
+def _(parser, inp):
+	return UseCodeBlock.parse(parser, inp)
 
 
 @RULES.add(IsInstance(VARIABLE), Token('.'), IsInstance(VARIABLE), useParser=True)

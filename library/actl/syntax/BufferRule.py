@@ -56,3 +56,6 @@ class BufferRule(SlotsViaGetAttr):
 
 	def __getattr__(self, key):
 		return getattr(self._buff, key)
+
+	def __str__(self):
+		return f'{type(self).__name__}(parser={self._parser}, buff={self._buff})'

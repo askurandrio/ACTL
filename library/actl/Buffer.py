@@ -31,6 +31,9 @@ class Buffer:
 		self._head, *res = itertools.tee(self._head, 2)
 		return type(self)(res[0])
 
+	def appFront(self, *items):
+		self._buff = list(items) + self._buff
+
 	def append(self, *items):  # pylint: disable=no-self-use
 		self += items
 
