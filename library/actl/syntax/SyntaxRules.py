@@ -15,13 +15,6 @@ class SyntaxRules:
 			return func
 		return decorator
 
-	def find(self, name):
-		for rule in self._rules:
-			if rule.__name__ == name:
-				return rule
-
-		raise RuntimeError(f'Rule with such name not found: {name}')
-
 	def __iter__(self):
 		return iter(self._rules)
 

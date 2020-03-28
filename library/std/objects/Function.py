@@ -24,4 +24,4 @@ def _(parser, inp):
 
 	opcode = CALL_FUNCTION_STATIC(dst=name, function=Function.call, args=(name, (), body))
 
-	return Buffer.of(opcode) + inp
+	return Buffer.of(opcode)

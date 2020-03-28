@@ -34,7 +34,7 @@ class IfSyntax:
 		else:
 			conditions, elseCode = self._getFromInlineCodeBlock()
 		if_ = If.call(*conditions, elseCode=elseCode)
-		return Buffer.of(if_) + self._inp
+		return Buffer.of(if_)
 
 	@property
 	def _inpRule(self):
@@ -49,7 +49,7 @@ class IfSyntax:
 
 		def parseLine():
 			line = self._parser.subParser(self._inp, self._ELIF_OR_ELSE_OR_ENDLINE).parseLine()
-			self._inp = line + self._inp
+			self._inp.appFront(*line)
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 		parseLine()

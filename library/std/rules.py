@@ -66,7 +66,7 @@ def _(inp, parser):
 
 	src = BufferRule(parser, Buffer.of(parsed.pop(-1))).pop(IsInstance(VARIABLE)).one().name
 
-	return parsed + Buffer.of(SET_VARIABLE(dst, src)) + inp
+	return parsed + Buffer.of(SET_VARIABLE(dst, src))
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
@@ -80,7 +80,7 @@ def _(inp, parser):
 	dst = VARIABLE.temp()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, typeb='(', args=[string]))
 
-	return Buffer.of(dst) + inp
+	return Buffer.of(dst)
 
 
 @CustomTemplate.createToken
@@ -118,7 +118,7 @@ class UseCodeBlock:
 		inpRule.pop(Token(':'))
 		code = cls.popCodeBlock(parser, inp)
 		var = var.getAttr('__useCodeBlock__').call(code)
-		return Buffer.of(var) + inp
+		return Buffer.of(var)
 
 	@classmethod
 	def isFullCodeBlock(cls, parser, inp):
@@ -145,7 +145,7 @@ class UseCodeBlock:
 				code.append(inp.pop())
 
 		if code[-1] == '\n':
-			inp.set_(Buffer.of(code.pop(-1)) + inp)
+			inp.appFront(code.pop(-1))
 
 		return parser.subParser(code)
 

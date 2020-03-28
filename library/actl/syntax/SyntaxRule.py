@@ -10,19 +10,21 @@ class SyntaxRule:
 		self._manualApply = manualApply
 		self._useParser = useParser
 
-	@property
-	def __name__(self):
-		return self.func.__name__
-
 	def __call__(self, parser, inp):
 		res = self._template(parser, inp)
 		if res is None:
 			return None
+
 		kwargs = {}
+
 		if self._useParser:
-			kwargs['parser'] = parser
+			kwargs = {
+				**kwargs,
+				'parser': parser
+			}
+
 		if self._manualApply:
-			inp = res + inp
+			inp.appFront(*res)
 			kwargs = {
 				**kwargs,
 				'inp': inp
@@ -33,7 +35,7 @@ class SyntaxRule:
 		kwargs.update({
 			arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)
 		})
-		return Buffer(self.func(*args, **kwargs)) + inp
+		return Buffer(self.func(*args, **kwargs))
 
 	def __repr__(self):
 		return f'{type(self).__name__}({self._template, self.func})'

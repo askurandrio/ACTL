@@ -24,19 +24,19 @@ class Parser:
 		for rule in self.rules:
 			res = rule(self, self.buff)
 			if res:
-				self.buff.set_(res)
-				return True
-		return False
+				return res
+		return None
 
 	def parseLine(self):
 		flush = Buffer()
 		while (self._endLine not in BufferRule(self, flush)) and self.buff:
-			if self._applyRule():
-				self.buff.appFront(*flush)
-				flush = Buffer()
+			res = self._applyRule()
+			if res is None:
+				flush.append(self.buff.pop())
 				continue
 
-			flush.append(self.buff.pop())
+			self.buff.appFront(*(flush + res))
+			flush = Buffer()
 
 		res = BufferRule(self, flush).popUntil(self._endLine)
 		self.buff.appFront(*flush)
