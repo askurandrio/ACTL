@@ -54,7 +54,11 @@ class Project:
 
 		res = self.data
 		for key in keys:
-			res = res[key]
+			tmpRes = res[key]
+			if isinstance(tmpRes, Lazy):
+				tmpRes = tmpRes.evaluate()
+				res[key] = tmpRes
+			res = tmpRes
 
 		return res
 
@@ -79,6 +83,11 @@ class Project:
 		else:
 			head = f'source={self.data}'
 		return f'{type(self).__name__}({head})'
+
+
+class Lazy:
+	def __init__(self, evaluate):
+		self.evaluate = evaluate
 
 
 @Project.addDefaultHandler('include')
