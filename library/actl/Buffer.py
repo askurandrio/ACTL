@@ -1,4 +1,5 @@
 import itertools
+from contextlib import contextmanager
 
 
 class Buffer:
@@ -13,10 +14,6 @@ class Buffer:
 
 		return type(self)(map(watch, self))
 
-	def set_(self, it):
-		self._buff = []
-		self._head = iter(it)
-
 	def one(self):
 		res, = self
 		return res
@@ -24,12 +21,6 @@ class Buffer:
 	def pop(self, index=0):
 		self._load(index)
 		return self._buff.pop(index)
-
-	def copy(self):
-		buff, self._buff = self._buff, []
-		self._head = itertools.chain(iter(buff), self._head)
-		self._head, *res = itertools.tee(self._head, 2)
-		return type(self)(res[0])
 
 	def appFront(self, *items):
 		self._buff = list(items) + self._buff
@@ -42,8 +33,24 @@ class Buffer:
 		self._load(len(tmpl))
 		return self._buff[:len(tmpl)] == tmpl
 
+	@contextmanager
 	def transaction(self):
-		return _Transaction(self)
+		def gen(head):
+			for elem in head:
+				backup.append(elem)
+				yield elem
+
+		backup = list(self._buff)
+		prevHead, self._head = self._head, gen(self._head)
+		tx = _Transaction()
+
+		yield tx
+
+		self._head = prevHead
+		if tx.isCommited:
+			return
+
+		self._buff = backup
 
 	def _load(self, quantity):
 		if isinstance(quantity, slice):
@@ -53,8 +60,11 @@ class Buffer:
 			return
 
 		quantity = (quantity + 1) - len(self._buff)
-		if quantity > 0:
-			self._buff.extend(itertools.islice(self._head, None, quantity, None))
+		for _ in range(quantity):
+			try:
+				self._buff.append(next(self._head))
+			except StopIteration:
+				break
 
 	def __eq__(self, other):
 		return list(self) == list(other)
@@ -65,11 +75,14 @@ class Buffer:
 
 	def __delitem__(self, index):
 		self._load(index)
-		self._buff.__delitem__(index)
+		del self._buff[index]
 
 	def __iter__(self):
-		self._head, head = itertools.tee(self._head)
-		return itertools.chain(iter(self._buff), head)
+		yield from self._buff
+
+		for elem in self._head:
+			self._buff.append(elem)
+			yield elem
 
 	def __iadd__(self, other):
 		self._head = itertools.chain(iter(self._head), iter(other))
@@ -115,19 +128,8 @@ class Buffer:
 
 
 class _Transaction:
-	def __init__(self, buff):
-		self._buff = buff
-		self._backup = None
-		self._commit = False
+	def __init__(self):
+		self.isCommited = False
 
 	def commit(self):
-		self._commit = True
-
-	def __enter__(self):
-		assert self._backup is None
-		self._backup = self._buff.copy()
-		return self
-
-	def __exit__(self, *_):
-		if not self._commit:
-			self._buff.set_(self._backup)
+		self.isCommited = True

@@ -23,8 +23,9 @@ def _hasAttr(attr):
 
 
 def _runtimeRule(parser, inp):
-	if not _hasAttr('__syntaxRule__')(parser, inp.copy()):
-		return None
+	with inp.transaction():
+		if not _hasAttr('__syntaxRule__')(parser, inp):
+			return None
 
 	syntaxRule = parser.scope[inp[0].name].getAttr('__syntaxRule__')
 	return syntaxRule(parser, inp)
