@@ -27,8 +27,8 @@ class AbstractObject:
 	def getAttr(self, key):
 		try:
 			return self.getSpecialAttr(key)
-		except AAttributeIsNotSpecial as ex:
-			ex.check(key)
+		except AAttributeIsNotSpecial:
+			pass
 
 		return self._getAttr.call(key)
 
@@ -46,8 +46,7 @@ class AbstractObject:
 	def hasAttr(self, key):
 		try:
 			self.getAttr(key)
-		except AAttributeNotFound as ex:
-			ex.check(key)
+		except AAttributeNotFound:
 			return False
 		else:
 			return True

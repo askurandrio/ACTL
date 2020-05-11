@@ -8,8 +8,8 @@ from actl.objects.object.ClassObject import ClassObject
 def getAttr(self, key):
 	try:
 		return self.getSpecialAttr(key)
-	except AAttributeIsNotSpecial as ex:
-		ex.check(key)
+	except AAttributeIsNotSpecial:
+		pass
 
 	attr = self.findAttr(key)
 	return loadPropIfNeed(self, attr)

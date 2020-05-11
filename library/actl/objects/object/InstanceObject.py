@@ -11,8 +11,7 @@ class InstanceObject(AbstractObject):
 		for parent in parents:
 			try:
 				prop = parent.getAttr('__self__').getItem(key)
-			except AKeyNotFound as ex:
-				ex.check(key)
+			except AKeyNotFound:
 				continue
 			if bind:
 				prop = loadPropIfNeed(self, prop)
@@ -31,6 +30,5 @@ class InstanceObject(AbstractObject):
 			pass
 		try:
 			return self.super_(self.class_, key, bind=False)
-		except AAttributeNotFound as superEx:
-			superEx.check(key)
+		except AAttributeNotFound:
 			raise ex

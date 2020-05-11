@@ -40,8 +40,8 @@ def _(self, *args):
 def _(self, key):
 	try:
 		return self.super_(PyToA, '__getAttr__').call(key)
-	except AAttributeNotFound as ex:
-		ex.check(key)
+	except AAttributeNotFound:
+		pass
 
 	if isinstance(key, str):
 		try:

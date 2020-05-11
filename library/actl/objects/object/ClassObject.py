@@ -25,8 +25,7 @@ class ClassObject(AbstractObject):
 		for parent in parents:
 			try:
 				prop = parent.findAttr(key)
-			except AAttributeNotFound as ex:
-				ex.check(key)
+			except AAttributeNotFound:
 				continue
 			if bind:
 				prop = loadPropIfNeed(self, prop)
@@ -40,6 +39,5 @@ class ClassObject(AbstractObject):
 			ex = AAttributeNotFound(key=key)
 		try:
 			return self.super_(self, key, bind=False)
-		except AAttributeNotFound as superEx:
-			superEx.check(key)
+		except AAttributeNotFound:
 			raise ex
