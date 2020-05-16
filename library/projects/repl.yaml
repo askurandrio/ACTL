@@ -17,14 +17,14 @@
       import traceback
       from actl import Project
 
-      while True:
+      this['_build'] = True
+
+      while this['_build']:
          try:
             this['std', 'build']()
-            break
          except Exception:
             traceback.print_exc()
-            #pdb.post_mortem()
-            break
+            pdb.post_mortem()
 
 
 - py-key:
@@ -43,10 +43,15 @@
             else:
                msg = '>>> '
             try:
-               yield from input(msg)
+               res = input(msg)
+               if res == ':break':
+                  this['_build'] = False
+                  break
+               yield from res
                print('')
                yield '\n'
             except EOFError:
+               this['_build'] = False
                break
 
       return getInput()
