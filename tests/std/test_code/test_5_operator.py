@@ -2,7 +2,7 @@ from actl import opcodes
 from actl.objects import String
 
 
-def test_callOperator(execute):
+def test_pointOperator(execute):
 	execute('print.__call__')
 
 	assert execute.parsed.code == [

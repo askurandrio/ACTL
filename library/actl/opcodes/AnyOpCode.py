@@ -34,14 +34,18 @@ class DynamicOpCode(AnyOpCode):
 
 	def __init__(self, *args, **kwargs):
 		args = dict(zip(self.__slots__, args))
-		assert not (set(args) & set(kwargs)), \
-			f'This attributes already declared: {set(args) & set(kwargs)}'
+
+		diff = set(args) & set(kwargs)
+		assert not diff, f'These attributes have multiply declaration: {diff}'
 
 		kwargs = {
 			**self._defaults,
 			**args,
 			**kwargs
 		}
+
+		diff = set(self.__slots__) - set(kwargs)
+		assert not diff, f'These attributes not declared: {diff}'
 
 		for key, value in kwargs.items():
 			setattr(self, key, value)
