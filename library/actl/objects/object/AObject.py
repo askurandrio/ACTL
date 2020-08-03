@@ -117,12 +117,7 @@ class AObject:
 			pass
 
 		if self._head.get('__isClass__'):
-			for parent in self._head['__parents__']:
-				try:
-					return parent.findAttr(key)
-				except AAttributeNotFound:
-					pass
-			raise AAttributeNotFound(key=key)
+			return self.super_(self, key, bind=False)
 
 		self_ = self.getAttr('__class__').getAttr('__self__')
 		try:
