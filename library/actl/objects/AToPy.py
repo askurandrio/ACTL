@@ -1,10 +1,10 @@
 from actl.objects.String import String
-from actl.objects.object import AbstractObject
+from actl.objects.object import Object
 
 
 class _MetaAToPy(type):
 	def __call__(self, value):
-		if not isinstance(value, AbstractObject):
+		if not isinstance(value, type(Object)):
 			return value
 
 		if value.hasAttr(AToPy):

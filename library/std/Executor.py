@@ -1,5 +1,5 @@
 from actl import opcodes, objects
-from actl.objects import While, Bool, If, Function, AToPy
+from actl.objects import While, Bool, If, Function, AToPy, Object
 
 
 class Executor:
@@ -56,9 +56,9 @@ class _CallFrame:
 		self.returnVar = returnVar
 
 
-@Executor.addHandler(objects.InstanceObject)  # TODO: Rework this
+@Executor.addHandler(type(Object))
 def _(executor, opcode):
-	parents = list(opcode.class_.parents)
+	parents = list(opcode.getAttr('__class__').getAttr('__parents__'))
 	while parents[0] not in Executor.HANDLERS:
 		parents.pop(0)
 
@@ -85,7 +85,7 @@ def _(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
-	if Function in function.class_.parents:
+	if Function in function.getAttr('__class__').getAttr('__parents__'):
 		return _executeFunction(executor, opcode)
 
 	assert opcode.typeb == '('

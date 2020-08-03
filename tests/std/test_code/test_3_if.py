@@ -7,7 +7,7 @@ def test_if(execute):
 	execute('if 1: a = 2')
 
 	if_ = execute.parsed.code.one()
-	assert if_.class_ is If
+	assert if_.getAttr('__class__') is If
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
@@ -29,7 +29,7 @@ def test_ifFalse(execute):
 	execute('if 0: a = 1')
 
 	if_ = execute.parsed.code.one()
-	assert if_.class_ is If
+	assert if_.getAttr('__class__') is If
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
@@ -51,7 +51,7 @@ def test_ifElif(execute):
 	execute('if 0: a = 1 elif 1: a = 2')
 
 	if_ = execute.parsed.code.one()
-	assert if_.class_ is If
+	assert if_.getAttr('__class__') is If
 	assert if_.getAttr('conditions') == (
 		(
 			(
@@ -89,7 +89,7 @@ def test_ifElse(execute):
 	execute('if 0: a = 1 else: a = 2')
 
 	if_ = execute.parsed.code.one()
-	assert if_.class_ is If
+	assert if_.getAttr('__class__') is If
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
@@ -116,7 +116,7 @@ def test_ifElifElseWithFullCodeBlock(execute):
 	execute('if 0:\n a = 1\nelif 0:\n a = 2\nelse:\n a = 3')
 
 	if_ = execute.parsed.code.one()
-	assert if_.class_ is If
+	assert if_.getAttr('__class__') is If
 	assert if_.getAttr('conditions') == (
 		(
 			(

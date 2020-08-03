@@ -7,7 +7,7 @@ While = objects.BuildClass('While', objects.While)
 
 @While.addMethod('__useCodeBlock__')
 def _(self, parser):
-	newSelf = self.class_.call(self.getAttr('conditionFrame'), tuple(parser))
+	newSelf = self.getAttr('__class__').call(self.getAttr('conditionFrame'), tuple(parser))
 	return newSelf
 
 

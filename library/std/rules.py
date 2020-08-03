@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 
-from actl.objects import String, Number, AbstractObject
+from actl.objects import String, Number, Object
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer, \
 	Template, BufferRule
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR
@@ -12,7 +12,7 @@ def _hasAttr(attr):
 	def rule(parser, token):
 		scope = parser.scope
 
-		if not isinstance(token, AbstractObject):
+		if not isinstance(token, type(Object)):
 			if not ((VARIABLE == token) and (token.name in scope)):
 				return None
 			token = scope[token.name]

@@ -1,11 +1,10 @@
 # pylint: disable=arguments-differ, useless-super-delegation
-from actl.objects.object.ClassObject import ClassObject
 from actl.objects.object.exceptions import AKeyNotFound, AAttributeNotFound
-from actl.objects.object.InstanceObject import InstanceObject
+from actl.objects.object.AObject import AObject
 
 
-class NativeObject(InstanceObject):
-	aCls = ClassObject({'__name__': '_NativeObject'})
+class NativeObject(AObject):
+	aCls = AObject({'__name__': '_NativeObject'})
 
 	def __init__(self, aAttributes, pyAttibutes):
 		for key, value in pyAttibutes.items():
@@ -47,6 +46,7 @@ def nativeFunc(name):
 		def asStr():
 			return f'nativeFunc<{name}>'
 
+		func.__name__ = asStr()
 		return NativeObject({}, {'call': func, 'asStr': asStr})
 
 	return decorator

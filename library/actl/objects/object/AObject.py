@@ -1,28 +1,34 @@
 import sys
 
-from actl.objects.object.exceptions import AAttributeNotFound, AAttributeIsNotSpecial
+from actl.objects.object.utils import loadPropIfNeed
+from actl.objects.object.exceptions import AAttributeNotFound, AAttributeIsNotSpecial, AKeyNotFound
 
 
 sys.setrecursionlimit(500)
 _default = object()
 
 
-class AbstractObject:
+class AObject:
 	_specialAttrs = {
-		'__class__': 'class_',
-		'__getAttr__': '_getAttr'
+		'__class__': '_class',
+		'__getAttr__': '_getAttr',
+		'__self__': '_self',
 	}
 
 	def __init__(self, head):
 		self._head = head
 
 	@property
-	def class_(self):
+	def _class(self):
 		return self._head['__class__']
 
 	@property
 	def _getAttr(self):
 		return self.findAttr('__getAttr__').get(self)
+
+	@property
+	def _self(self):
+		return self._head['__self__']
 
 	def getAttr(self, key):
 		try:
@@ -78,8 +84,58 @@ class AbstractObject:
 
 		return getattr(self, propertyName)
 
+	def super_(self, for_, key, bind=True):
+		isClass = self._head.get('__isClass__')
+		if isClass:
+			parents = self._head['__parents__']
+		else:
+			parents = self.getAttr('__class__').getAttr('__parents__')
+
+		if for_ in parents:
+			parents = parents[parents.index(for_) + 1:]
+
+		for parent in parents:
+			if isClass:
+				try:
+					prop = parent.findAttr(key)
+				except AAttributeNotFound:
+					continue
+			else:
+				try:
+					prop = parent.getAttr('__self__').getItem(key)
+				except AKeyNotFound:
+					continue
+			if bind:
+				prop = loadPropIfNeed(self, prop)
+			return prop
+		raise AAttributeNotFound(key)
+
+	def findAttr(self, key):
+		try:
+			return self._head[key]
+		except KeyError:
+			pass
+
+		if self._head.get('__isClass__'):
+			for parent in self._head['__parents__']:
+				try:
+					return parent.findAttr(key)
+				except AAttributeNotFound:
+					pass
+			raise AAttributeNotFound(key=key)
+
+		self_ = self.getAttr('__class__').getAttr('__self__')
+		try:
+			return self_.getItem(key)
+		except AKeyNotFound:
+			pass
+		try:
+			return self.super_(self.getAttr('__class__'), key, bind=False)
+		except AAttributeNotFound:
+			raise AAttributeNotFound(key=key)
+
 	def __eq__(self, other):
-		if not isinstance(other, AbstractObject):
+		if not isinstance(other, AObject):
 			return False
 		return self._head == other._head
 
@@ -93,21 +149,21 @@ class AbstractObject:
 		def toStr():
 			from actl.objects.AToPy import AToPy  # pylint: disable=cyclic-import, import-outside-toplevel
 
-			if id(self) in AbstractObject._stack:
+			if id(self) in AObject._stack:
 				return '{...}'
-			AbstractObject._stack.add(id(self))
+			AObject._stack.add(id(self))
 
 			pyView = AToPy(self)
 			asStr = str(pyView)
 			return asStr
 
-		if hasattr(AbstractObject, '_stack'):
+		if hasattr(AObject, '_stack'):
 			return toStr()
 
-		AbstractObject._stack = set()
+		AObject._stack = set()
 		try:
 			asStr = toStr()
 		finally:
-			del AbstractObject._stack
+			del AObject._stack
 
 		return asStr

@@ -1,12 +1,14 @@
-from actl.objects.object import Object, ClassObject, nativeMethod, nativeDict
+from actl.objects.object import Object, nativeMethod, nativeDict
 
 
-class BuildClass(ClassObject):
+class BuildClass(type(Object)):
 	def __init__(self, name, *parents):
-		super().__init__({})
-		self.setAttr('__name__', name)
-		self.setAttr('__parents__', parents + (Object,))
-		self.setAttr('__self__', nativeDict({}))
+		super().__init__({
+			'__name__': name,
+			'__parents__': parents + (Object,),
+			'__isClass__': True,
+			'__self__': nativeDict({})
+		})
 
 	def addMethod(self, attr):
 		def decorator(func):

@@ -15,7 +15,7 @@ def clsAsStr(self):
 
 
 def selfAsStr(self):
-	name = self.class_.getAttr('__name__')
+	name = self.getAttr('__class__').getAttr('__name__')
 	head = self._head  # pylint: disable=protected-access
 	head = {key: value for key, value in head.items() if key != '__class__'}
 	return String.call(f'{name}<{head}>')
