@@ -24,7 +24,8 @@
             this['std', 'build']()
          except Exception:
             traceback.print_exc()
-            pdb.post_mortem()
+            if '_debug' in this['scope']:
+               pdb.post_mortem()
 
 
 - py-key:
