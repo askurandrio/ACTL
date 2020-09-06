@@ -2,7 +2,7 @@
 
 from actl.objects import String, Number, Object
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer, \
-	Template, BufferRule
+	Template, BufferRule, Parsed
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR
 
 RULES = SyntaxRules()
@@ -187,6 +187,20 @@ def _(first, token, attribute, parser):
 		CALL_OPERATOR(
 			dst=dst.name, first=first.name, operator=token, second=attributeVar.name
 		)
+	)
+
+	return [dst]
+
+
+@RULES.add(
+	IsInstance(VARIABLE), Token(' '), Token('+'), Token(' '), Parsed(IsInstance(VARIABLE)),
+	useParser=True
+)
+def _(first, _, token, _1, second, parser):
+	dst = VARIABLE.temp()
+
+	parser.define(
+		CALL_OPERATOR(dst=dst.name, first=first.name, operator=token, second=second.name)
 	)
 
 	return [dst]

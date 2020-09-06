@@ -171,6 +171,18 @@ class Frame(AbstractTemplate):
 		return tuple(res)
 
 
+class Parsed(AbstractTemplate):
+	__slots__ = ('rule',)
+
+	def __init__(self, *templates):
+		super().__init__(Template(*templates))
+
+	def __call__(self, parser, buff):
+		line = parser.subParser(buff).parseLine()
+		buff.appFront(*line)
+		return self.rule(parser, buff)
+
+
 def Token(token):
 	def rule(_, val):
 		return token == val

@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 
 class Buffer:
-	def __init__(self, head=''):
+	def __init__(self, head=()):
 		self._buff = []
 		self._head = iter(head)
 

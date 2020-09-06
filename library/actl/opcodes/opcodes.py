@@ -20,8 +20,8 @@ class VARIABLE(DynamicOpCode):
 
 	@classmethod
 	def temp(cls):
-		t = cls.counter()
-		return cls(f'__IV{t}')
+		num = cls.counter()
+		return cls(f'__IV{num}')
 
 
 SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')

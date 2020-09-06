@@ -105,8 +105,9 @@ def _(executor, opcode):
 @Executor.addHandler(opcodes.CALL_OPERATOR)
 def _(executor, opcode):
 	first = executor.scope[opcode.first]
-	assert opcode.operator == '.'
 	second = executor.scope[opcode.second]
+
+	assert opcode.operator == '.'
 	executor.scope[opcode.dst] = first.getAttr(str(AToPy(second)))
 
 
