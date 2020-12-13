@@ -21,7 +21,7 @@ def test_add(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function=Number.call, args=['1']),
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV13', function=Number.call, args=['2']),
-		opcodes.CALL_OPERATOR(dst='__IV14', first='__IV11', operator='+', second='__IV13'),
-		opcodes.VARIABLE(name='__IV14')
+		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=Number.call, args=['2']),
+		opcodes.CALL_OPERATOR(dst='__IV13', first='__IV11', operator='+', second='__IV12'),
+		opcodes.VARIABLE(name='__IV13')
 	]

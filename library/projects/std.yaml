@@ -103,7 +103,7 @@
    name: executor
    code: |
       import std
-      from actl import Buffer
+      from actl.Buffer import Buffer
 
       this['code'] = this['parser']
       return std.Executor(this['code'], this['scope'])

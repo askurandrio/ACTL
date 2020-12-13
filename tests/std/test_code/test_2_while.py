@@ -5,13 +5,13 @@ from actl.objects import PyToA, AToPy, Number
 from std.objects import While
 
 
-def test_while(execute):
+def test_simple_while(execute):
 	def cond_():
 		called, cond_.called = cond_.called, True
 		return not called
 
-	cond_.called = False
-	cond = Mock(side_effect=cond_)
+	condIt = iter((True, False))
+	cond = Mock(side_effect=lambda: next(condIt))
 	print_ = Mock()
 	execute.scope['cond'] = PyToA.call(cond)
 	execute.scope['print'] = PyToA.call(print_)

@@ -1,4 +1,5 @@
-from actl import Buffer, opcodes
+from actl import opcodes
+from actl.Buffer import Buffer
 from actl.objects import AToPy, Number
 from std.objects import If
 

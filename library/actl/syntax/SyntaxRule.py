@@ -24,7 +24,7 @@ class SyntaxRule:
 			}
 
 		if self._manualApply:
-			inp.appFront(*res)
+			inp.insert(0, res)
 			kwargs = {
 				**kwargs,
 				'inp': inp

@@ -1,6 +1,6 @@
 from actl import objects
-from actl.syntax import SyntaxRule, Value, Token, Buffer, Or, End, Frame
-
+from actl.Buffer import Buffer
+from actl.syntax import SyntaxRule, Value, Token, Or, End, Frame, CustomTemplate
 
 While = objects.BuildClass('While', objects.While)
 
@@ -15,8 +15,8 @@ def _(self, parser):
 @SyntaxRule.wrap(
 	Value(While),
 	Token(' '),
-	Frame(Token(':')).asArg('conditionFrame'),
-	Or((End,), (Token(':'),)).asArg('end')
+	CustomTemplate.asArg(Frame(Token(':')), 'conditionFrame'),
+	CustomTemplate.asArg(Or((End,), (Token(':'),)), 'end')
 )
 def _(_, _1, conditionFrame, end):
 	res = Buffer.of(While.call(conditionFrame))

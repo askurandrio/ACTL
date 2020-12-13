@@ -1,6 +1,7 @@
 import pytest
 
-from actl import Buffer, opcodes, Project
+from actl.Buffer import Buffer
+from actl import opcodes, Project
 from std import Executor
 
 

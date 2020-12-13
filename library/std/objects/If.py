@@ -1,4 +1,5 @@
-from actl import objects, Buffer
+from actl import objects
+from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
 from std.rules import UseCodeBlock
 
@@ -48,8 +49,9 @@ class IfSyntax:
 			return tuple(code)
 
 		def parseLine():
-			line = self._parser.subParser(self._inp, self._ELIF_OR_ELSE_OR_ENDLINE).parseLine()
-			self._inp.appFront(*line)
+			self._parser.subParser(self._inp, self._ELIF_OR_ELSE_OR_ENDLINE).parseLine()
+			line = BufferRule(self._parser, self._inp).popUntil(self._ELIF_OR_ELSE_OR_ENDLINE)
+			self._inp.insert(0, line)
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
 		parseLine()
@@ -70,7 +72,8 @@ class IfSyntax:
 
 	def _getFromInlineCodeBlock(self):
 		def popCodeBlock():
-			codeBlock = self._parser.subParser(self._inp, self._INLINE_IF_END).parseLine()
+			self._parser.subParser(self._inp, self._INLINE_IF_END).parseLine()
+			codeBlock = BufferRule(self._parser, self._inp).popUntil(self._INLINE_IF_END)
 			return tuple(codeBlock)
 
 		self._inp.pop()
@@ -91,7 +94,8 @@ class IfSyntax:
 			self._inp.pop()
 			self._inp.pop()
 
-			elseCode = tuple(self._parser.subParser(self._inp, Token('\n')).parseLine())
+			self._parser.subParser(self._inp, Token('\n')).parseLine()
+			elseCode = tuple(BufferRule(self._parser, self._inp).popUntil(Token('\n')))
 		else:
 			elseCode = None
 

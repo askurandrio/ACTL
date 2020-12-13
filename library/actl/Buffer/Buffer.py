@@ -1,11 +1,14 @@
 import itertools
-from contextlib import contextmanager
 
 
 class Buffer:
 	def __init__(self, head=()):
 		self._buff = []
 		self._head = iter(head)
+
+	@property
+	def origin(self):
+		return self
 
 	def watch(self, func):
 		def watch(elem):
@@ -22,8 +25,9 @@ class Buffer:
 		self._load(index)
 		return self._buff.pop(index)
 
-	def appFront(self, *items):
-		self._buff = list(items) + self._buff
+	def insert(self, index, items):
+		self._load(index)
+		self._buff[index:index] = list(items)
 
 	def append(self, *items):  # pylint: disable=no-self-use
 		self += items
@@ -33,31 +37,12 @@ class Buffer:
 		self._load(len(tmpl))
 		return self._buff[:len(tmpl)] == tmpl
 
-	@contextmanager
-	def transaction(self):
-		def gen(head):
-			for elem in head:
-				backup.append(elem)
-				yield elem
-
-		backup = list(self._buff)
-		prevHead, self._head = self._head, gen(self._head)
-		tx = _Transaction()
-
-		yield tx
-
-		self._head = prevHead
-		if tx.isCommited:
-			return
-
-		self._buff = backup
-
 	def _load(self, quantity):
 		if isinstance(quantity, slice):
 			quantity = quantity.stop
+
 		if (quantity is None) or (quantity < 0):
 			self._buff.extend(self._head)
-			return
 
 		quantity = (quantity + 1) - len(self._buff)
 		for _ in range(quantity):
@@ -70,8 +55,17 @@ class Buffer:
 		return list(self) == list(other)
 
 	def __getitem__(self, index):
-		self._load(index)
-		return self._buff[index]
+		if not isinstance(index, slice):
+			self._load(index)
+			return self._buff[index]
+
+		def gen():
+			for elem in self._head:
+				self._buff.append(elem)
+				yield elem
+
+		res = itertools.chain(iter(self._buff), gen())
+		return Buffer(itertools.islice(res, index.start, index.stop, index.step))
 
 	def __delitem__(self, index):
 		self._load(index)
@@ -98,12 +92,15 @@ class Buffer:
 		self._load(0)
 		return bool(self._buff)
 
-	def __repr__(self):
+	def reprElements(self):
 		self._load(10)
-		res = str(self._buff[:10])
+		elementsAsStr = str(self._buff[:10])
 		if len(self._buff) == 11:
-			res = res[:-1] + ', ...]'
-		return f'{type(self).__name__}({res})'
+			elementsAsStr = elementsAsStr[:-1] + ', ...]'
+		return elementsAsStr
+
+	def __repr__(self):
+		return f'{type(self).__name__}({self.reprElements()})'
 
 	@classmethod
 	def of(cls, *it):

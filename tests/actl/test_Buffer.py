@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from actl import Buffer
+from actl.Buffer import Buffer
 
 
 def test_watch():

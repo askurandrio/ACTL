@@ -1,43 +1,54 @@
 # pylint: disable=redefined-outer-name
 
-import os
-import subprocess
+import sys
+from multiprocessing import Queue, Process
 
 import json
 import pytest
 
-import actl
+from actl.run import main, buildArgParser
 
 
-@pytest.fixture
-def run():
-	root = os.path.dirname(os.path.dirname(actl.__path__[0]))
-	actlBinPath = os.path.join(root, 'actl')
+class _WriteIoQueue:
+	def __init__(self):
+		self._queue = Queue()
 
-	def run_(args, inp=None):
-		if inp is not None:
-			inp = inp.encode()
-		print(' '.join((actlBinPath, *args)))
-		process = subprocess.run(
-			(actlBinPath, *args),
-			input=inp,
-			stdout=subprocess.PIPE,
-			check=True
-		)
-		return process.stdout.decode().split('\n')
+	def write(self, content):
+		self._queue.put(content)
 
-	return run_
+	def get(self):
+		return self._queue.get(timeout=5)
 
 
-def test_simpleRepl(run):
-	assert run(()) == ['>>> ']
+class _ReadIoQueue:
+	def __init__(self):
+		self._queue = Queue()
+
+	def put(self, line):
+		self._queue.put(line)
+
+	def readline(self):
+		line = self._queue.get(timeout=5)
+		if line == ':Ctrl^D':
+			raise EOFError(line)
+		return line
 
 
-def test_expliciSetProjectF(run):
-	assert run(('--projectf', 'repl')) == ['>>> ']
+def test_simpleRepl(run, stdin, stdout):
+	run()
+
+	stdin.put(':Ctrl^D')
+	assert stdout.get() == '>>> '
 
 
-def test_setExtraSource(run):
+def test_expliciSetProjectF(run, stdin, stdout):
+	run('--projectf', 'repl')
+
+	stdin.put(':Ctrl^D')
+	assert stdout.get() == '>>> '
+
+
+def test_setExtraSource(run, stdin, stdout):
 	extraSource = [
 		{
 			'py-key': {
@@ -54,4 +65,47 @@ def test_setExtraSource(run):
 		}
 	]
 
-	assert run(('--source', json.dumps(extraSource)), 'print(1)') == ['>>> ', 'mocked: 1', '>>> ']
+	run('--source', json.dumps(extraSource))
+
+	assert stdout.get() == '>>> '
+	stdin.put('print(1)')
+	assert stdout.get() == ''
+	assert stdout.get() == '\n'
+	assert stdout.get() == '>>> '
+	stdin.put(':Ctrl^D')
+	assert stdout.get() == 'mocked: 1'
+
+
+@pytest.fixture
+def run(stdin, stdout):
+	def _target(args, stdin, stdout):
+		sys.stdin = stdin
+		sys.stdout = stdout
+		args = buildArgParser().parse_args(args)
+		main(args)
+
+	process = None
+
+	def run_(*args):
+		nonlocal process
+		process = Process(target=_target, args=(args, stdin, stdout))
+		process.start()
+
+	yield run_
+
+	process.join(timeout=5)
+	try:
+		assert not process.is_alive()
+	except AssertionError:
+		process.terminate()
+		raise
+
+
+@pytest.fixture
+def stdin():
+	return _ReadIoQueue()
+
+
+@pytest.fixture
+def stdout():
+	return _WriteIoQueue()

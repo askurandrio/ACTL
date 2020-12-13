@@ -18,21 +18,25 @@
       from actl import Project
 
       this['_build'] = True
+      this['_catchEx'] = False
 
       while this['_build']:
          try:
             this['std', 'build']()
          except Exception:
-            traceback.print_exc()
             if '_debug' in this['scope']:
                pdb.post_mortem()
+            if this['_catchEx']:
+               traceback.print_exc()
+            else:
+               raise
 
 
 - py-key:
    name: uinput
    code: |
       import traceback
-      from actl import Buffer
+      from actl.Buffer import Buffer
 
       @Buffer.wrap
       def getInput():

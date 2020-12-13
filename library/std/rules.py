@@ -1,7 +1,7 @@
 # pylint: disable=no-member
-
+from actl.Buffer import LTransactionBuffer, Buffer
 from actl.objects import String, Number, Object
-from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Buffer, \
+from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, \
 	Template, BufferRule, Parsed
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR
 
@@ -22,16 +22,15 @@ def _hasAttr(attr):
 	return CustomTemplate.createToken(rule, f'_hasAttr({attr})')
 
 
-def _runtimeRule(parser, inp):
-	with inp.transaction():
-		if not _hasAttr('__syntaxRule__')(parser, inp):
-			return None
+def _applySyntaxObjectsRule(parser, inp):
+	if not _hasAttr('__syntaxRule__')(parser, LTransactionBuffer(inp)):
+		return None
 
 	syntaxRule = parser.scope[inp[0].name].getAttr('__syntaxRule__')
 	return syntaxRule(parser, inp)
 
 
-RULES.rawAdd(_runtimeRule)
+RULES.rawAdd(_applySyntaxObjectsRule)
 
 
 @CustomTemplate.createToken
@@ -63,7 +62,8 @@ def _(inp, parser):
 	dst = inpRule.pop(IsInstance(VARIABLE)).one().name
 	inpRule.pop(Token(' '), Token('='), Token(' '))
 
-	parsed = parser.subParser(inp).parseLine()
+	parser.subParser(inp).parseLine()
+	parsed = BufferRule(parser, inp).popUntil(parser.endLine)
 
 	src = BufferRule(parser, Buffer.of(parsed.pop(-1))).pop(IsInstance(VARIABLE)).one().name
 
@@ -129,7 +129,7 @@ class UseCodeBlock:
 	def popCodeBlock(cls, parser, inp):
 		if cls.isFullCodeBlock(parser, inp):
 			return cls.parseFullCodeBlock(parser, inp)
-		return cls._parseInlineCodeBlock(parser, inp)
+		return cls._parseLineCodeBlock(parser, inp)
 
 	@classmethod
 	def parseFullCodeBlock(cls, parser, inp):
@@ -146,7 +146,7 @@ class UseCodeBlock:
 				code.append(inp.pop())
 
 		if code[-1] == '\n':
-			inp.appFront(code.pop(-1))
+			inp.insert(0, (code.pop(-1),))
 
 		return parser.subParser(code)
 
@@ -158,14 +158,14 @@ class UseCodeBlock:
 		return Template(*map(Token, indent))
 
 	@staticmethod
-	def _parseInlineCodeBlock(parser, inp):
+	def _parseLineCodeBlock(parser, inp):
 		while inp[0] == ' ':
 			inp.pop()
 
 		code = Buffer()
 
 		while inp and (inp[0] != '\n'):
-			code.append(inp.pop(0))
+			code.append(inp.pop())
 
 		return parser.subParser(code)
 

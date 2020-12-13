@@ -2,7 +2,8 @@
 
 import pytest
 
-from actl import Parser, Buffer, Scope
+from actl import Parser, Scope
+from actl.Buffer import Buffer
 from actl.opcodes import VARIABLE
 from actl.syntax import SyntaxRules, Token, Many, IsInstance, Or, Maybe, Value, \
 	SyntaxRule, CustomTemplate

@@ -1,6 +1,7 @@
-from actl import objects, Buffer
-from actl.opcodes import CALL_FUNCTION_STATIC
-from actl.syntax import SyntaxRule, Value, Token, VARIABLE, IsInstance, BufferRule
+from actl import objects
+from actl.Buffer import Buffer
+from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE
+from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule
 from std.rules import UseCodeBlock
 
 Function = objects.BuildClass('Function', objects.Function)
