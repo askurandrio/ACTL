@@ -1,0 +1,10 @@
+while True:
+	input = readInput()
+	first, operator, second = input.split(' ')
+	first = Float(first)
+	second = Float(second)
+	if operator == '+':
+		result = first + second
+	elif operator == '-'
+		result = first - second
+	print(result)
