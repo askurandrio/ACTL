@@ -6,7 +6,8 @@ from multiprocessing import Queue, Process
 import json
 import pytest
 
-from actl.run import main, buildArgParser
+import actl
+from actl.run import main, parseArgs
 
 
 class _WriteIoQueue:
@@ -42,7 +43,7 @@ def test_simpleRepl(run, stdin, stdout):
 
 
 def test_expliciSetProjectF(run, stdin, stdout):
-	run('--projectf', 'repl')
+	run('--projectF', 'repl')
 
 	stdin.put(':Ctrl^D')
 	assert stdout.get() == '>>> '
@@ -51,16 +52,10 @@ def test_expliciSetProjectF(run, stdin, stdout):
 def test_setExtraSource(run, stdin, stdout):
 	extraSource = [
 		{
-			'py-key': {
-				'name': 'scope',
-				'code': '''
-				import actl
-
-				scope = this['std', 'scope']
-				scope['print'] = actl.objects.PyToA.call(lambda inp: print(f'mocked: {inp}'))
-				
-				return scope
-				'''
+			'py-externalKey': {
+				'from': 'tests.actl.test_run',
+				'import': 'getTestScope',
+				'name': 'scope'
 			}
 		}
 	]
@@ -81,8 +76,7 @@ def run(stdin, stdout):
 	def _target(args, stdin, stdout):
 		sys.stdin = stdin
 		sys.stdout = stdout
-		args = buildArgParser().parse_args(args)
-		main(args)
+		main(**parseArgs(args))
 
 	process = None
 
@@ -109,3 +103,9 @@ def stdin():
 @pytest.fixture
 def stdout():
 	return _WriteIoQueue()
+
+
+def getTestScope(project):
+	scope = project.this['std', 'scope']
+	scope['print'] = actl.objects.PyToA.call(lambda inp: print(f'mocked: {inp}'))
+	return scope

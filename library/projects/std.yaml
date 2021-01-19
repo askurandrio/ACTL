@@ -1,115 +1,40 @@
-- py-code: |
-   from actl.Project import Lazy
-
-   def pyFunc(project, data):
-      data = type(project)(source=data).data
-      name = data['name']
-      args = ', '.join(data.get('args', ()))
-      code = data['code'].replace('\n', '\n  ')
-      code = (
-         f"def {name}({args}):\n"
-         f"  {code}"
-      )
-      lcScope = {}
-      exec(code, globals(), lcScope)
-      project[name] = lcScope[name]
-
-   def pyKey(project, data):
-      data = type(project)(source=data).data
-      name = data['name']
-      code = data['code'].replace('\n', '\n  ')
-      code = (
-        f"def {name}():\n"
-        f"  {code}"
-      )
-      lcScope = {}
-      exec(code, globals(), lcScope)
-      project[name] = Lazy(lcScope[name])
-
-   project['handlers', 'py-key'] = pyKey
-   project['handlers', 'py-func'] = pyFunc
+-  py-execExternalFunction:
+      from: projects.std
+      import: loadHandlerPyExternalKey
 
 
-- py-key:
-   name: rules
-   code: |
-      import std
-      return std.RULES
+-  py-externalKey:
+      from: std
+      import: RULES
+      name: rules
+      rawUse: true
 
 
-- py-key:
-   name: scope
-   code: |
-      import actl
-      import std
+-  py-externalKey:
+      from: projects.std
+      import: getScope
+      name: scope
 
 
-      def _getPyToAVars():
-         for varName in ('print',):
-            var = eval(varName)
-            yield varName, actl.objects.PyToA.call(var)
+-  py-externalKey:
+      from: projects.std
+      import: getInput
+      name: input
 
 
-      def _getACTLVars():
-         for varName, clsName in (
-            ('True', 'ATrue'),
-            ('False', 'AFalse'),
-            ('Bool', 'Bool'),
-            ('String', 'String'),
-            ('Number', 'Number'),
-            ('elif', 'elif_'),
-            ('else', 'else_'),
-            ('None', 'ANone'),
-            ('PyToA', 'PyToA')
-         ):
-            var = getattr(actl.objects, clsName)
-            yield varName, var
+-  py-externalKey:
+      from: projects.std
+      import: getParser
+      name: parser
 
 
-      def _getSTDVars():
-         for varName, clsName in (
-            ('if', 'If'),
-            ('while', 'While'),
-            ('def', 'Function')
-         ):
-            var = getattr(std.objects, clsName)
-            yield varName, var
+-  py-externalKey:
+      from: projects.std
+      import: getExecutor
+      name: executor
 
 
-      return actl.Scope({
-         **dict(_getPyToAVars()),
-         **dict(_getACTLVars()),
-         **dict(_getSTDVars())
-      })
-
-
-- py-key:
-   name: uinput
-   code: |
-      import actl
-
-      return actl.Buffer(char for line in open(this['mainf']) for char in line)
-
-
-- py-key:
-   name: parser
-   code: |
-      import actl
-
-      return actl.Parser(this['scope'], this['rules'], this['uinput'])
-
-
-- py-key:
-   name: executor
-   code: |
-      import std
-      from actl.Buffer import Buffer
-
-      this['code'] = this['parser']
-      return std.Executor(this['code'], this['scope'])
-
-
-- py-func:
-   name: build
-   code: |
-      this['executor'].execute()
+-  py-externalKey:
+      from: projects.std
+      import: getBuild
+      name: build

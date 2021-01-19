@@ -45,4 +45,4 @@ class _Execute:
 		return self.executed
 
 	def __call__(self, code):
-		self._project['uinput'] = Buffer(code)
+		self._project['input'] = Buffer(code)

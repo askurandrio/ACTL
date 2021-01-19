@@ -1,35 +1,66 @@
-import argparse
+import sys
 
 import json
 
 import actl
 
 
-def main(args):
-	if args.mainf:
-		projectf = args.projectf or 'std'
-		project = actl.Project(
-			projectf=projectf, source=({'include': projectf}, {'mainf': args.mainf})
-		)
-	elif args.projectf:
-		project = actl.Project(projectf=args.projectf)
+def main(projectF=None, mainF=None, source=None):
+	if projectF is not None:
+		project = actl.Project(projectF=projectF)
+		if mainF is not None:
+			project = actl.Project(source=(
+				{
+					'include': project
+				},
+				{
+					'setKey': {
+						'key': 'mainF',
+						'value': mainF
+					}
+				}
+			))
+	elif mainF is not None:
+		project = actl.Project(source=(
+				{
+					'include': 'std'
+				},
+				{
+					'setKey': {
+						'key': 'mainF',
+						'value': mainF
+					}
+				}
+			))
 	else:
-		project = actl.Project(projectf='repl')
+		project = actl.Project(projectF='repl')
 
-	if args.source:
-		extraSource = json.loads(args.source)
+	if source is not None:
+		extraSource = json.loads(source)
 		project.processSource(extraSource)
 
 	project['build']()
 
 
-def buildArgParser():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--projectf', help='Project file')
-	parser.add_argument('--mainf', help='Code file')
-	parser.add_argument('--source', help='Extra source')
-	return parser
+def parseArgs(argv=None):
+	if argv is None:
+		argv = sys.argv[1:]
+	else:
+		argv = list(argv)
+
+	args = {}
+	while argv and (argv[0] in ('--projectF', '--mainF', '--source')):
+		key = argv.pop(0)[2:]
+		value = argv.pop(0)
+		args[key] = value
+
+	if argv:
+		assert 'mainF' not in args
+		args['mainF'] = argv.pop(0)
+
+	assert not argv, argv
+	return args
 
 
 if __name__ == '__main__':
-	main(buildArgParser().parse_args())
+	main(**parseArgs())

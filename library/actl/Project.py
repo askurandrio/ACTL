@@ -13,21 +13,21 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Project:
 	_DEFAULT_HANDLERS = {}
 
-	def __init__(self, projectf=None, source=(), this=None):
-		self.data = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
+	def __init__(self, projectF=None, source=(), this=None):
+		self._head = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
 
 		if this is not None:
-			self.data = {**self.data, 'this': this}
+			self._head = {**self._head, 'this': this}
 
-		if projectf is not None:
-			self.data = {**self.data, 'projectf': projectf}
-			source = ({'include': projectf},) + tuple(source)
+		if projectF is not None:
+			self._head = {**self._head, 'projectF': projectF}
+			source = ({'include': projectF},) + tuple(source)
 
 		self.processSource(source)
 
 	@property
 	def this(self):
-		return self.data.get('this', self)
+		return self._head.get('this', self)
 
 	def processSource(self, source):
 		if isinstance(source, dict):
@@ -43,16 +43,20 @@ class Project:
 			else:
 				key, arg = cmd
 			handlers = self['handlers']
-			if key in handlers:
-				handlers[key](self, arg)
-			else:
-				self[key] = arg
+			handlers[key](self, arg)
+
+	def include(self, projectF):
+		filename = os.path.join(DIR_LIBRARY, 'projects', f'{projectF}.yaml')
+		source = yaml.load(open(filename), Loader=yaml.SafeLoader)
+		subProject = type(self)(source=source, this=self.this)
+		self[projectF] = subProject
+		_recursiveUpdate(self._head, subProject._head)
 
 	def __getitem__(self, keys):
 		if not isinstance(keys, tuple):
 			keys = (keys,)
 
-		res = self.data
+		res = self._head
 		for key in keys:
 			tmpRes = res[key]
 			if isinstance(tmpRes, Lazy):
@@ -65,7 +69,7 @@ class Project:
 	def __setitem__(self, keys, value):
 		if isinstance(keys, str):
 			keys = (keys,)
-		base = self.data
+		base = self._head
 		for key in keys[:-1]:
 			base = base[key]
 		base[keys[-1]] = value
@@ -78,10 +82,10 @@ class Project:
 		return decorator
 
 	def __repr__(self):
-		if 'projectf' in self.data:
-			head = 'projectf={!r}'.format(self.data['projectf'])
+		if 'projectF' in self._head:
+			head = 'projectF={!r}'.format(self._head['projectF'])
 		else:
-			head = f'source={self.data}'
+			head = f'source={self._head}'
 		return f'{type(self).__name__}({head})'
 
 
@@ -90,18 +94,20 @@ class Lazy:
 		self.evaluate = evaluate
 
 
-@Project.addDefaultHandler('include')
-def _(project, projectf):
-	filename = os.path.join(DIR_LIBRARY, 'projects', f'{projectf}.yaml')
-	source = yaml.load(open(filename), Loader=yaml.SafeLoader)
-	subProject = type(project)(source=source, this=project.this)
-	project[projectf] = subProject
-	_recursiveUpdate(project.data, subProject.data)
-
-
-@Project.addDefaultHandler('py-code')
+@Project.addDefaultHandler('setKey')
 def _(project, arg):
-	exec(arg, {'this': project.this, 'project': project}, None)  # pylint: disable=exec-used
+	project[arg['key']] = arg['value']
+
+
+@Project.addDefaultHandler('include')
+def _(project, projectF):
+	project.include(projectF)
+
+
+@Project.addDefaultHandler('py-execExternalFunction')
+def _(project, arg):
+	function = importFrom(arg)
+	function(project)
 
 
 def _recursiveUpdate(base, new):
@@ -111,3 +117,15 @@ def _recursiveUpdate(base, new):
 			_recursiveUpdate(base[key], value)
 		elif key not in base:
 			base[key] = value
+
+
+def importFrom(arg):
+	globalScope = {}
+	try:
+		from_ = arg['from']
+		import_ = arg['import']
+		exec(f'from {from_} import {import_}', globalScope)
+	except (KeyError, ImportError, AttributeError) as ex:
+		raise RuntimeError(f'Error during getting py-execExternalFunction: {arg}') from ex
+
+	return globalScope[import_]

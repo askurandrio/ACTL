@@ -1,62 +1,19 @@
-- include: std
+-  include: std
 
 
-- py-key:
-   name: parser
-   code: |
-      from std import Parser
-
-      uinput = this['uinput']
-      return Parser(this['scope'], this['rules'], uinput)
+-  py-externalKey:
+     from: projects.repl
+     import: getParser
+     name: parser
 
 
-- py-func:
-   name: build
-   code: |
-      import pdb
-      import traceback
-      from actl import Project
-
-      this['_build'] = True
-      this['_catchEx'] = False
-
-      while this['_build']:
-         try:
-            this['std', 'build']()
-         except Exception:
-            if '_debug' in this['scope']:
-               pdb.post_mortem()
-            if this['_catchEx']:
-               traceback.print_exc()
-            else:
-               raise
+-  py-externalKey:
+      from: projects.repl
+      import: getInput
+      name: input
 
 
-- py-key:
-   name: uinput
-   code: |
-      import traceback
-      from actl.Buffer import Buffer
-
-      @Buffer.wrap
-      def getInput():
-         parser = this['parser']
-
-         while True:
-            if parser.applyingRule:
-               msg = '... '
-            else:
-               msg = '>>> '
-            try:
-               res = input(msg)
-               if res == ':break':
-                  this['_build'] = False
-                  break
-               yield from res
-               print('')
-               yield '\n'
-            except EOFError:
-               this['_build'] = False
-               break
-
-      return getInput()
+-  py-externalKey:
+      from: projects.repl
+      import: getBuild
+      name: build
