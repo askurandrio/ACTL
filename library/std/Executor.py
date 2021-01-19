@@ -23,7 +23,11 @@ class Executor:
 				self.frames.append(iter(opcode))
 				continue
 
-			handler = self.HANDLERS[type(opcode)]
+			try:
+				handler = self.HANDLERS[type(opcode)]
+			except KeyError:
+				raise KeyError(f'Handler for "{opcode}" not found')
+
 			res = handler(self, opcode)
 			if isinstance(res, _Frame):
 				self.frames.append(iter(res))

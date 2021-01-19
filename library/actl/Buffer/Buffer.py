@@ -2,7 +2,9 @@ import itertools
 
 
 class Buffer:
-	def __init__(self, head=()):
+	_emptyIter = iter(())
+
+	def __init__(self, head=_emptyIter):
 		self._buff = []
 		self._head = iter(head)
 
@@ -26,7 +28,8 @@ class Buffer:
 		return self._buff.pop(index)
 
 	def insert(self, index, items):
-		self._load(index)
+		if index != 0:
+			self._load(index)
 		self._buff[index:index] = list(items)
 
 	def append(self, *items):  # pylint: disable=no-self-use
@@ -37,15 +40,26 @@ class Buffer:
 		self._load(len(tmpl))
 		return self._buff[:len(tmpl)] == tmpl
 
-	def _load(self, quantity):
-		if isinstance(quantity, slice):
-			quantity = quantity.stop
+	def loadAll(self):
+		self._buff.extend(self._head)
+		self._head = self._emptyIter
+		return self
 
-		if (quantity is None) or (quantity < 0):
-			self._buff.extend(self._head)
+	def _load(self, index):
+		if isinstance(index, slice):
+			index = index.stop
 
-		quantity = (quantity + 1) - len(self._buff)
-		for _ in range(quantity):
+		assert not (
+			(
+				(index is None) or (index < 0)
+			) and (
+				self._head is not self._emptyIter
+			)
+		), 'use .loadAll() if you want load index with undefined count to load'
+
+		index = (index + 1) - len(self._buff)
+
+		for _ in range(index):
 			try:
 				self._buff.append(next(self._head))
 			except StopIteration:

@@ -1,4 +1,5 @@
 import pdb
+import sys
 import traceback
 
 from actl.Buffer import Buffer
@@ -18,17 +19,15 @@ def getInput(project):
 				msg = '... '
 			else:
 				msg = '>>> '
-			try:
-				res = input(msg)
-				if res == ':break':
-					project.this['_build'] = False
-					break
-				yield from res
-				print('')
-				yield '\n'
-			except EOFError:
+
+			sys.stdout.write(msg)
+			sys.stdout.flush()
+			inp = sys.stdin.readline()
+			if not inp:
 				project.this['_build'] = False
 				break
+
+			yield from inp
 
 	return make()
 

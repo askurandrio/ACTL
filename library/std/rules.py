@@ -61,9 +61,8 @@ def _(inp, parser):
 	inpRule = BufferRule(parser, inp)
 	dst = inpRule.pop(IsInstance(VARIABLE)).one().name
 	inpRule.pop(Token(' '), Token('='), Token(' '))
-
 	parser.subParser(inp).parseLine()
-	parsed = BufferRule(parser, inp).popUntil(parser.endLine)
+	parsed = BufferRule(parser, inp).popUntil(parser.endLine).loadAll()
 
 	src = BufferRule(parser, Buffer.of(parsed.pop(-1))).pop(IsInstance(VARIABLE)).one().name
 
@@ -145,6 +144,7 @@ class UseCodeBlock:
 			if inp:
 				code.append(inp.pop())
 
+		code.loadAll()
 		if code[-1] == '\n':
 			inp.insert(0, (code.pop(-1),))
 
