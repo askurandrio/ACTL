@@ -39,7 +39,7 @@ def test_function(execute):
 	mock = Mock()
 	execute.scope['print'] = PyToA.call(mock)
 
-	execute('def f(): print()\nf()')
+	execute('fun f(): print()\nf()')
 
 	callStaticFunction, _, _1 = execute.parsed.code
 	assert callStaticFunction.dst == 'f'
@@ -55,7 +55,7 @@ def test_functionMultiLine(execute):
 	mock = Mock()
 	execute.scope['print'] = PyToA.call(mock)
 
-	execute('def f():\n a = 1\n print(a)\nf()')
+	execute('fun f():\n a = 1\n print(a)\nf()')
 
 	callStaticFunction, _, _1 = execute.parsed.code
 	assert callStaticFunction.dst == 'f'

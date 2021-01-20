@@ -39,7 +39,7 @@ def getScope(_):
 		('PyToA', 'objects.PyToA'),
 		('if', 'std.objects.If'),
 		('while', 'std.objects.While'),
-		('def', 'std.objects.Function')
+		('fun', 'std.objects.Function')
 	):
 		pyVar = eval(pyName)
 		var = objects.PyToA.call(pyVar)
