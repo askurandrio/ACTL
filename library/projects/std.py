@@ -24,25 +24,28 @@ def getRules(_):
 
 
 def getScope(_):
-	def _getPyToAVars():
-		for varName in ('print',):
-			var = eval(varName)
-			yield varName, objects.PyToA.call(var)
+	scope = {}
+	for varName, pyName in (
+		('print', 'print'),
+		('readInput', 'input'),
+		('True', 'objects.ATrue'),
+		('False', 'objects.AFalse'),
+		('Bool', 'objects.Bool'),
+		('String', 'objects.String'),
+		('Number', 'objects.Number'),
+		('elif', 'objects.elif_'),
+		('else', 'objects.else_'),
+		('None', 'objects.ANone'),
+		('PyToA', 'objects.PyToA'),
+		('if', 'std.objects.If'),
+		('while', 'std.objects.While'),
+		('def', 'std.objects.Function')
+	):
+		pyVar = eval(pyName)
+		var = objects.PyToA.call(pyVar)
+		scope[varName] = var
 
-	def _getACTLVars():
-		for varName, clsName in (
-			('True', 'ATrue'), ('False', 'AFalse'), ('Bool', 'Bool'), ('String', 'String'),
-			('Number', 'Number'), ('elif', 'elif_'), ('else', 'else_'), ('None', 'ANone'),
-			('PyToA', 'PyToA')):
-			var = getattr(objects, clsName)
-			yield varName, var
-
-	def _getSTDVars():
-		for varName, clsName in (('if', 'If'), ('while', 'While'), ('def', 'Function')):
-			var = getattr(std.objects, clsName)
-			yield varName, var
-
-	return Scope({**dict(_getPyToAVars()), **dict(_getACTLVars()), **dict(_getSTDVars())})
+	return Scope(scope)
 
 
 def getInput(project):
@@ -60,8 +63,7 @@ def getParser(project):
 
 
 def getExecutor(project):
-	project.this['code'] = project.this['parser']
-	return std.Executor(project.this['code'], project.this['scope'])
+	return std.Executor(project.this['parser'], project.this['scope'])
 
 
 def getBuild(project):

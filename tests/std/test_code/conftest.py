@@ -40,7 +40,8 @@ class _Execute:
 		if self.parsed.isExecuted:
 			return self
 
-		Executor(self._project['code'], self._project['scope'])
+		self._project['executor'] = Executor(self._project['code'], self._project['scope'])
+		self._project['executor'].execute()
 		self.isExecuted = True
 		return self.executed
 

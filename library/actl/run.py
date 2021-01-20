@@ -7,11 +7,12 @@ import actl
 
 def main(projectF=None, mainF=None, source=None):
 	if projectF is not None:
-		project = actl.Project(projectF=projectF)
-		if mainF is not None:
+		if mainF is None:
+			project = actl.Project(projectF=projectF)
+		else:
 			project = actl.Project(source=(
 				{
-					'include': project
+					'include': projectF
 				},
 				{
 					'setKey': {
@@ -55,7 +56,6 @@ def parseArgs(argv=None):
 		args[key] = value
 
 	if argv:
-		assert 'mainF' not in args
 		args['mainF'] = argv.pop(0)
 
 	assert not argv, argv

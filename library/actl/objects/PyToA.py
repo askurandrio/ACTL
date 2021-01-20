@@ -5,6 +5,7 @@ from actl.objects.String import String
 from actl.objects.AToPy import AToPy
 from actl.objects.BuildClass import BuildClass
 from actl.objects.object import AAttributeNotFound
+from actl.objects.object import Object
 
 
 PyToA = BuildClass('PyToA')
@@ -12,6 +13,9 @@ PyToA = BuildClass('PyToA')
 
 @PyToA.addMethodToClass('__call__')
 def _(cls, value):
+	if isinstance(value, type(Object)):
+		return value
+
 	if isinstance(value, bool):
 		return ATrue if value else AFalse
 

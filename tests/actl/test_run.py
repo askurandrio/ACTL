@@ -26,9 +26,6 @@ class _AbstractIoQueue:
 
 
 class _WriteIoQueue(_AbstractIoQueue):
-	def flush(self):
-		pass
-
 	def write(self, content):
 		self._queue.put(content)
 
@@ -37,9 +34,6 @@ class _WriteIoQueue(_AbstractIoQueue):
 
 
 class _ReadIoQueue(_AbstractIoQueue):
-	def __init__(self):
-		self._queue = Queue()
-
 	def put(self, line):
 		self._queue.put(line)
 

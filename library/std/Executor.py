@@ -9,7 +9,6 @@ class Executor:
 		self.scope = scope
 		self.stack = []
 		self.frames = [iter(code)]
-		self.execute()
 
 	def execute(self):
 		while self.frames:
@@ -23,14 +22,17 @@ class Executor:
 				self.frames.append(iter(opcode))
 				continue
 
-			try:
-				handler = self.HANDLERS[type(opcode)]
-			except KeyError:
-				raise KeyError(f'Handler for "{opcode}" not found')
+			self._executeOpcode(opcode)
 
-			res = handler(self, opcode)
-			if isinstance(res, _Frame):
-				self.frames.append(iter(res))
+	def _executeOpcode(self, opcode):
+		try:
+			handler = self.HANDLERS[type(opcode)]
+		except KeyError:
+			raise KeyError(f'Handler for "{opcode}" not found')
+
+		res = handler(self, opcode)
+		if isinstance(res, _Frame):
+			self.frames.append(iter(res))
 
 	@classmethod
 	def addHandler(cls, opcode):
