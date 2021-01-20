@@ -7,6 +7,9 @@ class BufferRule:
 		self._parser = parser
 		self._buff = buff
 
+	def parseUntil(self, until):
+		self._parser.subParser(self._buff, until).parseLine()
+
 	def get(self, *template):
 		template = Template(*template)
 		lTxBuff = LTransactionBuffer(self._buff)

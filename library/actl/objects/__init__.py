@@ -8,6 +8,6 @@ from actl.objects.While import While
 from actl.objects.Number import Number
 from actl.objects.Bool import ATrue, AFalse, Bool
 from actl.objects.If import If, else_, elif_
-from actl.objects.Function import Function
+from actl.objects.Function import Function, Signature
 from actl.objects.ANone import ANone
 from actl.objects.BuildClass import BuildClass

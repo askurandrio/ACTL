@@ -57,9 +57,10 @@ class _Frame:
 
 
 class _CallFrame:
-	def __init__(self, frames, returnVar):
+	def __init__(self, frames, returnVar, scope):
 		self.frames = frames
 		self.returnVar = returnVar
+		self.scope = scope
 
 
 @Executor.addHandler(type(Object))
@@ -105,7 +106,9 @@ def _(executor, opcode):
 def _(executor, opcode):
 	callFrame = executor.stack.pop(-1)
 	executor.frames = callFrame.frames
-	executor.scope[callFrame.returnVar] = executor.scope[opcode.var]
+	returnVal = executor.scope[opcode.var]
+	executor.scope = callFrame.scope
+	executor.scope[callFrame.returnVar] = returnVal
 
 
 @Executor.addHandler(opcodes.CALL_OPERATOR)
@@ -146,5 +149,9 @@ def _(executor, opcode):
 
 def _executeFunction(executor, opcode):
 	function = executor.scope[opcode.function]
-	executor.stack.append(_CallFrame(executor.frames, opcode.dst))
+	args = [executor.scope[key] for key in opcode.args]
+	executor.stack.append(_CallFrame(executor.frames, opcode.dst, executor.scope))
+	executor.scope = executor.scope.child()
+	for arg, value in zip(function.getAttr('signature').getAttr('args'), args):
+		executor.scope[arg] = value
 	executor.frames = [iter(function.getAttr('body'))]

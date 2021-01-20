@@ -7,4 +7,7 @@ def loadPropIfNeed(self, val):
 	except (AAttributeNotFound, AttributeError):
 		return val
 	else:
-		return prop(self)
+		try:
+			return prop(self)
+		except:
+			breakpoint()

@@ -3,6 +3,7 @@ from actl.opcodes import RETURN
 
 
 Function = BuildClass('Function')
+Signature = BuildClass('Signature')
 
 
 @Function.addMethodToClass('__call__')
@@ -17,4 +18,12 @@ def _(cls, name, signature, body):
 		)
 	self.setAttr('body', body)
 
+	return self
+
+
+@Signature.addMethodToClass('__call__')
+def _(cls, args):
+	self = cls.super_(Function, '__call__').call()
+
+	self.setAttr('args', args)
 	return self

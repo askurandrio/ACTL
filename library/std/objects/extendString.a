@@ -1,0 +1,38 @@
+fun String__split(self, separator):
+	first = 0
+	second = self.index(separator, default=-1)
+	res = [self[first:second]]
+
+	while separator in self[second:]:
+		first = second
+		second = self.index(separator, start=first, default=-1)
+		res.append(self[first:second])
+
+	return res
+
+
+fun String__in(self, pattern):
+	res = self.index(pattern, default=None)
+	if res == None:
+		return False
+	return True
+
+
+fun String__index(self, pattern):
+	index = 1
+	while index < self.length:
+		if index[1] != pattern[1]:
+			index += 1
+			continue
+		patternIndex = 1
+		indexPattern = index
+		while (indexPattern <= self.length) and (patternIndex <= pattern.length):
+			if self[indexPattern] != pattern[patternIndex]:
+				patternIndex = 0
+				break
+			indexPattern += 1
+			patternIndex += 1
+		if (patternIndex != pattern.length) or (indexPattern > self.length):
+			continue
+		return index
+	_404

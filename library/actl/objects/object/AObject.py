@@ -8,7 +8,14 @@ sys.setrecursionlimit(500)
 _default = object()
 
 
+class _GetDescriptor:
+	def __get__(_, obj, _1):
+		get = obj.getAttr('__get__')
+		return get.call
+
+
 class AObject:
+	get = _GetDescriptor()
 	_specialAttrs = {
 		'__class__': '_class',
 		'__getAttr__': '_getAttr',
@@ -63,10 +70,6 @@ class AObject:
 	def call(self, *args, **kwargs):
 		func = self.getAttr('__call__').call
 		return func(*args, **kwargs)
-
-	def get(self, instance):
-		get = self.getAttr('__get__')
-		return get.call(instance)
 
 	def addPyMethod(self, name):
 		def decorator(func):

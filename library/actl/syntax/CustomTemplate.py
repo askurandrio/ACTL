@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from actl.Buffer import Buffer
 from actl.syntax.AbstractTemplate import AbstractTemplate
 from actl.syntax.NamedResult import NamedResult
@@ -42,6 +44,7 @@ class CustomTemplate(AbstractTemplate):
 		return f'{type(self).__name__}({self.name})'
 
 
+@lru_cache(maxsize=None)
 def Token(token):
 	def rule(_, val):
 		return token == val
@@ -49,6 +52,7 @@ def Token(token):
 	return CustomTemplate.createToken(rule, f'Token({token})')
 
 
+@lru_cache(maxsize=None)
 def IsInstance(cls):
 	def rule(_, val):
 		return isinstance(val, cls)
