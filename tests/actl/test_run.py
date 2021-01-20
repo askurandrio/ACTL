@@ -14,9 +14,6 @@ class _AbstractIoQueue:
 	def __init__(self):
 		self._queue = Queue()
 
-	def flush(self):
-		pass
-
 	def readAll(self):
 		def gen():
 			while self:
@@ -29,6 +26,9 @@ class _AbstractIoQueue:
 
 
 class _WriteIoQueue(_AbstractIoQueue):
+	def flush(self):
+		pass
+
 	def write(self, content):
 		self._queue.put(content)
 
