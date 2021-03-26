@@ -38,8 +38,8 @@ class Project:
 			cmd = source.pop(0)
 			if isinstance(cmd, dict):
 				lcmd = list(cmd.items())
+				assert len(cmd) == 1, lcmd
 				key, arg = lcmd.pop(0)
-				assert not lcmd
 			else:
 				key, arg = cmd
 			handlers = self['handlers']

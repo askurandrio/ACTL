@@ -37,8 +37,7 @@ def main(projectF=None, mainF=None, source=None):
 		project = actl.Project(projectF='repl')
 
 	if source is not None:
-		extraSource = json.loads(source)
-		project.processSource(extraSource)
+		project.processSource(source)
 
 	project['build']()
 
@@ -55,8 +54,16 @@ def parseArgs(argv=None):
 		value = argv.pop(0)
 		args[key] = value
 
-	if argv:
+	if len(argv) == 1:
 		args['mainF'] = argv.pop(0)
+
+	if len(argv) in [2, 3]:
+		args['projectF'] = argv.pop(0)
+		args['mainF'] = argv.pop(0)
+
+		if len(argv) == 1:
+			source = argv.pop(0)
+			args['source'] = json.loads(source)
 
 	assert not argv, argv
 	return args

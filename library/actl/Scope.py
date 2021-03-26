@@ -20,7 +20,10 @@ class Scope:
 		self._head[key] = value
 
 	def __repr__(self):
-		return f'Scope<{self.__head}>'
+		reprHead = ', '.join(tuple(self._head.keys())[:3])
+		if len(self._head) > 3:
+			reprHead += ', ...'
+		return f'Scope<{reprHead}>'
 
 
 class _ScopeChild(Scope):
@@ -49,4 +52,4 @@ class _ScopeChild(Scope):
 		super().__setitem__(key, value)
 
 	def __repr__(self):
-		return f'ScopeChild<{self._parent}, {self.__head}>'
+		return f'ScopeChild<{self._parent}, {self._head}>'

@@ -49,7 +49,7 @@ def Token(token):
 	def rule(_, val):
 		return token == val
 
-	return CustomTemplate.createToken(rule, f'Token({token})')
+	return CustomTemplate.createToken(rule, f'Token({repr(token)})')
 
 
 @lru_cache(maxsize=None)

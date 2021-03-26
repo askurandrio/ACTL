@@ -53,3 +53,6 @@ class Parser:
 			res = BufferRule(self, self.buff).popUntil(self.endLine)
 			BufferRule(self, self.buff).popOrNone(self.endLine)
 			yield from res
+
+	def __str__(self):
+		return f'Parser<{self.__dict__}>'
