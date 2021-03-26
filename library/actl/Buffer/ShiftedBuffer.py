@@ -3,6 +3,9 @@ class ShiftedBuffer:
 		self._origin = origin
 		self._shift = shift
 
+	def startsWith(self, tmpl):
+		return self._origin[self._shift:].startsWith(tmpl)
+
 	def pop(self, index=0):
 		return self._origin.pop(self._shift + index)
 
@@ -20,7 +23,7 @@ class ShiftedBuffer:
 		del self._origin[self._shift:(index.stop + self._shift)]
 
 	def __repr__(self):
-		return f'{type(self).__name__}({self._origin[self._shift:].reprElements()})'
+		return f'{type(self).__name__}({self._origin[self._shift:]})'
 
 	def __bool__(self):
 		return bool(self._origin[self._shift:])

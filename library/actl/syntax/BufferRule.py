@@ -2,6 +2,9 @@ from actl.Buffer import LTransactionBuffer, Buffer
 from actl.syntax.Template import Template
 
 
+_nothing = object()
+
+
 class BufferRule:
 	def __init__(self, parser, buff):
 		self._parser = parser
@@ -15,14 +18,13 @@ class BufferRule:
 		lTxBuff = LTransactionBuffer(self._buff)
 		return template(self._parser, lTxBuff)
 
-	def popOrNone(self, *template):
+	def pop(self, *template, default=_nothing):
 		template = Template(*template)
-		return template(self._parser, self._buff)
-
-	def pop(self, *template):
-		buff = self.popOrNone(*template)
+		buff = template(self._parser, self._buff)
 		if buff is None:
-			raise IndexError(f'{self}.pop({template}) is None')
+			if default is _nothing:
+				raise IndexError(f'{self}.pop({template}) is None')
+			buff = default
 		return buff
 
 	def popUntil(self, *template):

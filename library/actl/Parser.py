@@ -51,7 +51,7 @@ class Parser:
 			self.parseLine()
 			self.definition = Buffer()
 			res = BufferRule(self, self.buff).popUntil(self.endLine)
-			BufferRule(self, self.buff).popOrNone(self.endLine)
+			BufferRule(self, self.buff).pop(self.endLine, default=None)
 			yield from res
 
 	def __str__(self):

@@ -1,8 +1,8 @@
 # pylint: disable=no-member
 from actl.Buffer import LTransactionBuffer, Buffer
 from actl.objects import String, Number, Object
-from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, \
-	Template, BufferRule, Parsed
+from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
+	BufferRule, Parsed, Frame
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR
 
 RULES = SyntaxRules()
@@ -73,7 +73,7 @@ def _(inp, parser):
 def _(inp, parser):
 	start = [inp.pop()]
 	string = ''
-	while not inp.startswith(start):
+	while not inp.startsWith(start):
 		string += inp.pop()
 	while start:
 		assert start.pop(0) == inp.pop()
@@ -99,24 +99,47 @@ def _(*args, parser=None):
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token('('),
-	Maybe(Many(IsInstance(VARIABLE), minMatches=1)),
-	Token(')'),
+	manualApply=True,
 	useParser=True
 )
-def _(function, opToken, *args, parser=None):
-	args = [arg.name for arg in args[:-1]]
-	dst = VARIABLE.temp()
-	parser.define(CALL_FUNCTION(dst.name, function.name, opToken, args, {}))
-	return [dst]
+class _ParseFunctionCall:
+	def __init__(self, parser, inp):
+		self._parser = parser
+		self._inp = inp
+		self._inpRule = BufferRule(self._parser, self._inp)
+
+	def _parseFunctionName(self):
+		functionVar = self._inpRule.pop(IsInstance(VARIABLE)).one()
+		return functionVar.name
+
+	def parse(self):
+		functionName = self._parseFunctionName()
+		args = []
+		opToken = self._inpRule.pop(Token('(')).one()
+
+		while not self._inpRule.startsWith(Token(')')):
+			argCode = self._inpRule.pop(Frame(Or([Token(')')], [Token(',')])))
+			args.append(argCode.pop(-1).name)
+			self._parser.define(*argCode)
+
+			self._inpRule.pop(Token(','), Token(' '), default=None)
+
+		self._inpRule.pop(Token(')'))
+		dst = VARIABLE.temp()
+		self._parser.define(CALL_FUNCTION(dst.name, functionName, opToken, args, {}))
+		self._inp.insert(0, [dst])
 
 
 class UseCodeBlock:
-	@classmethod
-	def parse(cls, parser, inp):
-		inpRule = BufferRule(parser, inp)
+	def __init__(self, parser, inp):
+		self._parser = parser
+		self._inp = inp
+
+	def parse(self):
+		inpRule = BufferRule(self._parser, self._inp)
 		var = inpRule.pop(_hasAttr('__useCodeBlock__')).one()
 		inpRule.pop(Token(':'))
-		code = cls.popCodeBlock(parser, inp)
+		code = self.popCodeBlock(self._parser, self._inp)
 		var = var.getAttr('__useCodeBlock__').call(code)
 		return Buffer.of(var)
 
@@ -170,9 +193,7 @@ class UseCodeBlock:
 		return parser.subParser(code)
 
 
-@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
-def _(parser, inp):
-	return UseCodeBlock.parse(parser, inp)
+RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)(UseCodeBlock)
 
 
 @RULES.add(IsInstance(VARIABLE), Token('.'), IsInstance(VARIABLE), useParser=True)

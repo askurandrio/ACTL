@@ -45,6 +45,24 @@ def test_callWithString(execute, testF):
 	testF.assert_called_once_with('s')
 
 
+def test_callWithTwoArg(execute, testF):
+	first = Mock()
+	second = Mock()
+	execute.scope['first'] = PyToA.call(first)
+	execute.scope['second'] = PyToA.call(second)
+
+	execute('testF(first, second)')
+
+	assert execute.parsed.code == [
+		opcodes.CALL_FUNCTION(
+			dst='__IV11', function='testF', typeb='(', args=['first', 'second'], kwargs={}
+		),
+		opcodes.VARIABLE(name='__IV11')
+	]
+	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	testF.assert_called_once_with(first, second)
+
+
 @pytest.fixture
 def testF(execute):
 	mock = Mock()

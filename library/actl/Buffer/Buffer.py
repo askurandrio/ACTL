@@ -1,12 +1,17 @@
 import itertools
+from collections.abc import Iterator
 
 
 class Buffer:
 	_emptyIter = iter(())
 
 	def __init__(self, head=_emptyIter):
-		self._buff = []
-		self._head = iter(head)
+		if isinstance(head, Iterator):
+			self._buff = []
+			self._head = iter(head)
+		else:
+			self._buff = list(head)
+			self._head = self._emptyIter
 
 	@property
 	def origin(self):
@@ -35,7 +40,7 @@ class Buffer:
 	def append(self, *items):  # pylint: disable=no-self-use
 		self += items
 
-	def startswith(self, tmpl):
+	def startsWith(self, tmpl):
 		tmpl = list(tmpl)
 		self._load(len(tmpl))
 		return self._buff[:len(tmpl)] == tmpl
@@ -93,12 +98,15 @@ class Buffer:
 			yield elem
 
 	def __iadd__(self, other):
+		if (self._head is self._emptyIter) and (not isinstance(other, Iterator)):
+			self._buff.extend(other)
+			return self
+
 		self._head = itertools.chain(iter(self._head), iter(other))
 		return self
 
 	def __add__(self, other):
-		res = type(self)()
-		res += self
+		res = type(self)(self)
 		res += other
 		return res
 

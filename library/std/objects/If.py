@@ -44,7 +44,7 @@ class IfSyntax:
 	def _getFromFullCodeBlock(self):
 		def popCodeBlock():
 			code = Buffer(UseCodeBlock.parseFullCodeBlock(self._parser, self._inp))
-			if self._inp.startswith('\n'):
+			if self._inp.startsWith('\n'):
 				self._inp.pop()
 			return tuple(code)
 

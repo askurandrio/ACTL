@@ -4,10 +4,10 @@ from actl.syntax.AbstractTemplate import AbstractTemplate
 
 
 class _MetaTemplate(type(AbstractTemplate)):
-	def __call__(self, *template):
-		if (len(template) == 1) and isinstance(template[0], AbstractTemplate):
-			return template[0]
-		return super().__call__(*template)
+	def __call__(self, *args):
+		if (len(args) == 1) and isinstance(args[0], Template):
+			return args[0]
+		return super().__call__(*args)
 
 
 class Template(AbstractTemplate, metaclass=_MetaTemplate):
