@@ -91,7 +91,7 @@ def nativeDict(head):
 	def getItem(key):
 		try:
 			return head[key]
-		except KeyError:
-			raise AKeyNotFound(key=key)
+		except KeyError as ex:
+			raise AKeyNotFound(key=key) from ex
 
 	return NativeObject({}, {'asStr': asStr, 'setItem': setItem, 'getItem': getItem})

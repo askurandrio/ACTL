@@ -8,14 +8,7 @@ sys.setrecursionlimit(500)
 _default = object()
 
 
-class _GetDescriptor:
-	def __get__(_, obj, _1):
-		get = obj.getAttr('__get__')
-		return get.call
-
-
 class AObject:
-	get = _GetDescriptor()
 	_specialAttrs = {
 		'__class__': '_class',
 		'__getAttr__': '_getAttr',
@@ -36,6 +29,11 @@ class AObject:
 	@property
 	def _self(self):
 		return self._head['__self__']
+
+	@property
+	def get(self):
+		get = self.getAttr('__get__')
+		return get.call
 
 	def getAttr(self, key):
 		try:
@@ -64,9 +62,6 @@ class AObject:
 		else:
 			return True
 
-	def findAttr(self, key):
-		raise NotImplementedError
-
 	def call(self, *args, **kwargs):
 		func = self.getAttr('__call__').call
 		return func(*args, **kwargs)
@@ -82,8 +77,8 @@ class AObject:
 	def getSpecialAttr(self, key):
 		try:
 			propertyName = self._specialAttrs[key]
-		except KeyError:
-			raise AAttributeIsNotSpecial(key)
+		except KeyError as ex:
+			raise AAttributeIsNotSpecial(key) from ex
 
 		return getattr(self, propertyName)
 
@@ -129,8 +124,8 @@ class AObject:
 			pass
 		try:
 			return self.super_(self.getAttr('__class__'), key, bind=False)
-		except AAttributeNotFound:
-			raise AAttributeNotFound(key=key)
+		except AAttributeNotFound as ex:
+			raise AAttributeNotFound(key=key) from ex
 
 	def __eq__(self, other):
 		if not isinstance(other, AObject):

@@ -61,7 +61,7 @@ def IsInstance(cls):
 
 
 @CustomTemplate.create
-def BreakPoint(parser, inp):
+def BreakPoint(_, _1):
 	breakpoint()
 	return Buffer()
 

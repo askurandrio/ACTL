@@ -1,4 +1,4 @@
-from actl import opcodes, objects
+from actl import opcodes
 from actl.objects import While, Bool, If, Function, AToPy, Object
 
 
@@ -27,8 +27,8 @@ class Executor:
 	def _executeOpcode(self, opcode):
 		try:
 			handler = self.HANDLERS[type(opcode)]
-		except KeyError:
-			raise KeyError(f'Handler for "{opcode}" not found')
+		except KeyError as ex:
+			raise KeyError(f'Handler for "{opcode}" not found') from ex
 
 		res = handler(self, opcode)
 		if isinstance(res, _Frame):

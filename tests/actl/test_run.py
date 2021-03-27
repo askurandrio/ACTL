@@ -104,21 +104,21 @@ def test_setExtraSource(run, stdin, stdout):
 	stdin.put('')
 
 
-def test_explicitProjectFAndMainF(run, stdin, stdout):
+def test_explicitProjectFAndMainF(run, stdout):
 	run('--projectF', 'std', '--mainF', 'tests/actl/example.a')
 
 	assert stdout.get() == '1'
 	assert stdout.get() == '\n'
 
 
-def test_projectFAndMainF(run, stdin, stdout):
+def test_projectFAndMainF(run, stdout):
 	run('std', 'tests/actl/example.a')
 
 	assert stdout.get() == '1'
 	assert stdout.get() == '\n'
 
 
-def test_projectFAndMainFAndSource(run, stdin, stdout):
+def test_projectFAndMainFAndSource(run, stdout):
 	extraSource = [
 		{
 			'py-externalKey': {
@@ -134,14 +134,14 @@ def test_projectFAndMainFAndSource(run, stdin, stdout):
 	assert stdout.get() == '\n'
 
 
-def test_explicitMainF(run, stdin, stdout):
+def test_explicitMainF(run, stdout):
 	run('--mainF', 'tests/actl/example.a')
 
 	assert stdout.get() == '1'
 	assert stdout.get() == '\n'
 
 
-def test_mainF(run, stdin, stdout):
+def test_mainF(run, stdout):
 	run('tests/actl/example.a')
 
 	assert stdout.get() == '1'

@@ -49,11 +49,11 @@ class Project:
 		return self._head.get('this', self)
 
 	def processSource(self, source):
-		assert type(source) is list, source
+		assert isinstance(source, list), source
 
 		while source:
 			command = source.pop(0)
-			assert type(command) is dict, command
+			assert isinstance(command, dict), command
 			assert len(command) == 1, command
 			handlerName, arg = next(iter(command.items()))
 			handler = self['handlers'][handlerName]
@@ -64,7 +64,7 @@ class Project:
 		source = yaml.load(open(filename), Loader=yaml.SafeLoader)
 		subProject = type(self)(source=source, this=self.this)
 		self[projectF] = subProject
-		_recursiveUpdate(self._head, subProject._head)
+		_recursiveUpdate(self._head, subProject._head)  # pylint: disable=protected-access
 
 	def __getitem__(self, keys):
 		if not isinstance(keys, tuple):
@@ -138,7 +138,7 @@ def importFrom(arg):
 	try:
 		from_ = arg['from']
 		import_ = arg['import']
-		exec(f'from {from_} import {import_}', globalScope)
+		exec(f'from {from_} import {import_}', globalScope)  # pylint: disable=exec-used
 	except (KeyError, ImportError, AttributeError) as ex:
 		raise RuntimeError(f'Error during getting py-execExternalFunction: {arg}') from ex
 

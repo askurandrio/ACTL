@@ -24,6 +24,7 @@ def pytest_assertrepr_compare(op, left, right):
 	if isinstance(left, (Buffer, list, tuple, type(Object), DynamicOpCode)):
 		res = [''] + _getDiff(left, right, '')
 		return res
+	return None
 
 
 def _getDiff(left, right, indent):
