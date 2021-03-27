@@ -42,12 +42,7 @@ def main(projectF=None, mainF=None, source=None):
 	project['build']()
 
 
-def parseArgs(argv=None):
-	if argv is None:
-		argv = sys.argv[1:]
-	else:
-		argv = list(argv)
-
+def parseArgs(argv):
 	args = {}
 	while argv and (argv[0] in ('--projectF', '--mainF', '--source')):
 		key = argv.pop(0)[2:]
@@ -73,5 +68,5 @@ def parseArgs(argv=None):
 	return args
 
 
-if __name__ == '__main__':
-	main(**parseArgs())
+if __name__ == '__main__':  # pragma: no cover
+	main(**parseArgs(sys.argv[1:]))  # pragma: no cover

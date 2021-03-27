@@ -104,8 +104,45 @@ def test_setExtraSource(run, stdin, stdout):
 	stdin.put('')
 
 
-def test_projectFAndMainF(run, stdin, stdout):
+def test_explicitProjectFAndMainF(run, stdin, stdout):
 	run('--projectF', 'std', '--mainF', 'tests/actl/example.a')
+
+	assert stdout.get() == '1'
+	assert stdout.get() == '\n'
+
+
+def test_projectFAndMainF(run, stdin, stdout):
+	run('std', 'tests/actl/example.a')
+
+	assert stdout.get() == '1'
+	assert stdout.get() == '\n'
+
+
+def test_projectFAndMainFAndSource(run, stdin, stdout):
+	extraSource = [
+		{
+			'py-externalKey': {
+				'from': 'tests.actl.test_run',
+				'import': 'getTestScope',
+				'name': 'scope'
+			}
+		}
+	]
+	run('std', 'tests/actl/example.a', json.dumps(extraSource))
+
+	assert stdout.get() == 'mocked: 1'
+	assert stdout.get() == '\n'
+
+
+def test_explicitMainF(run, stdin, stdout):
+	run('--mainF', 'tests/actl/example.a')
+
+	assert stdout.get() == '1'
+	assert stdout.get() == '\n'
+
+
+def test_mainF(run, stdin, stdout):
+	run('tests/actl/example.a')
 
 	assert stdout.get() == '1'
 	assert stdout.get() == '\n'
@@ -136,7 +173,7 @@ class _Run:
 	def _target(self, args):
 		sys.stdin = self._stdin
 		sys.stdout = self._stdout
-		main(**parseArgs(args))
+		main(**parseArgs(list(args)))
 
 	def __enter__(self):
 		def run_(*args):
