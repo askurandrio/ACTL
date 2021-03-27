@@ -88,7 +88,7 @@ def _isDigit(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
-@RULES.add(Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True)
+@RULES.add(Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True)
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = VARIABLE.temp()
