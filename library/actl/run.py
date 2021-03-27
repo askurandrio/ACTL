@@ -10,7 +10,7 @@ def main(projectF=None, mainF=None, source=None):
 		if mainF is None:
 			project = actl.Project(projectF=projectF)
 		else:
-			project = actl.Project(source=(
+			project = actl.Project(source=[
 				{
 					'include': projectF
 				},
@@ -20,9 +20,9 @@ def main(projectF=None, mainF=None, source=None):
 						'value': mainF
 					}
 				}
-			))
+			])
 	elif mainF is not None:
-		project = actl.Project(source=(
+		project = actl.Project(source=[
 				{
 					'include': 'std'
 				},
@@ -32,7 +32,7 @@ def main(projectF=None, mainF=None, source=None):
 						'value': mainF
 					}
 				}
-			))
+			])
 	else:
 		project = actl.Project(projectF='repl')
 
@@ -62,10 +62,14 @@ def parseArgs(argv=None):
 		args['mainF'] = argv.pop(0)
 
 		if len(argv) == 1:
-			source = argv.pop(0)
-			args['source'] = json.loads(source)
+			args['source'] = argv.pop(0)
 
 	assert not argv, argv
+	if 'source' in args:
+		args = {
+			**args,
+			'source': json.loads(args['source'])
+		}
 	return args
 
 

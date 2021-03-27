@@ -4,6 +4,8 @@ import sys
 from multiprocessing import Queue, Process
 
 import json
+from queue import Empty
+
 import pytest
 
 import actl
@@ -13,6 +15,20 @@ from actl.run import main, parseArgs
 class _AbstractIoQueue:
 	def __init__(self):
 		self._queue = Queue()
+		self._process = None
+
+	def bind(self, process):
+		self._process = process
+
+	def _get(self, timeout):
+		for _ in range(timeout * 2):
+			try:
+				return self._queue.get(timeout=0.5)
+			except Empty:
+				if not self._process.is_alive():
+					raise
+
+		raise Empty
 
 	def readAll(self):
 		def gen():
@@ -30,7 +46,7 @@ class _WriteIoQueue(_AbstractIoQueue):
 		self._queue.put(content)
 
 	def get(self):
-		return self._queue.get(timeout=5)
+		return self._get(timeout=5)
 
 
 class _ReadIoQueue(_AbstractIoQueue):
@@ -38,7 +54,7 @@ class _ReadIoQueue(_AbstractIoQueue):
 		self._queue.put(line)
 
 	def readline(self):
-		return self._queue.get(timeout=5)
+		return self._get(timeout=5)
 
 
 def test_CtrlD(run, stdin, stdout):
@@ -119,6 +135,8 @@ class _Run:
 		def run_(*args):
 			self._process = Process(target=self._target, args=(args,))
 			self._process.start()
+			self._stdin.bind(self._process)
+			self._stdout.bind(self._process)
 
 		return run_
 

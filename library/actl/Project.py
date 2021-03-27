@@ -13,37 +13,51 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Project:
 	_DEFAULT_HANDLERS = {}
 
-	def __init__(self, projectF=None, source=(), this=None):
-		self._head = {'handlers': copy.copy(self._DEFAULT_HANDLERS)}
+	def __init__(self, projectF=None, source=None, this=None):
+		self._head = {
+			'handlers': copy.copy(self._DEFAULT_HANDLERS)
+		}
 
 		if this is not None:
-			self._head = {**self._head, 'this': this}
+			self.processSource([
+				{
+					'setKey': {
+						'key': 'this',
+						'value': this
+					}
+				}
+			])
 
 		if projectF is not None:
-			self._head = {**self._head, 'projectF': projectF}
-			source = ({'include': projectF},) + tuple(source)
+			self.processSource([
+				{
+					'setKey': {
+						'key': 'projectF',
+						'value': projectF
+					}
+				},
+				{
+					'include': projectF
+				}
+			])
 
-		self.processSource(source)
+		if source:
+			self.processSource(source)
 
 	@property
 	def this(self):
 		return self._head.get('this', self)
 
 	def processSource(self, source):
-		if isinstance(source, dict):
-			source = source.items()
+		assert type(source) is list, source
 
-		source = list(source)
 		while source:
-			cmd = source.pop(0)
-			if isinstance(cmd, dict):
-				lcmd = list(cmd.items())
-				assert len(cmd) == 1, lcmd
-				key, arg = lcmd.pop(0)
-			else:
-				key, arg = cmd
-			handlers = self['handlers']
-			handlers[key](self, arg)
+			command = source.pop(0)
+			assert type(command) is dict, command
+			assert len(command) == 1, command
+			handlerName, arg = next(iter(command.items()))
+			handler = self['handlers'][handlerName]
+			handler(self, arg)
 
 	def include(self, projectF):
 		filename = os.path.join(DIR_LIBRARY, 'projects', f'{projectF}.yaml')

@@ -87,7 +87,13 @@ class Buffer:
 		return Buffer(itertools.islice(res, index.start, index.stop, index.step))
 
 	def __delitem__(self, index):
-		self._load(index)
+		if isinstance(index, slice):
+			indexStop = None if index.stop is None else index.stop - 1
+			loadIndex = slice(index.start, indexStop, index.step)
+		else:
+			loadIndex = index
+
+		self._load(loadIndex)
 		del self._buff[index]
 
 	def __iter__(self):
