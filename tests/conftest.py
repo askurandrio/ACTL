@@ -2,7 +2,6 @@ import traceback
 import signal
 from functools import singledispatch
 from itertools import zip_longest
-from typing import Union
 
 import pytest
 
