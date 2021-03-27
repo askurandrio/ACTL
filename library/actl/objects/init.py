@@ -27,4 +27,5 @@ Object.setAttr(
 Object.getAttr('__self__').setItem(
 	String, nativeMethod('object.__str__', selfAsStr)
 )
+NativeObject.aCls.setAttr('__class__', Object)
 NativeObject.aCls.setAttr('__parents__', (Object,))

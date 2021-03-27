@@ -5,6 +5,7 @@ class BuildClass(type(Object)):
 	def __init__(self, name, *parents):
 		super().__init__({
 			'__name__': name,
+			'__class__': Object,
 			'__parents__': parents + (Object,),
 			'__isClass__': True,
 			'__self__': nativeDict({})

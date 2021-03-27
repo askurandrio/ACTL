@@ -255,7 +255,24 @@ def _(first, _, token, _1, second, parser):
 def _(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Token('['))
-	inpRule.pop(Token(']'))
 	dst = VARIABLE.temp()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call, args=[]))
+
+	if not inpRule.startsWith(Token(']')):
+		appendStrVar = VARIABLE.temp()
+		appendVarName = VARIABLE.temp().name
+		parser.define(
+			CALL_FUNCTION_STATIC(dst=appendStrVar.name, function=String.call, args=['append']),
+			CALL_OPERATOR(dst=appendVarName, first=dst.name, operator='.', second=appendStrVar.name)
+		)
+
+		while not inpRule.startsWith(Token(']')):
+			elementCode = inpRule.pop(Frame(Or([Token(']')], [Token(',')])))
+			elementVarName = elementCode.pop(-1).name
+			parser.define(
+				*elementCode,
+				CALL_FUNCTION('__IV0', appendVarName, args=[elementVarName])
+			)
+
+	inpRule.pop(Token(']'))
 	inp.insert(0, [dst])

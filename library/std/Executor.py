@@ -92,6 +92,7 @@ def _(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION)
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
+
 	if Function in function.getAttr('__class__').getAttr('__parents__'):
 		return _executeFunction(executor, opcode)
 

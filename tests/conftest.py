@@ -49,7 +49,7 @@ def _getDiff(left, right, indent):
 				f'{indent}   {first} != {second}'
 			]
 
-	raise RuntimeError
+	raise RuntimeError(f'{left} != {right}')
 
 
 @singledispatch
