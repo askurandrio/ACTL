@@ -96,8 +96,8 @@ def _(executor, opcode):
 		return _executeFunction(executor, opcode)
 
 	assert opcode.typeb == '('
-	args = (executor.scope[key] for key in opcode.args)
-	kwargs = {key: executor.scope[key] for key in opcode.kwargs}
+	args = [executor.scope[varName] for varName in opcode.args]
+	kwargs = {argName: executor.scope[varName] for argName, varName in opcode.kwargs.items()}
 	executor.scope[opcode.dst] = function.call(*args, **kwargs)
 	return None
 

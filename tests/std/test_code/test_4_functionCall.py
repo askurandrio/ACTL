@@ -63,6 +63,40 @@ def test_callWithTwoArg(execute, testF):
 	testF.assert_called_once_with(first, second)
 
 
+def test_callWithNamedArg(execute, testF):
+	arg = Mock()
+	execute.scope['arg'] = PyToA.call(arg)
+
+	execute('testF(argName=arg)')
+
+	assert execute.parsed.code == [
+		opcodes.CALL_FUNCTION(
+			dst='__IV11', function='testF', typeb='(', args=[], kwargs={'argName': 'arg'}
+		),
+		opcodes.VARIABLE(name='__IV11')
+	]
+	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	testF.assert_called_once_with(argName=arg)
+
+
+def test_callWithArgAndNamedArg(execute, testF):
+	first = Mock()
+	second = Mock()
+	execute.scope['first'] = PyToA.call(first)
+	execute.scope['second'] = PyToA.call(second)
+
+	execute('testF(first, secondName=second)')
+
+	assert execute.parsed.code == [
+		opcodes.CALL_FUNCTION(
+			dst='__IV11', function='testF', typeb='(', args=['first'], kwargs={'secondName': 'second'}
+		),
+		opcodes.VARIABLE(name='__IV11')
+	]
+	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	testF.assert_called_once_with(first, secondName=second)
+
+
 @pytest.fixture
 def testF(execute):
 	mock = Mock()

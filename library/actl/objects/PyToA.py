@@ -34,9 +34,10 @@ def _(cls, code):
 
 
 @PyToA.addMethod('__call__')
-def _(self, *args):
-	args = tuple(AToPy(arg) for arg in args)
-	res = self._value(*args)
+def _(self, *args, **kwargs):
+	args = [AToPy(arg) for arg in args]
+	kwargs = {key: AToPy(value) for key, value in kwargs.items()}
+	res = self._value(*args, **kwargs)
 	return PyToA.call(res)
 
 

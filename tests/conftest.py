@@ -23,7 +23,7 @@ def debugStuck():
 
 def pytest_assertrepr_compare(op, left, right):
 	if isinstance(left, (Buffer, list, tuple, type(Object), DynamicOpCode)):
-		res = _getDiff(left, right, '')
+		res = [''] + _getDiff(left, right, '')
 		return res
 
 
@@ -34,14 +34,20 @@ def _getDiff(left, right, indent):
 	else:
 		return [f'{indent}type<{type(right)}> of {right} is unexpected']
 
-	res = [f'{indent}{left} != {right} at ']
+	res = [
+		f'{indent}{left} != ',
+		f'{indent}{right}'
+	]
 
 	for idx, (first, second) in enumerate(zip_longest(left, right)):
 		if first != second:
-			res[-1] += f'{idx}'
+			res += [f'{indent}at {idx}']
 			if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode)):
 				return res + _getDiff(first, second, indent + '   ')
-			return res + [f'{first} != {second}']
+			return [
+				*res,
+				f'{indent}   {first} != {second}'
+			]
 
 	raise RuntimeError
 

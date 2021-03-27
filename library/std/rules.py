@@ -112,21 +112,45 @@ class _ParseFunctionCall:
 		functionVar = self._inpRule.pop(IsInstance(VARIABLE)).one()
 		return functionVar.name
 
+	def _parseArg(self):
+		self._inpRule.parseUntil(Or([IsInstance(VARIABLE)], [Token(')')], [Token(',')]))
+
+		if self._inpRule.startsWith(IsInstance(VARIABLE)):
+			var = self._inpRule.pop(IsInstance(VARIABLE)).one()
+			self._inpRule.parseUntil(Or([Token('=')], [Token(')')], [Token(',')]))
+			if self._inpRule.startsWith(Token('=')):
+				argName = var.name
+				self._inpRule.pop(Token('='))
+			else:
+				self._inp.insert(0, [var])
+				argName = None
+		else:
+			argName = None
+
+		argCode = self._inpRule.pop(Frame(Or([Token(')')], [Token(',')])))
+		argVar = argCode.pop(-1).name
+		self._parser.define(*argCode)
+		return argName, argVar
+
 	def parse(self):
 		functionName = self._parseFunctionName()
 		args = []
+		kwargs = {}
 		opToken = self._inpRule.pop(Token('(')).one()
 
 		while not self._inpRule.startsWith(Token(')')):
-			argCode = self._inpRule.pop(Frame(Or([Token(')')], [Token(',')])))
-			args.append(argCode.pop(-1).name)
-			self._parser.define(*argCode)
+			argName, argVar = self._parseArg()
+			if argName is None:
+				assert not kwargs, kwargs
+				args.append(argVar)
+			else:
+				kwargs[argName] = argVar
 
 			self._inpRule.pop(Token(','), Token(' '), default=None)
 
 		self._inpRule.pop(Token(')'))
 		dst = VARIABLE.temp()
-		self._parser.define(CALL_FUNCTION(dst.name, functionName, opToken, args, {}))
+		self._parser.define(CALL_FUNCTION(dst.name, functionName, opToken, args, kwargs))
 		self._inp.insert(0, [dst])
 
 
