@@ -104,6 +104,13 @@ def test_setExtraSource(run, stdin, stdout):
 	stdin.put('')
 
 
+def test_projectFAndMainF(run, stdin, stdout):
+	run('--projectF', 'std', '--mainF', 'tests/actl/example.a')
+
+	assert stdout.get() == '1'
+	assert stdout.get() == '\n'
+
+
 @pytest.fixture
 def run(stdin, stdout):
 	with _Run(stdin, stdout) as run_:
