@@ -1,5 +1,5 @@
 # pylint: disable=protected-access
-from actl.objects.Bool import Bool, AFalse, ATrue
+from actl.objects.Bool import Bool
 from actl.objects.AToPy import AToPy
 from actl.objects.BuildClass import BuildClass
 
@@ -22,8 +22,8 @@ def _(cls, value):
 @Number.addMethod(Bool)
 def _(self):
 	if self._value == 0:
-		return AFalse
-	return ATrue
+		return Bool.False_
+	return Bool.True_
 
 
 @Number.addMethod(AToPy)

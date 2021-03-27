@@ -17,7 +17,7 @@ def test_setVariable(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, typeb='(', args=['1'], kwargs={}
+			dst='__IV11', function=Number.call, args=['1']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV11')
 	]

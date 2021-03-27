@@ -28,8 +28,8 @@ def getScope(_):
 	for varName, pyName in (
 		('print', 'print'),
 		('readInput', 'input'),
-		('True', 'objects.ATrue'),
-		('False', 'objects.AFalse'),
+		('True', 'objects.Bool.True_'),
+		('False', 'objects.Bool.False_'),
 		('Bool', 'objects.Bool'),
 		('String', 'objects.String'),
 		('Number', 'objects.Number'),

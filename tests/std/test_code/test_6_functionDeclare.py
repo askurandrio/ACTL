@@ -19,7 +19,7 @@ def test_simpleFunctionDeclare(execute):
 				'f',
 				Signature.call([]),
 				[
-					opcodes.CALL_FUNCTION(dst='__IV11', function='print', typeb='(', args=[], kwargs={}),
+					opcodes.CALL_FUNCTION(dst='__IV11', function='print'),
 					opcodes.VARIABLE(name='__IV11')
 				]
 			)

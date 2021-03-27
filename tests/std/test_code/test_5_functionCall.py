@@ -10,7 +10,7 @@ def test_call(execute, testF):
 	execute('testF()')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(dst='__IV11', function='testF', typeb='(', args=[], kwargs={}),
+		opcodes.CALL_FUNCTION(dst='__IV11', function='testF'),
 		opcodes.VARIABLE(name='__IV11')
 	]
 	assert AToPy(execute.executed.scope['_']) == testF.return_value
@@ -24,7 +24,7 @@ def test_callWithArg(execute, testF):
 	execute('testF(arg)')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(dst='__IV11', function='testF', typeb='(', args=['arg'], kwargs={}),
+		opcodes.CALL_FUNCTION(dst='__IV11', function='testF', args=['arg']),
 		opcodes.VARIABLE(name='__IV11')
 	]
 	assert AToPy(execute.executed.scope['_']) == testF.return_value
@@ -37,7 +37,7 @@ def test_callWithString(execute, testF):
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function=String.call, args=['s']),
 		opcodes.CALL_FUNCTION(
-			dst='__IV12', function='testF', typeb='(', args=['__IV11'], kwargs={}
+			dst='__IV12', function='testF', args=['__IV11']
 		),
 		opcodes.VARIABLE(name='__IV12')
 	]
@@ -55,7 +55,7 @@ def test_callWithTwoArg(execute, testF):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION(
-			dst='__IV11', function='testF', typeb='(', args=['first', 'second'], kwargs={}
+			dst='__IV11', function='testF', args=['first', 'second']
 		),
 		opcodes.VARIABLE(name='__IV11')
 	]
@@ -71,7 +71,7 @@ def test_callWithNamedArg(execute, testF):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION(
-			dst='__IV11', function='testF', typeb='(', args=[], kwargs={'argName': 'arg'}
+			dst='__IV11', function='testF', kwargs={'argName': 'arg'}
 		),
 		opcodes.VARIABLE(name='__IV11')
 	]
@@ -89,7 +89,7 @@ def test_callWithArgAndNamedArg(execute, testF):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION(
-			dst='__IV11', function='testF', typeb='(', args=['first'], kwargs={'secondName': 'second'}
+			dst='__IV11', function='testF', args=['first'], kwargs={'secondName': 'second'}
 		),
 		opcodes.VARIABLE(name='__IV11')
 	]

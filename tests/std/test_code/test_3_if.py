@@ -12,13 +12,13 @@ def test_if(execute):
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, typeb='(', args=['1'], kwargs={}
+			dst='__IV11', function=Number.call, args=['1']
 		),
 		opcodes.VARIABLE(name='__IV11')
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV12', function=Number.call, typeb='(', args=['2'], kwargs={}
+			dst='__IV12', function=Number.call, args=['2']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV12')
 	)
@@ -34,13 +34,13 @@ def test_ifFalse(execute):
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, typeb='(', args=['0'], kwargs={}
+			dst='__IV11', function=Number.call, args=['0']
 		),
 		opcodes.VARIABLE(name='__IV11')
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV12', function=Number.call, typeb='(', args=['1'], kwargs={}
+			dst='__IV12', function=Number.call, args=['1']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV12')
 	)
@@ -57,13 +57,13 @@ def test_ifElif(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV11', function=Number.call, typeb='(', args=['0'], kwargs={}
+					dst='__IV11', function=Number.call, args=['0']
 				),
 				opcodes.VARIABLE(name='__IV11')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV12', function=Number.call, typeb='(', args=['1'], kwargs={}
+					dst='__IV12', function=Number.call, args=['1']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='__IV12')
 			)
@@ -71,13 +71,13 @@ def test_ifElif(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV13', function=Number.call, typeb='(', args=['1'], kwargs={}
+					dst='__IV13', function=Number.call, args=['1']
 				),
 				opcodes.VARIABLE(name='__IV13')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV14', function=Number.call, typeb='(', args=['2'], kwargs={}
+					dst='__IV14', function=Number.call, args=['2']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='__IV14')
 			)
@@ -94,19 +94,19 @@ def test_ifElse(execute):
 	conditionFrame, code = Buffer(if_.getAttr('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, typeb='(', args=['0'], kwargs={}
+			dst='__IV11', function=Number.call, args=['0']
 		),
 		opcodes.VARIABLE(name='__IV11')
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV12', function=Number.call, typeb='(', args=['1'], kwargs={}
+			dst='__IV12', function=Number.call, args=['1']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV12')
 	)
 	assert if_.getAttr('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV13', function=Number.call, typeb='(', args=['2'], kwargs={}
+			dst='__IV13', function=Number.call, args=['2']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV13')
 	)
@@ -122,13 +122,13 @@ def test_ifElifElseWithFullCodeBlock(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV11', function=Number.call, typeb='(', args=['0'], kwargs={}
+					dst='__IV11', function=Number.call, args=['0']
 				),
 				opcodes.VARIABLE(name='__IV11')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV12', function=Number.call, typeb='(', args=['1'], kwargs={}
+					dst='__IV12', function=Number.call, args=['1']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='__IV12')
 			)
@@ -136,13 +136,13 @@ def test_ifElifElseWithFullCodeBlock(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV13', function=Number.call, typeb='(', args=['0'], kwargs={}
+					dst='__IV13', function=Number.call, args=['0']
 				),
 				opcodes.VARIABLE(name='__IV13')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV14', function=Number.call, typeb='(', args=['2'], kwargs={}
+					dst='__IV14', function=Number.call, args=['2']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='__IV14')
 			)
@@ -150,7 +150,7 @@ def test_ifElifElseWithFullCodeBlock(execute):
 	)
 	assert if_.getAttr('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV15', function=Number.call, typeb='(', args=['3'], kwargs={}
+			dst='__IV15', function=Number.call, args=['3']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='__IV15')
 	)

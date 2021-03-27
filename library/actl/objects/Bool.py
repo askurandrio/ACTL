@@ -5,16 +5,16 @@ from actl.objects.BuildClass import BuildClass
 
 Bool = BuildClass('Bool')
 
-ATrue = Bool.call()
-ATrue._value = True
+Bool.True_ = Bool.call()
+Bool.True_._value = True
 
-AFalse = Bool.call()
-AFalse._value = False
+Bool.False_ = Bool.call()
+Bool.False_._value = False
 
 
 @Bool.addMethodToClass('__call__')
 def _(_, val):
-	if val in (ATrue, AFalse):
+	if val in (Bool.True_, Bool.False_):
 		return val
 
 	return val.getAttr(Bool).call()

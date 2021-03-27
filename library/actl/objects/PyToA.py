@@ -1,6 +1,6 @@
 # pylint: disable=protected-access
 from actl.objects.Number import Number
-from actl.objects.Bool import Bool, ATrue, AFalse
+from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
 from actl.objects.BuildClass import BuildClass
@@ -17,7 +17,7 @@ def _(cls, value):
 		return value
 
 	if isinstance(value, bool):
-		return ATrue if value else AFalse
+		return Bool.True_ if value else Bool.False_
 
 	if isinstance(value, (int, float)):
 		return Number.call(value)
@@ -66,7 +66,7 @@ def _(self):
 @PyToA.addMethod(Bool)
 def _(self):
 	res = bool(self._value)
-	return ATrue if res else AFalse
+	return Bool.True_ if res else Bool.False_
 
 
 @PyToA.addMethod(String)

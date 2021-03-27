@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 from actl.Buffer import LTransactionBuffer, Buffer
-from actl.objects import String, Number, Object
+from actl.objects import String, Number, Object, Vector
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
 	BufferRule, Parsed, Frame
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR
@@ -78,7 +78,7 @@ def _(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = VARIABLE.temp()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, typeb='(', args=[string]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, args=[string]))
 
 	return Buffer.of(dst)
 
@@ -92,7 +92,7 @@ def _isDigit(_, token):
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = VARIABLE.temp()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, typeb='(', args=[number]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, args=[number]))
 	return [dst]
 
 
@@ -227,7 +227,7 @@ def _(first, token, attribute, parser):
 
 	parser.define(
 		CALL_FUNCTION_STATIC(
-			dst=attributeVar.name, function=String.call, typeb='(', args=[attribute.name]
+			dst=attributeVar.name, function=String.call, args=[attribute.name]
 		),
 		CALL_OPERATOR(
 			dst=dst.name, first=first.name, operator=token, second=attributeVar.name
@@ -249,3 +249,13 @@ def _(first, _, token, _1, second, parser):
 	)
 
 	return [dst]
+
+
+@RULES.add(Token('['), manualApply=True, useParser=True)
+def _(parser, inp):
+	inpRule = BufferRule(parser, inp)
+	inpRule.pop(Token('['))
+	inpRule.pop(Token(']'))
+	dst = VARIABLE.temp()
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call, args=[]))
+	inp.insert(0, [dst])

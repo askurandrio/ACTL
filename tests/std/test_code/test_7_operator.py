@@ -7,7 +7,7 @@ def test_pointOperator(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=String.call, typeb='(', args=['__call__']
+			dst='__IV11', function=String.call, args=['__call__']
 		),
 		opcodes.CALL_OPERATOR(dst='__IV12', first='print', operator='.', second='__IV11'),
 		opcodes.VARIABLE(name='__IV12')
