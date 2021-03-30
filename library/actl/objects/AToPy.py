@@ -8,7 +8,7 @@ class _MetaAToPy(type):
 			return value
 
 		if value.hasAttr(AToPy):
-			return value.getAttr(AToPy).call()
+			return value.getAttribute(AToPy).call()
 
 		return super().__call__(value)
 
@@ -18,5 +18,5 @@ class AToPy(metaclass=_MetaAToPy):
 		self._value = value
 
 	def __str__(self):
-		res = self._value.getAttr(String).call()
+		res = self._value.getAttribute(String).call()
 		return type(self)(res)

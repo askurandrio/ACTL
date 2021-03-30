@@ -1,10 +1,10 @@
 # pylint: disable=protected-access
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 
 
 class _BuildClassString(BuildClass):
 	def __str__(self):
-		name = self.getAttr('__name__')
+		name = self.getAttribute('__name__')
 		return f"class '{name}'"
 
 

@@ -65,7 +65,7 @@ class _CallFrame:
 
 @Executor.addHandler(type(Object))
 def _(executor, opcode):
-	parents = list(opcode.getAttr('__class__').getAttr('__parents__'))
+	parents = list(opcode.getAttribute('__class__').getAttribute('__parents__'))
 	while parents[0] not in Executor.HANDLERS:
 		parents.pop(0)
 
@@ -93,7 +93,7 @@ def _(executor, opcode):
 def _(executor, opcode):
 	function = executor.scope[opcode.function]
 
-	if Function in function.getAttr('__class__').getAttr('__parents__'):
+	if Function in function.getAttribute('__class__').getAttribute('__parents__'):
 		return _executeFunction(executor, opcode)
 
 	assert opcode.typeb == '('
@@ -118,25 +118,25 @@ def _(executor, opcode):
 	second = executor.scope[opcode.second]
 
 	assert opcode.operator == '.'
-	executor.scope[opcode.dst] = first.getAttr(str(AToPy(second)))
+	executor.scope[opcode.dst] = first.getAttribute(str(AToPy(second)))
 
 
 @Executor.addHandler(While)
 @_Frame.wrap
 def _(executor, opcode):
 	while True:
-		yield _Frame(opcode.getAttr('conditionFrame'))
+		yield _Frame(opcode.getAttribute('conditionFrame'))
 		res = Bool.call(executor.scope['_'])
 		if not AToPy(res):
 			break
 
-		yield _Frame(opcode.getAttr('code'))
+		yield _Frame(opcode.getAttribute('code'))
 
 
 @Executor.addHandler(If)
 @_Frame.wrap
 def _(executor, opcode):
-	for conditionFrame, code in opcode.getAttr('conditions'):
+	for conditionFrame, code in opcode.getAttribute('conditions'):
 		yield _Frame(conditionFrame)
 		res = executor.scope['_']
 		res = Bool.call(res)
@@ -145,7 +145,7 @@ def _(executor, opcode):
 			return
 
 	if opcode.hasAttr('elseCode'):
-		yield _Frame(opcode.getAttr('elseCode'))
+		yield _Frame(opcode.getAttribute('elseCode'))
 
 
 def _executeFunction(executor, opcode):
@@ -153,6 +153,6 @@ def _executeFunction(executor, opcode):
 	args = [executor.scope[key] for key in opcode.args]
 	executor.stack.append(_CallFrame(executor.frames, opcode.dst, executor.scope))
 	executor.scope = executor.scope.child()
-	for arg, value in zip(function.getAttr('signature').getAttr('args'), args):
+	for arg, value in zip(function.getAttribute('signature').getAttribute('args'), args):
 		executor.scope[arg] = value
-	executor.frames = [iter(function.getAttr('body'))]
+	executor.frames = [iter(function.getAttribute('body'))]

@@ -1,6 +1,6 @@
 # pylint: disable=protected-access
 from actl.objects.AToPy import AToPy
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 
 
 Bool = BuildClass('Bool')
@@ -17,7 +17,7 @@ def _(_, val):
 	if val in (Bool.True_, Bool.False_):
 		return val
 
-	return val.getAttr(Bool).call()
+	return val.getAttribute(Bool).call()
 
 
 @Bool.addMethod(AToPy)

@@ -1,7 +1,6 @@
 from actl.objects.AToPy import AToPy
-from actl.objects.object import Object, nativeMethod
+from actl.objects.object import Object, BuildClass
 from actl.objects.String import String
-from actl.objects.object import NativeObject
 
 
 @String.addMethod(AToPy)
@@ -10,22 +9,18 @@ def _(self):
 
 
 def clsAsStr(self):
-	name = self.getAttr('__name__')
+	name = self.getAttribute('__name__')
 	return String.call(f"class '{name}'")
 
 
 def selfAsStr(self):
-	name = self.getAttr('__class__').getAttr('__name__')
+	name = self.getAttribute('__class__').getAttribute('__name__')
 	head = self._head  # pylint: disable=protected-access
 	head = {key: value for key, value in head.items() if key != '__class__'}
 	return String.call(f'{name}<{head}>')
 
 
-Object.setAttr(
-	String, nativeMethod('Object.__str__', clsAsStr)
-)
-Object.getAttr('__self__').setItem(
-	String, nativeMethod('object.__str__', selfAsStr)
-)
-NativeObject.aCls.setAttr('__class__', Object)
-NativeObject.aCls.setAttr('__parents__', (Object,))
+String.lookupAttribute('__getAttribute__')
+
+BuildClass.addMethodToClass(Object, String)(clsAsStr)
+BuildClass.addMethod(Object, String)(selfAsStr)

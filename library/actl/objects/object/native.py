@@ -20,7 +20,7 @@ class NativeObject(AObject):
 	def get(self, instance):
 		return super().get(instance)
 
-	def getAttr(self, key):
+	def getAttribute(self, key):
 		try:
 			return self._head[key]
 		except KeyError:

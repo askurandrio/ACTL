@@ -19,12 +19,12 @@ def test_simple_while(execute):
 	execute('while cond(): print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttr('__class__') is While
-	assert cycle.getAttr('conditionFrame') == (
+	assert cycle.getAttribute('__class__') is While
+	assert cycle.getAttribute('conditionFrame') == (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='cond'),
 		opcodes.VARIABLE(name='__IV11')
 	)
-	assert cycle.getAttr('code') == (
+	assert cycle.getAttribute('code') == (
 		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='__IV13', function='print', args=['__IV12']
@@ -51,12 +51,12 @@ def test_whileWithFullCodeBlock(execute):
 	execute('while cond():\n print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttr('__class__') is While
-	assert cycle.getAttr('conditionFrame') == (
+	assert cycle.getAttribute('__class__') is While
+	assert cycle.getAttribute('conditionFrame') == (
 		opcodes.CALL_FUNCTION(dst='__IV11', function='cond'),
 		opcodes.VARIABLE(name='__IV11')
 	)
-	assert cycle.getAttr('code') == (
+	assert cycle.getAttribute('code') == (
 		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='__IV13', function='print', args=['__IV12']

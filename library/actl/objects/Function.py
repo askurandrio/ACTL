@@ -1,4 +1,4 @@
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 from actl.opcodes import RETURN
 
 
@@ -10,13 +10,13 @@ Signature = BuildClass('Signature')
 def _(cls, name, signature, body):
 	self = cls.super_(Function, '__call__').call()
 
-	self.setAttr('name', name)
-	self.setAttr('signature', signature)
+	self.setAttribute('name', name)
+	self.setAttribute('signature', signature)
 	if RETURN != body[-1]:
 		body += (
 			RETURN('None'),
 		)
-	self.setAttr('body', body)
+	self.setAttribute('body', body)
 
 	return self
 
@@ -25,5 +25,5 @@ def _(cls, name, signature, body):
 def _(cls, args):
 	self = cls.super_(Function, '__call__').call()
 
-	self.setAttr('args', args)
+	self.setAttribute('args', args)
 	return self

@@ -13,7 +13,7 @@ def test_pointOperator(execute):
 		opcodes.VARIABLE(name='__IV12')
 	]
 
-	assert execute.executed.scope['_'] is execute.scope['print'].getAttr('__call__')
+	assert execute.executed.scope['_'] is execute.scope['print'].getAttribute('__call__')
 
 
 def test_add(execute):

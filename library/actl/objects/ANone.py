@@ -1,5 +1,5 @@
 from actl.objects import AToPy
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 
 
 NoneType = BuildClass('NoneType')

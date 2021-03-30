@@ -3,7 +3,7 @@ from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 from actl.objects.object import AAttributeNotFound
 from actl.objects.object import Object
 
@@ -41,10 +41,10 @@ def _(self, *args, **kwargs):
 	return PyToA.call(res)
 
 
-@PyToA.addMethod('__getAttr__')
+@PyToA.addMethod('__getAttribute__')
 def _(self, key):
 	try:
-		return self.super_(PyToA, '__getAttr__').call(key)
+		return self.super_(PyToA, '__getAttribute__').call(key)
 	except AAttributeNotFound:
 		pass
 

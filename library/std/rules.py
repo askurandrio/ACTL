@@ -26,7 +26,7 @@ def _applySyntaxObjectsRule(parser, inp):
 	if not _hasAttr('__syntaxRule__')(parser, LTransactionBuffer(inp)):
 		return None
 
-	syntaxRule = parser.scope[inp[0].name].getAttr('__syntaxRule__')
+	syntaxRule = parser.scope[inp[0].name].getAttribute('__syntaxRule__')
 	return syntaxRule(parser, inp)
 
 
@@ -164,7 +164,7 @@ class UseCodeBlock:
 		var = inpRule.pop(_hasAttr('__useCodeBlock__')).one()
 		inpRule.pop(Token(':'))
 		code = self.popCodeBlock(self._parser, self._inp)
-		var = var.getAttr('__useCodeBlock__').call(code)
+		var = var.getAttribute('__useCodeBlock__').call(code)
 		return Buffer.of(var)
 
 	@classmethod

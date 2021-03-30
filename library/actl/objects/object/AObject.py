@@ -1,136 +1,39 @@
-import sys
-
-from actl.objects.object.utils import loadPropIfNeed
-from actl.objects.object.exceptions import AAttributeNotFound, AAttributeIsNotSpecial, AKeyNotFound
+from actl.objects.object.exceptions import AAttributeNotFound
+from actl.objects.object.AObjectBase import AObjectBase
 
 
-sys.setrecursionlimit(500)
-_default = object()
-
-
-class AObject:
-	_specialAttrs = {
-		'__class__': '_class',
-		'__getAttr__': '_getAttr',
-		'__self__': '_self',
-	}
-
-	def __init__(self, head):
-		self._head = head
-
-	@property
-	def _class(self):
-		return self._head['__class__']
-
-	@property
-	def _getAttr(self):
-		return self.findAttr('__getAttr__').get(self)
-
-	@property
-	def _self(self):
-		return self._head['__self__']
-
-	@property
-	def get(self):
-		get = self.getAttr('__get__')
-		return get.call
-
-	def getAttr(self, key):
+class AObject(AObjectBase):
+	def lookupAttribute(self, key):
 		try:
-			return self.getSpecialAttr(key)
-		except AAttributeIsNotSpecial:
+			return super().lookupAttribute(key)
+		except AAttributeNotFound(key).class_:
 			pass
 
-		return self._getAttr.call(key)
-
-	def setAttr(self, key, value=_default):
-		if value is not _default:
-			self._head[key] = value
-			return None
-
-		def decorator(value):
-			self._head[key] = value
-			return value
-
-		return decorator
-
-	def hasAttr(self, key):
+		class_ = self.getAttribute('__class__')
 		try:
-			self.getAttr(key)
-		except AAttributeNotFound:
-			return False
-		else:
-			return True
-
-	def call(self, *args, **kwargs):
-		func = self.getAttr('__call__').call
-		return func(*args, **kwargs)
-
-	def addPyMethod(self, name):
-		def decorator(func):
-			method = lambda *args, **kwargs: func(self, *args, **kwargs)
-			setattr(self, name, method)
-			return method
-
-		return decorator
-
-	def getSpecialAttr(self, key):
-		try:
-			propertyName = self._specialAttrs[key]
-		except KeyError as ex:
-			raise AAttributeIsNotSpecial(key) from ex
-
-		return getattr(self, propertyName)
-
-	def super_(self, for_, key, bind=True):
-		isClass = self._head.get('__isClass__')
-		if isClass:
-			parents = self._head['__parents__']
-		else:
-			parents = self.getAttr('__class__').getAttr('__parents__')
-
-		if for_ in parents:
-			parents = parents[parents.index(for_) + 1:]
-
-		for parent in parents:
-			if isClass:
-				try:
-					prop = parent.findAttr(key)
-				except AAttributeNotFound:
-					continue
-			else:
-				try:
-					prop = parent.getAttr('__self__').getItem(key)
-				except AKeyNotFound:
-					continue
-			if bind:
-				prop = loadPropIfNeed(self, prop)
-			return prop
-		raise AAttributeNotFound(key)
-
-	def findAttr(self, key):
-		try:
-			return self._head[key]
-		except KeyError:
+			return class_.lookupAttributeInSelf(key, self)
+		except AAttributeNotFound(key).class_:
 			pass
 
-		if self._head.get('__isClass__'):
-			return self.super_(self, key, bind=False)
+		return self.super_(class_, key)
 
-		self_ = self.getAttr('__class__').getAttr('__self__')
+	def _toString(self):
+		import actl.objects  # pylint: disable=cyclic-import, import-outside-toplevel
+
+		if id(self) in AObject._stack:
+			return '{...}'
+		AObject._stack.add(id(self))
+
 		try:
-			return self_.getItem(key)
-		except AKeyNotFound:
-			pass
-		try:
-			return self.super_(self.getAttr('__class__'), key, bind=False)
-		except AAttributeNotFound as ex:
-			raise AAttributeNotFound(key=key) from ex
+			string = actl.objects.String(self)
+			return string.toPyString()
+		except Exception as ex:
+			return f'Error during convert to String: {ex}'
 
 	def __eq__(self, other):
 		if not isinstance(other, AObject):
 			return False
-		return self._head == other._head
+		return self.head == other.head
 
 	def __hash__(self):
 		return hash(str(self))
@@ -139,23 +42,13 @@ class AObject:
 		return str(self)
 
 	def __str__(self):
-		def toStr():
-			from actl.objects.AToPy import AToPy  # pylint: disable=cyclic-import, import-outside-toplevel
-
-			if id(self) in AObject._stack:
-				return '{...}'
-			AObject._stack.add(id(self))
-
-			pyView = AToPy(self)
-			asStr = str(pyView)
-			return asStr
-
 		if hasattr(AObject, '_stack'):
-			return toStr()
+			return self._toString()
 
 		AObject._stack = set()
+
 		try:
-			asStr = toStr()
+			asStr = self._toString()
 		finally:
 			del AObject._stack
 

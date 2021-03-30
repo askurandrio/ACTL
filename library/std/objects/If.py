@@ -102,7 +102,7 @@ class IfSyntax:
 		return tuple(conditions), elseCode
 
 
-@If.setAttr('__syntaxRule__')
+@If.setAttribute('__syntaxRule__')
 @SyntaxRule.wrap(
 	Value(If),
 	Token(' '),

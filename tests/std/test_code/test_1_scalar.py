@@ -48,7 +48,7 @@ def test_emptyVector(execute):
 		opcodes.VARIABLE(name='__IV11')
 	]
 	vector = execute.executed.scope['_']
-	assert vector.getAttr('__class__') is Vector
+	assert vector.getAttribute('__class__') is Vector
 	assert Bool.call(vector) is Bool.False_
 
 
@@ -64,5 +64,5 @@ def test_vectorWithNumber(execute):
 		opcodes.VARIABLE(name='__IV11')
 	]
 	vector = execute.executed.scope['_']
-	assert vector.getAttr('__class__') is Vector
+	assert vector.getAttribute('__class__') is Vector
 	assert Bool.call(vector) is Bool.True_

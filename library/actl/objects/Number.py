@@ -1,7 +1,7 @@
 # pylint: disable=protected-access
 from actl.objects.Bool import Bool
 from actl.objects.AToPy import AToPy
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 
 
 Number = BuildClass('Number')

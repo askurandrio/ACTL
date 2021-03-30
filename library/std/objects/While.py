@@ -7,11 +7,11 @@ While = objects.BuildClass('While', objects.While)
 
 @While.addMethod('__useCodeBlock__')
 def _(self, parser):
-	newSelf = self.getAttr('__class__').call(self.getAttr('conditionFrame'), tuple(parser))
+	newSelf = self.getAttribute('__class__').call(self.getAttribute('conditionFrame'), tuple(parser))
 	return newSelf
 
 
-@While.setAttr('__syntaxRule__')
+@While.setAttribute('__syntaxRule__')
 @SyntaxRule.wrap(
 	Value(While),
 	Token(' '),

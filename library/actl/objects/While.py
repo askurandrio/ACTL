@@ -1,4 +1,4 @@
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 
 
 While = BuildClass('While')
@@ -8,8 +8,8 @@ While = BuildClass('While')
 def _(cls, conditionFrame, code=None):
 	self = cls.super_(While, '__call__').call()
 
-	self.setAttr('conditionFrame', conditionFrame)
+	self.setAttribute('conditionFrame', conditionFrame)
 	if code is not None:
-		self.setAttr('code', code)
+		self.setAttribute('code', code)
 
 	return self

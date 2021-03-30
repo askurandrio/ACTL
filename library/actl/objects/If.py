@@ -1,4 +1,4 @@
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 
 
 If = BuildClass('If')
@@ -12,8 +12,8 @@ def _(cls, ifCondition, *elifConditions, elseCode=None):
 
 	conditions = (ifCondition,) + elifConditions
 
-	self.setAttr('conditions', conditions)
+	self.setAttribute('conditions', conditions)
 	if elseCode is not None:
-		self.setAttr('elseCode', elseCode)
+		self.setAttribute('elseCode', elseCode)
 
 	return self

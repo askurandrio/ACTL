@@ -11,7 +11,7 @@ def test_objectAsPyStr():
 
 def test_recursiveObjectAsStr():
 	obj = Object.call()
-	obj.setAttr('obj', obj)
+	obj.setAttribute('obj', obj)
 	assert str(obj) == "Object<{'obj': {...}}>"
 
 

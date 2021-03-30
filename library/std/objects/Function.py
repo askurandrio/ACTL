@@ -8,7 +8,7 @@ from std.rules import UseCodeBlock
 Function = objects.BuildClass('Function', objects.Function)
 
 
-@Function.setAttr('__syntaxRule__')
+@Function.setAttribute('__syntaxRule__')
 @SyntaxRule.wrap(
 	Value(Function),
 	Token(' '),

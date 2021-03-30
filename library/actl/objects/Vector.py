@@ -1,5 +1,5 @@
 from actl.objects.Bool import Bool
-from actl.objects.BuildClass import BuildClass
+from actl.objects.object import BuildClass
 
 
 Vector = BuildClass('Vector')

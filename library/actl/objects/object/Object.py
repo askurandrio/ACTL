@@ -1,32 +1,33 @@
+from actl.objects.object.NativeMethod import NativeMethod
 from actl.objects.object.AObject import AObject
-from actl.objects.object.native import nativeMethod, nativeDict
-from actl.objects.object.exceptions import AAttributeIsNotSpecial
-from actl.objects.object.utils import loadPropIfNeed
+from actl.objects.object.AObjectClass import AObjectClass
 
 
-def Object__getAttr(self, key):
-	try:
-		return self.getSpecialAttr(key)
-	except AAttributeIsNotSpecial:
-		pass
-
-	attr = self.findAttr(key)
-	return loadPropIfNeed(self, attr)
+def Object__getAttribute(self, key):
+	return self.lookupAttribute(key)
 
 
-def Object__call(cls):
-	self = AObject({})
-	self.setAttr('__class__', cls)
-	return self
+def Object__call(self, *args, **kwargs):
+	instance = AObject({'__class__': self})
+	instance.getAttribute('__init__').call(*args, **kwargs)
+	return instance
 
 
-Object = AObject({
+def object__init(self):
+	pass
+
+
+def object__getAttribute(self, key):
+	return self.lookupAttribute(key)
+
+
+Object = AObjectClass({
 	'__name__': 'Object',
-	'__isClass__': True,
 	'__parents__': (),
-	'__getAttr__': nativeMethod('Object.__getAttr__', Object__getAttr),
-	'__call__': nativeMethod('Object.__call__', Object__call),
-	'__self__': nativeDict({
-		'__getAttr__': nativeMethod('Object.__getAttr__', Object__getAttr)
-	})
+	'__getAttribute__': NativeMethod(Object__getAttribute),
+	'__call__': NativeMethod(Object__call),
+	'__self__': {
+		'__init__': NativeMethod(object__init),
+		'__getAttribute__': NativeMethod(object__getAttribute)
+	}
 })
