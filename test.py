@@ -3,7 +3,7 @@
 # cond = lambda num: num < 15000
 #
 # while cond(counter):
-#    counter = incr(counter)
+#	 counter = incr(counter)
 
 
 for _ in range(100000):
@@ -11,7 +11,7 @@ for _ in range(100000):
 
 #
 # def check():
-#     breakpoint()
+#	  breakpoint()
 #
 # from multiprocessing import Process
 # process = Process(target=check)

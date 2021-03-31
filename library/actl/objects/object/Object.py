@@ -1,6 +1,5 @@
-from actl.objects.object.NativeMethod import NativeMethod
 from actl.objects.object.AObject import AObject
-from actl.objects.object.AObjectClass import AObjectClass
+from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
 
 
 def Object__getAttribute(self, key):
@@ -21,13 +20,7 @@ def object__getAttribute(self, key):
 	return self.lookupAttribute(key)
 
 
-Object = AObjectClass({
-	'__name__': 'Object',
-	'__parents__': (),
-	'__getAttribute__': NativeMethod(Object__getAttribute),
-	'__call__': NativeMethod(Object__call),
-	'__self__': {
-		'__init__': NativeMethod(object__init),
-		'__getAttribute__': NativeMethod(object__getAttribute)
-	}
-})
+Object = makeClass('Object')
+Object.setAttribute('__name__', 'Object')
+addMethodToClass(Object, '__call__')(Object__call)
+addMethod(Object, '__getAttribute__')(Object__getAttribute)

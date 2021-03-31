@@ -3,7 +3,7 @@ from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
 from std.rules import UseCodeBlock
 
-If = objects.BuildClass('If', objects.If)
+If = objects.AObjectClass('If', objects.If)
 
 
 class IfSyntax:

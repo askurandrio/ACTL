@@ -1,46 +1,44 @@
 from actl.objects.object.exceptions import AAttributeNotFound, AAttributeIsNotSpecial
 from actl.objects.object.AObjectBase import AObjectBase
+from actl.objects.object.NativeMethod import NativeMethod
 
 
 class AObjectClass(AObjectBase):
+	Object = None
+
+	def __init__(self, name):
+		head = {
+			'__name__': name,
+			'__self__': {}
+		}
+		if self.Object is not None:
+			head = {
+				**head,
+				'__parents__': self.Object
+			}
+		super().__init__(head)
+
 	def _lookupSpecialAttribute(self, key):
 		try:
-			return super()._lookupSpecialAttribute(key)
+			return self._lookupSpecialAttribute(key)
 		except AAttributeIsNotSpecial(key).class_:
 			pass
-		if key in ('__self__', '__parents__'):
-			return super().lookupAttribute(key)
-		raise AAttributeIsNotSpecial(key)
+
+		if key not in '__class__':
+			raise AAttributeIsNotSpecial(key)
 
 	def lookupAttribute(self, key):
 		try:
-			attribute = super().lookupAttribute(key)
-		except AAttributeNotFound(key).class_:
-			pass
-		else:
-			return self.bindProperty(attribute)
-
-		try:
-			return self.super_(None, key, bindTo=self)
+			return super().lookupAttribute(key)
 		except AAttributeNotFound(key).class_:
 			pass
 
-	def lookupAttributeInSelf(self, key, bindTo=None):
-		if bindTo is None:
-			bindTo = self
-
-		classSelf = self.getAttribute('__self__')
 		try:
-			attribute = classSelf[key]
-		except KeyError as ex:
-			raise AAttributeNotFound(key) from ex
+			return self.super_(None, key)
+		except AAttributeNotFound(key).class_:
+			pass
 
-		return bindTo.bindProperty(attribute)
-
-	def super_(self, for_, key, bindTo=None):
-		if bindTo is None:
-			bindTo = self
-
+	def super_(self, for_, key, bind=True):
 		parents = self.getAttribute('__parents__')
 
 		if (for_ is not None) and (for_ in parents):
@@ -48,9 +46,11 @@ class AObjectClass(AObjectBase):
 
 		for parent in parents:
 			try:
-				attribute = parent.lookupAttribute(key)
+				attribute = AObjectBase.lookupAttribute(parent, key)
 			except AAttributeNotFound:
 				continue
-			return bindTo.bindProperty(attribute)
+			else:
+				if bind:
+					return self.bindAttribute(attribute)
+				return attribute
 
-		return super().super_(for_, key, bindTo)

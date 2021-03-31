@@ -1,9 +1,9 @@
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 
 
-If = BuildClass('If')
-elif_ = BuildClass('_Elif').call()
-else_ = BuildClass('_Else').call()
+If = AObjectClass('If')
+elif_ = AObjectClass('_Elif').call()
+else_ = AObjectClass('_Else').call()
 
 
 @If.addMethodToClass('__call__')

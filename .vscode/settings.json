@@ -1,0 +1,9 @@
+{
+    "python.pythonPath": "/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.analysis.extraPaths": [
+        "./library/"
+    ],
+    "editor.tabSize": 3,
+    "editor.insertSpaces": true,
+}

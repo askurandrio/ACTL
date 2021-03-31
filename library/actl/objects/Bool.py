@@ -1,9 +1,9 @@
 # pylint: disable=protected-access
 from actl.objects.AToPy import AToPy
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 
 
-Bool = BuildClass('Bool')
+Bool = AObjectClass('Bool')
 
 Bool.True_ = Bool.call()
 Bool.True_._value = True

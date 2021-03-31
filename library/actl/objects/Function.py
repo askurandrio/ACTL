@@ -1,9 +1,9 @@
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 from actl.opcodes import RETURN
 
 
-Function = BuildClass('Function')
-Signature = BuildClass('Signature')
+Function = AObjectClass('Function')
+Signature = AObjectClass('Signature')
 
 
 @Function.addMethodToClass('__call__')

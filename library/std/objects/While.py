@@ -2,7 +2,7 @@ from actl import objects
 from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Or, End, Frame, CustomTemplate
 
-While = objects.BuildClass('While', objects.While)
+While = objects.AObjectClass('While', objects.While)
 
 
 @While.addMethod('__useCodeBlock__')

@@ -3,11 +3,11 @@ from actl.objects.object.AObject import AObject
 
 
 class NativeObject(AObject):
-	def _lookupSpecialAttribute(self, key):
+	def lookupSpecialAttribute(self, key):
 		from actl.objects.object.Object import Object
 
 		if key != '__class__':
-			return super()._lookupSpecialAttribute(key)
+			return super().lookupSpecialAttribute(key)
 
 		return Object
 
@@ -25,9 +25,9 @@ class NativeMethod(NativeObject):
 		super().__init__({})
 		self._get = get
 
-	def _lookupSpecialAttribute(self, key):
+	def lookupSpecialAttribute(self, key):
 		if key != '__get__':
-			return super()._lookupSpecialAttribute(key)
+			return super().lookupSpecialAttribute(key)
 
 		return self._get
 

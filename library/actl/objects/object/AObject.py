@@ -1,21 +1,19 @@
-from actl.objects.object.exceptions import AAttributeNotFound
+from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
 from actl.objects.object.AObjectBase import AObjectBase
 
 
 class AObject(AObjectBase):
-	def lookupAttribute(self, key):
-		try:
-			return super().lookupAttribute(key)
-		except AAttributeNotFound(key).class_:
-			pass
+	def bindAttribute(self, attribute):
+		if not isinstance(attribute, AObject):
+			return attribute
 
-		class_ = self.getAttribute('__class__')
 		try:
-			return class_.lookupAttributeInSelf(key, self)
-		except AAttributeNotFound(key).class_:
-			pass
+			attributeGet = attribute.getAttribute('__get__')
+		except AAttributeNotFound('__get__').class_:
+			return attribute
 
-		return self.super_(class_, key)
+		attributeGetCall = attributeGet.call
+		return attributeGetCall(self)
 
 	def _toString(self):
 		import actl.objects  # pylint: disable=cyclic-import, import-outside-toplevel

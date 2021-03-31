@@ -3,12 +3,12 @@ from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 from actl.objects.object import AAttributeNotFound
 from actl.objects.object import Object
 
 
-PyToA = BuildClass('PyToA')
+PyToA = AObjectClass('PyToA')
 
 
 @PyToA.addMethodToClass('__call__')

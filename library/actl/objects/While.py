@@ -1,7 +1,7 @@
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 
 
-While = BuildClass('While')
+While = AObjectClass('While')
 
 
 @While.addMethodToClass('__call__')

@@ -1,8 +1,8 @@
 from actl.objects.Bool import Bool
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 
 
-Vector = BuildClass('Vector')
+Vector = AObjectClass('Vector')
 
 
 @Vector.addMethodToClass('__call__')

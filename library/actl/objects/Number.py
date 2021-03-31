@@ -1,10 +1,10 @@
 # pylint: disable=protected-access
 from actl.objects.Bool import Bool
 from actl.objects.AToPy import AToPy
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 
 
-Number = BuildClass('Number')
+Number = AObjectClass('Number')
 
 
 @Number.addMethodToClass('__call__')

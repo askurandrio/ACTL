@@ -5,7 +5,7 @@ from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule
 from std.rules import UseCodeBlock
 
 
-Function = objects.BuildClass('Function', objects.Function)
+Function = objects.AObjectClass('Function', objects.Function)
 
 
 @Function.setAttribute('__syntaxRule__')

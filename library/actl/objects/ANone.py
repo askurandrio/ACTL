@@ -1,8 +1,8 @@
 from actl.objects import AToPy
-from actl.objects.object import BuildClass
+from actl.objects.object import AObjectClass
 
 
-NoneType = BuildClass('NoneType')
+NoneType = AObjectClass('NoneType')
 ANone = NoneType.call()
 
 

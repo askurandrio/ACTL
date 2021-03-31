@@ -12,13 +12,39 @@ class AObjectBase:
 
 	def getAttribute(self, key):
 		try:
-			return self._lookupSpecialAttribute(key)
+			return self.lookupSpecialAttribute(key)
 		except AAttributeIsNotSpecial(key).class_:
 			pass
+		
+		try:
+			getAttributeFunc = self.lookupAttributeInHead('__getAttribute__')
+		except AAttributeNotFound('__getAttribute__').class_:
+			getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
+			bindGetAttribute = self.bindAttribute(getAttribute)
+			getAttributeFunc = bindGetAttribute.call
 
-		getAttribute = self.lookupAttribute('__getAttribute__')
-		getAttributeCall = getAttribute.call
-		return getAttributeCall(key)
+		return getAttributeFunc(key)
+
+	def lookupAttributeInClsSelf(self, key):
+		class_ = self.getAttribute('__class__')
+		parents = class_.getAttribute('__parents__')
+
+		for cls in [class_, *parents]:
+			self_ = cls.getAttribute('__self__')
+			try:
+				return self_[key]
+			except KeyError:
+				pass
+
+		raise AAttributeNotFound(key)
+
+	def lookupAttributeInHead(self, key):
+		try:
+			return self._head[key]
+		except KeyError:
+			pass
+
+		raise AAttributeNotFound(key)
 
 	def setAttribute(self, key, value):
 		self._head[key] = value
@@ -36,27 +62,11 @@ class AObjectBase:
 		funcCall = func.call
 		return funcCall(*args, **kwargs)
 
-	def _lookupSpecialAttribute(self, key):
-		if key != '__class__':
+	def lookupSpecialAttribute(self, key):
+		if key not in ('__class__', '__self__', '__parents__'):
 			raise AAttributeIsNotSpecial(key)
 
-		try:
-			return self._head[key]
-		except KeyError as ex:
-			raise AAttributeNotFound(key=key) from ex
-
-	def lookupAttribute(self, key):
-		try:
-			return self._lookupSpecialAttribute(key)
-		except AAttributeIsNotSpecial(key).class_:
-			pass
-
-		try:
-			return self._head[key]
-		except KeyError:
-			pass
-
-		raise AAttributeNotFound(key=key)
+		return self.lookupAttributeInHead(key)
 
 	def __eq__(self, other):
 		if not isinstance(other, AObjectBase):
