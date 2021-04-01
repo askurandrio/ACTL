@@ -145,7 +145,7 @@ def importFrom(arg):
 		from_ = importlib.import_module(from_)
 	except ImportError as ex:
 		raise RuntimeError(f'Error importing from_ at py-execExternalFunction: {arg}') from ex
-	
+
 	try:
 		return getattr(from_, import_)
 	except AttributeError as ex:

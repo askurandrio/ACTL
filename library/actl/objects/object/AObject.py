@@ -1,8 +1,102 @@
+import sys
+
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
-from actl.objects.object.AObjectBase import AObjectBase
 
 
-class AObject(AObjectBase):
+sys.setrecursionlimit(500)
+
+
+class AObject:
+	def __init__(self, head):
+		self._head = head
+
+	@property
+	def getAttribute(self):
+		try:
+			getAttributeFunc = self.lookupAttributeInHead('__getAttribute__')
+		except AAttributeNotFound('__getAttribute__').class_:
+			getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
+			getAttributeFunc = self.bindAttribute(getAttribute)
+
+		return getAttributeFunc.call
+
+	@property
+	def get(self):
+		get = self.getAttribute('__get__')
+		return get.call
+
+	@property
+	def super_(self):
+		try:
+			superGetAttributeFunc = self.lookupAttributeInHead('__superGetAttribute__')
+		except AAttributeNotFound('__superGetAttribute__').class_:
+			superGetAttribute = self.lookupAttributeInClsSelf('__superGetAttribute__')
+			bindSuperGetAttribute = self.bindAttribute(superGetAttribute)
+			superGetAttributeFunc = bindSuperGetAttribute.call
+
+		return superGetAttributeFunc
+
+	def lookupAttributeInClsSelf(self, key):
+		class_ = self.class_
+		parents = class_.parents
+
+		for cls in [class_, *parents]:
+			self_ = cls.self_
+			try:
+				return self_[key]
+			except KeyError:
+				pass
+
+		raise AAttributeNotFound(key)
+
+	def lookupAttributeInHead(self, key):
+		try:
+			return self._head[key]
+		except KeyError:
+			pass
+
+		raise AAttributeNotFound(key)
+
+	def setAttribute(self, key, value):
+		self._head[key] = value
+
+	def hasAttribute(self, key):
+		try:
+			self.getAttribute(key)
+		except AAttributeNotFound(key).class_:
+			return False
+		else:
+			return True
+
+	@property
+	def call(self):
+		func = self.getAttribute('__call__')
+		return func.call
+
+	@property
+	def class_(self):
+		return self.lookupAttributeInHead('__class__')
+
+	@property
+	def self_(self):
+		return self.lookupAttributeInHead('__self__')
+
+	@property
+	def parents(self):
+		return self.lookupAttributeInHead('__parents__')
+
+	def lookupSpecialAttribute(self, key):
+		if key == '__class__':
+			return self.class_
+		
+		if key == '__self__':
+			return self.self_
+
+		if key == '__parents__':
+			return self.parents
+
+		raise AAttributeIsNotSpecial(key)
+
 	def bindAttribute(self, attribute):
 		if not isinstance(attribute, AObject):
 			return attribute

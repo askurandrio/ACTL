@@ -1,5 +1,5 @@
 from actl.objects.AToPy import AToPy
-from actl.objects.object import Object, makeClass
+from actl.objects.object import Object
 from actl.objects.String import String
 from actl.objects.object.utils import addMethod, addMethodToClass
 
