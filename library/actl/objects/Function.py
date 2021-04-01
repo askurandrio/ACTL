@@ -1,12 +1,13 @@
-from actl.objects.object import AObjectClass
+from actl.objects.object import makeClass
+from actl.objects.object.utils import addMethodToClass
 from actl.opcodes import RETURN
 
 
-Function = AObjectClass('Function')
-Signature = AObjectClass('Signature')
+Function = makeClass('Function')
+Signature = makeClass('Signature')
 
 
-@Function.addMethodToClass('__call__')
+@addMethodToClass(Function, '__call__')
 def _(cls, name, signature, body):
 	self = cls.super_(Function, '__call__').call()
 
@@ -21,7 +22,7 @@ def _(cls, name, signature, body):
 	return self
 
 
-@Signature.addMethodToClass('__call__')
+@addMethodToClass(Signature, '__call__')
 def _(cls, args):
 	self = cls.super_(Function, '__call__').call()
 

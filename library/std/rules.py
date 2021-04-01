@@ -17,7 +17,7 @@ def _hasAttr(attr):
 				return None
 			token = scope[token.name]
 
-		return token.hasAttr(attr)
+		return token.hasAttribute(attr)
 
 	return CustomTemplate.createToken(rule, f'_hasAttr({attr})')
 

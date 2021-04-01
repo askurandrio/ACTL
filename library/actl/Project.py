@@ -2,6 +2,7 @@
 import os
 import copy
 import logging
+import importlib
 
 import yaml
 
@@ -134,12 +135,18 @@ def _recursiveUpdate(base, new):
 
 
 def importFrom(arg):
-	globalScope = {}
 	try:
 		from_ = arg['from']
 		import_ = arg['import']
-		exec(f'from {from_} import {import_}', globalScope)  # pylint: disable=exec-used
-	except (KeyError, ImportError, AttributeError) as ex:
+	except KeyError as ex:
 		raise RuntimeError(f'Error during getting py-execExternalFunction: {arg}') from ex
 
-	return globalScope[import_]
+	try:
+		from_ = importlib.import_module(from_)
+	except ImportError as ex:
+		raise RuntimeError(f'Error importing from_ at py-execExternalFunction: {arg}') from ex
+	
+	try:
+		return getattr(from_, import_)
+	except AttributeError as ex:
+		raise RuntimeError(f'Error getting import_ at py-execExternalFunction: {arg}') from ex

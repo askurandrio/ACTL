@@ -2,40 +2,73 @@
 from actl.objects.object.AObject import AObject
 
 
-class NativeObject(AObject):
-	def lookupSpecialAttribute(self, key):
-		from actl.objects.object.Object import Object
-
-		if key != '__class__':
-			return super().lookupSpecialAttribute(key)
-
-		return Object
-
-
-class NativeMethod(NativeObject):
+class NativeMethod(AObject):
 	def __init__(self, rawMethod):
 		@NativeFunction
 		def get(aSelf):
-			@NativeFunction
-			def method(*args, **kwargs):
-				return rawMethod(aSelf, *args, **kwargs)
-
-			return method
+			return NativeFunction(self._rawMethod).apply(aSelf)
 
 		super().__init__({})
+		self._rawMethod = rawMethod
 		self._get = get
 
-	def lookupSpecialAttribute(self, key):
-		if key != '__get__':
-			return super().lookupSpecialAttribute(key)
+	@property
+	def class_(self):
+		from actl.objects.object import Object
 
+		return Object
+
+	@property
+	def get(self):
 		return self._get
 
+	def toPyString(self):
+		return f'{type(self).__name__}({self._rawMethod})'
 
-class NativeFunction(NativeObject):
+
+class NativeFunction(AObject):
 	def __init__(self, function):
 		self._function = function
 		super().__init__({})
 
-	def call(self, *args, **kwargs):
-		return self._function(*args, **kwargs)
+	@property
+	def class_(self):
+		from actl.objects.object import Object
+
+		return Object
+
+	@property
+	def call(self):
+		return self._function
+
+	def toPyString(self):
+		return f'{type(self).__name__}({self._function})'
+
+	def apply(self, *args):
+		return type(self)(_AppliedFunction(self._function, *args))
+
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+		return self._function == other._function
+
+
+class _AppliedFunction:
+	def __init__(self, function, *args):
+		self._function = function
+		self._args = args
+
+	def __call__(self, *args, **kwargs):
+		return self._function(*self._args, *args, **kwargs)
+
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+
+		return (
+			(self._function == other._function) and
+			(self._args == other._args)
+		)
+
+	def __str__(self):
+		return f'{type(self)}({self._function}, *{self._args})'

@@ -3,15 +3,16 @@ from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.object import AObjectClass
+from actl.objects.object import makeClass
 from actl.objects.object import AAttributeNotFound
 from actl.objects.object import Object
+from actl.objects.object.utils import addMethod, addMethodToClass
 
 
-PyToA = AObjectClass('PyToA')
+PyToA = makeClass('PyToA')
 
 
-@PyToA.addMethodToClass('__call__')
+@addMethodToClass(PyToA, '__call__')
 def _(cls, value):
 	if isinstance(value, type(Object)):
 		return value
@@ -27,13 +28,13 @@ def _(cls, value):
 	return self
 
 
-@PyToA.addMethodToClass('eval')
+@addMethodToClass(PyToA, 'eval')
 def _(cls, code):
 	code = str(AToPy(code))
 	return cls.call(eval(code))  # pylint: disable=eval-used
 
 
-@PyToA.addMethod('__call__')
+@addMethod(PyToA, '__call__')
 def _(self, *args, **kwargs):
 	args = [AToPy(arg) for arg in args]
 	kwargs = {key: AToPy(value) for key, value in kwargs.items()}
@@ -41,7 +42,7 @@ def _(self, *args, **kwargs):
 	return PyToA.call(res)
 
 
-@PyToA.addMethod('__getAttribute__')
+@addMethod(PyToA, '__getAttribute__')
 def _(self, key):
 	try:
 		return self.super_(PyToA, '__getAttribute__').call(key)
@@ -58,17 +59,17 @@ def _(self, key):
 	raise AAttributeNotFound(key)
 
 
-@PyToA.addMethod(AToPy)
+@addMethod(PyToA, AToPy)
 def _(self):
 	return self._value
 
 
-@PyToA.addMethod(Bool)
+@addMethod(PyToA, Bool)
 def _(self):
 	res = bool(self._value)
 	return Bool.True_ if res else Bool.False_
 
 
-@PyToA.addMethod(String)
+@addMethod(PyToA, String)
 def _(self):
 	return String.call(str(self._value))

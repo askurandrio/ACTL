@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ACTL debug",
+            "name": "actl",
             "type": "python",
             "request": "launch",
             "program": "./library/actl/run.py",
@@ -15,14 +15,26 @@
             }
         },
         {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "./library/"
-            }
-        }
+         "name": "tests1",
+         "type": "python",
+         "request": "launch",
+         "module": "pytest",
+         "args": ["-x", "./tests", "-vv"],
+         "console": "integratedTerminal",
+         "env": {
+             "PYTHONPATH": "./library/"
+         }
+     },
+     {
+      "name": "run current file",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "env": {
+          "PYTHONPATH": "./library/"
+      }
+  }
+     }
     ]
 }

@@ -1,12 +1,13 @@
-from actl.objects.object import AObjectClass
+from actl.objects.object import makeClass
+from actl.objects.object.utils import addMethodToClass
 
 
-If = AObjectClass('If')
-elif_ = AObjectClass('_Elif').call()
-else_ = AObjectClass('_Else').call()
+If = makeClass('If')
+elif_ = makeClass('_Elif').call()
+else_ = makeClass('_Else').call()
 
 
-@If.addMethodToClass('__call__')
+@addMethodToClass(If, '__call__')
 def _(cls, ifCondition, *elifConditions, elseCode=None):
 	self = cls.super_(If, '__call__').call()
 

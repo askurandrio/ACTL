@@ -1,10 +1,11 @@
-from actl.objects.object import AObjectClass
+from actl.objects.object import makeClass
+from actl.objects.object.utils import addMethodToClass
 
 
-While = AObjectClass('While')
+While = makeClass('While')
 
 
-@While.addMethodToClass('__call__')
+@addMethodToClass(While, '__call__')
 def _(cls, conditionFrame, code=None):
 	self = cls.super_(While, '__call__').call()
 

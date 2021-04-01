@@ -1,0 +1,7 @@
+[*.py]
+indent_style = tab
+indent_size = 3
+
+[*.yaml]
+indent_size = 2
+indent_style = space

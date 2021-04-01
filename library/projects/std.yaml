@@ -1,40 +1,40 @@
 -  py-execExternalFunction:
-		from: projects.std
-		import: loadHandlerPyExternalKey
+    from: projects.std
+    import: loadHandlerPyExternalKey
 
 
 -  py-externalKey:
-		from: std
-		import: RULES
-		name: rules
-		rawUse: true
+    from: std
+    import: RULES
+    name: rules
+    rawUse: true
 
 
 -  py-externalKey:
-		from: projects.std
-		import: getScope
-		name: scope
+    from: projects.std
+    import: getScope
+    name: scope
 
 
 -  py-externalKey:
-		from: projects.std
-		import: getInput
-		name: input
+    from: projects.std
+    import: getInput
+    name: input
 
 
 -  py-externalKey:
-		from: projects.std
-		import: getParser
-		name: parser
+    from: projects.std
+    import: getParser
+    name: parser
 
 
 -  py-externalKey:
-		from: projects.std
-		import: getExecutor
-		name: executor
+    from: projects.std
+    import: getExecutor
+    name: executor
 
 
 -  py-externalKey:
-		from: projects.std
-		import: getBuild
-		name: build
+    from: projects.std
+    import: getBuild
+    name: build

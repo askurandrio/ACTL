@@ -5,10 +5,9 @@ from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule
 from std.rules import UseCodeBlock
 
 
-Function = objects.AObjectClass('Function', objects.Function)
+Function = objects.makeClass('Function', (objects.Function,))
 
 
-@Function.setAttribute('__syntaxRule__')
 @SyntaxRule.wrap(
 	Value(Function),
 	Token(' '),
@@ -17,7 +16,7 @@ Function = objects.AObjectClass('Function', objects.Function)
 	useParser=True,
 	manualApply=True
 )
-def _(parser, inp):
+def _syntaxRule(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Value(Function), Token(' '))
 	name = inpRule.pop(IsInstance(VARIABLE)).one().name
@@ -42,3 +41,6 @@ def _parseSignature(inpRule):
 
 	signature = objects.Signature.call(args)
 	return signature
+
+
+Function.setAttribute('__syntaxRule__', _syntaxRule)

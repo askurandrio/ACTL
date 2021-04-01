@@ -1,9 +1,11 @@
 # pylint: disable=protected-access
 from actl.objects.AToPy import AToPy
-from actl.objects.object import AObjectClass
+from actl.objects.object import makeClass
+from actl.objects.object.Object import Object
+from actl.objects.object.utils import addMethod, addMethodToClass
 
 
-Bool = AObjectClass('Bool')
+Bool = makeClass('Bool')
 
 Bool.True_ = Bool.call()
 Bool.True_._value = True
@@ -12,7 +14,7 @@ Bool.False_ = Bool.call()
 Bool.False_._value = False
 
 
-@Bool.addMethodToClass('__call__')
+@addMethodToClass(Bool, '__call__')
 def _(_, val):
 	if val in (Bool.True_, Bool.False_):
 		return val
@@ -20,6 +22,6 @@ def _(_, val):
 	return val.getAttribute(Bool).call()
 
 
-@Bool.addMethod(AToPy)
+@addMethod(Bool, AToPy)
 def _(self):
 	return self._value

@@ -1,9 +1,18 @@
 {
+   "python.languageServer": "Pylance",
+    "python.analysis.completeFunctionParens": true,
     "python.pythonPath": "/bin/python",
     "python.linting.pylintEnabled": true,
     "python.analysis.extraPaths": [
-        "./library/"
+        "/mnt/c/Git/ACTL/library/"
     ],
-    "editor.tabSize": 3,
-    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "[python]": {
+        "editor.tabSize": 3,
+        "editor.insertSpaces": true,
+    },
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": false,
+   }
 }

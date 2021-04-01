@@ -1,24 +1,27 @@
 from actl import objects
 from actl.Buffer import Buffer
+from actl.objects.object.utils import addMethod
 from actl.syntax import SyntaxRule, Value, Token, Or, End, Frame, CustomTemplate
 
-While = objects.AObjectClass('While', objects.While)
+While = objects.makeClass('While', (objects.While,))
 
 
-@While.addMethod('__useCodeBlock__')
+@addMethod(While, '__useCodeBlock__')
 def _(self, parser):
 	newSelf = self.getAttribute('__class__').call(self.getAttribute('conditionFrame'), tuple(parser))
 	return newSelf
 
 
-@While.setAttribute('__syntaxRule__')
 @SyntaxRule.wrap(
 	Value(While),
 	Token(' '),
 	CustomTemplate.asArg(Frame(Token(':')), 'conditionFrame'),
 	CustomTemplate.asArg(Or((End,), (Token(':'),)), 'end')
 )
-def _(_, _1, conditionFrame, end):
+def _syntaxRule(_, _1, conditionFrame, end):
 	res = Buffer.of(While.call(conditionFrame))
 	res.append(end.one())
 	return res
+
+
+While.setAttribute('__syntaxRule__', _syntaxRule)

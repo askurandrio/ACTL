@@ -90,10 +90,12 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION)
-def _(executor, opcode):
+def _ExecutorHandler_callFunction(executor, opcode):
 	function = executor.scope[opcode.function]
 
-	if Function in function.getAttribute('__class__').getAttribute('__parents__'):
+	functionClass = function.getAttribute('__class__')
+	functionClassParents = functionClass.getAttribute('__parents__')
+	if Function in functionClassParents:
 		return _executeFunction(executor, opcode)
 
 	assert opcode.typeb == '('
@@ -144,7 +146,7 @@ def _(executor, opcode):
 			yield _Frame(code)
 			return
 
-	if opcode.hasAttr('elseCode'):
+	if opcode.hasAttribute('elseCode'):
 		yield _Frame(opcode.getAttribute('elseCode'))
 
 

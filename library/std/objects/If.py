@@ -3,7 +3,7 @@ from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
 from std.rules import UseCodeBlock
 
-If = objects.AObjectClass('If', objects.If)
+If = objects.makeClass('If', (objects.If,))
 
 
 class IfSyntax:
@@ -102,7 +102,6 @@ class IfSyntax:
 		return tuple(conditions), elseCode
 
 
-@If.setAttribute('__syntaxRule__')
 @SyntaxRule.wrap(
 	Value(If),
 	Token(' '),
@@ -110,5 +109,8 @@ class IfSyntax:
 	useParser=True,
 	manualApply=True
 )
-def _(parser, inp):
+def _syntaxRule(parser, inp):
 	return IfSyntax(parser, inp).parse()
+
+
+If.setAttribute('__syntaxRule__', _syntaxRule)

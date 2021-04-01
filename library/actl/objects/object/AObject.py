@@ -8,7 +8,7 @@ class AObject(AObjectBase):
 			return attribute
 
 		try:
-			attributeGet = attribute.getAttribute('__get__')
+			attributeGet = attribute.get
 		except AAttributeNotFound('__get__').class_:
 			return attribute
 
@@ -16,22 +16,25 @@ class AObject(AObjectBase):
 		return attributeGetCall(self)
 
 	def _toString(self):
-		import actl.objects  # pylint: disable=cyclic-import, import-outside-toplevel
+		from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 
 		if id(self) in AObject._stack:
 			return '{...}'
 		AObject._stack.add(id(self))
 
-		try:
-			string = actl.objects.String(self)
-			return string.toPyString()
-		except Exception as ex:
-			return f'Error during convert to String: {ex}'
+		string = String.call(self)
+		return string.toPyString()
+
+	def toPyString(self):
+		name = self.getAttribute('__class__').getAttribute('__name__')
+		head = self._head
+		head = {key: value for key, value in head.items() if key != '__class__'}
+		return f'{name}<{head}>'
 
 	def __eq__(self, other):
 		if not isinstance(other, AObject):
 			return False
-		return self.head == other.head
+		return self._head == other._head
 
 	def __hash__(self):
 		return hash(str(self))

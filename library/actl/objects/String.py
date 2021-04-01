@@ -1,24 +1,34 @@
 # pylint: disable=protected-access
 from actl.objects.object import Object, class_
-from actl.objects.object.utils import addMethodToClass
+from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
 
 
 class _AString(type(Object)):
+	def toPyString(self):
+		return self._value
+
+
+class _AStringClass(type(Object)):
 	def __str__(self):
-		name = self.getAttribute('__name__')
-		return f"class '{name}'"
+		return "class 'String'"
 
 
-String = _AString({
+String = _AStringClass({
 	'__name__': 'String',
-	'__self__': {},
 	'__class__': class_,
 	'__parents__': (Object,),
+	'__self__': {}
 })
 
 
 @addMethodToClass(String, '__call__')
-def _(cls, value=''):
-	self = cls.super_(String, '__call__').call()
+def String__call(cls, value=''):
+	if isinstance(value, type(Object)):
+		valueGetAttribute = value.getAttribute
+		valueToString = valueGetAttribute(String)
+		valueToStringFunc = valueToString.call
+		return valueToStringFunc()
+
+	self = _AString({'__class__': cls})
 	self._value = value
 	return self

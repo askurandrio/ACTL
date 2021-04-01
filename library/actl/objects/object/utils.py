@@ -3,12 +3,19 @@ from actl.objects.object.NativeMethod import NativeMethod
 from actl.objects.object.class_ import class_
 
 
-def makeClass(name):
+def makeClass(name, parents=()):
+	if makeClass.Object:
+		parents = (*parents, makeClass.Object)
+
 	return AObject({
 		'__name__': name,
 		'__class__': class_,
+		'__parents__': parents,
 		'__self__': {}
 	})
+
+
+makeClass.Object = None
 
 
 def addMethod(cls, name):

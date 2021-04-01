@@ -7,7 +7,7 @@ class _MetaAToPy(type):
 		if not isinstance(value, type(Object)):
 			return value
 
-		if value.hasAttr(AToPy):
+		if value.hasAttribute(AToPy):
 			return value.getAttribute(AToPy).call()
 
 		return super().__call__(value)

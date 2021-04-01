@@ -31,6 +31,7 @@ def getScope(_):
 		('True', 'objects.Bool.True_'),
 		('False', 'objects.Bool.False_'),
 		('Bool', 'objects.Bool'),
+		('Object', 'objects.Object'),
 		('String', 'objects.String'),
 		('Number', 'objects.Number'),
 		('elif', 'objects.elif_'),
