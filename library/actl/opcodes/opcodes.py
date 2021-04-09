@@ -1,30 +1,8 @@
 from .AnyOpCode import DynamicOpCode
 
 
-class _Counter:
-	def __init__(self, count):
-		self._init = count
-		self._count = self._init
-
-	def reset(self):
-		self._count = self._init
-
-	def __call__(self):
-		self._count += 1
-		return self._count
-
-
-class VARIABLE(DynamicOpCode):
-	__slots__ = ('name',)
-	counter = _Counter(10)
-
-	@classmethod
-	def temp(cls):
-		num = cls.counter()
-		return cls(f'__IV{num}')
-
-
-SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
+VARIABLE = DynamicOpCode.create('VARIABLE', 'name')
+SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src', srcStatic=None)
 CALL_FUNCTION = DynamicOpCode.create(
 	'CALL_FUNCTION', 'dst', 'function', typeb='(', args=[], kwargs={}
 )

@@ -48,7 +48,7 @@ class _ScopeChild(Scope):
 
 	def __setitem__(self, key, value):
 		if key in self._parent:
-			raise RuntimeError
+			raise RuntimeError(key)
 		super().__setitem__(key, value)
 
 	def __repr__(self):

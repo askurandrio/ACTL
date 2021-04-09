@@ -1,11 +1,19 @@
 from actl import objects
 from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
+from actl.utils import asDecorator
 from std.rules import UseCodeBlock
 
 If = objects.makeClass('If', (objects.If,))
 
 
+@asDecorator(lambda rule: If.setAttribute('__syntaxRule__', rule))
+@SyntaxRule.wrap(
+	Value(If),
+	Token(' '),
+	useParser=True,
+	manualApply=True
+)
 class IfSyntax:
 	_INLINE_IF_END = Or(
 		(Token(' '), Value(objects.elif_),),
@@ -24,26 +32,22 @@ class IfSyntax:
 	def __init__(self, parser, inp):
 		self._parser = parser
 		self._inp = inp
-
-		self._inpRule.pop(Value(If), Token(' '))
-		self._firstConditionFrame = Frame(Token(':'))(parser, self._inp)
-		self._inpRule.pop(Token(':'))
+		self._inpRule = BufferRule(self._parser, self._inp)
 
 	def parse(self):
-		if UseCodeBlock.isFullCodeBlock(self._parser, self._inp):
+		self._inpRule.pop(Value(If), Token(' '))
+		self._firstConditionFrame = tuple(self._inpRule.pop(Frame(Token(':'))))
+		self._inpRule.pop(Token(':'))
+		if UseCodeBlock(self._parser, self._inp).isFullCodeBlock():
 			conditions, elseCode = self._getFromFullCodeBlock()
 		else:
 			conditions, elseCode = self._getFromInlineCodeBlock()
 		if_ = If.call(*conditions, elseCode=elseCode)
-		return Buffer.of(if_)
-
-	@property
-	def _inpRule(self):
-		return BufferRule(self._parser, self._inp)
+		self._inp.insert(0, [if_])
 
 	def _getFromFullCodeBlock(self):
 		def popCodeBlock():
-			code = Buffer(UseCodeBlock.parseFullCodeBlock(self._parser, self._inp))
+			code = Buffer(UseCodeBlock(self._parser, self._inp).parseFullCodeBlock())
 			if self._inp.startsWith('\n'):
 				self._inp.pop()
 			return tuple(code)
@@ -100,17 +104,3 @@ class IfSyntax:
 			elseCode = None
 
 		return tuple(conditions), elseCode
-
-
-@SyntaxRule.wrap(
-	Value(If),
-	Token(' '),
-	Frame(Token(':')),
-	useParser=True,
-	manualApply=True
-)
-def _syntaxRule(parser, inp):
-	return IfSyntax(parser, inp).parse()
-
-
-If.setAttribute('__syntaxRule__', _syntaxRule)

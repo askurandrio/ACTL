@@ -4,25 +4,27 @@ from actl.objects import AToPy, Number
 from std.objects import If
 
 
-def test_if(execute):
+def test_simple_if(execute):
 	execute('if 1: a = 2')
 
-	if_ = execute.parsed.code.one()
-	assert if_.getAttribute('__class__') is If
-	conditionFrame, code = Buffer(if_.getAttribute('conditions')).one()
-	assert conditionFrame == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, args=['1']
-		),
-		opcodes.VARIABLE(name='__IV11')
-	)
-	assert code == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV12', function=Number.call, args=['2']
-		),
-		opcodes.SET_VARIABLE(dst='a', src='__IV12')
-	)
-
+	assert execute.parsed.code == [
+		If.call(
+			(
+				(
+					opcodes.CALL_FUNCTION_STATIC(
+						dst='_tmpVar1', function=Number.call, args=['1']
+					),
+					opcodes.VARIABLE(name='_tmpVar1')
+				),
+				(
+					opcodes.CALL_FUNCTION_STATIC(
+						dst='_tmpVar2', function=Number.call, args=['2']
+					),
+					opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
+				)
+			)
+		)
+	]
 	assert AToPy(execute.executed.scope['a']) == 2
 
 
@@ -34,15 +36,15 @@ def test_ifFalse(execute):
 	conditionFrame, code = Buffer(if_.getAttribute('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, args=['0']
+			dst='_tmpVar1', function=Number.call, args=['0']
 		),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV12', function=Number.call, args=['1']
+			dst='_tmpVar2', function=Number.call, args=['1']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='__IV12')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 	)
 
 	assert not AToPy(execute.executed.scope['_'])
@@ -57,29 +59,29 @@ def test_ifElif(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV11', function=Number.call, args=['0']
+					dst='_tmpVar1', function=Number.call, args=['0']
 				),
-				opcodes.VARIABLE(name='__IV11')
+				opcodes.VARIABLE(name='_tmpVar1')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV12', function=Number.call, args=['1']
+					dst='_tmpVar2', function=Number.call, args=['1']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='__IV12')
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 			)
 		),
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV13', function=Number.call, args=['1']
+					dst='_tmpVar3', function=Number.call, args=['1']
 				),
-				opcodes.VARIABLE(name='__IV13')
+				opcodes.VARIABLE(name='_tmpVar3')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV14', function=Number.call, args=['2']
+					dst='_tmpVar4', function=Number.call, args=['2']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='__IV14')
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4')
 			)
 		)
 	)
@@ -94,21 +96,21 @@ def test_ifElse(execute):
 	conditionFrame, code = Buffer(if_.getAttribute('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, args=['0']
+			dst='_tmpVar1', function=Number.call, args=['0']
 		),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV12', function=Number.call, args=['1']
+			dst='_tmpVar2', function=Number.call, args=['1']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='__IV12')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 	)
 	assert if_.getAttribute('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV13', function=Number.call, args=['2']
+			dst='_tmpVar3', function=Number.call, args=['2']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='__IV13')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar3')
 	)
 	assert AToPy(execute.executed.scope['a']) == 2
 
@@ -122,36 +124,36 @@ def test_ifElifElseWithFullCodeBlock(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV11', function=Number.call, args=['0']
+					dst='_tmpVar1', function=Number.call, args=['0']
 				),
-				opcodes.VARIABLE(name='__IV11')
+				opcodes.VARIABLE(name='_tmpVar1')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV12', function=Number.call, args=['1']
+					dst='_tmpVar2', function=Number.call, args=['1']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='__IV12')
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 			)
 		),
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV13', function=Number.call, args=['0']
+					dst='_tmpVar3', function=Number.call, args=['0']
 				),
-				opcodes.VARIABLE(name='__IV13')
+				opcodes.VARIABLE(name='_tmpVar3')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='__IV14', function=Number.call, args=['2']
+					dst='_tmpVar4', function=Number.call, args=['2']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='__IV14')
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4')
 			)
 		)
 	)
 	assert if_.getAttribute('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV15', function=Number.call, args=['3']
+			dst='_tmpVar5', function=Number.call, args=['3']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='__IV15')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar5')
 	)
 	assert AToPy(execute.executed.scope['a']) == 3

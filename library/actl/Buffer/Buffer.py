@@ -25,7 +25,10 @@ class Buffer:
 		return type(self)(map(watch, self))
 
 	def one(self):
-		res, = self
+		try:
+			res, = self
+		except ValueError:
+			raise ValueError(f'len({self}) != 1')
 		return res
 
 	def pop(self, index=0):

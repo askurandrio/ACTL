@@ -23,7 +23,8 @@ def _hasAttr(attr):
 
 
 def _applySyntaxObjectsRule(parser, inp):
-	if not _hasAttr('__syntaxRule__')(parser, LTransactionBuffer(inp)):
+	hasAttrSyntaxRule = _hasAttr('__syntaxRule__')
+	if not hasAttrSyntaxRule(parser, LTransactionBuffer(inp)):
 		return None
 
 	syntaxRule = parser.scope[inp[0].name].getAttribute('__syntaxRule__')
@@ -66,7 +67,7 @@ def _(inp, parser):
 
 	src = BufferRule(parser, Buffer.of(parsed.pop(-1))).pop(IsInstance(VARIABLE)).one().name
 
-	return parsed + Buffer.of(SET_VARIABLE(dst, src))
+	inp.insert(0, parsed + Buffer.of(SET_VARIABLE(dst, src)))
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
@@ -77,10 +78,10 @@ def _(inp, parser):
 		string += inp.pop()
 	while start:
 		assert start.pop(0) == inp.pop()
-	dst = VARIABLE.temp()
+	dst = parser.makeTmpVar()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, args=[string]))
 
-	return Buffer.of(dst)
+	inp.insert(0, [dst])
 
 
 @CustomTemplate.createToken
@@ -91,7 +92,7 @@ def _isDigit(_, token):
 @RULES.add(Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True)
 def _(*args, parser=None):
 	number = ''.join(args)
-	dst = VARIABLE.temp()
+	dst = parser.makeTmpVar()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, args=[number]))
 	return [dst]
 
@@ -149,81 +150,75 @@ class _ParseFunctionCall:
 			self._inpRule.pop(Token(','), Token(' '), default=None)
 
 		self._inpRule.pop(Token(')'))
-		dst = VARIABLE.temp()
+		dst = self._parser.makeTmpVar()
 		self._parser.define(CALL_FUNCTION(dst.name, functionName, opToken, args, kwargs))
 		self._inp.insert(0, [dst])
 
 
+@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
 class UseCodeBlock:
 	def __init__(self, parser, inp):
 		self._parser = parser
 		self._inp = inp
+		self._inpRule = BufferRule(parser, inp)
 
 	def parse(self):
 		inpRule = BufferRule(self._parser, self._inp)
 		var = inpRule.pop(_hasAttr('__useCodeBlock__')).one()
 		inpRule.pop(Token(':'))
-		code = self.popCodeBlock(self._parser, self._inp)
-		var = var.getAttribute('__useCodeBlock__').call(code)
-		return Buffer.of(var)
+		code = self.popCodeBlock()
+		code = var.getAttribute('__useCodeBlock__').call(code)
+		self._inp.insert(0, code)
 
-	@classmethod
-	def isFullCodeBlock(cls, parser, inp):
-		return BufferRule(parser, inp).startsWith(Token('\n'))
+	def isFullCodeBlock(self):
+		return self._inpRule.startsWith(Token('\n'))
 
-	@classmethod
-	def popCodeBlock(cls, parser, inp):
-		if cls.isFullCodeBlock(parser, inp):
-			return cls.parseFullCodeBlock(parser, inp)
-		return cls._parseLineCodeBlock(parser, inp)
+	def popCodeBlock(self):
+		with self._parser.makeTmpVar.onNestedScope():
+			if self.isFullCodeBlock():
+				return self.parseFullCodeBlock()
+			return self._parseLineCodeBlock()
 
-	@classmethod
-	def parseFullCodeBlock(cls, parser, inp):
-		inpRule = BufferRule(parser, inp)
+	def parseFullCodeBlock(self):
 		code = Buffer()
-		inpRule.pop(Token('\n'))
-		indent = cls._getFirstIndent(inpRule)
+		self._inpRule.pop(Token('\n'))
+		indent = self._getFirstIndent()
 
-		while inpRule.startsWith(indent):
-			inpRule.pop(indent)
-			while inp and (not inpRule.startsWith(Token('\n'))):
-				code.append(inp.pop())
-			if inp:
-				code.append(inp.pop())
+		while self._inpRule.startsWith(indent):
+			self._inpRule.pop(indent)
+			while self._inp and (not self._inpRule.startsWith(Token('\n'))):
+				code.append(self._inp.pop())
+			if self._inp:
+				code.append(self._inp.pop())
 
 		code.loadAll()
 		if code[-1] == '\n':
-			inp.insert(0, (code.pop(-1),))
+			self._inp.insert(0, (code.pop(-1),))
 
-		return parser.subParser(code)
+		return tuple(self._parser.subParser(code))
 
-	@staticmethod
-	def _getFirstIndent(inpRule):
-		indent = inpRule.get(Many(Token(' '))) or inpRule.get(Many(Token('\t')))
+	def _getFirstIndent(self):
+		indent = self._inpRule.get(Many(Token(' '))) or self._inpRule.get(Many(Token('\t')))
 
 		assert len(set(indent)) == 1
 		return Template(*map(Token, indent))
 
-	@staticmethod
-	def _parseLineCodeBlock(parser, inp):
-		while inp[0] == ' ':
-			inp.pop()
+	def _parseLineCodeBlock(self):
+		while self._inp[0] == ' ':
+			self._inp.pop()
 
 		code = Buffer()
 
-		while inp and (inp[0] != '\n'):
-			code.append(inp.pop())
+		while self._inp and (self._inp[0] != '\n'):
+			code.append(self._inp.pop())
 
-		return parser.subParser(code)
-
-
-RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)(UseCodeBlock)
+		return tuple(self._parser.subParser(code))
 
 
 @RULES.add(IsInstance(VARIABLE), Token('.'), IsInstance(VARIABLE), useParser=True)
 def _(first, token, attribute, parser):
-	attributeVar = VARIABLE.temp()
-	dst = VARIABLE.temp()
+	attributeVar = parser.makeTmpVar()
+	dst = parser.makeTmpVar()
 
 	parser.define(
 		CALL_FUNCTION_STATIC(
@@ -242,7 +237,7 @@ def _(first, token, attribute, parser):
 	useParser=True
 )
 def _(first, _, token, _1, second, parser):
-	dst = VARIABLE.temp()
+	dst = parser.makeTmpVar()
 
 	parser.define(
 		CALL_OPERATOR(dst=dst.name, first=first.name, operator=token, second=second.name)
@@ -255,12 +250,12 @@ def _(first, _, token, _1, second, parser):
 def _(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Token('['))
-	dst = VARIABLE.temp()
+	dst = parser.makeTmpVar()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call, args=[]))
 
 	if not inpRule.startsWith(Token(']')):
-		appendStrVar = VARIABLE.temp()
-		appendVarName = VARIABLE.temp().name
+		appendStrVar = parser.makeTmpVar()
+		appendVarName = parser.makeTmpVar().name
 		parser.define(
 			CALL_FUNCTION_STATIC(dst=appendStrVar.name, function=String.call, args=['append']),
 			CALL_OPERATOR(dst=appendVarName, first=dst.name, operator='.', second=appendStrVar.name)

@@ -1,5 +1,3 @@
-from inspect import isclass
-
 from .SyntaxRule import SyntaxRule
 
 
@@ -12,14 +10,9 @@ class SyntaxRules:
 
 	def add(self, *template, manualApply=False, useParser=False):
 		def decorator(func):
-			ruleMaker = SyntaxRule.wrap(*template, manualApply=manualApply, useParser=useParser)
-
-			if isclass(func):
-				@ruleMaker
-				def rule(*args, **kwargs):
-					return func(*args, **kwargs).parse()
-			else:
-				rule = ruleMaker(func)
+			rule = SyntaxRule.wrap(
+				*template, manualApply=manualApply, useParser=useParser
+			)(func)
 
 			self.rawAdd(rule)
 			return func

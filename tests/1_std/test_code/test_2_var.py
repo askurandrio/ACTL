@@ -17,8 +17,8 @@ def test_setVariable(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, args=['1']
+			dst='_tmpVar1', function=Number.call, args=['1']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='__IV11')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar1')
 	]
 	assert AToPy(execute.executed.scope['a']) == 1

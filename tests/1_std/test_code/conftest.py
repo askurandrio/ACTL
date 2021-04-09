@@ -1,7 +1,7 @@
 import pytest
 
 from actl.Buffer import Buffer
-from actl import opcodes, Project
+from actl import Project
 from std import Executor
 
 
@@ -12,8 +12,6 @@ def execute():
 
 class _Execute:
 	def __init__(self):
-		opcodes.VARIABLE.counter.reset()
-
 		self.isParsed = False
 		self.isExecuted = False
 		self._project = Project('std')

@@ -1,13 +1,25 @@
 from actl import objects
-from actl.Buffer import Buffer
-from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE
+from actl.opcodes import SET_VARIABLE, VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule
-from std.rules import UseCodeBlock
+from actl import asDecorator
 
 
 Function = objects.makeClass('Function', (objects.Function,))
 
 
+@objects.addMethod(Function, '__useCodeBlock__')
+def _useCodeBlock(self, body):
+	if RETURN != body[-1]:
+		body = (
+			*body,
+			RETURN('None'),
+		)
+
+	self.setAttribute('body', body)
+	return []
+
+
+@asDecorator(lambda rule: Function.setAttribute('__syntaxRule__', rule))
 @SyntaxRule.wrap(
 	Value(Function),
 	Token(' '),
@@ -19,15 +31,15 @@ Function = objects.makeClass('Function', (objects.Function,))
 def _syntaxRule(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Value(Function), Token(' '))
-	name = inpRule.pop(IsInstance(VARIABLE)).one().name
+	nameVar = inpRule.pop(IsInstance(VARIABLE)).one()
 	inpRule.pop(Token('('))
 	signature = _parseSignature(inpRule)
-	inpRule.pop(Token(')'), Token(':'))
-	body = Buffer(UseCodeBlock.popCodeBlock(parser, inp)).loadAll()
-
-	opcode = CALL_FUNCTION_STATIC(dst=name, function=Function.call, args=(name, signature, body))
-
-	return Buffer.of(opcode)
+	inpRule.pop(Token(')'))
+	function = Function.call(nameVar.name, signature, None)
+	parser.define(
+		SET_VARIABLE(nameVar.name, src=None, srcStatic=function)
+	)
+	inp.insert(0, [function])
 
 
 def _parseSignature(inpRule):
@@ -41,6 +53,3 @@ def _parseSignature(inpRule):
 
 	signature = objects.Signature.call(args)
 	return signature
-
-
-Function.setAttribute('__syntaxRule__', _syntaxRule)

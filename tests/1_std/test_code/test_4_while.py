@@ -21,15 +21,15 @@ def test_simple_while(execute):
 	cycle = execute.parsed.code.one()
 	assert cycle.getAttribute('__class__') is While
 	assert cycle.getAttribute('conditionFrame') == (
-		opcodes.CALL_FUNCTION(dst='__IV11', function='cond'),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='cond'),
+		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert cycle.getAttribute('code') == (
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
-			dst='__IV13', function='print', args=['__IV12']
+			dst='_tmpVar1_2', function='print', args=['_tmpVar1_1']
 		),
-		opcodes.VARIABLE(name='__IV13')
+		opcodes.VARIABLE(name='_tmpVar1_2')
 	)
 
 	assert not AToPy(execute.executed.scope['_'])
@@ -53,15 +53,15 @@ def test_whileWithFullCodeBlock(execute):
 	cycle = execute.parsed.code.one()
 	assert cycle.getAttribute('__class__') is While
 	assert cycle.getAttribute('conditionFrame') == (
-		opcodes.CALL_FUNCTION(dst='__IV11', function='cond'),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='cond'),
+		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert cycle.getAttribute('code') == (
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
-			dst='__IV13', function='print', args=['__IV12']
+			dst='_tmpVar1_2', function='print', args=['_tmpVar1_1']
 		),
-		opcodes.VARIABLE(name='__IV13')
+		opcodes.VARIABLE(name='_tmpVar1_2')
 	)
 
 	assert not AToPy(execute.executed.scope['_'])

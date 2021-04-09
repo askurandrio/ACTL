@@ -5,6 +5,7 @@ from itertools import zip_longest
 
 import pytest
 import os
+from actl import objects
 
 from actl.Buffer import Buffer
 from actl.objects import Object
@@ -28,9 +29,12 @@ def pytest_assertrepr_compare(op, left, right):
 	return None
 
 
+_default = object()
+
+
 def _getDiff(leftObject, rightObject, indent):
 	left = _toTuple(leftObject)
-	if isinstance(leftObject, (Buffer, list, tuple, type(Object), DynamicOpCode)):
+	if isinstance(rightObject, (Buffer, list, tuple, type(Object), DynamicOpCode)):
 		right = _toTuple(rightObject)
 	else:
 		return [f'{indent}type<{type(rightObject)}> of {rightObject} is unexpected']
@@ -40,20 +44,34 @@ def _getDiff(leftObject, rightObject, indent):
 		f'{indent}{right}'
 	]
 
-	for idx, (first, second) in enumerate(zip_longest(left, right)):
-		if first != second:
-			res += [f'{indent}at {idx}']
-			if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode)):
-				return [
-					*res,
-					*_getDiff(first, second, indent + '	')
-				]
-			
-			breakpoint()
+	for idx, (first, second) in enumerate(zip_longest(left, right, fillvalue=_default)):
+		if first == second:
+			continue
+
+		res += [f'{indent}at {idx}']
+
+		if first is _default:
 			return [
 				*res,
-				f'{indent}	{first} != {second}'
+				f'{indent}first is empty, second is {second}'
 			]
+	
+		if second is _default:
+			return [
+				*res,
+				f'{indent}	second is empty, first is {first}'
+			]
+
+		if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode)):
+			return [
+				*res,
+				*_getDiff(first, second, indent + '	')
+			]
+
+		return [
+			*res,
+			f'{indent}	{repr(first)} != {repr(second)}'
+		]
 
 	return [
 		f'{indent}{type(leftObject)}{leftObject} != ',
@@ -65,7 +83,8 @@ def _getDiff(leftObject, rightObject, indent):
 def _toTuple(arg):
 	if isinstance(arg, DynamicOpCode):
 		return _toTuple.dispatch(DynamicOpCode)(arg)
-	raise RuntimeError(arg)
+
+	raise RuntimeError(f'{type(arg)}{(arg)} is unexpected')
 
 
 @_toTuple.register(Buffer)

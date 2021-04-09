@@ -7,9 +7,9 @@ While = objects.makeClass('While', (objects.While,))
 
 
 @addMethod(While, '__useCodeBlock__')
-def _(self, parser):
-	newSelf = self.getAttribute('__class__').call(self.getAttribute('conditionFrame'), tuple(parser))
-	return newSelf
+def _(self, code):
+	newSelf = self.getAttribute('__class__').call(self.getAttribute('conditionFrame'), code)
+	return [newSelf]
 
 
 @SyntaxRule.wrap(

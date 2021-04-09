@@ -80,7 +80,12 @@ def _(executor, opcode):
 
 @Executor.addHandler(opcodes.SET_VARIABLE)
 def _(executor, opcode):
-	executor.scope[opcode.dst] = executor.scope[opcode.src]
+	if opcode.srcStatic is not None:
+		src = opcode.srcStatic
+	else:
+		src = executor.scope[opcode.src]
+
+	executor.scope[opcode.dst] = src
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)

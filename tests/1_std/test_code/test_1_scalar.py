@@ -19,9 +19,9 @@ def test_floatNumber(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, args=['1.1']
+			dst='_tmpVar1', function=Number.call, args=['1.1']
 		),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	assert AToPy(execute.executed.scope['_']) == 1.1
 
@@ -31,9 +31,9 @@ def test_negativeNumber(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Number.call, args=['-1']
+			dst='_tmpVar1', function=Number.call, args=['-1']
 		),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	assert AToPy(execute.executed.scope['_']) == -1
 
@@ -43,9 +43,9 @@ def test_emptyVector(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='__IV11', function=Vector.call
+			dst='_tmpVar1', function=Vector.call
 		),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	vector = execute.executed.scope['_']
 	assert vector.getAttribute('__class__') is Vector
@@ -56,12 +56,12 @@ def test_vectorWithNumber(execute):
 	execute('[1]')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV11', function=Vector.call),
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV12', function=String.call, args=['append']),
-		opcodes.CALL_OPERATOR(dst='__IV13', first='__IV11', operator='.', second='__IV12'),
-		opcodes.CALL_FUNCTION_STATIC(dst='__IV14', function=Number.call, args=['1']),
-		opcodes.CALL_FUNCTION(dst='__IV0', function='__IV13', args=['__IV14']),
-		opcodes.VARIABLE(name='__IV11')
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=Vector.call),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar2', function=String.call, args=['append']),
+		opcodes.CALL_OPERATOR(dst='_tmpVar3', first='_tmpVar1', operator='.', second='_tmpVar2'),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar4', function=Number.call, args=['1']),
+		opcodes.CALL_FUNCTION(dst='__IV0', function='_tmpVar3', args=['_tmpVar4']),
+		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	vector = execute.executed.scope['_']
 	assert vector.getAttribute('__class__') is Vector
