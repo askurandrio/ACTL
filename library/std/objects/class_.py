@@ -8,7 +8,7 @@ class_ = makeClass('class_', (actlClass,))
 
 
 @addMethodToClass(class_, '__call__')
-def _makeClass(_, name):
+def _class_call(_, name):
 	return makeClass(name)
 
 

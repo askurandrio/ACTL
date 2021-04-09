@@ -1,22 +1,11 @@
 from actl import objects
-from actl.opcodes import SET_VARIABLE, VARIABLE, RETURN
+from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule
 from actl import asDecorator
+from std.rules import CodeBlock
 
 
 Function = objects.makeClass('Function', (objects.Function,))
-
-
-@objects.addMethod(Function, '__useCodeBlock__')
-def _useCodeBlock(self, body):
-	if RETURN != body[-1]:
-		body = (
-			*body,
-			RETURN('None'),
-		)
-
-	self.setAttribute('body', body)
-	return []
 
 
 @asDecorator(lambda rule: Function.setAttribute('__syntaxRule__', rule))
@@ -28,28 +17,43 @@ def _useCodeBlock(self, body):
 	useParser=True,
 	manualApply=True
 )
-def _syntaxRule(parser, inp):
-	inpRule = BufferRule(parser, inp)
-	inpRule.pop(Value(Function), Token(' '))
-	nameVar = inpRule.pop(IsInstance(VARIABLE)).one()
-	inpRule.pop(Token('('))
-	signature = _parseSignature(inpRule)
-	inpRule.pop(Token(')'))
-	function = Function.call(nameVar.name, signature, None)
-	parser.define(
-		SET_VARIABLE(nameVar.name, src=None, srcStatic=function)
-	)
-	inp.insert(0, [function])
+class _ParseFunction:
+	def __init__(self, parser, inp):
+		self._parser = parser
+		self._inp = inp
+		self._inpRule = BufferRule(parser, inp)
 
+	def parse(self):
+		self._inpRule.pop(Value(Function), Token(' '))
+		name = self._parseName()
+		signature = self._parseSignature()
+		if self._inpRule.startsWith(Token(':')):
+			body = self._parseBody()
+		else:
+			body = None
+		self._inp.insert(0, [Function.call(name, signature, body)])
 
-def _parseSignature(inpRule):
-	args = []
-	inpRule.parseUntil(Token(')'))
+	def _parseName(self):
+		return self._inpRule.pop(IsInstance(VARIABLE)).one().name
 
-	while inpRule.startsWith(IsInstance(VARIABLE)):
-		args.append(inpRule.pop(IsInstance(VARIABLE)).one().name)
-		if inpRule.startsWith(Token(',')):
-			inpRule.pop(Token(','))
+	def _parseSignature(self):
+		args = []
+		self._inpRule.pop(Token('('))
+		self._inpRule.parseUntil(Token(')'))
 
-	signature = objects.Signature.call(args)
-	return signature
+		while self._inpRule.startsWith(IsInstance(VARIABLE)):
+			args.append(self._inpRule.pop(IsInstance(VARIABLE)).one().name)
+			if self._inpRule.startsWith(Token(',')):
+				self._inpRule.pop(Token(','))
+
+		self._inpRule.pop(Token(')'))
+		signature = objects.Signature.call(args)
+		return signature
+
+	def _parseBody(self):
+		self._inpRule.pop(Token(':'))
+		body = CodeBlock(self._parser, self._inp).parse()
+		return (
+			*body,
+			RETURN('None')
+		)

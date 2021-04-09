@@ -2,7 +2,7 @@ from actl import objects
 from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
 from actl.utils import asDecorator
-from std.rules import UseCodeBlock
+from std.rules import CodeBlock
 
 
 If = objects.makeClass('If', (objects.If,))
@@ -39,7 +39,7 @@ class IfSyntax:
 		self._inpRule.pop(Value(If), Token(' '))
 		self._firstConditionFrame = tuple(self._inpRule.pop(Frame(Token(':'))))
 		self._inpRule.pop(Token(':'))
-		if UseCodeBlock(self._parser, self._inp).isFullCodeBlock():
+		if CodeBlock(self._parser, self._inp).isFullCodeBlock():
 			conditions, elseCode = self._getFromFullCodeBlock()
 		else:
 			conditions, elseCode = self._getFromInlineCodeBlock()
@@ -48,7 +48,7 @@ class IfSyntax:
 
 	def _getFromFullCodeBlock(self):
 		def popCodeBlock():
-			code = Buffer(UseCodeBlock(self._parser, self._inp).parseFullCodeBlock())
+			code = Buffer(CodeBlock(self._parser, self._inp).parseFullCodeBlock())
 			if self._inp.startsWith('\n'):
 				self._inp.pop()
 			return tuple(code)

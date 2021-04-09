@@ -65,12 +65,15 @@ class _CallFrame:
 
 @Executor.addHandler(type(Object))
 def _(executor, opcode):
-	parents = list(opcode.getAttribute('__class__').getAttribute('__parents__'))
-	while parents[0] not in Executor.HANDLERS:
-		parents.pop(0)
+	def getHandler():
+		parents = list(opcode.getAttribute('__class__').getAttribute('__parents__'))
 
-	handler = Executor.HANDLERS[parents[0]]
-	return handler(executor, opcode)
+		for parent in parents:
+			return Executor.HANDLERS[parent]
+		
+		raise RuntimeError(f'Handler for {opcode} not found')
+
+	return getHandler()(executor, opcode)
 
 
 @Executor.addHandler(opcodes.VARIABLE)
@@ -138,6 +141,11 @@ def _(executor, opcode):
 			break
 
 		yield _Frame(opcode.getAttribute('code'))
+
+
+@Executor.addHandler(Function)
+def _executeFunction(executor, opcode):
+	executor.scope[opcode.getAttribute('name')] = opcode
 
 
 @Executor.addHandler(If)

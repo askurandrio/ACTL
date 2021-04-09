@@ -1,27 +1,26 @@
 from actl import objects
-from actl.Buffer import Buffer
 from actl.objects.object.utils import addMethod
-from actl.syntax import SyntaxRule, Value, Token, Or, End, Frame, CustomTemplate
+from actl.syntax import SyntaxRule, Value, Token, Frame
+from actl.syntax.BufferRule import BufferRule
+from actl.utils import asDecorator
+from std.rules import CodeBlock
+
 
 While = objects.makeClass('While', (objects.While,))
 
 
-@addMethod(While, '__useCodeBlock__')
-def _(self, code):
-	newSelf = self.getAttribute('__class__').call(self.getAttribute('conditionFrame'), code)
-	return [newSelf]
-
-
+@asDecorator(lambda rule: While.setAttribute('__syntaxRule__', rule))
 @SyntaxRule.wrap(
 	Value(While),
 	Token(' '),
-	CustomTemplate.asArg(Frame(Token(':')), 'conditionFrame'),
-	CustomTemplate.asArg(Or((End,), (Token(':'),)), 'end')
+	manualApply=True,
+	useParser=True
 )
-def _syntaxRule(_, _1, conditionFrame, end):
-	res = Buffer.of(While.call(conditionFrame))
-	res.append(end.one())
-	return res
-
-
-While.setAttribute('__syntaxRule__', _syntaxRule)
+def _syntaxRule(parser, inp):
+	inpRule = BufferRule(parser, inp)
+	inpRule.pop(Value(While))
+	inpRule.pop(Token(' '))
+	condition = tuple(inpRule.pop(Frame(Token(':'))))
+	inpRule.pop(Token(':'))
+	code = CodeBlock(parser, inp).parse()
+	inp.insert(0, [While.call(condition, code)])

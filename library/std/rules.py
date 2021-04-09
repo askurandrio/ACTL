@@ -155,8 +155,7 @@ class _ParseFunctionCall:
 		self._inp.insert(0, [dst])
 
 
-@RULES.add(_hasAttr('__onCodeBlock__'), Token(':'), manualApply=True, useParser=True)
-class OnCodeBlock:
+class CodeBlock:
 	def __init__(self, parser, inp):
 		self.parser = parser
 		self.inp = inp
@@ -164,30 +163,13 @@ class OnCodeBlock:
 		self._var = None
 
 	def parse(self):
-		self._parseCodeBlockOpen()
-		self._var.getAttribute('__useCodeBlock__').call(self)
-
-	def _parseCodeBlockOpen(self):
-		self._var = self.inpRule.pop(IsInstance(type(Object))).one()
-		self.inpRule.pop(Token(':'))
-
-
-@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
-class UseCodeBlock(OnCodeBlock):
-	def parse(self):
-		self._parseCodeBlockOpen()
-		code = self.popCodeBlock()
-		code = self._var.getAttribute('__useCodeBlock__').call(code)
-		self.inp.insert(0, code)
-
-	def isFullCodeBlock(self):
-		return self.inpRule.startsWith(Token('\n'))
-
-	def popCodeBlock(self):
 		with self.parser.makeTmpVar.onNestedScope():
 			if self.isFullCodeBlock():
 				return self.parseFullCodeBlock()
 			return self.parseInLineCodeBlock()
+
+	def isFullCodeBlock(self):
+		return self.inpRule.startsWith(Token('\n'))
 
 	def parseFullCodeBlock(self):
 		code = Buffer()
