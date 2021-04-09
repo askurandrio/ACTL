@@ -30,7 +30,7 @@
 			"type": "python",
 			"request": "launch",
 			"module": "pytest",
-			"args": ["-x", "./tests", "-vv", "-k", "test_simpleFunctionDeclare"],
+			"args": ["-x", "./tests", "-vv", "-k", "class"],
 			"console": "integratedTerminal",
 			"env": {
 				"PYTHONPATH": "./library/"

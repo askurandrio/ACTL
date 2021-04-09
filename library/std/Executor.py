@@ -1,3 +1,4 @@
+from itertools import zip_longest
 from actl import opcodes
 from std.objects import Function
 from actl.objects import While, Bool, If, AToPy, Object
@@ -18,9 +19,9 @@ class Executor:
 			except StopIteration:
 				self.frames.pop(-1)
 				continue
-
+				
 			if isinstance(opcode, _Frame):
-				self.frames.append(iter(opcode))
+				self.frames.append(opcode)
 				continue
 
 			self._executeOpcode(opcode)
@@ -44,10 +45,13 @@ class Executor:
 
 class _Frame:
 	def __init__(self, head):
-		self._head = head
+		self._head = iter(head)
 
 	def __iter__(self):
-		yield from self._head
+		return self
+
+	def __next__(self):
+		return next(self._head)
 
 	@classmethod
 	def wrap(cls, func):
@@ -57,11 +61,18 @@ class _Frame:
 		return wrapper
 
 
-class _CallFrame:
-	def __init__(self, frames, returnVar, scope):
-		self.frames = frames
-		self.returnVar = returnVar
-		self.scope = scope
+class _CallFrame(_Frame):
+	def __init__(self, executor, opcode):
+		function = executor.scope[opcode.function]
+		executor.scope, self.prevScope = executor.scope.child(), executor.scope
+
+		for functionArg, opcodeArg in zip_longest(
+			function.getAttribute('signature').getAttribute('args'), opcode.args
+		):
+			executor.scope[functionArg] = self.prevScope[opcodeArg]
+
+		self.dst = opcode.dst
+		super().__init__(function.getAttribute('body'))
 
 
 @Executor.addHandler(type(Object))
@@ -73,7 +84,7 @@ def _(executor, opcode):
 		]:
 			if parent in Executor.HANDLERS:
 				return Executor.HANDLERS[parent]
-		
+
 		raise RuntimeError(f'Handler for {opcode} not found')
 
 	return getHandler()(executor, opcode)
@@ -105,7 +116,7 @@ def _ExecutorHandler_callFunction(executor, opcode):
 	function = executor.scope[opcode.function]
 
 	if Function == function.getAttribute('__class__'):
-		return _executeFunction(executor, opcode)
+		return _CallFrame(executor, opcode)
 
 	assert opcode.typeb == '('
 	args = [executor.scope[varName] for varName in opcode.args]
@@ -116,11 +127,12 @@ def _ExecutorHandler_callFunction(executor, opcode):
 
 @Executor.addHandler(opcodes.RETURN)
 def _(executor, opcode):
-	callFrame = executor.stack.pop(-1)
-	executor.frames = callFrame.frames
-	returnVal = executor.scope[opcode.var]
-	executor.scope = callFrame.scope
-	executor.scope[callFrame.returnVar] = returnVal
+	while not isinstance(executor.frames[-1], _CallFrame):
+		executor.frames.pop(-1)
+
+	callFrame = executor.frames.pop(-1)
+	callFrame.prevScope[callFrame.dst] = executor.scope[opcode.var]		
+	executor.scope = callFrame.prevScope
 
 
 @Executor.addHandler(opcodes.CALL_OPERATOR)
@@ -168,13 +180,3 @@ def _(executor, opcode):
 
 	if opcode.hasAttribute('elseCode'):
 		yield _Frame(opcode.getAttribute('elseCode'))
-
-
-def _executeFunction(executor, opcode):
-	function = executor.scope[opcode.function]
-	args = [executor.scope[key] for key in opcode.args]
-	executor.stack.append(_CallFrame(executor.frames, opcode.dst, executor.scope))
-	executor.scope = executor.scope.child()
-	for arg, value in zip(function.getAttribute('signature').getAttribute('args'), args):
-		executor.scope[arg] = value
-	executor.frames = [iter(function.getAttribute('body'))]
