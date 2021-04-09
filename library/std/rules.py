@@ -155,64 +155,74 @@ class _ParseFunctionCall:
 		self._inp.insert(0, [dst])
 
 
-@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
-class UseCodeBlock:
+@RULES.add(_hasAttr('__onCodeBlock__'), Token(':'), manualApply=True, useParser=True)
+class OnCodeBlock:
 	def __init__(self, parser, inp):
-		self._parser = parser
-		self._inp = inp
-		self._inpRule = BufferRule(parser, inp)
+		self.parser = parser
+		self.inp = inp
+		self.inpRule = BufferRule(parser, inp)
+		self._var = None
 
 	def parse(self):
-		inpRule = BufferRule(self._parser, self._inp)
-		var = inpRule.pop(_hasAttr('__useCodeBlock__')).one()
-		inpRule.pop(Token(':'))
+		self._parseCodeBlockOpen()
+		self._var.getAttribute('__useCodeBlock__').call(self)
+
+	def _parseCodeBlockOpen(self):
+		self._var = self.inpRule.pop(IsInstance(type(Object))).one()
+		self.inpRule.pop(Token(':'))
+
+
+@RULES.add(_hasAttr('__useCodeBlock__'), Token(':'), manualApply=True, useParser=True)
+class UseCodeBlock(OnCodeBlock):
+	def parse(self):
+		self._parseCodeBlockOpen()
 		code = self.popCodeBlock()
-		code = var.getAttribute('__useCodeBlock__').call(code)
-		self._inp.insert(0, code)
+		code = self._var.getAttribute('__useCodeBlock__').call(code)
+		self.inp.insert(0, code)
 
 	def isFullCodeBlock(self):
-		return self._inpRule.startsWith(Token('\n'))
+		return self.inpRule.startsWith(Token('\n'))
 
 	def popCodeBlock(self):
-		with self._parser.makeTmpVar.onNestedScope():
+		with self.parser.makeTmpVar.onNestedScope():
 			if self.isFullCodeBlock():
 				return self.parseFullCodeBlock()
-			return self._parseLineCodeBlock()
+			return self.parseInLineCodeBlock()
 
 	def parseFullCodeBlock(self):
 		code = Buffer()
-		self._inpRule.pop(Token('\n'))
-		indent = self._getFirstIndent()
+		self.inpRule.pop(Token('\n'))
+		indent = self.getFirstIndent()
 
-		while self._inpRule.startsWith(indent):
-			self._inpRule.pop(indent)
-			while self._inp and (not self._inpRule.startsWith(Token('\n'))):
-				code.append(self._inp.pop())
-			if self._inp:
-				code.append(self._inp.pop())
+		while self.inpRule.startsWith(indent):
+			self.inpRule.pop(indent)
+			while self.inp and (not self.inpRule.startsWith(Token('\n'))):
+				code.append(self.inp.pop())
+			if self.inp:
+				code.append(self.inp.pop())
 
 		code.loadAll()
 		if code[-1] == '\n':
-			self._inp.insert(0, (code.pop(-1),))
+			self.inp.insert(0, (code.pop(-1),))
 
-		return tuple(self._parser.subParser(code))
+		return tuple(self.parser.subParser(code))
 
-	def _getFirstIndent(self):
-		indent = self._inpRule.get(Many(Token(' '))) or self._inpRule.get(Many(Token('\t')))
+	def getFirstIndent(self):
+		indent = self.inpRule.get(Many(Token(' '))) or self.inpRule.get(Many(Token('\t')))
 
 		assert len(set(indent)) == 1
 		return Template(*map(Token, indent))
 
-	def _parseLineCodeBlock(self):
-		while self._inp[0] == ' ':
-			self._inp.pop()
+	def parseInLineCodeBlock(self):
+		while self.inp[0] == ' ':
+			self.inp.pop()
 
 		code = Buffer()
 
-		while self._inp and (self._inp[0] != '\n'):
-			code.append(self._inp.pop())
+		while self.inp and (self.inp[0] != '\n'):
+			code.append(self.inp.pop())
 
-		return tuple(self._parser.subParser(code))
+		return tuple(self.parser.subParser(code))
 
 
 @RULES.add(IsInstance(VARIABLE), Token('.'), IsInstance(VARIABLE), useParser=True)
