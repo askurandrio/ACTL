@@ -1,5 +1,5 @@
 from actl.objects.AToPy import AToPy
-from actl.objects.object import Object
+from actl.objects.object import Object, class_
 from actl.objects.String import String
 from actl.objects.object.utils import addMethod, addMethodToClass
 
@@ -9,7 +9,7 @@ def _(self):
 	return self._value  # pylint: disable=protected-access
 
 
-@addMethodToClass(Object, String)
+@addMethod(class_, String)
 def clsAsStr(self):
 	name = self.getAttribute('__name__')
 	return String.call(f"class '{name}'")

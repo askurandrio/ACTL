@@ -109,16 +109,6 @@ class AObject:
 		attributeGetCall = attributeGet.call
 		return attributeGetCall(self)
 
-	def _toString(self):
-		from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
-
-		if id(self) in AObject._stack:
-			return '{...}'
-		AObject._stack.add(id(self))
-
-		string = String.call(self)
-		return string.toPyString()
-
 	def toPyString(self):
 		name = self.getAttribute('__class__').getAttribute('__name__')
 		head = self._head
@@ -137,14 +127,23 @@ class AObject:
 		return str(self)
 
 	def __str__(self):
-		if hasattr(AObject, '_stack'):
-			return self._toString()
+		if not hasattr(AObject, '_stack'):
+			AObject._stack = set()
 
-		AObject._stack = set()
+			try:
+				return str(self)
+			finally:
+				del AObject._stack
+
+		if id(self) in AObject._stack:
+			return '{...}'
+		
+		AObject._stack.add(id(self))
 
 		try:
-			asStr = self._toString()
-		finally:
-			del AObject._stack
+			from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 
-		return asStr
+			string = String.call(self)
+			return string.toPyString()
+		except Exception as ex:
+			return f'Error during convert<{id(self)}> to string: {ex}'

@@ -1,5 +1,6 @@
 {
    "python.languageServer": "Pylance",
+   "terminal.external.windowsExec": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.6.10571.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe",
    "git.enabled": false,
     "python.analysis.completeFunctionParens": true,
     "python.pythonPath": "/bin/python",

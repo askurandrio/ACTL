@@ -31,7 +31,7 @@ def pytest_assertrepr_compare(op, left, right):
 def _getDiff(leftObject, rightObject, indent):
 	left = _toTuple(leftObject)
 	if isinstance(leftObject, (Buffer, list, tuple, type(Object), DynamicOpCode)):
-		right = _toTuple(leftObject)
+		right = _toTuple(rightObject)
 	else:
 		return [f'{indent}type<{type(rightObject)}> of {rightObject} is unexpected']
 
@@ -44,7 +44,12 @@ def _getDiff(leftObject, rightObject, indent):
 		if first != second:
 			res += [f'{indent}at {idx}']
 			if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode)):
-				return res + _getDiff(first, second, indent + '	')
+				return [
+					*res,
+					*_getDiff(first, second, indent + '	')
+				]
+			
+			breakpoint()
 			return [
 				*res,
 				f'{indent}	{first} != {second}'

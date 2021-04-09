@@ -2,6 +2,7 @@
 import sys
 import logging
 
+from .utils import *
 from . import objects
 from . import opcodes
 from . import Buffer

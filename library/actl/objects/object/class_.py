@@ -60,4 +60,5 @@ class_ = AObject({
 		'__superGetAttribute__': NativeMethod(class__superGetAttribute)
 	}
 })
+class_.setAttribute('__class__', class_)
 class_.setAttribute('__getAttribute__', NativeFunction(class__getAttribute).apply(class_))
