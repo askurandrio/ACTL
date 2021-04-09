@@ -1,7 +1,7 @@
 from itertools import zip_longest
 from actl import opcodes
-from std.objects import Function
-from actl.objects import While, Bool, If, AToPy, Object
+from std.objects import Function, class_ as stdClass
+from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass
 
 
 class Executor:
@@ -20,9 +20,9 @@ class Executor:
 				self.frames.pop(-1)
 				continue
 				
-			if isinstance(opcode, _Frame):
-				self.frames.append(opcode)
-				continue
+			# if isinstance(opcode, _Frame):
+			# 	self.frames.append(opcode)
+			# 	continue
 
 			self._executeOpcode(opcode)
 
@@ -148,12 +148,12 @@ def _(executor, opcode):
 @_Frame.wrap
 def _(executor, opcode):
 	while True:
-		yield _Frame(opcode.getAttribute('conditionFrame'))
+		yield from opcode.getAttribute('conditionFrame')
 		res = Bool.call(executor.scope['_'])
 		if not AToPy(res):
 			break
 
-		yield _Frame(opcode.getAttribute('code'))
+		yield from opcode.getAttribute('code')
 
 
 @Executor.addHandler(Function)
@@ -171,12 +171,32 @@ def _executeFunction(executor, opcode):
 @_Frame.wrap
 def _(executor, opcode):
 	for conditionFrame, code in opcode.getAttribute('conditions'):
-		yield _Frame(conditionFrame)
+		yield from conditionFrame
 		res = executor.scope['_']
 		res = Bool.call(res)
 		if AToPy(res):
-			yield _Frame(code)
+			yield from code
 			return
 
 	if opcode.hasAttribute('elseCode'):
-		yield _Frame(opcode.getAttribute('elseCode'))
+		yield from opcode.getAttribute('elseCode')
+
+
+@Executor.addHandler(actlClass)
+@_Frame.wrap
+def _bindClass(executor, opcode):
+	className = str(opcode.getAttribute('__name__'))
+	newClass = stdClass.call(className, {})
+	executor.scope, prevScope = executor.scope.child(), executor.scope
+	executor.scope['__class__'] = newClass
+	executor.scope[className] = newClass
+
+	yield from opcode.getAttribute('body')
+
+	for key, value in executor.scope.getDiff():
+		if key in ['__name__', '__class__', className]:
+			continue
+		newClass.setAttribute(str(key), value)
+
+	executor.scope = prevScope
+	executor.scope[className] = newClass

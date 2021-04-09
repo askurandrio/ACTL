@@ -31,6 +31,12 @@ class _ScopeChild(Scope):
 		self._parent = parent
 		super().__init__({})
 
+	def getDiff(self):
+		for key, value in self._head.items():
+			if key.startswith('_tmpVar'):
+				continue
+			yield key, value
+
 	def get(self, key, default=None):
 		if key in self._parent:
 			return self._parent[key]

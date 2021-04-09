@@ -53,9 +53,9 @@ def _getDiff(leftObject, rightObject, indent):
 		if first is _default:
 			return [
 				*res,
-				f'{indent}first is empty, second is {second}'
+				f'{indent}	first is empty, second is {second}'
 			]
-	
+
 		if second is _default:
 			return [
 				*res,
