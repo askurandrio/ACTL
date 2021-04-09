@@ -1,5 +1,6 @@
 from actl import opcodes
-from actl.objects import While, Bool, If, Function, AToPy, Object
+from std.objects import Function
+from actl.objects import While, Bool, If, AToPy, Object
 
 
 class Executor:
@@ -66,10 +67,12 @@ class _CallFrame:
 @Executor.addHandler(type(Object))
 def _(executor, opcode):
 	def getHandler():
-		parents = list(opcode.getAttribute('__class__').getAttribute('__parents__'))
-
-		for parent in parents:
-			return Executor.HANDLERS[parent]
+		for parent in [
+			opcode.getAttribute('__class__'),
+			*opcode.getAttribute('__class__').getAttribute('__parents__')
+		]:
+			if parent in Executor.HANDLERS:
+				return Executor.HANDLERS[parent]
 		
 		raise RuntimeError(f'Handler for {opcode} not found')
 
@@ -101,9 +104,7 @@ def _(executor, opcode):
 def _ExecutorHandler_callFunction(executor, opcode):
 	function = executor.scope[opcode.function]
 
-	functionClass = function.getAttribute('__class__')
-	functionClassParents = functionClass.getAttribute('__parents__')
-	if Function in functionClassParents:
+	if Function == function.getAttribute('__class__'):
 		return _executeFunction(executor, opcode)
 
 	assert opcode.typeb == '('
@@ -145,7 +146,13 @@ def _(executor, opcode):
 
 @Executor.addHandler(Function)
 def _executeFunction(executor, opcode):
-	executor.scope[opcode.getAttribute('name')] = opcode
+	linkedFunction = Function.call(
+		opcode.getAttribute('name'),
+		opcode.getAttribute('signature'),
+		opcode.getAttribute('body'),
+		executor.scope
+	)
+	executor.scope[opcode.getAttribute('name')] = linkedFunction
 
 
 @Executor.addHandler(If)

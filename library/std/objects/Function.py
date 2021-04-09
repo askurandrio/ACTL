@@ -31,7 +31,7 @@ class _ParseFunction:
 			body = self._parseBody()
 		else:
 			body = None
-		self._inp.insert(0, [Function.call(name, signature, body)])
+		self._inp.insert(0, [Function.call(name, signature, body, None)])
 
 	def _parseName(self):
 		return self._inpRule.pop(IsInstance(VARIABLE)).one().name

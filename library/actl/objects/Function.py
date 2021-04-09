@@ -6,10 +6,11 @@ Signature = makeClass('Signature')
 
 
 @addMethod(Function, '__init__')
-def _Function_init(self, name, signature, body):
+def _Function_init(self, name, signature, body, scope):
 	self.setAttribute('name', name)
 	self.setAttribute('signature', signature)
 	self.setAttribute('body', body)
+	self.setAttribute('scope', scope)
 
 	return self
 

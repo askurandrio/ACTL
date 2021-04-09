@@ -19,7 +19,8 @@ def test_simpleFunctionDeclare(execute):
 				opcodes.CALL_FUNCTION('_tmpVar1_1', 'print'),
 				opcodes.VARIABLE('_tmpVar1_1'),
 				opcodes.RETURN('None')
-			)
+			),
+			None
 		),
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='f', args=[]),
 		opcodes.VARIABLE(name='_tmpVar1')
@@ -44,7 +45,8 @@ def test_declareMultiLineFunction(execute):
 				opcodes.CALL_FUNCTION(dst='_tmpVar1_2', function='print', args=['a']),
 				opcodes.VARIABLE(name='_tmpVar1_2'),
 				opcodes.RETURN('None')
-			)
+			),
+			None
 		),
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='f', args=[]),
 		opcodes.VARIABLE(name='_tmpVar1')
@@ -67,7 +69,8 @@ def test_declareFunctionWithArg(execute):
 				opcodes.CALL_FUNCTION('_tmpVar1_1', 'print', args=['arg']),
 				opcodes.VARIABLE('_tmpVar1_1'),
 				opcodes.RETURN('None')
-			)
+			),
+			None
 		),
 		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(dst='_tmpVar2', function='f', args=['_tmpVar1']),
