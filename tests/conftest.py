@@ -37,7 +37,11 @@ def _getDiff(leftObject, rightObject, indent):
 	if isinstance(rightObject, (Buffer, list, tuple, type(Object), DynamicOpCode)):
 		right = _toTuple(rightObject)
 	else:
-		return [f'{indent}type<{type(rightObject)}> of {rightObject} is unexpected']
+		return [
+			f'{indent}	left is {left}',
+			f'{indent}	right is {rightObject}',
+			f'{indent}	right type<{type(rightObject).__name__}> is unexpected'
+		]
 
 	res = [
 		f'{indent}{left} != ',

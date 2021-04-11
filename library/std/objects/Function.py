@@ -1,6 +1,6 @@
 from actl import objects
 from actl.opcodes import VARIABLE, RETURN
-from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule
+from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from actl import asDecorator
 from std.rules import CodeBlock
 
@@ -39,12 +39,13 @@ class _ParseFunction:
 	def _parseSignature(self):
 		args = []
 		self._inpRule.pop(Token('('))
-		self._inpRule.parseUntil(Token(')'))
 
-		while self._inpRule.startsWith(IsInstance(VARIABLE)):
-			args.append(self._inpRule.pop(IsInstance(VARIABLE)).one().name)
+		while not self._inpRule.startsWith(Token(')')):
+			self._inpRule.parseUntil(IsInstance(VARIABLE))
+			argVar = self._inpRule.pop(IsInstance(VARIABLE)).one().name
+			args.append(argVar)
 			if self._inpRule.startsWith(Token(',')):
-				self._inpRule.pop(Token(','))
+				self._inpRule.pop(Token(','), Maybe(Token(' ')))
 
 		self._inpRule.pop(Token(')'))
 		signature = objects.Signature.call(args)
