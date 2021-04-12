@@ -1,4 +1,4 @@
-from actl.Buffer import LTransactionBuffer, Buffer
+from actl.Buffer import ShiftedBuffer, Buffer
 from actl.syntax.AbstractTemplate import AbstractTemplate
 from actl.syntax.Template import Template
 
@@ -12,20 +12,20 @@ class Many(AbstractTemplate):
 
 	def __call__(self, parser, inp):
 		res = Buffer()
-		mainLTxInp = LTransactionBuffer(inp)
+		mainShiftedBuff = ShiftedBuffer(inp)
 
 		for matches in Buffer.inf():
-			iterationLTxInp = LTransactionBuffer(mainLTxInp)
+			iterationshiftedBuff = ShiftedBuffer(mainShiftedBuff)
 
 			tmplRes = self.template(parser, inp)
 			if tmplRes is None:
 				if matches < self.minMatches:
 					return None
 
-				mainLTxInp.commit()
+				inp.shift(mainShiftedBuff.indexShift)
 				return res
 
-			iterationLTxInp.commit()
+			mainShiftedBuff.shift(iterationshiftedBuff.indexShift)
 
 			res += tmplRes
 

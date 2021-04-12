@@ -1,4 +1,4 @@
-from actl.Buffer import LTransactionBuffer, Buffer
+from actl.Buffer import ShiftedBuffer, Buffer
 from actl.syntax.Template import Template
 from actl.syntax.AbstractTemplate import AbstractTemplate
 
@@ -10,9 +10,9 @@ class Maybe(AbstractTemplate):
 		super().__init__(Template(*template))
 
 	def __call__(self, parser, inp):
-		lTxInp = LTransactionBuffer(inp)
+		shiftedBuff = ShiftedBuffer(inp)
 		res = self.template(parser, inp)
 		if res is not None:
-			lTxInp.commit()
+			inp.shift(shiftedBuff.indexShift)
 			return res
 		return Buffer()

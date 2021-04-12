@@ -1,5 +1,5 @@
 # pylint: disable=no-member
-from actl.Buffer import LTransactionBuffer, Buffer
+from actl.Buffer import ShiftedBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
 	BufferRule, Parsed, Frame
@@ -25,7 +25,7 @@ def _hasAttr(attr):
 
 def _applySyntaxObjectsRule(parser, inp):
 	hasAttrSyntaxRule = _hasAttr('__syntaxRule__')
-	if not hasAttrSyntaxRule(parser, LTransactionBuffer(inp)):
+	if not hasAttrSyntaxRule(parser, ShiftedBuffer(inp)):
 		return None
 
 	syntaxRule = parser.scope[inp[0].name].getAttribute.obj('__syntaxRule__').obj

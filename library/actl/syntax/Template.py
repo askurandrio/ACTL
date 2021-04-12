@@ -1,5 +1,5 @@
 # pylint: disable=no-member
-from actl.Buffer import LTransactionBuffer, Buffer
+from actl.Buffer import ShiftedBuffer, Buffer
 from actl.syntax.AbstractTemplate import AbstractTemplate
 
 
@@ -17,16 +17,19 @@ class Template(AbstractTemplate, metaclass=_MetaTemplate):
 		super().__init__(template)
 
 	def __call__(self, parser, buff):
-		lTxBuff = LTransactionBuffer(buff)
+		shiftedBuff = ShiftedBuffer(buff)
 		res = Buffer()
 
 		for tmpl in self._template:
-			tmplRes = tmpl(parser, lTxBuff)
+			tmplRes = tmpl(parser, shiftedBuff)
 			if tmplRes is None:
 				return None
 			res += tmplRes
 
-		lTxBuff.commit()
+		if isinstance(buff, ShiftedBuffer):
+			buff.shift(shiftedBuff.indexShift)
+		else:
+			del buff[:shiftedBuff.indexShift]
 		return res
 
 	def __repr__(self):

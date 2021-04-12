@@ -1,2 +1,2 @@
 from actl.Buffer.Buffer import Buffer
-from actl.Buffer.LTransactionBuffer import LTransactionBuffer
+from actl.Buffer.ShiftedBuffer import ShiftedBuffer
