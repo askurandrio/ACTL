@@ -6,7 +6,7 @@ def test_pointOperator(execute):
 	execute('print.__call__')
 
 	assert execute.parsed.code == [
-		opcodes.GET_ATTR(
+		opcodes.GET_ATTRIBUTE(
 			dst='_tmpVar1', object='print', attribute='__call__'
 		),
 		opcodes.VARIABLE(name='_tmpVar1')

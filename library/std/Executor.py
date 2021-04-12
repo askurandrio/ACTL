@@ -166,7 +166,7 @@ def _(executor, opcode):
 	executor.scope[opcode.dst] = first.getAttribute.obj(str(AToPy(second))).obj
 
 
-@Executor.addHandler(opcodes.GET_ATTR)
+@Executor.addHandler(opcodes.GET_ATTRIBUTE)
 def _(executor, opcode):
 	object = executor.scope[opcode.object]
 	attribute = opcode.attribute

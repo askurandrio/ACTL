@@ -1,6 +1,6 @@
 from actl import objects
 from actl.objects.object.utils import addMethod
-from actl.syntax import SyntaxRule, Value, Token, Frame
+from actl.syntax import SyntaxRule, Value, Token, Parsed
 from actl.syntax.BufferRule import BufferRule
 from actl.utils import asDecorator
 from std.rules import CodeBlock
@@ -20,7 +20,7 @@ def _syntaxRule(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Value(While))
 	inpRule.pop(Token(' '))
-	condition = tuple(inpRule.pop(Frame(Token(':'))))
+	condition = tuple(inpRule.pop(Parsed(Token(':'))))
 	inpRule.pop(Token(':'))
 	code = CodeBlock(parser, inp).parse()
 	inp.insert(0, [While.call.obj(condition, code).obj])

@@ -1,6 +1,6 @@
 from actl import objects
 from actl.Buffer import Buffer
-from actl.syntax import SyntaxRule, Value, Token, Frame, Or, BufferRule
+from actl.syntax import SyntaxRule, Value, Token, Parsed, Or, BufferRule
 from actl.utils import asDecorator
 from std.rules import CodeBlock
 
@@ -37,7 +37,7 @@ class IfSyntax:
 
 	def parse(self):
 		self._inpRule.pop(Value(If), Token(' '))
-		self._firstConditionFrame = tuple(self._inpRule.pop(Frame(Token(':'))))
+		self._firstConditionFrame = tuple(self._inpRule.pop(Parsed(Token(':'))))
 		self._inpRule.pop(Token(':'))
 		if CodeBlock(self._parser, self._inp).isFullCodeBlock():
 			conditions, elseCode = self._getFromFullCodeBlock()
@@ -62,7 +62,7 @@ class IfSyntax:
 		parseLine()
 		while self._inpRule.startsWith(Value(objects.elif_)):
 			self._inpRule.pop(Value(objects.elif_), Token(' '))
-			frame = Frame(Token(':'))(self._parser, self._inp)
+			frame = Parsed(Token(':'))(self._parser, self._inp)
 			self._inpRule.pop(Token(':'))
 			conditions.append((tuple(frame), popCodeBlock()))
 			parseLine()
@@ -88,7 +88,7 @@ class IfSyntax:
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
-			frame = Frame(Token(':'))(self._parser, self._inp)
+			frame = Parsed(Token(':'))(self._parser, self._inp)
 			self._inp.pop()
 			self._inp.pop()
 			conditions.append((tuple(frame), popCodeBlock()))

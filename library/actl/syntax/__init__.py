@@ -6,6 +6,5 @@ from .Many import Many
 from .Or import Or
 from .CustomTemplate import CustomTemplate, Token, IsInstance, BreakPoint, End
 from .Maybe import Maybe
-from .Frame import Frame
 from .Parsed import Parsed
 from .Value import Value

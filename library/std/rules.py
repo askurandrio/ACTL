@@ -2,8 +2,8 @@
 from actl.Buffer import ShiftedBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
-	BufferRule, Parsed, Frame
-from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR, GET_ATTR
+	BufferRule, Parsed
+from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR, GET_ATTRIBUTE
 
 RULES = SyntaxRules()
 
@@ -129,7 +129,7 @@ class _ParseFunctionCall:
 		else:
 			argName = None
 
-		argCode = self._inpRule.pop(Frame(Or([Token(')')], [Token(',')])))
+		argCode = self._inpRule.pop(Parsed(Or([Token(')')], [Token(',')])))
 		argVar = argCode.pop(-1).name
 		self._parser.define(*argCode)
 		return argName, argVar
@@ -208,12 +208,17 @@ class CodeBlock:
 		return tuple(self.parser.subParser(code))
 
 
-@RULES.add(IsInstance(VARIABLE), Token('.'), IsInstance(VARIABLE), useParser=True)
-def _parseGetAttr(first, _, attribute, parser):
+@RULES.add(
+	IsInstance(VARIABLE),
+	Token('.'),
+	IsInstance(VARIABLE),
+	useParser=True
+)
+def _parseGetAttribute(first, _, attribute, parser):
 	dst = parser.makeTmpVar()
 
 	parser.define(
-		GET_ATTR(
+		GET_ATTRIBUTE(
 			dst=dst.name, object=first.name, attribute=attribute.name
 		)
 	)
@@ -222,13 +227,19 @@ def _parseGetAttr(first, _, attribute, parser):
 
 
 @RULES.add(
-	IsInstance(VARIABLE), Token(' '), Token('+'), Token(' '), Parsed(IsInstance(VARIABLE)),
+	IsInstance(VARIABLE),
+	Token(' '),
+	Token('+'),
+	Token(' '),
+	Parsed(IsInstance(VARIABLE)),
+	IsInstance(VARIABLE),
 	useParser=True
 )
-def _(first, _, token, _1, second, parser):
+def _(first, _, token, _1, secondDefinition, second, parser):
 	dst = parser.makeTmpVar()
 
 	parser.define(
+		secondDefinition,
 		CALL_OPERATOR(dst=dst.name, first=first.name, operator=token, second=second.name)
 	)
 
@@ -251,7 +262,7 @@ def _(parser, inp):
 		)
 
 		while not inpRule.startsWith(Token(']')):
-			elementCode = inpRule.pop(Frame(Or([Token(']')], [Token(',')])))
+			elementCode = inpRule.pop(Parsed(Or([Token(']')], [Token(',')])))
 			elementVarName = elementCode.pop(-1).name
 			parser.define(
 				*elementCode,
