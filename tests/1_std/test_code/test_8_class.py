@@ -47,13 +47,8 @@ def test_classDeclareWithInitMethod(execute):
 						'__init__',
 						Signature.call.obj(['self', 'a']).obj,
 						(
-							opcodes.CALL_FUNCTION_STATIC(
-								'_tmpVar2_1', function=String.call.obj, args=['a']
-							),
-							opcodes.CALL_OPERATOR(
-								'_tmpVar2_2', 'self', '.', '_tmpVar2_1'
-							),
-							opcodes.SET_VARIABLE('_tmpVar2_2', 'a'),
+							opcodes.GET_ATTR('_tmpVar2_1', 'self', 'a'),
+							opcodes.SET_VARIABLE('_tmpVar2_1', 'a'),
 							opcodes.RETURN('None')
 						),
 						None
@@ -71,13 +66,8 @@ def test_classDeclareWithInitMethod(execute):
 					'__init__',
 					Signature.call.obj(['self', 'a']).obj,
 					(
-						opcodes.CALL_FUNCTION_STATIC(
-							'_tmpVar2_1', function=String.call.obj, args=['a']
-						),
-						opcodes.CALL_OPERATOR(
-							'_tmpVar2_2', 'self', '.', '_tmpVar2_1'
-						),
-						opcodes.SET_VARIABLE('_tmpVar2_2', 'a'),
+						opcodes.GET_ATTR('_tmpVar2_1', 'self', 'a'),
+						opcodes.SET_VARIABLE('_tmpVar2_1', 'a'),
 						opcodes.RETURN('None')
 					),
 					ANY

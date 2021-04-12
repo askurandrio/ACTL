@@ -3,7 +3,7 @@ from actl.Buffer import ShiftedBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
 	BufferRule, Parsed, Frame
-from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR
+from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR, GET_ATTR
 
 RULES = SyntaxRules()
 
@@ -209,16 +209,12 @@ class CodeBlock:
 
 
 @RULES.add(IsInstance(VARIABLE), Token('.'), IsInstance(VARIABLE), useParser=True)
-def _(first, token, attribute, parser):
-	attributeVar = parser.makeTmpVar()
+def _parseGetAttr(first, _, attribute, parser):
 	dst = parser.makeTmpVar()
 
 	parser.define(
-		CALL_FUNCTION_STATIC(
-			dst=attributeVar.name, function=String.call.obj, args=[attribute.name]
-		),
-		CALL_OPERATOR(
-			dst=dst.name, first=first.name, operator=token, second=attributeVar.name
+		GET_ATTR(
+			dst=dst.name, object=first.name, attribute=attribute.name
 		)
 	)
 

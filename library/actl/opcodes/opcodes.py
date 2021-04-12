@@ -10,3 +10,4 @@ CALL_FUNCTION_STATIC = CALL_FUNCTION.create('CALL_FUNCTION_STATIC')
 
 RETURN = DynamicOpCode.create('RETURN', 'var')
 CALL_OPERATOR = DynamicOpCode.create('CALL_OPERATOR', 'dst', 'first', 'operator', 'second')
+GET_ATTR = DynamicOpCode.create('GET_ATTR', 'dst', 'object', 'attribute')

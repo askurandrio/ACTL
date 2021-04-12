@@ -6,11 +6,10 @@ def test_pointOperator(execute):
 	execute('print.__call__')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=String.call.obj, args=['__call__']
+		opcodes.GET_ATTR(
+			dst='_tmpVar1', object='print', attribute='__call__'
 		),
-		opcodes.CALL_OPERATOR(dst='_tmpVar2', first='print', operator='.', second='_tmpVar1'),
-		opcodes.VARIABLE(name='_tmpVar2')
+		opcodes.VARIABLE(name='_tmpVar1')
 	]
 
 	assert execute.executed.scope['_'] == execute.scope['print'].getAttribute.obj('__call__').obj
