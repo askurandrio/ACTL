@@ -1,7 +1,6 @@
-from itertools import zip_longest
-from actl import opcodes
-from std.objects import Function, class_ as stdClass
+from actl import opcodes, ResultReturnException
 from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass
+from std.objects import Function, class_ as stdClass
 
 
 class Executor:
@@ -11,6 +10,7 @@ class Executor:
 		self.scope = scope
 		self.stack = []
 		self.frames = [iter(code)]
+		self.returnHandler = None
 
 	def execute(self):
 		while self.frames:
@@ -19,10 +19,6 @@ class Executor:
 			except StopIteration:
 				self.frames.pop(-1)
 				continue
-				
-			# if isinstance(opcode, _Frame):
-			# 	self.frames.append(opcode)
-			# 	continue
 
 			self._executeOpcode(opcode)
 
@@ -61,26 +57,45 @@ class _Frame:
 		return wrapper
 
 
-class _CallFrame(_Frame):
-	def __init__(self, executor, opcode):
-		function = executor.scope[opcode.function]
-		executor.scope, self.prevScope = executor.scope.child(), executor.scope
+class _ResultFrame(_Frame):
+	def __init__(self, executor, result):
+		self._executor = executor
+		self._finalResult = result
+		self._result = result.getParent()
+		super().__init__(self._result.popExecute(self._executor))
 
-		for functionArg, opcodeArg in zip_longest(
-			function.getAttribute('signature').getAttribute('args'), opcode.args
-		):
-			executor.scope[functionArg] = self.prevScope[opcodeArg]
+	def return_(self, returnValue):
+		try:
+			self._head.throw(ResultReturnException(returnValue))
+		except ResultReturnException:
+			pass
+		else:
+			raise RuntimeError(f'This generator do not want return: {self._head}')
 
-		self.dst = opcode.dst
-		super().__init__(function.getAttribute('body'))
+		self._result = self._result.resolve(returnValue)
+		if self._result is None:
+			self._head = None
+			assert self._executor.frames.pop(-1) == self
+		else:
+			self._head = self._result.popExecute(self._executor)
+
+	def __next__(self):
+		if self._head is None:
+			raise StopIteration
+
+		try:
+			return super().__next__()
+		except StopIteration as ex:
+			raise RuntimeError('Unexpected end of code') from ex
 
 
 @Executor.addHandler(type(Object))
 def _(executor, opcode):
 	def getHandler():
+		class_ = opcode.getAttribute.obj('__class__').obj
 		for parent in [
-			opcode.getAttribute('__class__'),
-			*opcode.getAttribute('__class__').getAttribute('__parents__')
+			class_,
+			*class_.getAttribute.obj('__parents__').obj
 		]:
 			if parent in Executor.HANDLERS:
 				return Executor.HANDLERS[parent]
@@ -108,31 +123,38 @@ def _(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
 def _(executor, opcode):
 	assert opcode.typeb == '('
-	executor.scope[opcode.dst] = opcode.function(*opcode.args, **opcode.kwargs)
+	result = opcode.function(*opcode.args, **opcode.kwargs)
+	executor.scope[opcode.dst] = result.obj
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION)
 def _ExecutorHandler_callFunction(executor, opcode):
 	function = executor.scope[opcode.function]
 
-	if Function == function.getAttribute('__class__'):
-		return _CallFrame(executor, opcode)
-
 	assert opcode.typeb == '('
 	args = [executor.scope[varName] for varName in opcode.args]
 	kwargs = {argName: executor.scope[varName] for argName, varName in opcode.kwargs.items()}
-	executor.scope[opcode.dst] = function.call(*args, **kwargs)
-	return None
+
+	resultCall = function.call.obj(*args, **kwargs)
+
+	@resultCall.then
+	def setDstForResultCall(returnValue):
+		executor.scope[opcode.dst] = returnValue
+
+	if setDstForResultCall.isResolved():
+		return
+
+	return _ResultFrame(executor, setDstForResultCall)
 
 
 @Executor.addHandler(opcodes.RETURN)
 def _(executor, opcode):
-	while not isinstance(executor.frames[-1], _CallFrame):
-		executor.frames.pop(-1)
+	returnVal = executor.scope[opcode.var]
 
-	callFrame = executor.frames.pop(-1)
-	callFrame.prevScope[callFrame.dst] = executor.scope[opcode.var]		
-	executor.scope = callFrame.prevScope
+	while not isinstance(executor.frames[-1], _ResultFrame):
+		del executor.frames[-1]
+
+	executor.frames[-1].return_(returnVal)
 
 
 @Executor.addHandler(opcodes.CALL_OPERATOR)
@@ -141,62 +163,68 @@ def _(executor, opcode):
 	second = executor.scope[opcode.second]
 
 	assert opcode.operator == '.'
-	executor.scope[opcode.dst] = first.getAttribute(str(AToPy(second)))
+	executor.scope[opcode.dst] = first.getAttribute.obj(str(AToPy(second))).obj
 
 
 @Executor.addHandler(While)
 @_Frame.wrap
 def _(executor, opcode):
 	while True:
-		yield from opcode.getAttribute('conditionFrame')
-		res = Bool.call(executor.scope['_'])
+		yield from opcode.getAttribute.obj('conditionFrame').obj
+		res = Bool.call.obj(executor.scope['_']).obj
 		if not AToPy(res):
 			break
 
-		yield from opcode.getAttribute('code')
+		yield from opcode.getAttribute.obj('code').obj
 
 
 @Executor.addHandler(Function)
 def _executeFunction(executor, opcode):
-	linkedFunction = Function.call(
-		opcode.getAttribute('name'),
-		opcode.getAttribute('signature'),
-		opcode.getAttribute('body'),
+	linkedFunction = Function.call.obj(
+		opcode.getAttribute.obj('name').obj,
+		opcode.getAttribute.obj('signature').obj,
+		opcode.getAttribute.obj('body').obj,
 		executor.scope
-	)
-	executor.scope[opcode.getAttribute('name')] = linkedFunction
+	).obj
+	executor.scope[opcode.getAttribute.obj('name').obj] = linkedFunction
 
 
 @Executor.addHandler(If)
 @_Frame.wrap
 def _(executor, opcode):
-	for conditionFrame, code in opcode.getAttribute('conditions'):
+	for conditionFrame, code in opcode.getAttribute.obj('conditions').obj:
 		yield from conditionFrame
 		res = executor.scope['_']
-		res = Bool.call(res)
+		res = Bool.call.obj(res).obj
 		if AToPy(res):
 			yield from code
 			return
 
 	if opcode.hasAttribute('elseCode'):
-		yield from opcode.getAttribute('elseCode')
+		yield from opcode.getAttribute.obj('elseCode').obj
 
 
 @Executor.addHandler(actlClass)
 @_Frame.wrap
-def _bindClass(executor, opcode):
-	className = str(opcode.getAttribute('__name__'))
-	newClass = stdClass.call(className, {})
+def _executeClass(executor, opcode):
+	className = str(opcode.getAttribute.obj('__name__').obj)
+	newClass = stdClass.call.obj(className, {}).obj
 	executor.scope, prevScope = executor.scope.child(), executor.scope
 	executor.scope['__class__'] = newClass
 	executor.scope[className] = newClass
+	self_ = newClass.getAttribute.obj('__self__').obj
 
-	yield from opcode.getAttribute('body')
+	yield from opcode.getAttribute.obj('body').obj
 
 	for key, value in executor.scope.getDiff():
-		if key in ['__name__', '__class__', className]:
+		if key in ['__class__', className, '__name__']:
 			continue
-		newClass.setAttribute(str(key), value)
+
+		if Function == value.getAttribute.obj('__class__').obj:
+			self_[key] = value
+			continue
+
+		newClass.setAttribute(key, value)
 
 	executor.scope = prevScope
 	executor.scope[className] = newClass

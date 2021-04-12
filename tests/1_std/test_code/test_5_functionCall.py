@@ -19,7 +19,7 @@ def test_call(execute, testF):
 
 def test_callWithArg(execute, testF):
 	arg = Mock()
-	execute.scope['arg'] = PyToA.call(arg)
+	execute.scope['arg'] = PyToA.call.obj(arg).obj
 
 	execute('testF(arg)')
 
@@ -35,7 +35,7 @@ def test_callWithString(execute, testF):
 	execute('testF("s")')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=String.call, args=['s']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=String.call.obj, args=['s']),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar2', function='testF', args=['_tmpVar1']
 		),
@@ -48,8 +48,8 @@ def test_callWithString(execute, testF):
 def test_callWithTwoArg(execute, testF):
 	first = Mock()
 	second = Mock()
-	execute.scope['first'] = PyToA.call(first)
-	execute.scope['second'] = PyToA.call(second)
+	execute.scope['first'] = PyToA.call.obj(first).obj
+	execute.scope['second'] = PyToA.call.obj(second).obj
 
 	execute('testF(first, second)')
 
@@ -65,7 +65,7 @@ def test_callWithTwoArg(execute, testF):
 
 def test_callWithNamedArg(execute, testF):
 	arg = Mock()
-	execute.scope['arg'] = PyToA.call(arg)
+	execute.scope['arg'] = PyToA.call.obj(arg).obj
 
 	execute('testF(argName=arg)')
 
@@ -82,8 +82,8 @@ def test_callWithNamedArg(execute, testF):
 def test_callWithArgAndNamedArg(execute, testF):
 	first = Mock()
 	second = Mock()
-	execute.scope['first'] = PyToA.call(first)
-	execute.scope['second'] = PyToA.call(second)
+	execute.scope['first'] = PyToA.call.obj(first).obj
+	execute.scope['second'] = PyToA.call.obj(second).obj
 
 	execute('testF(first, secondName=second)')
 
@@ -100,6 +100,6 @@ def test_callWithArgAndNamedArg(execute, testF):
 @pytest.fixture
 def testF(execute):
 	mock = Mock()
-	execute.scope['testF'] = PyToA.call(mock)
+	execute.scope['testF'] = PyToA.call.obj(mock).obj
 
 	return mock

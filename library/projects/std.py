@@ -44,7 +44,7 @@ def getScope(_):
 		('class', 'std.objects.class_')
 	):
 		pyVar = eval(pyName)
-		var = objects.PyToA.call(pyVar)
+		var = objects.PyToA.call.obj(pyVar).obj
 		scope[varName] = var
 
 	return Scope(scope)

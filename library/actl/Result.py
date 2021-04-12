@@ -31,6 +31,8 @@ class Result:
 		return execute(executor)
 
 	def getParent(self):
+		# pylint: disable=protected-access
+
 		parent = self
 
 		while parent._parent is not None:
@@ -39,6 +41,7 @@ class Result:
 		return parent
 
 	def resolve(self, resolveValue):
+		# pylint: disable=protected-access
 		currentResult = self._then
 
 		while currentResult is not None:
@@ -72,7 +75,7 @@ class Result:
 		if (self._obj is not _default) and (handler is not None):
 			try:
 				obj = handler(self._obj)
-			except Exception as ex:
+			except Exception as ex: # pylint: disable=broad-except
 				return Result(ex=ex)
 
 			if isinstance(obj, Result):
@@ -84,7 +87,7 @@ class Result:
 			if errHandler is not None:
 				try:
 					obj = errHandler(self._ex)
-				except Exception as ex:
+				except Exception as ex:  # pylint: disable=broad-except
 					return Result(ex=ex)
 
 				if isinstance(obj, Result):

@@ -1,7 +1,7 @@
 from actl.objects import makeClass, class_ as actlClass, addMethodToClass
 from actl.opcodes import VARIABLE
 from actl.syntax import SyntaxRule, Value, Token, IsInstance
-from actl import asDecorator
+from actl import Result, asDecorator
 from actl.syntax.BufferRule import BufferRule
 from std.rules import CodeBlock
 
@@ -16,7 +16,7 @@ def _class_call(_, name, scope):
 	for key, value in scope.items():
 		self.setAttribute(key, value)
 
-	return self
+	return Result(obj=self)
 
 
 @asDecorator(lambda rule: class_.setAttribute('__syntaxRule__', rule))
@@ -31,5 +31,5 @@ def _parseClass(parser, inp):
 	clsName = inpRule.pop(IsInstance(VARIABLE)).one().name
 	inpRule.pop(Token(':'))
 	body = CodeBlock(parser, inp).parse()
-	cls = class_.call(clsName, {'body': body})
+	cls = class_.call.obj(clsName, {'body': body}).obj
 	inp.insert(0, [cls])

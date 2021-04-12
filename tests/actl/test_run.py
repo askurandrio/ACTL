@@ -197,5 +197,5 @@ class _Run:
 
 def getTestScope(project):
 	scope = project.this['std', 'scope']
-	scope['print'] = actl.objects.PyToA.call(lambda inp: print(f'mocked: {inp}'))
+	scope['print'] = actl.objects.PyToA.call.obj(lambda inp: print(f'mocked: {inp}')).obj
 	return scope

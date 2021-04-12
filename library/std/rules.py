@@ -15,6 +15,7 @@ def _hasAttr(attr):
 		if not isinstance(token, type(Object)):
 			if not ((VARIABLE == token) and (token.name in scope)):
 				return None
+
 			token = scope[token.name]
 
 		return token.hasAttribute(attr)
@@ -27,7 +28,7 @@ def _applySyntaxObjectsRule(parser, inp):
 	if not hasAttrSyntaxRule(parser, LTransactionBuffer(inp)):
 		return None
 
-	syntaxRule = parser.scope[inp[0].name].getAttribute('__syntaxRule__')
+	syntaxRule = parser.scope[inp[0].name].getAttribute.obj('__syntaxRule__').obj
 	return syntaxRule(parser, inp)
 
 
@@ -79,7 +80,7 @@ def _(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, args=[string]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call.obj, args=[string]))
 
 	inp.insert(0, [dst])
 
@@ -93,7 +94,7 @@ def _isDigit(_, token):
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, args=[number]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call.obj, args=[number]))
 	return [dst]
 
 
@@ -214,7 +215,7 @@ def _(first, token, attribute, parser):
 
 	parser.define(
 		CALL_FUNCTION_STATIC(
-			dst=attributeVar.name, function=String.call, args=[attribute.name]
+			dst=attributeVar.name, function=String.call.obj, args=[attribute.name]
 		),
 		CALL_OPERATOR(
 			dst=dst.name, first=first.name, operator=token, second=attributeVar.name
@@ -243,13 +244,13 @@ def _(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Token('['))
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call, args=[]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call.obj, args=[]))
 
 	if not inpRule.startsWith(Token(']')):
 		appendStrVar = parser.makeTmpVar()
 		appendVarName = parser.makeTmpVar().name
 		parser.define(
-			CALL_FUNCTION_STATIC(dst=appendStrVar.name, function=String.call, args=['append']),
+			CALL_FUNCTION_STATIC(dst=appendStrVar.name, function=String.call.obj, args=['append']),
 			CALL_OPERATOR(dst=appendVarName, first=dst.name, operator='.', second=appendStrVar.name)
 		)
 
