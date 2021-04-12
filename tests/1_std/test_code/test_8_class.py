@@ -47,8 +47,7 @@ def test_classDeclareWithInitMethod(execute):
 						'__init__',
 						Signature.call.obj(['self', 'a']).obj,
 						(
-							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-							opcodes.SET_VARIABLE('_tmpVar2_1', 'a'),
+							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.RETURN('None')
 						),
 						None
@@ -66,8 +65,7 @@ def test_classDeclareWithInitMethod(execute):
 					'__init__',
 					Signature.call.obj(['self', 'a']).obj,
 					(
-						opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-						opcodes.SET_VARIABLE('_tmpVar2_1', 'a'),
+						opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 						opcodes.RETURN('None')
 					),
 					ANY

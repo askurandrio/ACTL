@@ -8,3 +8,4 @@ from .CustomTemplate import CustomTemplate, Token, IsInstance, BreakPoint, End
 from .Maybe import Maybe
 from .Parsed import Parsed
 from .Value import Value
+from .Not import Not

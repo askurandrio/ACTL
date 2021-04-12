@@ -36,8 +36,9 @@ class Buffer:
 		return self._buff.pop(index)
 
 	def insert(self, index, items):
-		if index != 0:
-			self._load(index)
+		loadIndex = index - 1
+		if loadIndex > 0:
+			self._load(loadIndex)
 		self._buff[index:index] = list(items)
 
 	def append(self, *items):  # pylint: disable=no-self-use
@@ -127,7 +128,6 @@ class Buffer:
 		if sep is None:
 			sep = ', '
 
-		self._load(10)
 		elementsAsStr = '['
 		elementsAsStr += sep.join(repr(elem) for elem in self._buff[:10])
 		if len(self._buff) == 11:
@@ -161,11 +161,3 @@ class Buffer:
 				value += 1
 
 		return gen()
-
-
-class _Transaction:
-	def __init__(self):
-		self.isCommited = False
-
-	def commit(self):
-		self.isCommited = True

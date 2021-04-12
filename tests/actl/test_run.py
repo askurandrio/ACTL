@@ -25,7 +25,7 @@ class _AbstractIoQueue:
 			try:
 				return self._queue.get(timeout=0.5)
 			except Empty:
-				if not self._process.is_alive():
+				if (self._process is None) or (not self._process.is_alive()):
 					raise
 
 		raise Empty

@@ -2,8 +2,9 @@
 from actl.Buffer import ShiftedBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
-	BufferRule, Parsed
-from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, CALL_OPERATOR, GET_ATTRIBUTE
+	BufferRule, Parsed, Not
+from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, \
+	CALL_OPERATOR, GET_ATTRIBUTE, SET_ATTRIBUTE
 
 RULES = SyntaxRules()
 
@@ -58,17 +59,13 @@ def _(*tokens):
 	return [VARIABLE(''.join(tokens))]
 
 
-@RULES.add(IsInstance(VARIABLE), Token(' '), Token('='), manualApply=True, useParser=True)
-def _(inp, parser):
-	inpRule = BufferRule(parser, inp)
-	dst = inpRule.pop(IsInstance(VARIABLE)).one().name
-	inpRule.pop(Token(' '), Token('='), Token(' '))
-	parser.subParser(inp).parseLine()
-	parsed = BufferRule(parser, inp).popUntil(parser.endLine).loadAll()
-
-	src = BufferRule(parser, Buffer.of(parsed.pop(-1))).pop(IsInstance(VARIABLE)).one().name
-
-	inp.insert(0, parsed + Buffer.of(SET_VARIABLE(dst, src)))
+@RULES.add(
+	IsInstance(VARIABLE), Token(' '), Token('='), Token(' '), Parsed(), IsInstance(VARIABLE)
+)
+def _parseSetVariable(dst, _, _1, _2, src):
+	return [
+		SET_VARIABLE(dst.name, src.name)
+	]
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
@@ -212,18 +209,37 @@ class CodeBlock:
 	IsInstance(VARIABLE),
 	Token('.'),
 	IsInstance(VARIABLE),
+	Not(Token(' '), Token('=')),
 	useParser=True
 )
-def _parseGetAttribute(first, _, attribute, parser):
+def _parseGetAttribute(object_, _, attribute, parser):
 	dst = parser.makeTmpVar()
 
 	parser.define(
 		GET_ATTRIBUTE(
-			dst=dst.name, object=first.name, attribute=attribute.name
+			dst=dst.name, object=object_.name, attribute=attribute.name
 		)
 	)
 
 	return [dst]
+
+
+@RULES.add(
+	IsInstance(VARIABLE),
+	Token('.'),
+	IsInstance(VARIABLE),
+	Token(' '),
+	Token('='),
+	Token(' '),
+	Parsed(),
+	IsInstance(VARIABLE)
+)
+def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
+	return [
+		SET_ATTRIBUTE(
+			object=object_.name, attribute=attribute.name, src=src.name
+		)
+	]
 
 
 @RULES.add(
