@@ -1,4 +1,5 @@
 # pylint: disable=arguments-differ, useless-super-delegation
+from actl.Result import Result
 from actl.objects.object.AObject import AObject
 
 
@@ -20,7 +21,7 @@ class NativeMethod(AObject):
 
 	@property
 	def get(self):
-		return self._get
+		return Result(obj=self._get)
 
 	def toPyString(self):
 		return f'{type(self).__name__}({self._rawMethod})'
@@ -39,7 +40,7 @@ class NativeFunction(AObject):
 
 	@property
 	def call(self):
-		return self._function
+		return Result(obj=self._function)
 
 	def toPyString(self):
 		return f'{type(self).__name__}({self._function})'

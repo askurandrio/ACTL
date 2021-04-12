@@ -21,7 +21,7 @@ makeClass.Object = None
 def addMethod(cls, name):
 	def decorator(function):
 		aFunction = NativeMethod(function)
-		cls.getAttribute('__self__')[name] = aFunction
+		cls.getAttribute.obj('__self__').obj[name] = aFunction
 
 	return decorator
 

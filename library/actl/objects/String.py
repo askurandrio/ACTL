@@ -1,4 +1,5 @@
 # pylint: disable=protected-access
+from actl.Result import Result
 from actl.objects.object import Object, class_
 from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
 
@@ -24,11 +25,22 @@ String = _AStringClass({
 @addMethodToClass(String, '__call__')
 def String__call(cls, value=''):
 	if isinstance(value, type(Object)):
-		valueGetAttribute = value.getAttribute
-		valueToString = valueGetAttribute(String)
-		valueToStringFunc = valueToString.call
-		return valueToStringFunc()
+		resultValueGetAttribute = value.getAttribute
+
+		@resultValueGetAttribute.then
+		def resultValueToString(valueGetAttribute):
+			return valueGetAttribute(String)
+
+		@resultValueToString.then
+		def resultValueToStringFunc(valueToString):
+			return valueToString.call
+
+		@resultValueToStringFunc.then
+		def result(valueToStringFunc):
+			return valueToStringFunc()
+
+		return result
 
 	self = _AString({'__class__': cls})
 	self._value = value
-	return self
+	return Result(obj=self)

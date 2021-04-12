@@ -59,12 +59,20 @@ class DynamicOpCode(AnyOpCode):
 		return self._getAttributes() == other._getAttributes()
 
 	def __repr__(self):
-		attributes = ', '.join(
-			f'{key}={value!r}'
-			for key, value in self._getAttributes().items()
-			if not ((key in self._defaults) and (self._defaults[key] == value))
+		attributes = self._getAttributes()
+		attributesToStr = ', '.join(
+			repr(attributes[key])
+			for key in sorted(self.__slots__)
+			if key not in self._defaults.keys()
 		)
-		return '{}({})'.format(type(self).__name__, attributes)
+		notDefaultAttributesToStr = ', '.join(
+			f'{key}={attributes[key]!r}'
+			for key in self._defaults.keys()
+			if self._defaults[key] == attributes[key]
+		)
+		if notDefaultAttributesToStr:
+			attributesToStr += f', {notDefaultAttributesToStr}'
+		return '{}({})'.format(type(self).__name__, attributesToStr)
 
 	@classmethod
 	def create(cls, name, *attributes, **defaults):

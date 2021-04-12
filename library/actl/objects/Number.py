@@ -1,4 +1,5 @@
 # pylint: disable=protected-access
+from actl.Result import Result
 from actl.objects.Bool import Bool
 from actl.objects.AToPy import AToPy
 from actl.objects.object import makeClass
@@ -10,21 +11,21 @@ Number = makeClass('Number')
 
 @addMethodToClass(Number, '__call__')
 def _(cls, value):
-	self = cls.super_(Number, '__call__').call()
+	resultSelf = cls.super_.obj(Number, '__call__').obj.call.obj()
 	if isinstance(value, str):
 		if '.' in value:
 			value = float(value)
 		else:
 			value = int(value)
-	self._value = value
-	return self
+	resultSelf.obj._value = value
+	return resultSelf
 
 
 @addMethod(Number, Bool)
 def _(self):
 	if self._value == 0:
-		return Bool.False_
-	return Bool.True_
+		return Result(obj=Bool.False_)
+	return Result(obj=Bool.True_)
 
 
 @addMethod(Number, AToPy)

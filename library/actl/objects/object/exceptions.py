@@ -27,11 +27,8 @@ class _MetaAGenericKeyError(type, _GenericKeyExceptionMixin):
 
 	@lru_cache(maxsize=None)
 	def _getClassFor(self, key):
-		class Temp(self, metaclass=type):
-			_key = key
-
-		Temp.__name__ = f'{self.__name__} for {key}'
-		return Temp
+		cls = type(f'{self.__name__} for {key}', (self,), {'_key': key})
+		return cls
 
 
 class AGenericKeyError(Exception, metaclass=_MetaAGenericKeyError):

@@ -1,6 +1,8 @@
 import sys
 
+from actl.Result import Result
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
+from actl.opcodes.opcodes import RETURN
 
 
 sys.setrecursionlimit(500)
@@ -13,28 +15,41 @@ class AObject:
 	@property
 	def getAttribute(self):
 		try:
-			getAttributeFunc = self.lookupAttributeInHead('__getAttribute__')
+			resultGetAttributeFunc = Result(obj=self.lookupAttributeInHead('__getAttribute__'))
 		except AAttributeNotFound('__getAttribute__').class_:
 			getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
-			getAttributeFunc = self.bindAttribute(getAttribute)
+			resultGetAttributeFunc = self.bindAttribute(getAttribute)
 
-		return getAttributeFunc.call
+		@resultGetAttributeFunc.then
+		def resultGetAttributeFuncCall(getAttributeFunc):
+			return getAttributeFunc.call
+
+		return resultGetAttributeFuncCall
 
 	@property
 	def get(self):
-		get = self.getAttribute('__get__')
-		return get.call
+		resultGet = self.getAttribute('__get__')
+
+		@resultGet.then
+		def resultGetCall(get):
+			return get.call
+
+		return resultGetCall
 
 	@property
 	def super_(self):
 		try:
-			superGetAttributeFunc = self.lookupAttributeInHead('__superGetAttribute__')
+			resultSuperGetAttributeFunc = Result(obj=self.lookupAttributeInHead('__superGetAttribute__'))
 		except AAttributeNotFound('__superGetAttribute__').class_:
 			superGetAttribute = self.lookupAttributeInClsSelf('__superGetAttribute__')
-			bindSuperGetAttribute = self.bindAttribute(superGetAttribute)
-			superGetAttributeFunc = bindSuperGetAttribute.call
+			resultBindSuperGetAttribute = self.bindAttribute(superGetAttribute)
 
-		return superGetAttributeFunc
+			@resultBindSuperGetAttribute.then
+			def resultSuperGetAttributeFunc(bindSuperGetAttribute):
+				superGetAttributeFunc = bindSuperGetAttribute.call
+				return superGetAttributeFunc
+
+		return resultSuperGetAttributeFunc
 
 	def lookupAttributeInClsSelf(self, key):
 		class_ = self.class_
@@ -62,7 +77,9 @@ class AObject:
 
 	def hasAttribute(self, key):
 		try:
-			self.getAttribute(key)
+			result = self.getAttribute.obj(key)
+			if isinstance(result, Result):
+				result.obj
 		except AAttributeNotFound(key).class_:
 			return False
 		else:
@@ -70,8 +87,17 @@ class AObject:
 
 	@property
 	def call(self):
-		func = self.getAttribute('__call__')
-		return func.call
+		resultGetAttribute = self.getAttribute
+
+		@resultGetAttribute.then
+		def resultFunc(getAttribute):
+			return getAttribute('__call__')
+
+		@resultFunc.then
+		def resultFuncCall(func):
+			return func.call
+
+		return resultFuncCall
 
 	@property
 	def class_(self):
@@ -88,7 +114,7 @@ class AObject:
 	def lookupSpecialAttribute(self, key):
 		if key == '__class__':
 			return self.class_
-		
+
 		if key == '__self__':
 			return self.self_
 
@@ -99,18 +125,28 @@ class AObject:
 
 	def bindAttribute(self, attribute):
 		if not isinstance(attribute, AObject):
+			return Result(obj=attribute)
+
+		resultAttributeGet = attribute.get
+
+		def catchAttributeGetLookup(ex):
+			assert isinstance(ex, AAttributeNotFound('__get__').class_)
+
 			return attribute
 
-		try:
-			attributeGet = attribute.get
-		except AAttributeNotFound('__get__').class_:
-			return attribute
+		def resultAttributeGetCall(attributeGet):
+			resultAttributeGetCall = attributeGet.call
 
-		attributeGetCall = attributeGet.call
-		return attributeGetCall(self)
+			@resultAttributeGetCall.then
+			def resultBindedAttribute(attributeGetCall):
+				return attributeGetCall(self)
+
+			return resultBindedAttribute
+
+		return resultAttributeGet.then(resultAttributeGetCall, catchAttributeGetLookup)
 
 	def toPyString(self):
-		name = self.getAttribute('__class__').getAttribute('__name__')
+		name = self.getAttribute.obj('__class__').obj.getAttribute.obj('__name__').obj
 		head = self._head
 		head = {key: value for key, value in head.items() if key != '__class__'}
 		return f'{name}<{head}>'
@@ -137,13 +173,18 @@ class AObject:
 
 		if id(self) in AObject._stack:
 			return '{...}'
-		
+
 		AObject._stack.add(id(self))
 
 		try:
 			from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 
-			string = String.call(self)
-			return string.toPyString()
+			try:
+				string = String.call.obj(self).obj
+				return string.toPyString()
+			except:
+				breakpoint()
+				string = String.call.obj(self).obj
+				return string.toPyString()
 		except Exception as ex:
 			return f'Error during convert<{id(self)}> to string: {ex}'

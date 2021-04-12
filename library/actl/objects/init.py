@@ -11,11 +11,11 @@ def _(self):
 
 @addMethod(class_, String)
 def clsAsStr(self):
-	name = self.getAttribute('__name__')
-	return String.call(f"class '{name}'")
+	name = self.getAttribute.obj('__name__').obj
+	return String.call.obj(f"class '{name}'")
 
 
 @addMethod(Object, String)
 def selfAsStr(self):
 	pySting = self.toPyString()
-	return String.call(pySting)
+	return String.call.obj(pySting)

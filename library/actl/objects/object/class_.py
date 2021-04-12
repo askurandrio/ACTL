@@ -1,3 +1,4 @@
+from actl.Result import Result
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeMethod import NativeFunction, NativeMethod
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
@@ -5,7 +6,7 @@ from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNot
 
 def class__getAttribute(self, key):
 	try:
-		return self.lookupSpecialAttribute(key)
+		return Result(obj=self.lookupSpecialAttribute(key))
 	except AAttributeIsNotSpecial(key).class_:
 		pass
 
@@ -35,7 +36,7 @@ def class__getAttribute(self, key):
 
 
 def class__superGetAttribute(self, for_, key):
-	parents = self.getAttribute('__parents__')
+	parents = self.getAttribute.obj('__parents__').obj
 
 	if for_ in parents:
 		forIndex = parents.index(for_)

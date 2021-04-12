@@ -3,18 +3,18 @@ from actl.objects.object.utils import addMethodToClass
 
 
 If = makeClass('If')
-elif_ = makeClass('_Elif').call()
-else_ = makeClass('_Else').call()
+elif_ = makeClass('_Elif').call.obj().obj
+else_ = makeClass('_Else').call.obj().obj
 
 
 @addMethodToClass(If, '__call__')
 def _(cls, ifCondition, *elifConditions, elseCode=None):
-	self = cls.super_(If, '__call__').call()
+	resultSelf = cls.super_.obj(If, '__call__').obj.call.obj()
 
 	conditions = (ifCondition,) + elifConditions
 
-	self.setAttribute('conditions', conditions)
+	resultSelf.obj.setAttribute('conditions', conditions)
 	if elseCode is not None:
-		self.setAttribute('elseCode', elseCode)
+		resultSelf.obj.setAttribute('elseCode', elseCode)
 
-	return self
+	return resultSelf
