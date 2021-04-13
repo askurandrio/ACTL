@@ -12,5 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
   
+      - name: set-up
+        run: python3 -m pip install -r ./etc/requirements.txt
+
       - name: pytest
         run: PYTHONPATH=./library py.test ./tests -x -vv

@@ -13,6 +13,8 @@ ACTL this compiler A in C++
 
 Runner:
 
+docker build -f runner_dockerfile -t runner_dockerfile .
+
 RUNNER_TOKEN=
 
 docker run --rm --name github-runner \
@@ -23,4 +25,8 @@ docker run --rm --name github-runner \
   -e RUNNER_GROUP="actl-group" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-actl:/tmp/github-runner-actl \
-  myoung34/github-runner:latest
+  runner_dockerfile
+
+
+remove:
+    docker rm -f $(docker ps -aqf "name=github-runner")
