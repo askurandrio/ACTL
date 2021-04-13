@@ -1,5 +1,6 @@
 from actl import opcodes
 from actl.objects import String, Number
+from actl.opcodes.opcodes import SET_VARIABLE
 
 
 def test_pointOperator(execute):
@@ -24,3 +25,19 @@ def test_add(execute):
 		opcodes.CALL_OPERATOR(dst='_tmpVar3', first='_tmpVar1', operator='+', second='_tmpVar2'),
 		opcodes.VARIABLE(name='_tmpVar3')
 	]
+
+
+	assert execute.executed.scope['_'] == Number.call.obj('3').obj
+
+
+def test_setAddResult(execute):
+	execute('a = 1 + 2')
+
+	assert execute.parsed.code == [
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=Number.call.obj, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar2', function=Number.call.obj, args=['2']),
+		opcodes.CALL_OPERATOR(dst='_tmpVar3', first='_tmpVar1', operator='+', second='_tmpVar2'),
+		opcodes.SET_VARIABLE('a', '_tmpVar3')
+	]
+
+	assert execute.executed.scope['a'] == Number.call.obj('3').obj

@@ -154,9 +154,16 @@ def _(executor, opcode):
 def _(executor, opcode):
 	first = executor.scope[opcode.first]
 	second = executor.scope[opcode.second]
+	assert opcode.operator == '+'
 
-	assert opcode.operator == '.'
-	executor.scope[opcode.dst] = first.getAttribute.obj(str(AToPy(second))).obj
+	pyFirst = AToPy(first)
+	pySecond = AToPy(second)
+	pyResult = pyFirst + pySecond
+
+	resultClass = first.getAttribute.obj('__class__').obj
+	result = resultClass.call.obj(pyResult).obj
+
+	executor.scope[opcode.dst] = result
 
 
 @Executor.addHandler(opcodes.GET_ATTRIBUTE)

@@ -38,14 +38,14 @@ def _getDiff(leftObject, rightObject, indent):
 		right = _toTuple(rightObject)
 	else:
 		return [
-			f'{indent}	left is {left}',
+			f'{indent}	left is {leftObject}',
 			f'{indent}	right is {rightObject}',
 			f'{indent}	right type<{type(rightObject).__name__}> is unexpected'
 		]
 
 	res = [
-		f'{indent}{left} != ',
-		f'{indent}{right}'
+		f'{indent}{leftObject} != ',
+		f'{indent}{rightObject}'
 	]
 
 	for idx, (first, second) in enumerate(zip_longest(left, right, fillvalue=_default)):

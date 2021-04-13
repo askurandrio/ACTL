@@ -61,12 +61,6 @@ def IsInstance(cls):
 
 
 @CustomTemplate.create
-def BreakPoint(_, _1):
-	breakpoint()
-	return Buffer()
-
-
-@CustomTemplate.create
 def End(_, buff):
 	if buff:
 		return None

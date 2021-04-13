@@ -2,7 +2,7 @@
 from actl.Buffer import ShiftedBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
-	BufferRule, Parsed, Not
+	BufferRule, Parsed, Not, BreakPoint
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, \
 	CALL_OPERATOR, GET_ATTRIBUTE, SET_ATTRIBUTE
 
@@ -60,7 +60,12 @@ def _(*tokens):
 
 
 @RULES.add(
-	IsInstance(VARIABLE), Token(' '), Token('='), Token(' '), Parsed(), IsInstance(VARIABLE)
+	IsInstance(VARIABLE),
+	Token(' '),
+	Token('='),
+	Token(' '),
+	Parsed(),
+	IsInstance(VARIABLE)
 )
 def _parseSetVariable(dst, _, _1, _2, src):
 	return [
@@ -247,15 +252,14 @@ def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
 	Token(' '),
 	Token('+'),
 	Token(' '),
-	Parsed(IsInstance(VARIABLE)),
+	Parsed(),
 	IsInstance(VARIABLE),
 	useParser=True
 )
-def _(first, _, token, _1, secondDefinition, second, parser):
+def _parseAdd(first, _, token, _1, second, parser):
 	dst = parser.makeTmpVar()
 
 	parser.define(
-		secondDefinition,
 		CALL_OPERATOR(dst=dst.name, first=first.name, operator=token, second=second.name)
 	)
 
@@ -270,19 +274,18 @@ def _(parser, inp):
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call.obj, args=[]))
 
 	if not inpRule.startsWith(Token(']')):
-		appendStrVar = parser.makeTmpVar()
 		appendVarName = parser.makeTmpVar().name
 		parser.define(
-			CALL_FUNCTION_STATIC(dst=appendStrVar.name, function=String.call.obj, args=['append']),
-			CALL_OPERATOR(dst=appendVarName, first=dst.name, operator='.', second=appendStrVar.name)
+			GET_ATTRIBUTE(appendVarName, dst.name, 'append')
 		)
+		appendResultVarName = parser.makeTmpVar().name
 
 		while not inpRule.startsWith(Token(']')):
 			elementCode = inpRule.pop(Parsed(Or([Token(']')], [Token(',')])))
 			elementVarName = elementCode.pop(-1).name
 			parser.define(
 				*elementCode,
-				CALL_FUNCTION('__IV0', appendVarName, args=[elementVarName])
+				CALL_FUNCTION(appendResultVarName, appendVarName, args=[elementVarName])
 			)
 
 	inpRule.pop(Token(']'))

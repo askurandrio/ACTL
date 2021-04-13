@@ -56,11 +56,10 @@ def test_vectorWithNumber(execute):
 	execute('[1]')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=Vector.call.obj),
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar2', function=String.call.obj, args=['append']),
-		opcodes.CALL_OPERATOR(dst='_tmpVar3', first='_tmpVar1', operator='.', second='_tmpVar2'),
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar4', function=Number.call.obj, args=['1']),
-		opcodes.CALL_FUNCTION(dst='__IV0', function='_tmpVar3', args=['_tmpVar4']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Vector.call.obj),
+		opcodes.GET_ATTRIBUTE('_tmpVar2', '_tmpVar1', 'append'),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar4', Number.call.obj, args=['1']),
+		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar2', args=['_tmpVar4']),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	vector = execute.executed.scope['_']

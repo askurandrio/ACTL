@@ -11,7 +11,7 @@ class Maybe(AbstractTemplate):
 
 	def __call__(self, parser, inp):
 		shiftedBuff = ShiftedBuffer(inp)
-		res = self.template(parser, inp)
+		res = self.template(parser, shiftedBuff)
 		if res is not None:
 			inp.shift(shiftedBuff.indexShift)
 			return res

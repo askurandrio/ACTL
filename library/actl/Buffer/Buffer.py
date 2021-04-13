@@ -124,22 +124,17 @@ class Buffer:
 		self._load(0)
 		return bool(self._buff)
 
-	def reprElements(self, sep=None):
-		if sep is None:
-			sep = ', '
-
-		elementsAsStr = '['
-		elementsAsStr += sep.join(repr(elem) for elem in self._buff[:10])
-		if len(self._buff) == 11:
-			elementsAsStr += f'{sep}...'
-		elementsAsStr += ']'
-		return elementsAsStr
-
-	def __repr__(self, sep=None):
-		return f'{type(self).__name__}({self.reprElements(sep)})'
+	def __repr__(self):
+		return str(self)
 
 	def __str__(self):
-		return self.__repr__('\n')
+		self._load(10)
+		elementsAsStr = '['
+		elementsAsStr += ', '.join(repr(elem) for elem in self._buff[:10])
+		if len(self._buff) == 11:
+			elementsAsStr += f', ...'
+		elementsAsStr += ']'
+		return f'{type(self).__name__}({elementsAsStr})'
 
 	@classmethod
 	def of(cls, *it):

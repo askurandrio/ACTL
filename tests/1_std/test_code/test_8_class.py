@@ -1,4 +1,4 @@
-from unittest.mock import ANY, Mock
+from unittest.mock import ANY
 
 from actl import opcodes
 from actl.objects import Number, Signature, String, PyToA
@@ -31,16 +31,17 @@ def test_simpleClassDeclare(execute):
 	).obj
 
 
-def test_classDeclareWithInitMethod(execute):
+def test_classWithInitMethod(execute):
 	execute(
-		'class T:\n'
+		'class C:\n'
 		'    fun __init__(self, a):\n'
 		'        self.a = a\n'
+		'c = C(1)'
 	)
 
 	assert execute.parsed.code == [
 		class_.call.obj(
-			'T',
+			'C',
 			{
 				'body': (
 					Function.call.obj(
@@ -54,11 +55,14 @@ def test_classDeclareWithInitMethod(execute):
 					).obj,
 				)
 			}
-		).obj
+		).obj,
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call.obj, args=['1']),
+		opcodes.CALL_FUNCTION('_tmpVar2', 'C', args=['_tmpVar1']),
+		opcodes.SET_VARIABLE('c', '_tmpVar2')
 	]
 
-	assert execute.executed.scope['T'] == class_.call.obj(
-		'T',
+	assert execute.executed.scope['C'] == class_.call.obj(
+		'C',
 		{
 			'__self__': {
 				'__init__': Function.call.obj(
@@ -73,21 +77,41 @@ def test_classDeclareWithInitMethod(execute):
 			}
 		}
 	).obj
+	assert str(String.call.obj(execute.executed.scope['c']).obj) == "C<{'a': Number<1>}>"
 
 
-def test_classUseInitMethod(execute):
-	test_classDeclareWithInitMethod(execute)
-	execute.flush()
+# def test_classWithMethod(execute):
+# 	execute(
+# 		'class C:\n'
+# 		'    fun method(self, a):\n'
+# 		'        self.a = a\n'
+# 	   '        a = self.a + 2\n'
+# 		'        return a\n'
+# 		'c = C()\n'
+# 		'tMethodResult = c.method(1)'
+# 	)
 
-	mock = Mock()
-	execute.scope['print'] = PyToA.call.obj(mock).obj
+# 	assert execute.parsed.code == [
+# 		class_.call.obj(
+# 			'C',
+# 			{
+# 				'body': (
+# 					Function.call.obj(
+# 						'method',
+# 						Signature.call.obj(['self', 'a']).obj,
+# 						(
+# 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
+# 							opcodes.RETURN('None')
+# 						),
+# 						None
+# 					).obj,
+# 				)
+# 			}
+# 		).obj,
+# 		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call.obj, args=['1']),
+# 		opcodes.CALL_FUNCTION('_tmpVar2', 'C', args=['_tmpVar1']),
+# 		opcodes.SET_VARIABLE('c', '_tmpVar2')
+# 	]
 
-	execute('t = T(1)')
+# 	assert str(String.call.obj(execute.executed.scope['t']).obj) == "T<{'a': Number<1>}>"
 
-	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call.obj, args=['1']),
-		opcodes.CALL_FUNCTION('_tmpVar2', 'T', args=['_tmpVar1']),
-		opcodes.SET_VARIABLE('t', '_tmpVar2')
-	]
-
-	assert str(String.call.obj(execute.executed.scope['t']).obj) == "T<{'a': Number<1>}>"

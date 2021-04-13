@@ -62,13 +62,13 @@ class DynamicOpCode(AnyOpCode):
 		attributes = self._getAttributes()
 		attributesToStr = ', '.join(
 			repr(attributes[key])
-			for key in sorted(self.__slots__)
+			for key in self.__slots__
 			if key not in self._defaults.keys()
 		)
 		notDefaultAttributesToStr = ', '.join(
 			f'{key}={attributes[key]!r}'
 			for key in self._defaults.keys()
-			if self._defaults[key] == attributes[key]
+			if self._defaults[key] != attributes[key]
 		)
 		if notDefaultAttributesToStr:
 			attributesToStr += f', {notDefaultAttributesToStr}'
