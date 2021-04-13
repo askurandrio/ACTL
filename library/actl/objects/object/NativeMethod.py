@@ -6,7 +6,7 @@ from actl.objects.object.AObject import AObject
 class NativeMethod(AObject):
 	def __init__(self, rawMethod):
 		@NativeFunction
-		def get(aSelf):
+		def get(aSelf):				
 			return NativeFunction(self._rawMethod).apply(aSelf)
 
 		super().__init__({})
@@ -21,7 +21,7 @@ class NativeMethod(AObject):
 
 	@property
 	def get(self):
-		return Result(obj=self._get)
+		return Result.fromObj(self._get)
 
 	def toPyString(self):
 		return f'{type(self).__name__}({self._rawMethod})'
@@ -40,7 +40,7 @@ class NativeFunction(AObject):
 
 	@property
 	def call(self):
-		return Result(obj=self._function)
+		return Result.fromObj(self._function)
 
 	def toPyString(self):
 		return f'{type(self).__name__}({self._function})'
@@ -71,5 +71,9 @@ class _AppliedFunction:
 			(self._args == other._args)
 		)
 
+	def __repr__(self):
+		return str(self)
+
 	def __str__(self):
-		return f'{type(self)}({self._function}, *{self._args})'
+		args = ', '.join(str(arg) for arg in (self._function,) + self._args)
+		return f'{type(self).__name__}({args})'

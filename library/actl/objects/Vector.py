@@ -17,9 +17,9 @@ def _(cls):
 @addMethod(Vector, 'append')
 def _(self, element):
 	self._elements.append(element)
-	return Result(obj=None)
+	return Result.fromObj(None)
 
 
 @addMethod(Vector, Bool)
 def _(self):
-	return Result(obj=Bool.True_) if self._elements else Result(obj=Bool.False_)
+	return Result.fromObj(Bool.True_) if self._elements else Result.fromObj(Bool.False_)

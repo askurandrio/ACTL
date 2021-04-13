@@ -17,7 +17,7 @@ Bool.False_._value = False
 @addMethodToClass(Bool, '__call__')
 def _(_, val):
 	if val in (Bool.True_, Bool.False_):
-		return Result(obj=val)
+		return Result.fromObj(val)
 
 	return val.getAttribute.obj(Bool).obj.call.obj()
 

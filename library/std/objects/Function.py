@@ -8,6 +8,7 @@ from std.rules import CodeBlock
 
 
 Function = objects.makeClass('Function', (objects.Function,))
+_default = object()
 
 
 @objects.addMethod(Function, '__call__')
@@ -17,17 +18,22 @@ def _Function__call(self, *args):
 	argNames = signature.getAttribute.obj('args').obj
 	body = self.getAttribute.obj('body').obj
 
-	def execute(executor):
+	@Result.fromExecute
+	def result(executor):
 		executor.scope, prevScope = callScope.child(), executor.scope
-		for argName, argValue in zip_longest(argNames, args):
+		for argName, argValue in zip_longest(argNames, args, fillvalue=_default):
+			assert argName is not _default, \
+					f'argName is default, argValue is {argValue}'
+			assert argValue is not _default, \
+					f'argValue is default, argName is {argName}'
 			executor.scope[argName] = argValue
 
 		try:
 			yield from body
-		finally:
+		except GeneratorExit:
 			executor.scope = prevScope
 
-	return Result(execute=execute)
+	return result
 
 
 @asDecorator(lambda rule: Function.setAttribute('__syntaxRule__', rule))

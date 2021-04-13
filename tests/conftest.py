@@ -23,7 +23,7 @@ def debugStuck():
 
 
 def pytest_assertrepr_compare(op, left, right):
-	if isinstance(left, (Buffer, list, tuple, type(Object), DynamicOpCode)):
+	if isinstance(left, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)):
 		res = [''] + _getDiff(left, right, '')
 		return res
 	return None
@@ -34,7 +34,7 @@ _default = object()
 
 def _getDiff(leftObject, rightObject, indent):
 	left = _toTuple(leftObject)
-	if isinstance(rightObject, (Buffer, list, tuple, type(Object), DynamicOpCode)):
+	if isinstance(rightObject, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)):
 		right = _toTuple(rightObject)
 	else:
 		return [
@@ -66,7 +66,7 @@ def _getDiff(leftObject, rightObject, indent):
 				f'{indent}	second is empty, first is {first}'
 			]
 
-		if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode)):
+		if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)):
 			return [
 				*res,
 				*_getDiff(first, second, indent + '	')
@@ -98,9 +98,14 @@ def _(arg):
 	return tuple(arg)
 
 
+@_toTuple.register(dict)
+def _(arg):
+	return tuple(sorted(arg.items(), key=lambda pair: pair[0]))
+
+
 @_toTuple.register
 def _(arg: type(Object)):
-	return tuple(sorted(arg._head.items(), key=lambda pair: pair[0]))
+	return _toTuple(arg._head)
 
 
 @_toTuple.register

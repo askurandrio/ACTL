@@ -6,7 +6,7 @@ from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNot
 
 def class__getAttribute(self, key):
 	try:
-		return Result(obj=self.lookupSpecialAttribute(key))
+		return Result.fromObj(self.lookupSpecialAttribute(key))
 	except AAttributeIsNotSpecial(key).class_:
 		pass
 

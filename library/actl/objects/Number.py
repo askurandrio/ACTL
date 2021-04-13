@@ -1,6 +1,7 @@
 # pylint: disable=protected-access
 from actl.Result import Result
 from actl.objects.Bool import Bool
+from actl.objects.String import String
 from actl.objects.AToPy import AToPy
 from actl.objects.object import makeClass
 from actl.objects.object.utils import addMethod, addMethodToClass
@@ -24,8 +25,16 @@ def _(cls, value):
 @addMethod(Number, Bool)
 def _(self):
 	if self._value == 0:
-		return Result(obj=Bool.False_)
-	return Result(obj=Bool.True_)
+		return Result.fromObj(Bool.False_)
+	return Result.fromObj(Bool.True_)
+
+
+@addMethod(Number, String)
+def _(self):
+	class_ = self.getAttribute.obj('__class__').obj
+	className = class_.getAttribute.obj('__name__').obj
+	toStr = f'{className}<{self._value}>'
+	return String.call.obj(toStr)
 
 
 @addMethod(Number, AToPy)

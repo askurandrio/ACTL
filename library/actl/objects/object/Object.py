@@ -11,12 +11,12 @@ makeClass.Object = Object
 @addMethod(Object, '__getAttribute__')
 def object__getAttribute(self, key):
 	try:
-		return Result(obj=self.lookupSpecialAttribute(key))
+		return Result.fromObj(self.lookupSpecialAttribute(key))
 	except AAttributeIsNotSpecial(key).class_:
 		pass
 
 	try:
-		return Result(obj=self.lookupAttributeInHead(key))
+		return Result.fromObj(self.lookupAttributeInHead(key))
 	except AAttributeNotFound(key).class_:
 		pass
 
@@ -68,7 +68,7 @@ def Object__call(self, *args, **kwargs):
 
 	@resultInitMethodFunc.then
 	def resultInitMethodCall(initMethodFunc):
-		initMethodFunc(*args, **kwargs)
+		return initMethodFunc(*args, **kwargs)
 
 	@resultInitMethodCall.then
 	def resultInstance(_):
@@ -79,4 +79,4 @@ def Object__call(self, *args, **kwargs):
 
 @addMethod(Object, '__init__')
 def object__init(_):
-	return Result(obj=None)
+	return Result.fromObj(None)

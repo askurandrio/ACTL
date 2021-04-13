@@ -1,5 +1,6 @@
 import sys
 
+from actl.utils import default
 from actl.Result import Result
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
 from actl.opcodes.opcodes import RETURN
@@ -9,13 +10,15 @@ sys.setrecursionlimit(500)
 
 
 class AObject:
+	Function = None
+
 	def __init__(self, head):
 		self._head = head
 
 	@property
 	def getAttribute(self):
 		try:
-			resultGetAttributeFunc = Result(obj=self.lookupAttributeInHead('__getAttribute__'))
+			resultGetAttributeFunc = Result.fromObj(self.lookupAttributeInHead('__getAttribute__'))
 		except AAttributeNotFound('__getAttribute__').class_:
 			getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
 			resultGetAttributeFunc = self.bindAttribute(getAttribute)
@@ -28,7 +31,11 @@ class AObject:
 
 	@property
 	def get(self):
-		resultGet = self.getAttribute('__get__')
+		resultGetAttribute = self.getAttribute
+
+		@resultGetAttribute.then
+		def resultGet(resultGetAttribute):
+			return resultGetAttribute('__get__')
 
 		@resultGet.then
 		def resultGetCall(get):
@@ -39,7 +46,7 @@ class AObject:
 	@property
 	def super_(self):
 		try:
-			resultSuperGetAttributeFunc = Result(obj=self.lookupAttributeInHead('__superGetAttribute__'))
+			resultSuperGetAttributeFunc = Result.fromObj(self.lookupAttributeInHead('__superGetAttribute__'))
 		except AAttributeNotFound('__superGetAttribute__').class_:
 			superGetAttribute = self.lookupAttributeInClsSelf('__superGetAttribute__')
 			resultBindSuperGetAttribute = self.bindAttribute(superGetAttribute)
@@ -123,27 +130,41 @@ class AObject:
 
 		raise AAttributeIsNotSpecial(key)
 
+	def isinstance_(self, cls):
+		if self.class_ == cls:
+			return True
+
+		for parent in self.class_.parents:
+			if parent == cls:
+				return True
+
+		return False
+
 	def bindAttribute(self, attribute):
 		if not isinstance(attribute, AObject):
-			return Result(obj=attribute)
+			return Result.fromObj(attribute)
 
 		resultAttributeGet = attribute.get
 
-		def catchAttributeGetLookup(ex):
-			assert isinstance(ex, AAttributeNotFound('__get__').class_)
+		@resultAttributeGet.finally_
+		def result(obj=default, ex=default):
+			if ex is not default:
+				if not isinstance(ex, AAttributeNotFound('__get__').class_):
+					raise ex
 
-			return attribute
+				if attribute.isinstance_(self.Function):
+					applyFunc = attribute.getAttribute.obj('apply').obj.call.obj
+					return applyFunc(self).obj
 
-		def resultAttributeGetCall(attributeGet):
-			resultAttributeGetCall = attributeGet.call
+				return attribute
 
-			@resultAttributeGetCall.then
+			@obj.call.then
 			def resultBindedAttribute(attributeGetCall):
 				return attributeGetCall(self)
 
 			return resultBindedAttribute
 
-		return resultAttributeGet.then(resultAttributeGetCall, catchAttributeGetLookup)
+		return result
 
 	def toPyString(self):
 		name = self.getAttribute.obj('__class__').obj.getAttribute.obj('__name__').obj

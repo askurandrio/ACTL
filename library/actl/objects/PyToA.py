@@ -16,10 +16,10 @@ PyToA = makeClass('PyToA')
 @addMethodToClass(PyToA, '__call__')
 def _(cls, value):
 	if isinstance(value, type(Object)):
-		return Result(obj=value)
+		return Result.fromObj(value)
 
 	if isinstance(value, bool):
-		return Result(obj=Bool.True_) if value else Result(obj=Bool.False_)
+		return Result.fromObj(Bool.True_) if value else Result.fromObj(Bool.False_)
 
 	if isinstance(value, (int, float)):
 		return Number.call(value)
@@ -68,7 +68,7 @@ def _(self):
 @addMethod(PyToA, Bool)
 def _(self):
 	res = bool(self._value)
-	return Result(obj=Bool.True_) if res else Result(obj=Bool.False_)
+	return Result.fromObj(Bool.True_) if res else Result.fromObj(Bool.False_)
 
 
 @addMethod(PyToA, String)

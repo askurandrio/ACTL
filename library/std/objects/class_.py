@@ -16,7 +16,7 @@ def _class_call(_, name, scope):
 	for key, value in scope.items():
 		self.setAttribute(key, value)
 
-	return Result(obj=self)
+	return Result.fromObj(self)
 
 
 @asDecorator(lambda rule: class_.setAttribute('__syntaxRule__', rule))

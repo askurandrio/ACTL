@@ -17,6 +17,9 @@ class AToPy(metaclass=_MetaAToPy):
 	def __init__(self, value):
 		self._value = value
 
+	def __repr__(self):
+		return str(self)
+
 	def __str__(self):
-		res = self._value.getAttribute(String).call()
+		res = self._value.getAttribute.obj(String).obj.call.obj().obj
 		return type(self)(res)

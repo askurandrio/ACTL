@@ -1,4 +1,4 @@
-from actl import opcodes, ResultReturnException
+from actl import opcodes
 from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass
 from std.objects import Function, class_ as stdClass
 
@@ -62,19 +62,14 @@ class _ResultFrame(_Frame):
 		self._executor = executor
 		self._finalResult = result
 		self._result = result.getParent()
-		super().__init__(self._result.popExecute(self._executor))
+		super().__init__(self._result.getExecute()(self._executor))
 
 	def return_(self, returnValue):
-		try:
-			self._head.throw(ResultReturnException(returnValue))
-		except ResultReturnException:
-			pass
-		else:
-			raise RuntimeError(f'This generator do not want return: {self._head}')
+		self._head.close()
 
 		self._result = self._result.resolve(returnValue)
 		if self._result is None:
-			self._head = None
+			self._head = iter('')
 			assert self._executor.frames.pop(-1) == self
 		else:
 			self._head = self._result.popExecute(self._executor)
@@ -85,8 +80,9 @@ class _ResultFrame(_Frame):
 
 		try:
 			return super().__next__()
-		except StopIteration as ex:
-			raise RuntimeError('Unexpected end of code') from ex
+		except StopIteration:
+			assert self._result is None
+			raise
 
 
 @Executor.addHandler(type(Object))
@@ -112,10 +108,7 @@ def _(executor, opcode):
 
 @Executor.addHandler(opcodes.SET_VARIABLE)
 def _(executor, opcode):
-	if opcode.srcStatic is not None:
-		src = opcode.srcStatic
-	else:
-		src = executor.scope[opcode.src]
+	src = executor.scope[opcode.src]
 
 	executor.scope[opcode.dst] = src
 
@@ -168,10 +161,19 @@ def _(executor, opcode):
 
 @Executor.addHandler(opcodes.GET_ATTRIBUTE)
 def _(executor, opcode):
-	object = executor.scope[opcode.object]
+	object_ = executor.scope[opcode.object]
 	attribute = opcode.attribute
 
-	executor.scope[opcode.dst] = object.getAttribute.obj(attribute).obj
+	executor.scope[opcode.dst] = object_.getAttribute.obj(attribute).obj
+
+
+@Executor.addHandler(opcodes.SET_ATTRIBUTE)
+def _(executor, opcode):
+	object_ = executor.scope[opcode.object]
+	attribute = opcode.attribute
+	src = executor.scope[opcode.src]
+
+	object_.setAttribute(attribute, src)
 
 
 @Executor.addHandler(While)

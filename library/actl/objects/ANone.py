@@ -10,7 +10,7 @@ ANone = NoneType.call.obj().obj
 
 @addMethodToClass(NoneType, '__call__')
 def _(_):
-	return Result(obj=ANone)
+	return Result.fromObj(ANone)
 
 
 @addMethod(NoneType, AToPy)

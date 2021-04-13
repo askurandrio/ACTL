@@ -2,7 +2,7 @@ from .AnyOpCode import DynamicOpCode
 
 
 VARIABLE = DynamicOpCode.create('VARIABLE', 'name')
-SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src', srcStatic=None)
+SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
 CALL_FUNCTION = DynamicOpCode.create(
 	'CALL_FUNCTION', 'dst', 'function', typeb='(', args=[], kwargs={}
 )

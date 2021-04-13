@@ -223,7 +223,7 @@ def _parseGetAttribute(object_, _, attribute, parser):
 
 	return [dst]
 
-
+from actl.syntax import BreakPoint
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token('.'),
