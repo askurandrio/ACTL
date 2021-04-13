@@ -16,4 +16,4 @@ jobs:
         run: python3 -m pip install -r ./etc/requirements.txt
 
       - name: pytest
-        run: PYTHONPATH=./library py.test ./tests -x -vv
+        run: PYTHONPATH=./library python3.8 -m pytest ./tests -x -vv
