@@ -16,6 +16,13 @@ class _Execute:
 		self.isExecuted = False
 		self._project = Project('std')
 
+	def flush(self):
+		self.isParsed = False
+		self.isExecuted = False
+		scope = self.scope
+		self._project = Project('std')
+		self._project['scope'] = scope
+
 	@property
 	def scope(self):
 		return self._project['scope']

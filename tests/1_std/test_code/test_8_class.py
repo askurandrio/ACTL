@@ -75,58 +75,19 @@ def test_classDeclareWithInitMethod(execute):
 	).obj
 
 
-def test_classUseWithInitMethod(execute):
+def test_classUseInitMethod(execute):
+	test_classDeclareWithInitMethod(execute)
+	execute.flush()
+
 	mock = Mock()
 	execute.scope['print'] = PyToA.call.obj(mock).obj
 
-	execute(
-		'class T:\n'
-		'    fun __init__(self):\n'
-		'        self.a = 1\n'
-		't = T()\n'
-	)
+	execute('t = T(1)')
 
 	assert execute.parsed.code == [
-		class_.call.obj(
-			'T',
-			{
-				'body': (
-					Function.call.obj(
-						'__init__',
-						Signature.call.obj(['self']).obj,
-						(
-							opcodes.CALL_FUNCTION_STATIC(
-								'_tmpVar2_1', function=Number.call.obj, args=['1']
-							),
-							opcodes.SET_ATTRIBUTE('self', 'a', '_tmpVar2_1'),
-							opcodes.RETURN('None')
-						),
-						None
-					).obj,
-				)
-			}
-		).obj,
-		opcodes.CALL_FUNCTION('_tmpVar1', 'T'),
-		opcodes.SET_VARIABLE('t', '_tmpVar1')
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call.obj, args=['1']),
+		opcodes.CALL_FUNCTION('_tmpVar2', 'T', args=['_tmpVar1']),
+		opcodes.SET_VARIABLE('t', '_tmpVar2')
 	]
 
-	assert execute.executed.scope['T'] == class_.call.obj(
-		'T',
-		{
-			'__self__': {
-				'__init__': Function.call.obj(
-					'__init__',
-					Signature.call.obj(['self']).obj,
-					(
-						opcodes.CALL_FUNCTION_STATIC(
-							'_tmpVar2_1', function=Number.call.obj, args=['1']
-						),
-						opcodes.SET_ATTRIBUTE('self', 'a', '_tmpVar2_1'),
-						opcodes.RETURN('None')
-					),
-					ANY
-				).obj
-			}
-		}
-	).obj
 	assert str(String.call.obj(execute.executed.scope['t']).obj) == "T<{'a': Number<1>}>"
