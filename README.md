@@ -1,4 +1,7 @@
 # ACTL
+
+![tests](https://github.com/askurandrio/ACTL/actions/workflows/tests/badge.svg)
+
 ACTL this compiler A in C++
 
 1. while expression
