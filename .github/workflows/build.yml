@@ -25,13 +25,8 @@ jobs:
         run: python3.8 -m coverage_badge -f -o coverage.svg
 
       - name: commit coverage badge
-        run: |
-          git config --local user.email "actl-runner@email.com"
-          git config --local user.name "actl-runner"
-          git commit -m "Update coverage badge" coverage.svg
-
-      - name: push changes
-        uses: ad-m/github-push-action@master
+        uses: test-room-7/action-update-file@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          file-path: coverage.svg
+          commit-msg: Update coverage.svg
+          github-token: ${{ secrets.GITHUB_TOKEN }}
