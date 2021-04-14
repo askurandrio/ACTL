@@ -17,17 +17,23 @@ class AObject:
 
 	@property
 	def getAttribute(self):
+		resultGetAttribute = self.lookupSpecialAttribute('__getAttribute__')
+
+		@resultGetAttribute.then
+		def resultGetAttributeCall(getAttribute):
+			return getAttribute.call
+
+		return resultGetAttributeCall
+
+	@property
+	def _getAttribute(self):
 		try:
-			resultGetAttributeFunc = Result.fromObj(self.lookupAttributeInHead('__getAttribute__'))
+			return Result.fromObj(self.lookupAttributeInHead('__getAttribute__'))
 		except AAttributeNotFound('__getAttribute__').class_:
-			getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
-			resultGetAttributeFunc = self.bindAttribute(getAttribute)
+			pass
 
-		@resultGetAttributeFunc.then
-		def resultGetAttributeFuncCall(getAttributeFunc):
-			return getAttributeFunc.call
-
-		return resultGetAttributeFuncCall
+		getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
+		return self.bindAttribute(getAttribute)
 
 	@property
 	def get(self):
@@ -44,19 +50,24 @@ class AObject:
 		return resultGetCall
 
 	@property
-	def super_(self):
+	def _superGetAttribute(self):
 		try:
-			resultSuperGetAttributeFunc = Result.fromObj(self.lookupAttributeInHead('__superGetAttribute__'))
+			return Result.fromObj(self.lookupAttributeInHead('__superGetAttribute__'))
 		except AAttributeNotFound('__superGetAttribute__').class_:
-			superGetAttribute = self.lookupAttributeInClsSelf('__superGetAttribute__')
-			resultBindSuperGetAttribute = self.bindAttribute(superGetAttribute)
+			pass
 
-			@resultBindSuperGetAttribute.then
-			def resultSuperGetAttributeFunc(bindSuperGetAttribute):
-				superGetAttributeFunc = bindSuperGetAttribute.call
-				return superGetAttributeFunc
+		superGetAttribute = self.lookupAttributeInClsSelf('__superGetAttribute__')
+		return self.bindAttribute(superGetAttribute)
 
-		return resultSuperGetAttributeFunc
+	@property
+	def super_(self):
+		resultSuperGetAttribute = self.lookupSpecialAttribute('__superGetAttribute__')
+
+		@resultSuperGetAttribute.then
+		def resultSuperGetAttributeCall(superGetAttribute):
+			return superGetAttribute.call
+
+		return resultSuperGetAttributeCall
 
 	def lookupAttributeInClsSelf(self, key):
 		class_ = self.class_
@@ -127,6 +138,12 @@ class AObject:
 
 		if key == '__parents__':
 			return self.parents
+
+		if key == '__getAttribute__':
+			return self._getAttribute
+
+		if key == '__superGetAttribute__':
+			return self._superGetAttribute
 
 		raise AAttributeIsNotSpecial(key)
 
