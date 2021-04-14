@@ -17,4 +17,13 @@ jobs:
         run: python3.8 -m pip install -r ./etc/requirements.txt
 
       - name: pytest
-        run: PYTHONPATH=./library python3.8 -m pytest ./tests -x -vv
+        run: PYTHONPATH=./library python3.8 -m pytest ./tests -x -vv --cov=library --cov-report term-missing --cov-branch --no-cov-on-fail
+      
+      - name: generate coverage badge
+        run: python3.8 coverage-badge -o coverage.svg
+
+      - name: commit coverage badge
+        run: git commit -m "Update coverage badge" coverage.svg
+
+      - name: push changes
+        run: git push

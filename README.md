@@ -18,12 +18,12 @@ Runner:
 
 docker build -f runner_dockerfile -t runner_dockerfile .
 
-RUNNER_TOKEN=
+ACCESS_TOKEN=
 
 docker run --rm --name github-runner \
   -e REPO_URL="https://github.com/askurandrio/ACTL" \
   -e RUNNER_NAME="actl-tests" \
-  -e RUNNER_TOKEN="${RUNNER_TOKEN}" \
+  -e ACCESS_TOKEN="${ACCESS_TOKEN}" \
   -e RUNNER_WORKDIR="/tmp/github-runner-actl" \
   -e RUNNER_GROUP="actl-group" \
   -v /var/run/docker.sock:/var/run/docker.sock \
