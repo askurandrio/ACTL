@@ -26,11 +26,10 @@ class Parser:
 		return type(self)(self.scope, self.rules, buff, endLine, self.makeTmpVar)
 
 	def _applyRule(self):
-		for rule in self.rules:
-			isApplied = rule(self, self.buff)
-			if isApplied:
-				return True
-
+		apply = self.rules.match(self, self.buff)
+		if apply:
+			apply()
+			return True
 		return False
 
 	def parseLine(self, insertDefiniton=True):

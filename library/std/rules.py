@@ -3,15 +3,30 @@ from actl.Buffer import ShiftedBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
-	BufferRule, Parsed, Not, BreakPoint
+	BufferRule, Parsed, Not, BreakPoint, AbstractTemplate
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, \
 	CALL_OPERATOR, GET_ATTRIBUTE, SET_ATTRIBUTE
+
 
 RULES = SyntaxRules()
 
 
-def _hasAttr(attr):
-	def rule(parser, token):
+@RULES.rawAdd
+class _ApplySyntaxObjectSyntaxRule:
+	@classmethod
+	def match(cls, parser, inp):
+		if not cls._hasSyntaxRule(parser, inp):
+			return None
+
+		syntaxRule = parser.scope[inp[0].name].getAttribute.obj('__syntaxRule__').obj
+		return syntaxRule.match(parser, inp)
+
+	@staticmethod
+	def _hasSyntaxRule(parser, inp):
+		if not inp:
+			return None
+
+		token = inp[0]
 		scope = parser.scope
 
 		if not isinstance(token, type(Object)):
@@ -20,30 +35,7 @@ def _hasAttr(attr):
 
 			token = scope[token.name]
 
-		return token.hasAttribute(attr)
-
-	return CustomTemplate.createToken(rule, f'_hasAttr({attr})')
-
-
-def _applySyntaxObjectsRule(parser, inp):
-	hasAttrSyntaxRule = _hasAttr('__syntaxRule__')
-	if not hasAttrSyntaxRule(parser, ShiftedBuffer(inp)):
-		return None
-
-	syntaxRule = parser.scope[inp[0].name].getAttribute.obj('__syntaxRule__').obj
-	return syntaxRule(parser, inp)
-
-
-RULES.rawAdd(_applySyntaxObjectsRule)
-
-
-@RULES.add(Token('return '), Parsed(), IsInstance(VARIABLE))
-def _parseReturn(*args):
-	*_, returnVar = args
-
-	return [
-		RETURN(returnVar.name)
-	]
+		return token.hasAttribute('__syntaxRule__')
 
 
 @CustomTemplate.createToken
@@ -56,17 +48,46 @@ def _isAcceptableContinuesName(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
-@RULES.add(
-	_isAcceptableName,
-	Maybe(Many(
-		Or(
-			[_isAcceptableName],
-			[_isAcceptableContinuesName]
+class VariableTemplate(Template):
+	def __init__(self):
+		super().__init__(
+			_isAcceptableName,
+			Maybe(Many(
+				Or(
+					[_isAcceptableName],
+					[_isAcceptableContinuesName]
+				)
+			))
 		)
-	))
-)
-def _(*tokens):
-	return [VARIABLE(''.join(tokens))]
+
+	def __call__(self, parser, inp):
+		shiftedBuff = ShiftedBuffer(inp)
+
+		if super().__call__(parser, shiftedBuff) is None:
+			return None
+
+		tokens = inp[:shiftedBuff.indexShift]
+		variable = VARIABLE(''.join(tokens))
+		origin = getattr(inp, 'origin', inp)
+		del origin[:shiftedBuff.indexShift]
+		origin.insert(0, [variable])
+		originShift = getattr(inp, 'shift', getattr(inp, 'pop', None))
+		originShift()
+		return [variable]
+
+
+@RULES.add(Token('return '), Parsed(), IsInstance(VARIABLE))
+def _parseReturn(*args):
+	*_, returnVar = args
+
+	return [
+		RETURN(returnVar.name)
+	]
+
+
+@RULES.add(VariableTemplate())
+def _parseVar(var):
+	return [var]
 
 
 @RULES.add(
@@ -223,7 +244,7 @@ class CodeBlock:
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token('.'),
-	IsInstance(VARIABLE),
+	VariableTemplate(),
 	Not(Token(' '), Token('=')),
 	useParser=True
 )
@@ -238,7 +259,7 @@ def _parseGetAttribute(object_, _, attribute, parser):
 
 	return [dst]
 
-from actl.syntax import BreakPoint
+
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token('.'),
@@ -277,7 +298,7 @@ def _parseAdd(first, _, token, _1, second, parser):
 
 
 @RULES.add(Token('['), manualApply=True, useParser=True)
-def _(parser, inp):
+def _parseVector(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Token('['))
 	dst = parser.makeTmpVar()

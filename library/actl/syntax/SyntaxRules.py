@@ -5,6 +5,13 @@ class SyntaxRules:
 	def __init__(self, rules=None):
 		self._rules = [] if rules is None else rules
 
+	def match(self, parser, buff):
+		for rule in self._rules:
+			apply = rule.match(parser, buff)
+			if apply:
+				return apply
+		return None
+
 	def rawAdd(self, rule):
 		self._rules.append(rule)
 
