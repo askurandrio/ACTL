@@ -101,7 +101,11 @@ def test_classWithInitMethod(execute):
 # 						Signature.call.obj(['self', 'a']).obj,
 # 						(
 # 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
-# 							opcodes.RETURN('None')
+# 							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call.obj, args=['2']),
+# 							opcodes.CALL_OPERATOR('_tmpVar2_2', 'a', '+', '_tmpVar2_1'),
+# 							opcodes.GET_ATTRIBUTE('_tmpVar2_3', 'self', '_tmpVar2_2'),
+# 							opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
+# 							opcodes.VARIABLE('return')
 # 						),
 # 						None
 # 					).obj,
@@ -114,4 +118,3 @@ def test_classWithInitMethod(execute):
 # 	]
 
 # 	assert str(String.call.obj(execute.executed.scope['t']).obj) == "T<{'a': Number<1>}>"
-

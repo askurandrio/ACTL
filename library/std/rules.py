@@ -1,6 +1,7 @@
 # pylint: disable=no-member
 from actl.Buffer import ShiftedBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
+from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
 	BufferRule, Parsed, Not, BreakPoint
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, \
@@ -34,6 +35,15 @@ def _applySyntaxObjectsRule(parser, inp):
 
 
 RULES.rawAdd(_applySyntaxObjectsRule)
+
+
+@RULES.add(Token('return '), Parsed(), IsInstance(VARIABLE))
+def _parseReturn(*args):
+	*_, returnVar = args
+
+	return [
+		RETURN(returnVar.name)
+	]
 
 
 @CustomTemplate.createToken

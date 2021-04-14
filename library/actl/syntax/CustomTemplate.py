@@ -45,14 +45,6 @@ class CustomTemplate(AbstractTemplate):
 
 
 @lru_cache(maxsize=None)
-def Token(token):
-	def rule(_, val):
-		return token == val
-
-	return CustomTemplate.createToken(rule, f'Token({repr(token)})')
-
-
-@lru_cache(maxsize=None)
 def IsInstance(cls):
 	def rule(_, val):
 		return isinstance(val, cls)

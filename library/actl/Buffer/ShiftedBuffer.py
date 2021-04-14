@@ -11,12 +11,13 @@ class ShiftedBuffer:
 		return ShiftedBufferOrigin(self._origin, self.indexShift)
 
 	def pop(self):
-		res = self[0]
-		self.shift()
-		return res
+		element, = self.shift()
+		return element
 
 	def shift(self, shift=1):
+		result = self[:shift]
 		self.indexShift += shift
+		return result
 
 	def delShift(self):
 		del self._origin[:self.indexShift]
@@ -31,9 +32,10 @@ class ShiftedBuffer:
 
 	def _shiftIndex(self, index):
 		if isinstance(index,  slice):
-			indexStart = index.start
-			if indexStart is not None:
-				indexStart += self.indexShift
+			if index.start is not None:
+				indexStart = self.indexShift + index.start
+			else:
+				indexStart = self.indexShift
 			indexStop = index.stop
 			if indexStop is not None:
 				indexStop += self.indexShift
@@ -43,7 +45,11 @@ class ShiftedBuffer:
 		return self.indexShift + index
 
 	def __repr__(self):
-		return f'{type(self).__name__}({self._origin[self.indexShift:]})'
+		return f'{type(self).__name__}({self._origin[self.indexShift:self.indexShift+10]})'
 
 	def __bool__(self):
-		return bool(self._origin[self.indexShift:])
+		try:
+			self._origin[self.indexShift]
+		except IndexError:
+			return False
+		return True

@@ -54,17 +54,14 @@ class Buffer:
 		self._head = self._emptyIter
 		return self
 
-	def _load(self, index):
+	def _load(self, index):	
 		if isinstance(index, slice):
 			index = index.stop
+			if index > 0:
+				index -= 1
 
-		assert not (
-			(
-				(index is None) or (index < 0)
-			) and (
-				self._head is not self._emptyIter
-			)
-		), 'use .loadAll() if you want load index with undefined count to load'
+		if self._head is not self._emptyIter:
+			assert index >= 0, 'use .loadAll() if you want load index with undefined count to load'
 
 		index = (index + 1) - len(self._buff)
 
@@ -78,17 +75,11 @@ class Buffer:
 		return list(self) == list(other)
 
 	def __getitem__(self, index):
-		if not isinstance(index, slice):
-			self._load(index)
-			return self._buff[index]
-
-		def gen():
-			for elem in self._head:
-				self._buff.append(elem)
-				yield elem
-
-		res = itertools.chain(iter(self._buff), gen())
-		return Buffer(itertools.islice(res, index.start, index.stop, index.step))
+		self._load(index)
+		res = self._buff[index]
+		if isinstance(index, slice):
+			return Buffer(res)
+		return res
 
 	def __delitem__(self, index):
 		if isinstance(index, slice):
@@ -121,18 +112,21 @@ class Buffer:
 		return res
 
 	def __bool__(self):
-		self._load(0)
+		try:
+			self._load(0)
+		except:
+			self._load(0)
 		return bool(self._buff)
 
 	def __repr__(self):
 		return str(self)
 
 	def __str__(self):
-		self._load(10)
+		# self._load(10)
 		elementsAsStr = '['
 		elementsAsStr += ', '.join(repr(elem) for elem in self._buff[:10])
 		if len(self._buff) == 11:
-			elementsAsStr += f', ...'
+			elementsAsStr += ', ...'
 		elementsAsStr += ']'
 		return f'{type(self).__name__}({elementsAsStr})'
 

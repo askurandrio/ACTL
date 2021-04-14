@@ -4,6 +4,7 @@ from actl.Result import Result
 from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from actl import asDecorator
+from actl.syntax.BreakPoint import BreakPoint
 from std.rules import CodeBlock
 
 
@@ -82,7 +83,11 @@ class _ParseFunction:
 	def _parseBody(self):
 		self._inpRule.pop(Token(':'))
 		body = CodeBlock(self._parser, self._inp).parse()
-		return (
-			*body,
-			RETURN('None')
-		)
+
+		if (not body) or (RETURN != body[-1]):
+			body = (
+				*body,
+				RETURN('None')
+			)
+
+		return body

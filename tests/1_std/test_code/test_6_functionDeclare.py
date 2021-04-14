@@ -79,3 +79,30 @@ def test_declareFunctionWithArg(execute):
 
 	assert AToPy(execute.executed.scope['_']) is None
 	mock.assert_called_once_with(1)
+
+
+def test_functionWithReturn(execute):
+	mock = Mock()
+	execute.scope['print'] = PyToA.call.obj(mock).obj
+
+	execute(
+		'fun f():\n'
+		'    return 1\n'
+		'f()'
+	)
+
+	assert execute.parsed.code == [
+		Function.call.obj(
+			'f',
+			Signature.call.obj([]).obj,
+			(
+				opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', Number.call.obj, args=['1']),
+				opcodes.RETURN('_tmpVar1_1')
+			),
+			None
+		).obj,
+		opcodes.CALL_FUNCTION('_tmpVar1', 'f', args=[]),
+		opcodes.VARIABLE('_tmpVar1')
+	]
+
+	assert execute.executed.scope['_tmpVar1'] == Number.call.obj('1').obj
