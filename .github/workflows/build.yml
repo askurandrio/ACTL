@@ -20,13 +20,3 @@ jobs:
 
       - name: pytest
         run: PYTHONPATH=./library python3.8 -m pytest ./tests -x -vv --cov=library --cov-report term-missing --cov-branch --no-cov-on-fail
-      
-      - name: generate coverage badge
-        run: python3.8 -m coverage_badge -f -o coverage.svg
-
-      - name: commit coverage badge
-        uses: test-room-7/action-update-file@v1
-        with:
-          file-path: coverage.svg
-          commit-msg: Update coverage.svg
-          github-token: ${{ secrets.GITHUB_TOKEN }}
