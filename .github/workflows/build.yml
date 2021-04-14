@@ -12,6 +12,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0 
   
       - name: set-up
         run: python3.8 -m pip install -r ./etc/requirements.txt
@@ -23,7 +26,13 @@ jobs:
         run: python3.8 -m coverage_badge -f -o coverage.svg
 
       - name: commit coverage badge
-        run: git commit -m "Update coverage badge" coverage.svg
+        run: |
+          git config --local user.email "actl-runner@email.com"
+          git config --local user.name "actl-runner"
+          git commit -m "Update coverage badge" coverage.svg
 
       - name: push changes
-        run: git push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
