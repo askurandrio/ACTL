@@ -5,7 +5,14 @@ set -x
 set -e
 
 
-docker rm -f $(docker ps -aqf "name=github-runner")
+container_id="$(docker ps -aqf "name=github-runner")"
+
+
+if [[ "${container_id}" ]]; then
+  docker rm -f ${container_id}
+fi
+
+
 docker build -f runner_dockerfile -t runner_dockerfile .
 docker run --rm --name github-runner \
   -e REPO_URL="https://github.com/askurandrio/ACTL" \
