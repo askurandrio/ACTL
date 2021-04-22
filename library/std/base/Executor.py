@@ -1,6 +1,6 @@
 from actl import opcodes
 from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass
-from std.objects import Function, class_ as stdClass
+from std.base.objects import Function, class_ as stdClass
 
 
 class Executor:

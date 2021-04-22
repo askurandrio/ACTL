@@ -3,7 +3,7 @@ from actl.opcodes import VARIABLE
 from actl.syntax import SyntaxRule, Value, Token, IsInstance
 from actl import Result, asDecorator
 from actl.syntax.BufferRule import BufferRule
-from std.rules import CodeBlock
+from std.base.rules import CodeBlock
 
 
 class_ = makeClass('class_', (actlClass,))

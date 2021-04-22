@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from actl import opcodes
 from actl.objects import PyToA, AToPy, Number
-from std.objects import While
+from std.base.objects import While
 
 
 def test_simple_while(execute):

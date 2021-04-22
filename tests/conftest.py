@@ -4,8 +4,6 @@ from functools import singledispatch
 from itertools import zip_longest
 
 import pytest
-import os
-from actl import objects
 
 from actl.Buffer import Buffer
 from actl.objects import Object

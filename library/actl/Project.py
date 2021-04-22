@@ -60,13 +60,6 @@ class Project:
 			handler = self['handlers'][handlerName]
 			handler(self, arg)
 
-	def include(self, projectF):
-		filename = os.path.join(DIR_LIBRARY, 'projects', f'{projectF}.yaml')
-		source = yaml.load(open(filename), Loader=yaml.SafeLoader)
-		subProject = type(self)(source=source, this=self.this)
-		self[projectF] = subProject
-		_recursiveUpdate(self._head, subProject._head)  # pylint: disable=protected-access
-
 	def __getitem__(self, keys):
 		if not isinstance(keys, tuple):
 			keys = (keys,)
@@ -116,7 +109,12 @@ def _(project, arg):
 
 @Project.addDefaultHandler('include')
 def _(project, projectF):
-	project.include(projectF)
+	filename = os.path.join(DIR_LIBRARY, f'{projectF}.yaml')
+	with open(filename) as file:
+		source = yaml.load(file, Loader=yaml.SafeLoader)
+	subProject = Project(source=source, this=project.this)
+	project[projectF] = subProject
+	_recursiveUpdate(project._head, subProject._head)  # pylint: disable=protected-access
 
 
 @Project.addDefaultHandler('py-execExternalFunction')

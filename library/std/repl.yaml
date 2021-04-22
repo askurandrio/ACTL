@@ -1,19 +1,19 @@
--  include: std
+-  include: std/base
 
 
 -  py-externalKey:
-    from: projects.repl
+    from: std.repl
     import: getParser
     name: parser
 
 
 -  py-externalKey:
-    from: projects.repl
+    from: std.repl
     import: getInput
     name: input
 
 
 -  py-externalKey:
-    from: projects.repl
+    from: std.repl
     import: getBuild
     name: build

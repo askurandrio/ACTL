@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from actl.objects import AToPy, PyToA, Number, Signature
 from actl.opcodes import opcodes
-from std.objects import Function
+from std.base.objects import Function
 
 
 def test_simpleFunctionDeclare(execute):

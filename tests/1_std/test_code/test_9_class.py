@@ -2,7 +2,7 @@ from unittest.mock import ANY
 
 from actl import opcodes
 from actl.objects import Number, Signature, String, PyToA
-from std.objects import class_, Function
+from std.base.objects import class_, Function
 
 
 def test_simpleClassDeclare(execute):

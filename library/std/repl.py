@@ -2,7 +2,7 @@ import pdb
 import traceback
 
 from actl.Buffer import Buffer
-from std import Parser
+from std.base import Parser
 
 
 def getParser(project):
@@ -37,7 +37,7 @@ def getBuild(project):
 	def build():
 		while project.this['_build']:
 			try:
-				project.this['std', 'build']()
+				project.this['std/base', 'build']()
 			except Exception:
 				if '_debug' in project.this['scope']:
 					pdb.post_mortem()

@@ -2,7 +2,7 @@ import pytest
 
 from actl.Buffer import Buffer
 from actl import Project
-from std import Executor
+from std.base import Executor
 
 
 @pytest.fixture
@@ -14,13 +14,13 @@ class _Execute:
 	def __init__(self):
 		self.isParsed = False
 		self.isExecuted = False
-		self._project = Project('std')
+		self._project = Project('std/base')
 
 	def flush(self):
 		self.isParsed = False
 		self.isExecuted = False
 		scope = self.scope
-		self._project = Project('std')
+		self._project = Project('std/base')
 		self._project['scope'] = scope
 
 	@property
@@ -29,14 +29,14 @@ class _Execute:
 
 	@property
 	def code(self):
-		return self._project['code']
+		return self._project['parser']
 
 	@property
 	def parsed(self):
 		if self.isParsed:
 			return self
 
-		self._project['code'] = Buffer(self._project['parser'])
+		self._project['parser'] = Buffer(self._project['parser'])
 		self.isParsed = True
 		return self.parsed
 
@@ -45,7 +45,6 @@ class _Execute:
 		if self.parsed.isExecuted:
 			return self
 
-		self._project['executor'] = Executor(self._project['code'], self._project['scope'])
 		self._project['executor'].execute()
 		self.isExecuted = True
 		return self.executed

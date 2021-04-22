@@ -77,7 +77,7 @@ def test_setVar(run, stdin, stdout):
 
 
 def test_expliciSetProjectF(run, stdin, stdout):
-	run('--projectF', 'repl')
+	run('--projectF', 'std/repl')
 
 	stdin.put('')
 	assert stdout.get() == '>>> '
@@ -105,14 +105,14 @@ def test_setExtraSource(run, stdin, stdout):
 
 
 def test_explicitProjectFAndMainF(run, stdout):
-	run('--projectF', 'std', '--mainF', 'tests/actl/example.a')
+	run('--projectF', 'std/base', '--mainF', 'tests/actl/example.a')
 
 	assert stdout.get() == '1'
 	assert stdout.get() == '\n'
 
 
 def test_projectFAndMainF(run, stdout):
-	run('std', 'tests/actl/example.a')
+	run('std/base', 'tests/actl/example.a')
 
 	assert stdout.get() == '1'
 	assert stdout.get() == '\n'
@@ -128,7 +128,7 @@ def test_projectFAndMainFAndSource(run, stdout):
 			}
 		}
 	]
-	run('std', 'tests/actl/example.a', json.dumps(extraSource))
+	run('std/base', 'tests/actl/example.a', json.dumps(extraSource))
 
 	assert stdout.get() == 'mocked: 1'
 	assert stdout.get() == '\n'
@@ -196,6 +196,6 @@ class _Run:
 
 
 def getTestScope(project):
-	scope = project.this['std', 'scope']
+	scope = project.this['std/base', 'scope']
 	scope['print'] = actl.objects.PyToA.call.obj(lambda inp: print(f'mocked: {inp}')).obj
 	return scope

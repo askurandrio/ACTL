@@ -5,7 +5,7 @@ from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from actl import asDecorator
 from actl.syntax.BreakPoint import BreakPoint
-from std.rules import CodeBlock
+from std.base.rules import CodeBlock
 
 
 Function = objects.makeClass('Function', (objects.Function,))

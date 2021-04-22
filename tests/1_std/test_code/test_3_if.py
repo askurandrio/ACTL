@@ -1,7 +1,7 @@
 from actl import opcodes
 from actl.Buffer import Buffer
 from actl.objects import AToPy, Number
-from std.objects import If
+from std.base.objects import If
 
 
 def test_simple_if(execute):

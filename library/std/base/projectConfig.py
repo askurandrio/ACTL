@@ -8,8 +8,6 @@ def pyExternalKey(project, arg):
 	def get():
 		value = importFrom(arg)
 
-		if arg.get('rawUse'):
-			return value
 		return value(project)
 
 	project[arg['name']] = Lazy(get)
@@ -20,7 +18,7 @@ def loadHandlerPyExternalKey(project):
 
 
 def getRules(_):
-	return std.RULES
+	return std.base.RULES
 
 
 def getScope(_):
@@ -38,10 +36,10 @@ def getScope(_):
 		('else', 'objects.else_'),
 		('None', 'objects.ANone'),
 		('PyToA', 'objects.PyToA'),
-		('if', 'std.objects.If'),
-		('while', 'std.objects.While'),
-		('fun', 'std.objects.Function'),
-		('class', 'std.objects.class_')
+		('if', 'std.base.objects.If'),
+		('while', 'std.base.objects.While'),
+		('fun', 'std.base.objects.Function'),
+		('class', 'std.base.objects.class_')
 	):
 		pyVar = eval(pyName)
 		var = objects.PyToA.call.obj(pyVar).obj
@@ -65,7 +63,7 @@ def getParser(project):
 
 
 def getExecutor(project):
-	return std.Executor(project.this['parser'], project.this['scope'])
+	return std.base.Executor(project.this['parser'], project.this['scope'])
 
 
 def getBuild(project):

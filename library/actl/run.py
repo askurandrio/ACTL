@@ -24,7 +24,7 @@ def main(projectF=None, mainF=None, source=None):
 	elif mainF is not None:
 		project = actl.Project(source=[
 				{
-					'include': 'std'
+					'include': 'std/base'
 				},
 				{
 					'setKey': {
@@ -34,7 +34,7 @@ def main(projectF=None, mainF=None, source=None):
 				}
 			])
 	else:
-		project = actl.Project(projectF='repl')
+		project = actl.Project(projectF='std/repl')
 
 	if source is not None:
 		project.processSource(source)

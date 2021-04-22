@@ -2,7 +2,7 @@ from actl import objects
 from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Parsed, Or, BufferRule
 from actl.utils import asDecorator
-from std.rules import CodeBlock
+from std.base.rules import CodeBlock
 
 
 If = objects.makeClass('If', (objects.If,))
