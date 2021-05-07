@@ -2,18 +2,18 @@
 
 
 -  py-externalKey:
-    from: std.repl
+    from: std.repl.projectConfig
     import: getParser
     name: parser
 
 
 -  py-externalKey:
-    from: std.repl
+    from: std.repl.projectConfig
     import: getInput
     name: input
 
 
 -  py-externalKey:
-    from: std.repl
+    from: std.repl.projectConfig
     import: getBuild
     name: build

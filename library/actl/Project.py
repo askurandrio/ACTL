@@ -109,8 +109,8 @@ def _(project, arg):
 
 @Project.addDefaultHandler('include')
 def _(project, projectF):
-	filename = os.path.join(DIR_LIBRARY, f'{projectF}.yaml')
-	with open(filename) as file:
+	fileName = os.path.join(DIR_LIBRARY, projectF, f'{os.path.basename(projectF)}.yaml')
+	with open(fileName) as file:
 		source = yaml.load(file, Loader=yaml.SafeLoader)
 	subProject = Project(source=source, this=project.this)
 	project[projectF] = subProject
