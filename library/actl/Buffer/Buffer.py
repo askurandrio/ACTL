@@ -54,7 +54,7 @@ class Buffer:
 		self._head = self._emptyIter
 		return self
 
-	def _load(self, index):	
+	def _load(self, index):
 		if isinstance(index, slice):
 			index = index.stop
 			if index > 0:
@@ -112,10 +112,7 @@ class Buffer:
 		return res
 
 	def __bool__(self):
-		try:
-			self._load(0)
-		except:
-			self._load(0)
+		self._load(0)
 		return bool(self._buff)
 
 	def __repr__(self):

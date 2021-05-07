@@ -88,8 +88,8 @@ def test_setExtraSource(run, stdin, stdout):
 		{
 			'py-externalKey': {
 				'from': 'tests.actl.test_run',
-				'import': 'getTestScope',
-				'name': 'scope'
+				'import': 'getInitialScope',
+				'name': 'initialScope'
 			}
 		}
 	]
@@ -123,8 +123,8 @@ def test_projectFAndMainFAndSource(run, stdout):
 		{
 			'py-externalKey': {
 				'from': 'tests.actl.test_run',
-				'import': 'getTestScope',
-				'name': 'scope'
+				'import': 'getInitialScope',
+				'name': 'initialScope'
 			}
 		}
 	]
@@ -195,7 +195,7 @@ class _Run:
 			raise
 
 
-def getTestScope(project):
-	scope = project.this['std/base', 'scope']
+def getInitialScope(project):
+	scope = project.this['std/base', 'initialScope']
 	scope['print'] = actl.objects.PyToA.call.obj(lambda inp: print(f'mocked: {inp}')).obj
 	return scope

@@ -21,7 +21,7 @@ def getRules(_):
 	return std.base.RULES
 
 
-def getScope(_):
+def getInitialScope(project):
 	scope = {}
 	for varName, pyName in (
 		('print', 'print'),
@@ -39,7 +39,9 @@ def getScope(_):
 		('if', 'std.base.objects.If'),
 		('while', 'std.base.objects.While'),
 		('fun', 'std.base.objects.Function'),
-		('class', 'std.base.objects.class_')
+		('class', 'std.base.objects.class_'),
+		('import', 'std.base.objects.import_.import_'),
+		('__project__', 'project.this')
 	):
 		pyVar = eval(pyName)
 		var = objects.PyToA.call.obj(pyVar).obj
@@ -58,16 +60,38 @@ def getInput(project):
 	return make()
 
 
-def getParser(project):
-	return Parser(project.this['scope'], project.this['rules'], project.this['input'])
+def getParseInput(project):
+	def parseInput(scope, input_):
+		return Parser(scope, project.this['rules'], input_)
+
+	return parseInput
 
 
-def getExecutor(project):
-	return std.base.Executor(project.this['parser'], project.this['scope'])
+def getExecuteInput(_):
+	def executeInput(parsedInput, scope):
+		return std.base.Executor(parsedInput, scope)
+
+	return executeInput
+
+
+def getBuildScope(project):
+	return project.this['initialScope']
+
+
+def getBuildParser(project):
+	return project.this['parseInput'](
+		project.this['buildScope'], project.this['input']
+	)
+
+
+def getBuildExecutor(project):
+	return project.this['executeInput'](
+		project.this['buildParser'], project.this['buildScope']
+	)
 
 
 def getBuild(project):
 	def build():
-		project.this['executor'].execute()
+		project.this['buildExecutor'].execute()
 
 	return build

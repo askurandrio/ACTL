@@ -3,8 +3,8 @@
 
 -  py-externalKey:
     from: std.repl.projectConfig
-    import: getParser
-    name: parser
+    import: getParseInput
+    name: parseInput
 
 
 -  py-externalKey:

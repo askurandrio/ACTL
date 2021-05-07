@@ -11,8 +11,8 @@
 
 -  py-externalKey:
     from: std.base.projectConfig
-    import: getScope
-    name: scope
+    import: getInitialScope
+    name: initialScope
 
 
 -  py-externalKey:
@@ -23,17 +23,35 @@
 
 -  py-externalKey:
     from: std.base.projectConfig
-    import: getParser
-    name: parser
+    import: getParseInput
+    name: parseInput
 
 
 -  py-externalKey:
     from: std.base.projectConfig
-    import: getExecutor
-    name: executor
+    import: getExecuteInput
+    name: executeInput
 
 
 -  py-externalKey:
     from: std.base.projectConfig
     import: getBuild
     name: build
+
+
+-  py-externalKey:
+    from: std.base.projectConfig
+    import: getBuildScope
+    name: buildScope
+
+
+-  py-externalKey:
+    from: std.base.projectConfig
+    import: getBuildParser
+    name: buildParser
+
+
+-  py-externalKey:
+    from: std.base.projectConfig
+    import: getBuildExecutor
+    name: buildExecutor

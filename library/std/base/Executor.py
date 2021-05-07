@@ -75,14 +75,18 @@ class _ResultFrame(_Frame):
 			self._head = self._result.popExecute(self._executor)
 
 	def __next__(self):
-		if self._head is None:
-			raise StopIteration
-
 		try:
 			return super().__next__()
 		except StopIteration:
 			assert self._result is None
 			raise
+
+	@classmethod
+	def wrap(cls, executor, result):
+		if result.isResolved():
+			return
+
+		return cls(executor, result)
 
 
 @Executor.addHandler(type(Object))
@@ -116,8 +120,13 @@ def _(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
 def _(executor, opcode):
 	assert opcode.typeb == '('
-	result = opcode.function(*opcode.args, **opcode.kwargs)
-	executor.scope[opcode.dst] = result.obj
+	resultCall = opcode.function(*opcode.args, **opcode.kwargs)
+
+	@resultCall.then
+	def setDstForResultCall(returnValue):
+		executor.scope[opcode.dst] = returnValue
+
+	return _ResultFrame.wrap(executor, setDstForResultCall)
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION)
@@ -134,10 +143,7 @@ def _ExecutorHandler_callFunction(executor, opcode):
 	def setDstForResultCall(returnValue):
 		executor.scope[opcode.dst] = returnValue
 
-	if setDstForResultCall.isResolved():
-		return
-
-	return _ResultFrame(executor, setDstForResultCall)
+	return _ResultFrame.wrap(executor, setDstForResultCall)
 
 
 @Executor.addHandler(opcodes.RETURN)

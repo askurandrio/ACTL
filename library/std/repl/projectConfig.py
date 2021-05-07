@@ -5,14 +5,17 @@ from actl.Buffer import Buffer
 from std.base import Parser
 
 
-def getParser(project):
-	return Parser(project.this['scope'], project.this['rules'], project.this['input'])
+def getParseInput(project):
+	def parseInput(scope, input_):
+		return Parser(scope, project.this['rules'], input_)
+
+	return parseInput
 
 
 def getInput(project):
 	@Buffer.wrap
 	def make():
-		parser = project.this['parser']
+		parser = project.this['buildParser']
 		while True:
 			if parser.applyingRule:
 				msg = '... '
@@ -39,7 +42,7 @@ def getBuild(project):
 			try:
 				project.this['std/base', 'build']()
 			except Exception:
-				if '_debug' in project.this['scope']:
+				if '_debug' in project.this['buildScope']:
 					pdb.post_mortem()
 				if project.this['_catchEx']:
 					traceback.print_exc()
