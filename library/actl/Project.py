@@ -147,4 +147,4 @@ def importFrom(arg):
 	try:
 		return getattr(from_, import_)
 	except AttributeError as ex:
-		raise RuntimeError(f'Error getting import_ at py-execExternalFunction: {arg}') from ex
+		raise RuntimeError(f'Error getting {import_} at py-execExternalFunction: {arg}') from ex
