@@ -14,7 +14,7 @@ def test_simple_while(execute):
 	cond = Mock(side_effect=lambda: next(condIt))
 	print_ = Mock()
 	execute.scope['cond'] = PyToA.call.obj(cond).obj
-	execute.scope['print'] = PyToA.call.obj(print_).obj
+	execute.initialScope['print'] = PyToA.call.obj(print_).obj
 
 	execute('while cond(): print(1)')
 
@@ -46,7 +46,7 @@ def test_whileWithFullCodeBlock(execute):
 	cond = Mock(side_effect=cond_)
 	print_ = Mock()
 	execute.scope['cond'] = PyToA.call.obj(cond).obj
-	execute.scope['print'] = PyToA.call.obj(print_).obj
+	execute.initialScope['print'] = PyToA.call.obj(print_).obj
 
 	execute('while cond():\n print(1)')
 

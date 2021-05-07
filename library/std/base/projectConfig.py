@@ -75,7 +75,7 @@ def getExecuteInput(_):
 
 
 def getBuildScope(project):
-	return project.this['initialScope']
+	return project.this['initialScope'].child()
 
 
 def getBuildParser(project):

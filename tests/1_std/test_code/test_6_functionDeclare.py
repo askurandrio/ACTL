@@ -7,7 +7,7 @@ from std.base.objects import Function
 
 def test_simpleFunctionDeclare(execute):
 	mock = Mock()
-	execute.scope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call.obj(mock).obj
 
 	execute('fun f(): print()\nf()')
 
@@ -31,7 +31,7 @@ def test_simpleFunctionDeclare(execute):
 
 def test_declareMultiLineFunction(execute):
 	mock = Mock()
-	execute.scope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call.obj(mock).obj
 
 	execute('fun f():\n a = 1\n print(a)\nf()')
 
@@ -57,7 +57,7 @@ def test_declareMultiLineFunction(execute):
 
 def test_declareFunctionWithArg(execute):
 	mock = Mock()
-	execute.scope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call.obj(mock).obj
 
 	execute('fun f(arg): print(arg)\nf(1)')
 
@@ -83,7 +83,7 @@ def test_declareFunctionWithArg(execute):
 
 def test_functionWithReturn(execute):
 	mock = Mock()
-	execute.scope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call.obj(mock).obj
 
 	execute(
 		'fun f():\n'

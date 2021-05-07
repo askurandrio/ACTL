@@ -21,11 +21,15 @@ class _Execute:
 		self.isExecuted = False
 		buildScope = self.scope
 		self._project = Project('std/base')
-		self._project['initialScope'] = buildScope
+		self._project['buildScope'] = buildScope
 
 	@property
 	def scope(self):
 		return self._project['buildScope']
+
+	@property
+	def initialScope(self):
+		return self._project['initialScope']
 
 	@property
 	def code(self):
