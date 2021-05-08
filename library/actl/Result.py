@@ -50,7 +50,7 @@ class Result:
 
 			resolveValue._child = result._child
 			result = resolveValue.getParent()
-			assert _ResultObj.isExecuteAvailable(result._obj)
+			assert not result.isResolved()
 			return result
 
 		return None
