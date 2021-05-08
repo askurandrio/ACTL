@@ -3,9 +3,9 @@ import os
 from actl import Result, DIR_LIBRARY, asDecorator
 from actl.Buffer import Buffer
 from actl.opcodes import CALL_FUNCTION_STATIC, RETURN, VARIABLE
-from actl.syntax import SyntaxRule, Value, Token
+from actl.syntax import SyntaxRule, Value, Token, IsInstance
 from actl.objects import addMethodToClass, AToPy, makeClass
-from actl.syntax.CustomTemplate import IsInstance
+from std.base.objects.Module import Module
 
 
 import_ = makeClass('import')
@@ -17,13 +17,14 @@ def _import__call(_, name):
 	def result(executor):
 		project = AToPy(executor.scope['__project__'])
 		moduleScope = project['initialScope'].child()
+		moduleScope['__module__'] = Module.call.obj(moduleScope).obj
 		input_ = _open(os.path.join(DIR_LIBRARY, f'{name}.a'))
 		parsedInput = project['parseInput'](moduleScope, input_)
-		executor.scope, prevScope = moduleScope.child(), executor.scope
+		executor.scope, prevScope = moduleScope, executor.scope
 
 		try:
 			yield from parsedInput
-			yield RETURN('__scope__')
+			yield RETURN('__module__')
 		finally:
 			executor.scope = prevScope
 

@@ -1,6 +1,3 @@
-from actl.objects import PyToA
-
-
 class Scope:
 	def __init__(self, head):
 		self._head = head
@@ -15,9 +12,6 @@ class Scope:
 		return key in self._head
 
 	def __getitem__(self, key):
-		if key == '__scope__':
-			return PyToA.call.obj(self).obj
-
 		return self._head[key]
 
 	def __setitem__(self, key, value):

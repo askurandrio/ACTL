@@ -217,12 +217,7 @@ class AObject:
 		try:
 			from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 
-			try:
-				string = String.call.obj(self).obj
-				return string.toPyString()
-			except:
-				breakpoint()
-				string = String.call.obj(self).obj
-				return string.toPyString()
+			string = String.call.obj(self).obj
+			return string.toPyString()
 		except Exception as ex:
 			return f'Error during convert<{id(self)}> to string: {ex}'

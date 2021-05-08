@@ -27,7 +27,7 @@ def object__getAttribute(self, key):
 	else:
 		return self.bindAttribute(attribute)
 
-	raise AAttributeNotFound(key)
+	return Result.fromEx(AAttributeNotFound(key))
 
 
 @addMethod(Object, '__superGetAttribute__')

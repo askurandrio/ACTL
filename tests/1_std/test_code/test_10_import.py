@@ -5,21 +5,23 @@ import pytest
 
 from actl import DIR_LIBRARY
 from actl.opcodes import CALL_FUNCTION_STATIC
-from actl.objects import AToPy
+from std.base.objects import Module
 from std.base.objects.import_ import import_
 
 
 def test_simpleImport(execute, _mockedModule):
-	_mockedModule('t', 'a = 1')
+	_mockedModule('testModule', 'a = 1')
 	execute(
-		'import t'
+		'import testModule'
 	)
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('t', import_.call.obj, args=['t'])
+		CALL_FUNCTION_STATIC('testModule', import_.call.obj, args=['testModule'])
 	]
 
-	assert str(AToPy(execute.executed.scope['t'])['a']) == 'Number<1>'
+	testModule = execute.executed.scope['testModule']
+	assert testModule.isinstance_(Module)
+	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
 
 
 @pytest.fixture
