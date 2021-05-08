@@ -72,7 +72,7 @@ class _ResultFrame(_Frame):
 			self._head = iter('')
 			assert self._executor.frames.pop(-1) == self
 		else:
-			self._head = self._result.popExecute(self._executor)
+			self._head = self._result.getExecute()(self._executor)
 
 	def __next__(self):
 		try:

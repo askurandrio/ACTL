@@ -8,8 +8,9 @@ from actl.opcodes import CALL_FUNCTION_STATIC
 from std.base.objects import Module, Import
 
 
-def test_simpleImport(execute, _mockedModule):
-	_mockedModule('testModule', 'a = 1')
+def test_simpleImport(execute, _mockOpen, _mockIsDir):
+	_mockIsDir('testModule', False)
+	_mockOpen('testModule.a', 'a = 1')
 	execute(
 		'import testModule'
 	)
@@ -23,8 +24,26 @@ def test_simpleImport(execute, _mockedModule):
 	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
 
 
+def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
+	_mockIsDir('testPackage', True)
+	_mockIsDir('testPackage/testModule', False)
+	_mockOpen('testPackage/testModule.a', 'a = 1')
+	execute(
+		'import testPackage.testModule'
+	)
+
+	assert execute.parsed.code == [
+		CALL_FUNCTION_STATIC('testPackage', Import.call.obj, args=['testPackage.testModule'])
+	]
+
+	testPackage = execute.executed.scope['testPackage']
+	assert testPackage.isinstance_(Module)
+	testModule = testPackage.getAttribute.obj('testModule').obj
+	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
+
+
 @pytest.fixture
-def _mockedModule(mocker):
+def _mockOpen(mocker):
 	mockFileName = None
 	mockContent = None
 
@@ -37,8 +56,23 @@ def _mockedModule(mocker):
 	def setContent(fileName, content):
 		nonlocal mockFileName
 		nonlocal mockContent
-		mockFileName = os.path.join(DIR_LIBRARY, f'{fileName}.a')
+		mockFileName = os.path.join(DIR_LIBRARY, fileName)
 		mockContent = content
 
 	mocker.patch('std.base.objects.import_.open', _open)
 	return setContent
+
+
+@pytest.fixture
+def _mockIsDir(mocker):
+	result = {}
+
+	def isDir(path):
+		return result[path]
+
+	def addResult(path, checkResult):
+		path = os.path.join(DIR_LIBRARY, path)
+		result[path] = checkResult
+
+	mocker.patch('std.base.objects.import_.os.path.isdir', isDir)
+	return addResult

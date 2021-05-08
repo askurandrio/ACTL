@@ -6,7 +6,8 @@ Module = makeClass('Module')
 
 
 @addMethod(Module, '__init__')
-def _Module__init(self, scope):
+def _Module__init(self, path, scope):
+	self.setAttribute('path', path)
 	self.setAttribute('scope', scope)
 
 	return Result.fromObj(None)

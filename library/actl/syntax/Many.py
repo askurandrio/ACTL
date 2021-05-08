@@ -7,7 +7,6 @@ class Many(AbstractTemplate):
 	__slots__ = ('template', 'minMatches')
 
 	def __init__(self, *template, minMatches=1):
-		assert minMatches != 0, f'minMatches<{minMatches}> == 0. Use Maybe for this case'
 		super().__init__(Template(*template), minMatches)
 
 	def __call__(self, parser, inp):
