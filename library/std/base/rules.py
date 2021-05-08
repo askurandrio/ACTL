@@ -15,27 +15,27 @@ RULES = SyntaxRules()
 class _ApplySyntaxObjectSyntaxRule:
 	@classmethod
 	def match(cls, parser, inp):
-		if not cls._hasSyntaxRule(parser, inp):
-			return None
+		for syntaxObject in cls._getSyntaxObjects(parser, inp):
+			syntaxRule = syntaxObject.getAttribute.obj('__syntaxRule__').obj
+			if not isinstance(syntaxRule, list):
+				syntaxRule = [syntaxRule]
 
-		syntaxRule = parser.scope[inp[0].name].getAttribute.obj('__syntaxRule__').obj
-		return syntaxRule.match(parser, inp)
+			for rule in syntaxRule:
+				apply = rule.match(parser, inp)
+				if apply:
+					return apply
 
 	@staticmethod
-	def _hasSyntaxRule(parser, inp):
-		if not inp:
-			return None
-
-		token = inp[0]
+	def _getSyntaxObjects(parser, inp):
 		scope = parser.scope
 
-		if not isinstance(token, type(Object)):
-			if not ((VARIABLE == token) and (token.name in scope)):
-				return None
+		for token in BufferRule(parser, ShiftedBuffer(inp)).popUntil(parser.endLine):
+			if (VARIABLE != token) or (token.name not in scope):
+				continue
 
 			token = scope[token.name]
-
-		return token.hasAttribute('__syntaxRule__')
+			if token.hasAttribute('__syntaxRule__'):
+				yield token
 
 
 @CustomTemplate.createToken

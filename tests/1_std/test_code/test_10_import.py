@@ -16,7 +16,11 @@ def test_simpleImport(execute, _mockOpen, _mockIsDir):
 	)
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('testModule', Import.call.obj, args=['testModule'])
+		CALL_FUNCTION_STATIC(
+			'testModule',
+			Import.call.obj,
+			kwargs={'importName': 'testModule'}
+		)
 	]
 
 	testModule = execute.executed.scope['testModule']
@@ -33,7 +37,11 @@ def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 	)
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('testPackage', Import.call.obj, args=['testPackage.testModule'])
+		CALL_FUNCTION_STATIC(
+			'testPackage',
+			Import.call.obj,
+			kwargs={'importName': 'testPackage.testModule'}
+		)
 	]
 
 	testPackage = execute.executed.scope['testPackage']
@@ -41,22 +49,23 @@ def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 	testModule = testPackage.getAttribute.obj('testModule').obj
 	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
 
-def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
-	_mockIsDir('testPackage', True)
-	_mockIsDir('testPackage/testModule', False)
-	_mockOpen('testPackage/testModule.a', 'a = 1')
+
+def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
+	_mockIsDir('testModule', False)
+	_mockOpen('testModule.a', 'a = 1')
 	execute(
-		'import testPackage.testModule'
+		'from testModule import *'
 	)
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('testPackage', Import.call.obj, args=['testPackage.testModule'])
+		CALL_FUNCTION_STATIC(
+			'_tmpVarTrash',
+			Import.call.obj,
+			kwargs={'fromName': 'testModule', 'importName': '*'}
+		)
 	]
 
-	testPackage = execute.executed.scope['testPackage']
-	assert testPackage.isinstance_(Module)
-	testModule = testPackage.getAttribute.obj('testModule').obj
-	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
+	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
 @pytest.fixture
