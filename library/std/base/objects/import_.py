@@ -8,11 +8,11 @@ from actl.objects import addMethodToClass, AToPy, makeClass
 from std.base.objects.Module import Module
 
 
-import_ = makeClass('import')
+Import = makeClass('import')
 
 
-@addMethodToClass(import_, '__call__')
-def _import__call(_, name):
+@addMethodToClass(Import, '__call__')
+def _Import__call(_, name):
 	@Result.fromExecute
 	def result(executor):
 		project = AToPy(executor.scope['__project__'])
@@ -31,15 +31,15 @@ def _import__call(_, name):
 	return result
 
 
-@asDecorator(lambda rule: import_.setAttribute('__syntaxRule__', rule))
+@asDecorator(lambda rule: Import.setAttribute('__syntaxRule__', rule))
 @SyntaxRule.wrap(
-	Value(import_),
+	Value(Import),
 	Token(' '),
 	IsInstance(VARIABLE)
 )
-def _import__syntaxRule(_, _1, nameVar):
+def _Import__syntaxRule(_, _1, nameVar):
 	return [
-		CALL_FUNCTION_STATIC(nameVar.name, import_.call.obj, args=[nameVar.name])
+		CALL_FUNCTION_STATIC(nameVar.name, Import.call.obj, args=[nameVar.name])
 	]
 
 

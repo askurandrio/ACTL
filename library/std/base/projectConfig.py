@@ -40,7 +40,7 @@ def getInitialScope(project):
 		('while', 'std.base.objects.While'),
 		('fun', 'std.base.objects.Function'),
 		('class', 'std.base.objects.class_'),
-		('import', 'std.base.objects.import_.import_'),
+		('import', 'std.base.objects.Import'),
 		('__project__', 'project.this')
 	):
 		pyVar = eval(pyName)

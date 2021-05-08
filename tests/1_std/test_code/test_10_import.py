@@ -5,8 +5,7 @@ import pytest
 
 from actl import DIR_LIBRARY
 from actl.opcodes import CALL_FUNCTION_STATIC
-from std.base.objects import Module
-from std.base.objects.import_ import import_
+from std.base.objects import Module, Import
 
 
 def test_simpleImport(execute, _mockedModule):
@@ -16,7 +15,7 @@ def test_simpleImport(execute, _mockedModule):
 	)
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('testModule', import_.call.obj, args=['testModule'])
+		CALL_FUNCTION_STATIC('testModule', Import.call.obj, args=['testModule'])
 	]
 
 	testModule = execute.executed.scope['testModule']
