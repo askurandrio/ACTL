@@ -68,6 +68,29 @@ def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
+def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
+	_mockIsDir('testMainPackage', True)
+	_mockIsDir('testMainPackage/testPackage', True)
+	_mockIsDir('testMainPackage/testPackage/testModule', False)
+	_mockOpen('testMainPackage/testPackage/testModule.a', 'a = 1')
+	execute(
+		'import testMainPackage.testPackage.testModule'
+	)
+
+	assert execute.parsed.code == [
+		CALL_FUNCTION_STATIC(
+			'testMainPackage',
+			Import.call.obj,
+			kwargs={'importName': 'testMainPackage.testPackage.testModule'}
+		)
+	]
+
+	testMainPackage = execute.executed.scope['testMainPackage']
+	testPackage = testMainPackage.getAttribute.obj('testPackage').obj
+	testModule = testPackage.getAttribute.obj('testModule').obj
+	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
+
+
 @pytest.fixture
 def _mockOpen(mocker):
 	mockFileName = None

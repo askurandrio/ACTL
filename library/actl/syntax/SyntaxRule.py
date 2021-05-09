@@ -16,7 +16,7 @@ class SyntaxRule:
 			return None
 
 		def apply():
-			nonlocal res
+			nonlocal res, inp
 
 			kwargs = {}
 
@@ -40,6 +40,8 @@ class SyntaxRule:
 				arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)
 			})
 			res = self.func(*args, **kwargs)
+			while hasattr(inp, 'origin'):
+				inp = inp.origin
 			inp.insert(0, res)
 
 		return apply

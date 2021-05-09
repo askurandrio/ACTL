@@ -3,6 +3,10 @@ from functools import lru_cache
 from actl.Buffer import Buffer
 from actl.syntax.AbstractTemplate import AbstractTemplate
 from actl.syntax.NamedResult import NamedResult
+from actl.syntax.Token import Token
+
+
+IS_APPLYING_END_DICT = {}
 
 
 class CustomTemplate(AbstractTemplate):
@@ -53,8 +57,16 @@ def IsInstance(cls):
 
 
 @CustomTemplate.create
-def End(_, buff):
-	if buff:
-		return None
+def End(parser, buff):
+	if not buff:
+		return Buffer()
 
-	return Buffer()
+	if parser in IS_APPLYING_END_DICT:
+		return Token('\n')(parser, buff)
+	else:
+		IS_APPLYING_END_DICT[parser] = True
+
+		try:
+			return parser.endLine(parser, buff)
+		finally:
+			del IS_APPLYING_END_DICT[parser]

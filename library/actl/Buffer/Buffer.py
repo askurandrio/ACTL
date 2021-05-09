@@ -13,10 +13,6 @@ class Buffer:
 			self._buff = list(head)
 			self._head = self._emptyIter
 
-	@property
-	def origin(self):
-		return self
-
 	def watch(self, func):
 		def watch(elem):
 			func(elem)

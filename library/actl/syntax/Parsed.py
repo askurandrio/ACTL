@@ -4,14 +4,14 @@ from actl.syntax.AbstractTemplate import AbstractTemplate
 
 
 class Parsed(AbstractTemplate):
-	__slots__ = ('until',)
+	__slots__ = ('until', 'checkEndLineInBuff', 'withEnd')
 
-	def __init__(self, *templates):
+	def __init__(self, *templates, checkEndLineInBuff=False, withEnd=False):
 		if templates:
 			until = Template(*templates)
 		else:
 			until = None
-		super().__init__(until)
+		super().__init__(until, checkEndLineInBuff, withEnd)
 
 	def __call__(self, parser, buff):
 		subParser = parser.subParser(buff.origin, self.until)
@@ -20,6 +20,9 @@ class Parsed(AbstractTemplate):
 			parser.definition += subParser.definition
 			return ()
 
-		subParser.parseLine()
-		res = BufferRule(parser, buff).popUntil(self.until)
+		subParser.parseLine(checkEndLineInBuff=self.checkEndLineInBuff)
+		bufferRule = BufferRule(parser, buff)
+		res = bufferRule.popUntil(self.until)
+		if self.withEnd:
+			res += bufferRule.pop(self.until)
 		return tuple(res)

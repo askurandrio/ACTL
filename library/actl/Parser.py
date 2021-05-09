@@ -32,7 +32,7 @@ class Parser:
 			return True
 		return False
 
-	def parseLine(self, insertDefiniton=True):
+	def parseLine(self, insertDefiniton=True, checkEndLineInBuff=False):
 		flush = Buffer()
 
 		while (self.endLine not in BufferRule(self, flush)) and self.buff:
@@ -40,6 +40,8 @@ class Parser:
 			if isApplied:
 				self.buff.insert(0, flush)
 				flush = Buffer()
+				if checkEndLineInBuff and BufferRule(self, self.buff).startsWith(self.endLine):
+					return
 				continue
 
 			flush.append(self.buff.pop())

@@ -9,7 +9,12 @@ class TransactionBuffer:
 
 	@property
 	def origin(self):
-		return TransactionBufferOrigin(self._origin, self._shiftIndex(0))
+		origin = self._origin
+
+		while isinstance(origin, TransactionBuffer):
+			origin = origin.origin
+
+		return TransactionBufferOrigin(origin, self._shiftIndex(0))
 
 	def commit(self):
 		for index in reversed(sorted(self._skippedIndexes)):
