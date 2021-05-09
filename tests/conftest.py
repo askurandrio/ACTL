@@ -1,5 +1,6 @@
 import traceback
 import signal
+from pathlib import Path
 from functools import singledispatch
 from itertools import zip_longest
 
@@ -18,6 +19,22 @@ def debugStuck():
 
 	signal.signal(signal.SIGALRM, debug)
 	signal.alarm(20)
+
+
+def pytest_collection_modifyitems(session, config, items):
+	def getKey(item):
+		filePath, _, _1 = item.location
+		firstKey = 'tests/1_std/' in filePath
+		fileName = Path(filePath).name
+		fileIdx = fileName.replace('test_', '')
+		if '_' in fileIdx:
+			fileIdx = int(fileIdx[:fileIdx.index('_')])
+		else:
+			fileIdx = 0
+
+		return firstKey, fileIdx
+
+	items.sort(key=getKey)
 
 
 def pytest_assertrepr_compare(op, left, right):

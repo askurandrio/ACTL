@@ -1,4 +1,4 @@
-from actl.Buffer import ShiftedBuffer
+from actl.Buffer import TransactionBuffer
 from actl.syntax.Template import Template
 from actl.syntax.AbstractTemplate import AbstractTemplate
 
@@ -12,10 +12,10 @@ class Or(AbstractTemplate):
 
 	def __call__(self, parser, inp):
 		for template in self.templates:
-			shiftedBuff = ShiftedBuffer(inp)
-			res = template(parser, shiftedBuff)
+			transactionBuff = TransactionBuffer(inp)
+			res = template(parser, transactionBuff)
 			if res is not None:
-				inp.shift(shiftedBuff.indexShift)
+				transactionBuff.commit()
 				return res
 
 		return None

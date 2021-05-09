@@ -1,4 +1,4 @@
-from actl.Buffer import ShiftedBuffer, Buffer
+from actl.Buffer import TransactionBuffer, Buffer
 from actl.syntax.Template import Template
 from actl.syntax.AbstractTemplate import AbstractTemplate
 
@@ -10,9 +10,9 @@ class Maybe(AbstractTemplate):
 		super().__init__(Template(*template))
 
 	def __call__(self, parser, inp):
-		shiftedBuff = ShiftedBuffer(inp)
-		res = self.template(parser, shiftedBuff)
+		transactionBuff = TransactionBuffer(inp)
+		res = self.template(parser, transactionBuff)
 		if res is not None:
-			inp.shift(shiftedBuff.indexShift)
+			transactionBuff.commit()
 			return res
 		return Buffer()

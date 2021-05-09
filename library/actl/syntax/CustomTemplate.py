@@ -33,7 +33,7 @@ class CustomTemplate(AbstractTemplate):
 				return None
 			token = inp[0]
 			if func(parser, token):
-				inp.shift()
+				del inp[0]
 				return Buffer.of(token)
 			return None
 

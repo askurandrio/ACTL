@@ -1,4 +1,4 @@
-from actl.Buffer import ShiftedBuffer, Buffer
+from actl.Buffer import TransactionBuffer, Buffer
 from actl.syntax.Template import Template
 
 
@@ -15,8 +15,8 @@ class BufferRule:
 
 	def get(self, *template):
 		template = Template(*template)
-		shiftedBuff = ShiftedBuffer(self._buff)
-		return template(self._parser, shiftedBuff)
+		transactionBuff = TransactionBuffer(self._buff)
+		return template(self._parser, transactionBuff)
 
 	def pop(self, *template, default=_nothing):
 		template = Template(*template)
@@ -36,23 +36,23 @@ class BufferRule:
 	def index(self, *template):
 		template = Template(*template)
 		index = 0
-		shiftedBuff = ShiftedBuffer(self._buff)
+		transactionBuff = TransactionBuffer(self._buff)
 
-		while shiftedBuff:
-			res = template(self._parser, shiftedBuff)
+		while transactionBuff:
+			res = template(self._parser, transactionBuff)
 			if res is not None:
 				return index
 
 			index += 1
-			shiftedBuff.shift()
+			del transactionBuff[0]
 
 		raise IndexError(f'Can not find this: {template}')
 
 	def startsWith(self, *template):
 		template = Template(*template)
-		shiftedBuff = ShiftedBuffer(self._buff)
+		transactionBuff = TransactionBuffer(self._buff)
 
-		res = template(self._parser, shiftedBuff)
+		res = template(self._parser, transactionBuff)
 		return res is not None
 
 	def __contains__(self, rule):

@@ -1,4 +1,4 @@
-class ShiftedBufferOrigin:
+class TransactionBufferOrigin:
 	def __init__(self, origin, shift):
 		self._origin = origin
 		self._shift = shift

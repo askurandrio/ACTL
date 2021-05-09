@@ -11,11 +11,11 @@ class And(AbstractTemplate):
 		super().__init__(templates)
 
 	def __call__(self, parser, inp):
-		maxShiftIndex = 0 
+		maxShiftIndex = 0
 
 		for template in self.templates:
-			shiftedBuff = ShiftedBuffer(inp)
-			res = template(parser, shiftedBuff)
+			transactionBuff = ShiftedBuffer(inp)
+			res = template(parser, transactionBuff)
 			if res is None:
 				return None
 			maxShiftIndex = max(maxShiftIndex, res.shiftIndex)

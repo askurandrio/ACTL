@@ -1,4 +1,4 @@
-from actl.Buffer import ShiftedBuffer
+from actl.Buffer import TransactionBuffer
 from actl.syntax.Template import Template
 from actl.syntax.AbstractTemplate import AbstractTemplate
 
@@ -10,8 +10,8 @@ class Not(AbstractTemplate):
 		super().__init__(Template(*template))
 
 	def __call__(self, parser, inp):
-		shiftedBuff = ShiftedBuffer(inp)
-		res = self.template(parser, shiftedBuff)
+		transactionBuff = TransactionBuffer(inp)
+		res = self.template(parser, transactionBuff)
 		if res is None:
 			return ()
 		return None

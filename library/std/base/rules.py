@@ -1,5 +1,5 @@
 # pylint: disable=no-member
-from actl.Buffer import ShiftedBuffer, Buffer
+from actl.Buffer import TransactionBuffer, Buffer
 from actl.objects import String, Number, Object, Vector
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
@@ -29,7 +29,7 @@ class _ApplySyntaxObjectSyntaxRule:
 	def _getSyntaxObjects(parser, inp):
 		scope = parser.scope
 
-		for token in BufferRule(parser, ShiftedBuffer(inp)).popUntil(parser.endLine):
+		for token in BufferRule(parser, TransactionBuffer(inp)).popUntil(parser.endLine):
 			if (VARIABLE != token) or (token.name not in scope):
 				continue
 
@@ -61,18 +61,13 @@ class VariableTemplate(Template):
 		)
 
 	def __call__(self, parser, inp):
-		shiftedBuff = ShiftedBuffer(inp)
+		tokens = super().__call__(parser, TransactionBuffer(inp))
 
-		if super().__call__(parser, shiftedBuff) is None:
+		if tokens is None:
 			return None
 
-		tokens = inp[:shiftedBuff.indexShift]
 		variable = VARIABLE(''.join(tokens))
-		origin = getattr(inp, 'origin', inp)
-		del origin[:shiftedBuff.indexShift]
-		origin.insert(0, [variable])
-		originShift = getattr(inp, 'shift', getattr(inp, 'pop', None))
-		originShift()
+		del inp[:len(list(tokens))]
 		return [variable]
 
 
