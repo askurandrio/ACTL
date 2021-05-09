@@ -82,7 +82,7 @@ def _Module__import_(self, name):
 		@packageResult.then
 		def result(_):
 			package = self.getAttribute.obj(packageName).obj
-			return package.getAttribute('import_').obj.call.obj(name)
+			return package.getAttribute.obj('import_').obj.call.obj(name)
 
 		return result
 

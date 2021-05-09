@@ -41,6 +41,7 @@ def getInitialScope(project):
 		('fun', 'std.base.objects.Function'),
 		('class', 'std.base.objects.class_'),
 		('import', 'std.base.objects.Import'),
+		('from', 'std.base.objects.From'),
 		('__project__', 'project.this')
 	):
 		pyVar = eval(pyName)
@@ -67,13 +68,6 @@ def getParseInput(project):
 	return parseInput
 
 
-def getExecuteInput(_):
-	def executeInput(parsedInput, scope):
-		return std.base.Executor(parsedInput, scope)
-
-	return executeInput
-
-
 def getBuildScope(project):
 	return project.this['initialScope'].child()
 
@@ -85,7 +79,7 @@ def getBuildParser(project):
 
 
 def getBuildExecutor(project):
-	return project.this['executeInput'](
+	return std.base.Executor(
 		project.this['buildParser'], project.this['buildScope']
 	)
 
