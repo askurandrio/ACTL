@@ -87,7 +87,7 @@ def test_setExtraSource(run, stdin, stdout):
 	extraSource = [
 		{
 			'py-externalKey': {
-				'from': 'tests.actl.test_run',
+				'from': 'tests.test_run',
 				'import': 'getInitialScope',
 				'name': 'initialScope'
 			}
@@ -122,7 +122,7 @@ def test_projectFAndMainFAndSource(run, stdout):
 	extraSource = [
 		{
 			'py-externalKey': {
-				'from': 'tests.actl.test_run',
+				'from': 'tests.test_run',
 				'import': 'getInitialScope',
 				'name': 'initialScope'
 			}

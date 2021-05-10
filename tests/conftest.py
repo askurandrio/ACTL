@@ -24,7 +24,12 @@ def debugStuck():
 def pytest_collection_modifyitems(session, config, items):
 	def getKey(item):
 		filePath, _, _1 = item.location
-		firstKey = 'tests/1_std/' in filePath
+		if 'tests/test_run.py' in filePath:
+			firstKey = 2
+		elif 'tests/1_std/' in filePath:
+			firstKey = 1
+		elif 'tests/actl/' in filePath:
+			firstKey = 0
 		fileName = Path(filePath).name
 		fileIdx = fileName.replace('test_', '')
 		if '_' in fileIdx:
