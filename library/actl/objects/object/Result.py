@@ -35,6 +35,16 @@ class Result:
 
 		return result
 
+	def join(self, resultForJoin):
+		@resultForJoin.then
+		def result(_):
+			if self.isResolved():
+				return self.obj
+
+			return self
+
+		return result
+
 	def getExecute(self):
 		_ResultObj.checkEx(self._obj)
 		return _ResultObj.getExecute(self._obj)

@@ -59,11 +59,7 @@ def Object__call(self, *args, **kwargs):
 	init = instance.getAttribute('__init__')
 	initResult = init.call(*args, **kwargs)
 
-	@initResult.then
-	def resultInstance(_):
-		return instance
-
-	return resultInstance
+	return Result.fromObj(instance).join(initResult)
 
 
 @addMethod(Object, '__init__')
