@@ -10,14 +10,14 @@ ORDER_KEY = 6
 
 def test_simpleFunctionDeclare(execute):
 	mock = Mock()
-	execute.initialScope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call(mock).obj
 
 	execute('fun f(): print()\nf()')
 
 	assert execute.parsed.code == [
-		Function.call.obj(
+		Function.call(
 			'f',
-			Signature.call.obj([]).obj,
+			Signature.call([]).obj,
 			(
 				opcodes.CALL_FUNCTION('_tmpVar1_1', 'print'),
 				opcodes.VARIABLE('_tmpVar1_1'),
@@ -34,14 +34,14 @@ def test_simpleFunctionDeclare(execute):
 
 def test_declareMultiLineFunction(execute):
 	mock = Mock()
-	execute.initialScope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call(mock).obj
 
 	execute('fun f():\n a = 1\n print(a)\nf()')
 
 	assert execute.parsed.code == [
-		Function.call.obj(
+		Function.call(
 			'f',
-			Signature.call.obj([]).obj,
+			Signature.call([]).obj,
 			(
 				opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call.obj, args=['1']),
 				opcodes.SET_VARIABLE(dst='a', src='_tmpVar1_1'),
@@ -60,14 +60,14 @@ def test_declareMultiLineFunction(execute):
 
 def test_declareFunctionWithArg(execute):
 	mock = Mock()
-	execute.initialScope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call(mock).obj
 
 	execute('fun f(arg): print(arg)\nf(1)')
 
 	assert execute.parsed.code == [
-		Function.call.obj(
+		Function.call(
 			'f',
-			Signature.call.obj(['arg']).obj,
+			Signature.call(['arg']).obj,
 			(
 				opcodes.CALL_FUNCTION('_tmpVar1_1', 'print', args=['arg']),
 				opcodes.VARIABLE('_tmpVar1_1'),
@@ -86,7 +86,7 @@ def test_declareFunctionWithArg(execute):
 
 def test_functionWithReturn(execute):
 	mock = Mock()
-	execute.initialScope['print'] = PyToA.call.obj(mock).obj
+	execute.initialScope['print'] = PyToA.call(mock).obj
 
 	execute(
 		'fun f():\n'
@@ -95,9 +95,9 @@ def test_functionWithReturn(execute):
 	)
 
 	assert execute.parsed.code == [
-		Function.call.obj(
+		Function.call(
 			'f',
-			Signature.call.obj([]).obj,
+			Signature.call([]).obj,
 			(
 				opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', Number.call.obj, args=['1']),
 				opcodes.RETURN('_tmpVar1_1')
@@ -108,4 +108,4 @@ def test_functionWithReturn(execute):
 		opcodes.VARIABLE('_tmpVar1')
 	]
 
-	assert execute.executed.scope['_tmpVar1'] == Number.call.obj('1').obj
+	assert execute.executed.scope['_tmpVar1'] == Number.call('1').obj

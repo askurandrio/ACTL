@@ -21,7 +21,7 @@ def _Function_init(self, name, signature, body, scope):
 def _Function_apply(self, *applyArgs):
 	@NativeFunction
 	def appliedFunction(*args):
-		return self.call.obj(*applyArgs, *args)
+		return self.call(*applyArgs, *args)
 
 	return Result.fromObj(appliedFunction)
 

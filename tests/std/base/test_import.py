@@ -28,7 +28,7 @@ def test_simpleImport(execute, _mockOpen, _mockIsDir):
 
 	testModule = execute.executed.scope['testModule']
 	assert testModule.isinstance_(Module)
-	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
+	assert str(testModule.getAttribute('a').obj) == 'Number<1>'
 
 
 def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
@@ -49,8 +49,8 @@ def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 
 	testPackage = execute.executed.scope['testPackage']
 	assert testPackage.isinstance_(Module)
-	testModule = testPackage.getAttribute.obj('testModule').obj
-	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
+	testModule = testPackage.getAttribute('testModule').obj
+	assert str(testModule.getAttribute('a').obj) == 'Number<1>'
 
 
 def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
@@ -89,9 +89,9 @@ def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
 	]
 
 	testMainPackage = execute.executed.scope['testMainPackage']
-	testPackage = testMainPackage.getAttribute.obj('testPackage').obj
-	testModule = testPackage.getAttribute.obj('testModule').obj
-	assert str(testModule.getAttribute.obj('a').obj) == 'Number<1>'
+	testPackage = testMainPackage.getAttribute('testPackage').obj
+	testModule = testPackage.getAttribute('testModule').obj
+	assert str(testModule.getAttribute('a').obj) == 'Number<1>'
 
 
 def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, _mockIsDir):

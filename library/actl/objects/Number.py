@@ -29,10 +29,10 @@ def _Number__Bool(self):
 
 @addMethod(Number, String)
 def _Number__String(self):
-	class_ = self.getAttribute.obj('__class__').obj
-	className = class_.getAttribute.obj('__name__').obj
+	class_ = self.getAttribute('__class__').obj
+	className = class_.getAttribute('__name__').obj
 	toStr = f'{className}<{self._value}>'
-	return String.call.obj(toStr)
+	return String.call(toStr)
 
 
 @addMethod(Number, AToPy)

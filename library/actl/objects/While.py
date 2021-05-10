@@ -7,7 +7,7 @@ While = makeClass('While')
 
 @addMethodToClass(While, '__call__')
 def _(cls, conditionFrame, code=None):
-	resultSelf = cls.super_.obj(While, '__call__').obj.call.obj()
+	resultSelf = cls.super_(While, '__call__').obj.call()
 
 	resultSelf.obj.setAttribute('conditionFrame', conditionFrame)
 	if code is not None:

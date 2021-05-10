@@ -13,20 +13,20 @@ Module = makeClass('Module')
 @addMethodToClass(Module, '__call__')
 def _Module__call(cls, path=None, name=None):
 	if path is not None:
-		return cls.super_.obj(Module, '__call__').obj.call.obj(path)
+		return cls.super_(Module, '__call__').obj.call(path)
 
 	if '.' not in name:
 		path = os.path.join(DIR_LIBRARY, name)
-		return cls.call.obj(path)
+		return cls.call(path)
 
 	packageName = name[:name.find('.')]
 	name = name[name.find('.')+1:]
 
-	packageResult = cls.call.obj(name=packageName)
+	packageResult = cls.call(name=packageName)
 
 	@packageResult.then
 	def result(package):
-		resultImport = package.getAttribute.obj('import_').obj.call.obj(name)
+		resultImport = package.getAttribute('import_').obj.call(name)
 
 		@resultImport.then
 		def result(_):
@@ -77,19 +77,19 @@ def _Module__import_(self, name):
 		packageName = name[:name.find('.')]
 		name = name[name.find('.')+1:]
 
-		packageResult = self.getAttribute.obj('import_').obj.call.obj(packageName)
+		packageResult = self.getAttribute('import_').obj.call(packageName)
 
 		@packageResult.then
 		def result(_):
-			package = self.getAttribute.obj(packageName).obj
-			return package.getAttribute.obj('import_').obj.call.obj(name)
+			package = self.getAttribute(packageName).obj
+			return package.getAttribute('import_').obj.call(name)
 
 		return result
 
-	path = str(self.getAttribute.obj('path').obj)
+	path = str(self.getAttribute('path').obj)
 	path = os.path.join(path, name)
 
-	resultModule = self.class_.call.obj(path)
+	resultModule = self.class_.call(path)
 
 	@resultModule.then
 	def result(module):
@@ -100,14 +100,14 @@ def _Module__import_(self, name):
 
 @addMethod(Module, '__getAttribute__')
 def _Module__getAttribute(self, key):
-	resultGetAttribute = self.super_.obj(Module, '__getAttribute__').obj.call.obj(key)
+	resultGetAttribute = self.super_(Module, '__getAttribute__').obj.call(key)
 
 	try:
 		return Result.fromObj(resultGetAttribute.obj)
 	except AAttributeNotFound(key=key).class_:
 		pass
 
-	scope = self.super_.obj(Module, '__getAttribute__').obj.call.obj('scope').obj
+	scope = self.super_(Module, '__getAttribute__').obj.call('scope').obj
 	return Result.fromObj(scope[key])
 
 

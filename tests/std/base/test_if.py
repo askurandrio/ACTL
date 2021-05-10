@@ -11,7 +11,7 @@ def test_simple_if(execute):
 	execute('if 1: a = 2')
 
 	assert execute.parsed.code == [
-		If.call.obj(
+		If.call(
 			(
 				(
 					opcodes.CALL_FUNCTION_STATIC(
@@ -35,8 +35,8 @@ def test_ifFalse(execute):
 	execute('if 0: a = 1')
 
 	if_ = execute.parsed.code.one()
-	assert if_.getAttribute.obj('__class__').obj is If
-	conditionFrame, code = Buffer(if_.getAttribute.obj('conditions').obj).one()
+	assert if_.getAttribute('__class__').obj is If
+	conditionFrame, code = Buffer(if_.getAttribute('conditions').obj).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar1', function=Number.call.obj, args=['0']
@@ -57,8 +57,8 @@ def test_ifElif(execute):
 	execute('if 0: a = 1 elif 1: a = 2')
 
 	if_ = execute.parsed.code.one()
-	assert if_.getAttribute.obj('__class__').obj is If
-	assert if_.getAttribute.obj('conditions').obj == (
+	assert if_.getAttribute('__class__').obj is If
+	assert if_.getAttribute('conditions').obj == (
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
@@ -95,8 +95,8 @@ def test_ifElse(execute):
 	execute('if 0: a = 1 else: a = 2')
 
 	if_ = execute.parsed.code.one()
-	assert if_.getAttribute.obj('__class__').obj is If
-	conditionFrame, code = Buffer(if_.getAttribute.obj('conditions').obj).one()
+	assert if_.getAttribute('__class__').obj is If
+	conditionFrame, code = Buffer(if_.getAttribute('conditions').obj).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar1', function=Number.call.obj, args=['0']
@@ -109,7 +109,7 @@ def test_ifElse(execute):
 		),
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 	)
-	assert if_.getAttribute.obj('elseCode').obj == (
+	assert if_.getAttribute('elseCode').obj == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar3', function=Number.call.obj, args=['2']
 		),
@@ -122,8 +122,8 @@ def test_ifElifElseWithFullCodeBlock(execute):
 	execute('if 0:\n a = 1\nelif 0:\n a = 2\nelse:\n a = 3')
 
 	if_ = execute.parsed.code.one()
-	assert if_.getAttribute.obj('__class__').obj is If
-	assert if_.getAttribute.obj('conditions').obj == (
+	assert if_.getAttribute('__class__').obj is If
+	assert if_.getAttribute('conditions').obj == (
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
@@ -153,7 +153,7 @@ def test_ifElifElseWithFullCodeBlock(execute):
 			)
 		)
 	)
-	assert if_.getAttribute.obj('elseCode').obj == (
+	assert if_.getAttribute('elseCode').obj == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar5', function=Number.call.obj, args=['3']
 		),

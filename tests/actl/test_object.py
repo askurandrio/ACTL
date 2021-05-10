@@ -6,15 +6,15 @@ def test_ObjectAsPyStr():
 
 
 def test_objectAsPyStr():
-	assert str(Object.call.obj().obj) == "Object<{}>"
+	assert str(Object.call().obj) == "Object<{}>"
 
 
 def test_recursiveObjectAsStr():
-	obj = Object.call.obj().obj
+	obj = Object.call().obj
 	obj.setAttribute('obj', obj)
 	assert str(obj) == "Object<{'obj': {...}}>"
 
 
 def test_strWhile():
 	assert str(While) == "class 'While'"
-	assert str(While.call.obj([]).obj) == "While<{'conditionFrame': []}>"
+	assert str(While.call([]).obj) == "While<{'conditionFrame': []}>"

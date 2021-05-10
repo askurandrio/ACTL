@@ -36,7 +36,7 @@ def class__getAttribute(self, key):
 
 
 def class__superGetAttribute(self, for_, key):
-	parents = self.getAttribute.obj('__parents__').obj
+	parents = self.getAttribute('__parents__').obj
 
 	if for_ in parents:
 		forIndex = parents.index(for_)

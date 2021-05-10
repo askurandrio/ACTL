@@ -24,7 +24,7 @@ def _(cls, value):
 	if isinstance(value, (int, float)):
 		return Number.call(value)
 
-	resultSelf = cls.super_.obj(PyToA, '__call__').obj.call.obj()
+	resultSelf = cls.super_(PyToA, '__call__').obj.call()
 	resultSelf.obj._value = value
 	return resultSelf
 
@@ -40,13 +40,13 @@ def _(self, *args, **kwargs):
 	args = [AToPy(arg) for arg in args]
 	kwargs = {key: AToPy(value) for key, value in kwargs.items()}
 	res = self._value(*args, **kwargs)
-	return PyToA.call.obj(res)
+	return PyToA.call(res)
 
 
 @addMethod(PyToA, '__getAttribute__')
 def _(self, key):
 	try:
-		return self.super_.obj(PyToA, '__getAttribute__').obj.call.obj(key)
+		return self.super_(PyToA, '__getAttribute__').obj.call(key)
 	except AAttributeNotFound:
 		pass
 
@@ -56,7 +56,7 @@ def _(self, key):
 		except AttributeError:
 			pass
 		else:
-			return PyToA.call.obj(value)
+			return PyToA.call(value)
 	raise AAttributeNotFound(key)
 
 
@@ -73,4 +73,4 @@ def _(self):
 
 @addMethod(PyToA, String)
 def _(self):
-	return String.call.obj(str(self._value))
+	return String.call(str(self._value))

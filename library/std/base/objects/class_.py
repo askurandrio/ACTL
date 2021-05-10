@@ -31,5 +31,5 @@ def _parseClass(parser, inp):
 	clsName = inpRule.pop(IsInstance(VARIABLE)).one().name
 	inpRule.pop(Token(':'))
 	body = CodeBlock(parser, inp).parse()
-	cls = class_.call.obj(clsName, {'body': body}).obj
+	cls = class_.call(clsName, {'body': body}).obj
 	inp.insert(0, [cls])

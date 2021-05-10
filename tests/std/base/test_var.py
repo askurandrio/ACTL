@@ -6,7 +6,7 @@ ORDER_KEY = 2
 
 
 def test_varWithEndLine(execute):
-	one = Number.call.obj(1).obj
+	one = Number.call(1).obj
 	execute.scope['var'] = one
 
 	execute('var\n')

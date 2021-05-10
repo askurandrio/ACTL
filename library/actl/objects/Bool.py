@@ -7,10 +7,10 @@ from actl.objects.object.utils import addMethod, addMethodToClass
 
 Bool = makeClass('Bool')
 
-Bool.True_ = Bool.call.obj().obj
+Bool.True_ = Bool.call().obj
 Bool.True_._value = True
 
-Bool.False_ = Bool.call.obj().obj
+Bool.False_ = Bool.call().obj
 Bool.False_._value = False
 
 
@@ -19,7 +19,7 @@ def _(_, val):
 	if val in (Bool.True_, Bool.False_):
 		return Result.fromObj(val)
 
-	return val.getAttribute.obj(Bool).obj.call.obj()
+	return val.getAttribute(Bool).obj.call()
 
 
 @addMethod(Bool, AToPy)

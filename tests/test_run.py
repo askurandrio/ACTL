@@ -201,5 +201,5 @@ class _Run:
 
 def getInitialScope(project):
 	scope = project.this['std/base', 'initialScope']
-	scope['print'] = actl.objects.PyToA.call.obj(lambda inp: print(f'mocked: {inp}')).obj
+	scope['print'] = actl.objects.PyToA.call(lambda inp: print(f'mocked: {inp}')).obj
 	return scope

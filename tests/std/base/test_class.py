@@ -15,7 +15,7 @@ def test_simpleClassDeclare(execute):
 	)
 
 	assert execute.parsed.code == [
-		class_.call.obj(
+		class_.call(
 			'T',
 			{
 				'body': (
@@ -26,10 +26,10 @@ def test_simpleClassDeclare(execute):
 		).obj
 	]
 
-	assert execute.executed.scope['T'] == class_.call.obj(
+	assert execute.executed.scope['T'] == class_.call(
 		'T',
 		{
-			'a': Number.call.obj(1).obj
+			'a': Number.call(1).obj
 		}
 	).obj
 
@@ -43,13 +43,13 @@ def test_classWithInitMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		class_.call.obj(
+		class_.call(
 			'C',
 			{
 				'body': (
-					Function.call.obj(
+					Function.call(
 						'__init__',
-						Signature.call.obj(['self', 'a']).obj,
+						Signature.call(['self', 'a']).obj,
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.RETURN('None')
@@ -64,13 +64,13 @@ def test_classWithInitMethod(execute):
 		opcodes.SET_VARIABLE('c', '_tmpVar2')
 	]
 
-	assert execute.executed.scope['C'] == class_.call.obj(
+	assert execute.executed.scope['C'] == class_.call(
 		'C',
 		{
 			'__self__': {
-				'__init__': Function.call.obj(
+				'__init__': Function.call(
 					'__init__',
-					Signature.call.obj(['self', 'a']).obj,
+					Signature.call(['self', 'a']).obj,
 					(
 						opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 						opcodes.RETURN('None')
@@ -80,7 +80,7 @@ def test_classWithInitMethod(execute):
 			}
 		}
 	).obj
-	assert str(String.call.obj(execute.executed.scope['c']).obj) == "C<{'a': Number<1>}>"
+	assert str(String.call(execute.executed.scope['c']).obj) == "C<{'a': Number<1>}>"
 
 
 def test_classWithMethod(execute):
@@ -95,13 +95,13 @@ def test_classWithMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		class_.call.obj(
+		class_.call(
 			'C',
 			{
 				'body': (
-					Function.call.obj(
+					Function.call(
 						'method',
-						Signature.call.obj(['self', 'a']).obj,
+						Signature.call(['self', 'a']).obj,
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
@@ -123,5 +123,5 @@ def test_classWithMethod(execute):
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]
 
-	assert str(String.call.obj(execute.executed.scope['c']).obj) == "C<{'a': Number<1>}>"
-	assert execute.executed.scope['tMethodResult'] == Number.call.obj('3').obj
+	assert str(String.call(execute.executed.scope['c']).obj) == "C<{'a': Number<1>}>"
+	assert execute.executed.scope['tMethodResult'] == Number.call('3').obj

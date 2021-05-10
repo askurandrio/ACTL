@@ -95,7 +95,7 @@ class AObject:
 
 	def hasAttribute(self, key):
 		try:
-			result = self.getAttribute.obj(key)
+			result = self.getAttribute(key)
 			if isinstance(result, Result):
 				result.obj
 		except AAttributeNotFound(key).class_:
@@ -170,7 +170,7 @@ class AObject:
 					raise ex
 
 				if attribute.isinstance_(self.Function):
-					applyFunc = attribute.getAttribute.obj('apply').obj.call.obj
+					applyFunc = attribute.getAttribute('apply').obj.call.obj
 					return applyFunc(self).obj
 
 				return attribute
@@ -184,7 +184,7 @@ class AObject:
 		return result
 
 	def toPyString(self):
-		name = self.getAttribute.obj('__class__').obj.getAttribute.obj('__name__').obj
+		name = self.getAttribute('__class__').obj.getAttribute('__name__').obj
 		head = self._head
 		head = {key: value for key, value in head.items() if key != '__class__'}
 		return f'{name}<{head}>'
@@ -217,7 +217,7 @@ class AObject:
 		try:
 			from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 
-			string = String.call.obj(self).obj
+			string = String.call(self).obj
 			return string.toPyString()
 		except Exception as ex:
 			return f'Error during convert<{id(self)}> to string: {ex}'

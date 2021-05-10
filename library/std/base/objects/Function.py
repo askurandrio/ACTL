@@ -14,10 +14,10 @@ _default = object()
 
 @objects.addMethod(Function, '__call__')
 def _Function__call(self, *args):
-	callScope = self.getAttribute.obj('scope').obj
-	signature = self.getAttribute.obj('signature').obj
-	argNames = signature.getAttribute.obj('args').obj
-	body = self.getAttribute.obj('body').obj
+	callScope = self.getAttribute('scope').obj
+	signature = self.getAttribute('signature').obj
+	argNames = signature.getAttribute('args').obj
+	body = self.getAttribute('body').obj
 
 	@Result.fromExecute
 	def result(executor):
@@ -60,7 +60,7 @@ class _ParseFunction:
 			body = self._parseBody()
 		else:
 			body = None
-		self._inp.insert(0, [Function.call.obj(name, signature, body, None).obj])
+		self._inp.insert(0, [Function.call(name, signature, body, None).obj])
 
 	def _parseName(self):
 		return self._inpRule.pop(IsInstance(VARIABLE)).one().name
@@ -77,7 +77,7 @@ class _ParseFunction:
 				self._inpRule.pop(Token(','), Maybe(Token(' ')))
 
 		self._inpRule.pop(Token(')'))
-		signature = objects.Signature.call.obj(args).obj
+		signature = objects.Signature.call(args).obj
 		return signature
 
 	def _parseBody(self):

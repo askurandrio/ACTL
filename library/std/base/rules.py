@@ -16,7 +16,7 @@ class _ApplySyntaxObjectSyntaxRule:
 	@classmethod
 	def match(cls, parser, inp):
 		for syntaxObject in cls._getSyntaxObjects(parser, inp):
-			syntaxRule = syntaxObject.getAttribute.obj('__syntaxRule__').obj
+			syntaxRule = syntaxObject.getAttribute('__syntaxRule__').obj
 			if not isinstance(syntaxRule, list):
 				syntaxRule = [syntaxRule]
 

@@ -5,7 +5,7 @@ from actl.objects.object.utils import addMethod, addMethodToClass
 
 
 NoneType = makeClass('NoneType')
-ANone = NoneType.call.obj().obj
+ANone = NoneType.call().obj
 
 
 @addMethodToClass(NoneType, '__call__')

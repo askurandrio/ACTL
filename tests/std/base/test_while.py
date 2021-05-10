@@ -16,18 +16,18 @@ def test_simple_while(execute):
 	condIt = iter((True, False))
 	cond = Mock(side_effect=lambda: next(condIt))
 	print_ = Mock()
-	execute.scope['cond'] = PyToA.call.obj(cond).obj
-	execute.initialScope['print'] = PyToA.call.obj(print_).obj
+	execute.scope['cond'] = PyToA.call(cond).obj
+	execute.initialScope['print'] = PyToA.call(print_).obj
 
 	execute('while cond(): print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttribute.obj('__class__').obj is While
-	assert cycle.getAttribute.obj('conditionFrame').obj == (
+	assert cycle.getAttribute('__class__').obj is While
+	assert cycle.getAttribute('conditionFrame').obj == (
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='cond'),
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
-	assert cycle.getAttribute.obj('code').obj == (
+	assert cycle.getAttribute('code').obj == (
 		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call.obj, args=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar1_2', function='print', args=['_tmpVar1_1']
@@ -48,18 +48,18 @@ def test_whileWithFullCodeBlock(execute):
 	cond_.called = False
 	cond = Mock(side_effect=cond_)
 	print_ = Mock()
-	execute.scope['cond'] = PyToA.call.obj(cond).obj
-	execute.initialScope['print'] = PyToA.call.obj(print_).obj
+	execute.scope['cond'] = PyToA.call(cond).obj
+	execute.initialScope['print'] = PyToA.call(print_).obj
 
 	execute('while cond():\n print(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttribute.obj('__class__').obj is While
-	assert cycle.getAttribute.obj('conditionFrame').obj == (
+	assert cycle.getAttribute('__class__').obj is While
+	assert cycle.getAttribute('conditionFrame').obj == (
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='cond'),
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
-	assert cycle.getAttribute.obj('code').obj == (
+	assert cycle.getAttribute('code').obj == (
 		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call.obj, args=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar1_2', function='print', args=['_tmpVar1_1']

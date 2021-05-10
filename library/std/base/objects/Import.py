@@ -14,9 +14,9 @@ From = makeClass('From')
 @addMethodToClass(Import, '__call__')
 def _Import__call(cls, fromName=None, importName=None):
 	if fromName is None:
-		return Module.call.obj(name=importName)
+		return Module.call(name=importName)
 
-	moduleResult = cls.call.obj(importName=fromName)
+	moduleResult = cls.call(importName=fromName)
 	assert importName == '*'
 
 	@moduleResult.then
@@ -27,9 +27,9 @@ def _Import__call(cls, fromName=None, importName=None):
 
 			if '.' in fromName:
 				for moduleName in fromName.split('.')[1:]:
-					module = module.getAttribute.obj(moduleName).obj
+					module = module.getAttribute(moduleName).obj
 
-			for key, value in module.getAttribute.obj('scope').obj.getDiff():
+			for key, value in module.getAttribute('scope').obj.getDiff():
 				executor.scope[key] = value
 
 			yield RETURN('None')

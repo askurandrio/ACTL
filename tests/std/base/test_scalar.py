@@ -6,7 +6,7 @@ ORDER_KEY = 1
 
 
 def test_var(execute):
-	one = Number.call.obj(1).obj
+	one = Number.call(1).obj
 	execute.scope['var'] = one
 
 	execute('var')
@@ -51,8 +51,8 @@ def test_emptyVector(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	vector = execute.executed.scope['_']
-	assert vector.getAttribute.obj('__class__').obj is Vector
-	assert Bool.call.obj(vector).obj is Bool.False_
+	assert vector.getAttribute('__class__').obj is Vector
+	assert Bool.call(vector).obj is Bool.False_
 
 
 def test_vectorWithNumber(execute):
@@ -66,5 +66,5 @@ def test_vectorWithNumber(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	vector = execute.executed.scope['_']
-	assert vector.getAttribute.obj('__class__').obj is Vector
-	assert Bool.call.obj(vector).obj is Bool.True_
+	assert vector.getAttribute('__class__').obj is Vector
+	assert Bool.call(vector).obj is Bool.True_

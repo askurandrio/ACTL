@@ -9,7 +9,7 @@ Vector = makeClass('Vector')
 
 @addMethodToClass(Vector, '__call__')
 def _(cls):
-	resultSelf = cls.super_.obj(Vector, '__call__').obj.call.obj()
+	resultSelf = cls.super_(Vector, '__call__').obj.call()
 	resultSelf.obj._elements = []
 	return resultSelf
 
