@@ -18,9 +18,9 @@ class _MetaAGenericKeyError(type, _GenericKeyExceptionMixin):
 
 	def __call__(self, key=_default):
 		if self._key is _default:
-			return self._getClassFor(key)(key)
+			return self._getClassFor(key)('')
 
-		assert self._key == key, (self._key, key)
+		assert key is '', key
 		instance = super().__call__(key)
 		instance.class_ = self
 		return instance

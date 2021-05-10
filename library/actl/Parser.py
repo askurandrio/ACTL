@@ -19,8 +19,9 @@ class Parser:
 	def define(self, *opcodes):
 		self.definition.append(*opcodes)
 
-	def _makeSyntaxError(self):
-		return RuntimeError(f'Error during parsing at {self.buff}')
+	def _makeSyntaxError(self, message=''):
+		message = f'Error during parsing at buff<{self.buff}>{message}'
+		return RuntimeError(message)
 
 	def subParser(self, buff, endLine=None):
 		if endLine is None:
@@ -67,7 +68,11 @@ class Parser:
 			self.definition = Buffer()
 			res = BufferRule(self, self.buff).popUntil(self.endLine)
 			BufferRule(self, self.buff).pop(self.endLine, default=None)
-			yield from res
+			for opcode in res:
+				try:
+					yield opcode
+				except Exception as ex:
+					raise self._makeSyntaxError(f'at res<{res}>') from ex
 
 	def __str__(self):
 		return f'Parser<{self.__dict__}>'
