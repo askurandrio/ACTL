@@ -5,11 +5,15 @@ from multiprocessing import Queue, Process
 
 import json
 from queue import Empty
+from tests.actl import ORDER_KEY
 
 import pytest
 
 import actl
 from actl.run import main, parseArgs
+
+
+ORDER_KEY = 3
 
 
 class _AbstractIoQueue:

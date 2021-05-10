@@ -1,6 +1,7 @@
 import traceback
 import signal
-from pathlib import Path
+import importlib
+import os
 from functools import singledispatch
 from itertools import zip_longest
 
@@ -24,20 +25,17 @@ def debugStuck():
 def pytest_collection_modifyitems(session, config, items):
 	def getKey(item):
 		filePath, _, _1 = item.location
-		if 'tests/test_run.py' in filePath:
-			firstKey = 2
-		elif 'tests/1_std/' in filePath:
-			firstKey = 1
-		elif 'tests/actl/' in filePath:
-			firstKey = 0
-		fileName = Path(filePath).name
-		fileIdx = fileName.replace('test_', '')
-		if '_' in fileIdx:
-			fileIdx = int(fileIdx[:fileIdx.index('_')])
-		else:
-			fileIdx = 0
+		filePath = filePath.replace('.py', '')
+		order_keys = []
 
-		return firstKey, fileIdx
+		while filePath != '':
+			moduleName = filePath.replace('/', '.')
+			module = importlib.import_module(moduleName)
+			order_key = getattr(module, 'ORDER_KEY', float('inf'))
+			order_keys.insert(0, order_key)
+			filePath = os.path.dirname(filePath)
+
+		return order_keys
 
 	items.sort(key=getKey)
 
