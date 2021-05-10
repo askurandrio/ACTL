@@ -1,4 +1,3 @@
-from tests.std.test_code.test_var import ORDER_KEY
 from actl import opcodes
 from actl.objects import Number, AToPy, Vector, Bool, String
 

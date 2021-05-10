@@ -1,6 +1,5 @@
 import os
 from contextlib import contextmanager
-from tests.std.test_code.test_var import ORDER_KEY
 
 import pytest
 
