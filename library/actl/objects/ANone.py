@@ -1,6 +1,5 @@
-from actl.Result import Result
 from actl.objects import AToPy
-from actl.objects.object import makeClass
+from actl.objects.object import makeClass, Result
 from actl.objects.object.utils import addMethod, addMethodToClass
 
 

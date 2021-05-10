@@ -1,10 +1,9 @@
 # pylint: disable=protected-access
-from actl.Result import Result
 from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.object import makeClass
+from actl.objects.object import makeClass, Result
 from actl.objects.object import AAttributeNotFound
 from actl.objects.object import Object
 from actl.objects.object.utils import addMethod, addMethodToClass

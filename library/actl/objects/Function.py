@@ -1,5 +1,4 @@
-from actl.objects.object import makeClass, addMethod, NativeFunction
-from actl.Result import Result
+from actl.objects.object import makeClass, addMethod, NativeFunction, Result
 
 
 Function = makeClass('Function')

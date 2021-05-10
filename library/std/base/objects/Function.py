@@ -1,6 +1,5 @@
 from itertools import zip_longest
 from actl import objects
-from actl.Result import Result
 from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from actl import asDecorator
@@ -19,7 +18,7 @@ def _Function__call(self, *args):
 	argNames = signature.getAttribute('args').obj
 	body = self.getAttribute('body').obj
 
-	@Result.fromExecute
+	@objects.Result.fromExecute
 	def result(executor):
 		executor.scope, prevScope = callScope.child(), executor.scope
 		for argName, argValue in zip_longest(argNames, args, fillvalue=_default):

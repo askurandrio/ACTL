@@ -1,12 +1,12 @@
 # pylint: disable=arguments-differ, useless-super-delegation
-from actl.Result import Result
+from actl.objects.object.Result import Result
 from actl.objects.object.AObject import AObject
 
 
 class NativeMethod(AObject):
 	def __init__(self, rawMethod):
 		@NativeFunction
-		def get(aSelf):				
+		def get(aSelf):
 			return NativeFunction(self._rawMethod).apply(aSelf)
 
 		super().__init__({})

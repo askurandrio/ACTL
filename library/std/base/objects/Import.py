@@ -1,8 +1,7 @@
-from actl.Result import Result
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, Parsed, Many, Or, End
-from actl.objects import addMethodToClass, makeClass
+from actl.objects import addMethodToClass, makeClass, Result
 from actl.utils import asDecorator
 from std.base.objects.module import Module
 

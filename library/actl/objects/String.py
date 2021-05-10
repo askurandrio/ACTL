@@ -1,7 +1,6 @@
 # pylint: disable=protected-access
-from actl.Result import Result
-from actl.objects.object import Object, class_
-from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
+from actl.objects.object import Object, class_, Result
+from actl.objects.object.utils import addMethod, addMethodToClass
 
 
 class _AString(type(Object)):

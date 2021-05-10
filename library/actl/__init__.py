@@ -9,7 +9,6 @@ from . import Buffer
 from .Parser import Parser
 from .Project import *
 from .Scope import Scope
-from .Result import *
 
 
 def _makeLogger():

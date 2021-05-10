@@ -1,5 +1,4 @@
-from actl.Result import Result
-from actl.objects import NativeFunction
+from actl.objects import NativeFunction, Result
 from actl.opcodes import CALL_FUNCTION_STATIC, RETURN
 from std.base.objects import Import
 

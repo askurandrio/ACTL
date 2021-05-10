@@ -1,7 +1,7 @@
-from actl.objects import makeClass, class_ as actlClass, addMethodToClass
+from actl.objects import makeClass, class_ as actlClass, addMethodToClass, Result
 from actl.opcodes import VARIABLE
 from actl.syntax import SyntaxRule, Value, Token, IsInstance
-from actl import Result, asDecorator
+from actl import asDecorator
 from actl.syntax.BufferRule import BufferRule
 from std.base.rules import CodeBlock
 

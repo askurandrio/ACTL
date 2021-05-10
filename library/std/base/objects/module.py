@@ -1,9 +1,9 @@
 from logging import addLevelName
 import os
 
-from actl import Result, DIR_LIBRARY
+from actl import DIR_LIBRARY
 from actl.Buffer import Buffer
-from actl.objects import addMethod, addMethodToClass, makeClass, AAttributeNotFound, AToPy
+from actl.objects import addMethod, addMethodToClass, makeClass, AAttributeNotFound, AToPy, Result
 from actl.opcodes import RETURN
 
 

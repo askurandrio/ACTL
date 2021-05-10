@@ -1,4 +1,4 @@
-from actl.Result import Result
+from actl.objects.object.Result import Result
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeMethod import NativeFunction, NativeMethod
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
