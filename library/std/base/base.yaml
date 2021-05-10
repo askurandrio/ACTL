@@ -29,12 +29,6 @@
 
 -  py-externalKey:
     from: std.base.projectConfig
-    import: getExecuteInput
-    name: executeInput
-
-
--  py-externalKey:
-    from: std.base.projectConfig
     import: getBuild
     name: build
 

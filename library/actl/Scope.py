@@ -15,6 +15,9 @@ class Scope:
 		return self._head[key]
 
 	def __setitem__(self, key, value):
+		if key == '_tmpVarTrash':
+			return
+
 		self._head[key] = value
 
 	def __repr__(self):
