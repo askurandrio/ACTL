@@ -25,8 +25,9 @@ class Executor:
 	def _executeOpcode(self, opcode):
 		try:
 			handler = self.HANDLERS[type(opcode)]
-		except KeyError as ex:
-			raise KeyError(f'Handler for "{opcode}" not found') from ex
+		except KeyError:
+			error = KeyError(f'Opcode<"{opcode}"> is not expected')
+			self.frames[-1].throw(error)
 
 		res = handler(self, opcode)
 		if isinstance(res, _Frame):
@@ -42,6 +43,9 @@ class Executor:
 class _Frame:
 	def __init__(self, head):
 		self._head = iter(head)
+
+	def throw(self, error):
+		self._head.throw(error)
 
 	def __iter__(self):
 		return self

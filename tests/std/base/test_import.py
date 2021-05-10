@@ -71,6 +71,24 @@ def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
+def test_importFromModuleImportName(execute, _mockOpen, _mockIsDir):
+	_mockIsDir('testModule', False)
+	_mockOpen('testModule.a', 'a = 1')
+	execute(
+		'from testModule import a'
+	)
+
+	assert execute.parsed.code == [
+		CALL_FUNCTION_STATIC(
+			'_tmpVarTrash',
+			Import.call.obj,
+			kwargs={'fromName': 'testModule', 'importName': 'a'}
+		)
+	]
+
+	assert str(execute.executed.scope['a']) == 'Number<1>'
+
+
 def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)

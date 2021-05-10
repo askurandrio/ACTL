@@ -16,7 +16,6 @@ def _Import__call(cls, fromName=None, importName=None):
 		return Module.call(name=importName)
 
 	moduleResult = cls.call(importName=fromName)
-	assert importName == '*'
 
 	@moduleResult.then
 	def result(module):
@@ -29,6 +28,9 @@ def _Import__call(cls, fromName=None, importName=None):
 					module = module.getAttribute(moduleName).obj
 
 			for key, value in module.getAttribute('scope').obj.getDiff():
+				if (importName != '*') and (key != importName):
+					continue
+
 				executor.scope[key] = value
 
 			yield RETURN('None')
@@ -75,7 +77,9 @@ def _parseImport(_, _1, returnVar, *nameVars):
 	Token(' '),
 	Parsed(Or([IsInstance(VARIABLE)], [End]), checkEndLineInBuff=True),
 	Value(Import),
-	Token(' *')
+	Token(' '),
+	Parsed(Or([IsInstance(VARIABLE)], [Token('*')]), checkEndLineInBuff=True),
+	Or([IsInstance(VARIABLE)], [Token('*')])
 )
 def _parseFromImport(*args):
 	_, _1, *nameVars, _2, _3, _4, importName = args
@@ -83,6 +87,7 @@ def _parseFromImport(*args):
 		(nameVar.name if VARIABLE == nameVar else nameVar)
 		for nameVar in nameVars
 	)
+	importName = (importName.name if VARIABLE == importName else importName)
 	return [
 		CALL_FUNCTION_STATIC(
 			'_tmpVarTrash',
