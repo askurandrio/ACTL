@@ -56,21 +56,10 @@ def Object__call(self, *args, **kwargs):
 	assert not isinstance(self, Result)
 	instance = AObject({'__class__': self})
 
-	resultInstanceGetAttribute = instance.getAttribute
+	init = instance.getAttribute('__init__')
+	initResult = init.call(*args, **kwargs)
 
-	@resultInstanceGetAttribute.then
-	def resultInitMethod(instanceGetAttribute):
-		return instanceGetAttribute('__init__')
-
-	@resultInitMethod.then
-	def resultInitMethodFunc(initMethod):
-		return initMethod.call
-
-	@resultInitMethodFunc.then
-	def resultInitMethodCall(initMethodFunc):
-		return initMethodFunc(*args, **kwargs)
-
-	@resultInitMethodCall.then
+	@initResult.then
 	def resultInstance(_):
 		return instance
 

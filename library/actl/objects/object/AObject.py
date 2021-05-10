@@ -17,13 +17,9 @@ class AObject:
 
 	@property
 	def getAttribute(self):
-		resultGetAttribute = self.lookupSpecialAttribute('__getAttribute__')
+		getAttribute = self.lookupSpecialAttribute('__getAttribute__')
 
-		@resultGetAttribute.then
-		def resultGetAttributeCall(getAttribute):
-			return getAttribute.call
-
-		return resultGetAttributeCall
+		return getAttribute.call
 
 	@property
 	def _getAttribute(self):
@@ -37,17 +33,9 @@ class AObject:
 
 	@property
 	def get(self):
-		resultGetAttribute = self.getAttribute
+		get = self.getAttribute('__get__')
 
-		@resultGetAttribute.then
-		def resultGet(resultGetAttribute):
-			return resultGetAttribute('__get__')
-
-		@resultGet.then
-		def resultGetCall(get):
-			return get.call
-
-		return resultGetCall
+		return get.call
 
 	@property
 	def _superGetAttribute(self):
@@ -61,13 +49,9 @@ class AObject:
 
 	@property
 	def super_(self):
-		resultSuperGetAttribute = self.lookupSpecialAttribute('__superGetAttribute__')
+		superGetAttribute = self.lookupSpecialAttribute('__superGetAttribute__')
 
-		@resultSuperGetAttribute.then
-		def resultSuperGetAttributeCall(superGetAttribute):
-			return superGetAttribute.call
-
-		return resultSuperGetAttributeCall
+		return superGetAttribute.call
 
 	def lookupAttributeInClsSelf(self, key):
 		class_ = self.class_
@@ -105,17 +89,9 @@ class AObject:
 
 	@property
 	def call(self):
-		resultGetAttribute = self.getAttribute
+		call = self.getAttribute('__call__')
 
-		@resultGetAttribute.then
-		def resultFunc(getAttribute):
-			return getAttribute('__call__')
-
-		@resultFunc.then
-		def resultFuncCall(func):
-			return func.call
-
-		return resultFuncCall
+		return call.call
 
 	@property
 	def class_(self):
@@ -175,11 +151,7 @@ class AObject:
 
 				return attribute
 
-			@obj.call.then
-			def resultBindedAttribute(attributeGetCall):
-				return attributeGetCall(self)
-
-			return resultBindedAttribute
+			return obj.call(self)
 
 		return result
 

@@ -24,21 +24,7 @@ String = _AStringClass({
 @addMethodToClass(String, '__call__')
 def String__call(cls, value=''):
 	if isinstance(value, type(Object)):
-		resultValueGetAttribute = value.getAttribute
-
-		@resultValueGetAttribute.then
-		def resultValueToString(valueGetAttribute):
-			return valueGetAttribute(String)
-
-		@resultValueToString.then
-		def resultValueToStringFunc(valueToString):
-			return valueToString.call
-
-		@resultValueToStringFunc.then
-		def result(valueToStringFunc):
-			return valueToStringFunc()
-
-		return result
+		return value.getAttribute(String).call()
 
 	self = _AString({'__class__': cls})
 	self._value = value
