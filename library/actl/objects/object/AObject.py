@@ -170,7 +170,7 @@ class AObject:
 					raise ex
 
 				if attribute.isinstance_(self.Function):
-					applyFunc = attribute.getAttribute('apply').obj.call.obj
+					applyFunc = attribute.getAttribute('apply').call.obj
 					return applyFunc(self).obj
 
 				return attribute

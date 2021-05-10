@@ -13,7 +13,7 @@ Module = makeClass('Module')
 @addMethodToClass(Module, '__call__')
 def _Module__call(cls, path=None, name=None):
 	if path is not None:
-		return cls.super_(Module, '__call__').obj.call(path)
+		return cls.super_(Module, '__call__').call(path)
 
 	if '.' not in name:
 		path = os.path.join(DIR_LIBRARY, name)
@@ -26,7 +26,7 @@ def _Module__call(cls, path=None, name=None):
 
 	@packageResult.then
 	def result(package):
-		resultImport = package.getAttribute('import_').obj.call(name)
+		resultImport = package.getAttribute('import_').call(name)
 
 		@resultImport.then
 		def result(_):
@@ -77,12 +77,12 @@ def _Module__import_(self, name):
 		packageName = name[:name.find('.')]
 		name = name[name.find('.')+1:]
 
-		packageResult = self.getAttribute('import_').obj.call(packageName)
+		packageResult = self.getAttribute('import_').call(packageName)
 
 		@packageResult.then
 		def result(_):
 			package = self.getAttribute(packageName).obj
-			return package.getAttribute('import_').obj.call(name)
+			return package.getAttribute('import_').call(name)
 
 		return result
 
@@ -100,14 +100,14 @@ def _Module__import_(self, name):
 
 @addMethod(Module, '__getAttribute__')
 def _Module__getAttribute(self, key):
-	resultGetAttribute = self.super_(Module, '__getAttribute__').obj.call(key)
+	resultGetAttribute = self.super_(Module, '__getAttribute__').call(key)
 
 	try:
 		return Result.fromObj(resultGetAttribute.obj)
 	except AAttributeNotFound(key=key).class_:
 		pass
 
-	scope = self.super_(Module, '__getAttribute__').obj.call('scope').obj
+	scope = self.super_(Module, '__getAttribute__').call('scope').obj
 	return Result.fromObj(scope[key])
 
 

@@ -20,6 +20,14 @@ class Result:
 		_ResultObj.checkEx(self._obj)
 		return _ResultObj.isObjAvailable(self._obj)
 
+	@property
+	def call(self):
+		@self.then
+		def result(obj):
+			return obj.call
+
+		return result
+
 	def __call__(self, *args, **kwargs):
 		@self.then
 		def result(obj):

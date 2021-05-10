@@ -19,7 +19,7 @@ def _(_, val):
 	if val in (Bool.True_, Bool.False_):
 		return Result.fromObj(val)
 
-	return val.getAttribute(Bool).obj.call()
+	return val.getAttribute(Bool).call()
 
 
 @addMethod(Bool, AToPy)

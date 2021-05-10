@@ -24,7 +24,7 @@ def _(cls, value):
 	if isinstance(value, (int, float)):
 		return Number.call(value)
 
-	resultSelf = cls.super_(PyToA, '__call__').obj.call()
+	resultSelf = cls.super_(PyToA, '__call__').call()
 	resultSelf.obj._value = value
 	return resultSelf
 
@@ -46,7 +46,7 @@ def _(self, *args, **kwargs):
 @addMethod(PyToA, '__getAttribute__')
 def _(self, key):
 	try:
-		return self.super_(PyToA, '__getAttribute__').obj.call(key)
+		return self.super_(PyToA, '__getAttribute__').call(key)
 	except AAttributeNotFound:
 		pass
 

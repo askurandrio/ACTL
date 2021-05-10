@@ -9,7 +9,7 @@ else_ = makeClass('_Else').call().obj
 
 @addMethodToClass(If, '__call__')
 def _(cls, ifCondition, *elifConditions, elseCode=None):
-	resultSelf = cls.super_(If, '__call__').obj.call()
+	resultSelf = cls.super_(If, '__call__').call()
 
 	conditions = (ifCondition,) + elifConditions
 
