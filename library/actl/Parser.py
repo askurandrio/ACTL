@@ -19,6 +19,9 @@ class Parser:
 	def define(self, *opcodes):
 		self.definition.append(*opcodes)
 
+	def _makeSyntaxError(self):
+		return RuntimeError(f'Error during parsing at {self.buff}')
+
 	def subParser(self, buff, endLine=None):
 		if endLine is None:
 			endLine = self.endLine
@@ -28,7 +31,10 @@ class Parser:
 	def _applyRule(self):
 		apply = self.rules.match(self, self.buff)
 		if apply:
-			apply()
+			try:
+				apply()
+			except Exception as ex:
+				raise self._makeSyntaxError() from ex
 			return True
 		return False
 

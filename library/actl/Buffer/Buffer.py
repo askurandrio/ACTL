@@ -51,13 +51,15 @@ class Buffer:
 		return self
 
 	def _load(self, index):
+		if self._head is self._emptyIter:
+			return
+
 		if isinstance(index, slice):
 			index = index.stop
 			if index > 0:
 				index -= 1
 
-		if self._head is not self._emptyIter:
-			assert index >= 0, 'use .loadAll() if you want load index with undefined count to load'
+		assert index >= 0, 'use .loadAll() if you want load index with undefined count to load'
 
 		index = (index + 1) - len(self._buff)
 
