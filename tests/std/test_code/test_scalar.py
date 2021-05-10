@@ -1,5 +1,9 @@
+from tests.std.test_code.test_var import ORDER_KEY
 from actl import opcodes
 from actl.objects import Number, AToPy, Vector, Bool, String
+
+
+ORDER_KEY = 1
 
 
 def test_var(execute):

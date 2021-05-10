@@ -1,6 +1,10 @@
+from tests.std.test_code.test_var import ORDER_KEY
 from actl import opcodes
 from actl.objects import String, Number
 from actl.opcodes.opcodes import SET_VARIABLE
+
+
+ORDER_KEY = 7
 
 
 def test_pointOperator(execute):

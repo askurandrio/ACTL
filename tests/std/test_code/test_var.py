@@ -2,6 +2,9 @@ from actl import opcodes
 from actl.objects import Number, AToPy
 
 
+ORDER_KEY = 2
+
+
 def test_varWithEndLine(execute):
 	one = Number.call.obj(1).obj
 	execute.scope['var'] = one

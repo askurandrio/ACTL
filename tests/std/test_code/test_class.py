@@ -5,6 +5,9 @@ from actl.objects import Number, Signature, String, PyToA
 from std.base.objects import class_, Function
 
 
+ORDER_KEY = 9
+
+
 def test_simpleClassDeclare(execute):
 	execute(
 		'class T:\n'

@@ -5,6 +5,9 @@ from actl.opcodes import opcodes
 from std.base.objects import Function
 
 
+ORDER_KEY = 6
+
+
 def test_simpleFunctionDeclare(execute):
 	mock = Mock()
 	execute.initialScope['print'] = PyToA.call.obj(mock).obj

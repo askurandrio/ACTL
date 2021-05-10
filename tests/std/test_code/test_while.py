@@ -5,6 +5,9 @@ from actl.objects import PyToA, AToPy, Number
 from std.base.objects import While
 
 
+ORDER_KEY = 4
+
+
 def test_simple_while(execute):
 	def cond_():
 		called, cond_.called = cond_.called, True

@@ -1,5 +1,9 @@
+from tests.std.test_code.test_var import ORDER_KEY
 from actl import opcodes
 from actl.objects import Number
+
+
+ORDER_KEY = 8
 
 
 def test_parseAddPropertyAndScalar(execute):

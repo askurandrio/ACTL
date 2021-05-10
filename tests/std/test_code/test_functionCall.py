@@ -6,6 +6,9 @@ from actl.objects import AToPy, PyToA, String
 from actl.opcodes import opcodes
 
 
+ORDER_KEY = 5
+
+
 def test_call(execute, testF):
 	execute('testF()')
 

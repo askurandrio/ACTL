@@ -1,11 +1,15 @@
 import os
 from contextlib import contextmanager
+from tests.std.test_code.test_var import ORDER_KEY
 
 import pytest
 
 from actl import DIR_LIBRARY
 from actl.opcodes import CALL_FUNCTION_STATIC
 from std.base.objects import Module, Import
+
+
+ORDER_KEY = 10
 
 
 def test_simpleImport(execute, _mockOpen, _mockIsDir):

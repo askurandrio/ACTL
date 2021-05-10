@@ -4,6 +4,9 @@ from actl.objects import AToPy, Number
 from std.base.objects import If
 
 
+ORDER_KEY = 3
+
+
 def test_simple_if(execute):
 	execute('if 1: a = 2')
 
