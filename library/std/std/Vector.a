@@ -1,2 +1,5 @@
 class Vector:
-	a = 2
+	fun __init__(self):
+		self._head = pyEval('[]')
+	fun append(self, element):
+		self._head.append(element)

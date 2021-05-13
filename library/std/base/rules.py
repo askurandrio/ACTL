@@ -209,8 +209,15 @@ class CodeBlock:
 			self.inpRule.pop(indent)
 			while self.inp and (not self.inpRule.startsWith(Token('\n'))):
 				code.append(self.inp.pop())
-			if self.inp:
+
+			if self.inpRule.startsWith(Token('\n')):
 				code.append(self.inp.pop())
+
+			while self.inpRule.startsWith(
+				Many(Or([Token(' ')], [Token('\t')]), minMatches=0), Token('\n')
+			):
+				self.inpRule.popUntil(Token('\n'))
+				self.inpRule.pop(Token('\n'))
 
 		code.loadAll()
 		if code[-1] == '\n':
