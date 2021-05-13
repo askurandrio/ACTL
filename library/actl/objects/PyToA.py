@@ -15,17 +15,17 @@ PyToA = makeClass('PyToA')
 @addMethodToClass(PyToA, '__call__')
 def _(cls, value):
 	if isinstance(value, type(Object)):
-		return Result.fromObj(value)
+		return value
 
 	if isinstance(value, bool):
-		return Result.fromObj(Bool.True_) if value else Result.fromObj(Bool.False_)
+		return Bool.True_ if value else Bool.False_
 
 	if isinstance(value, (int, float)):
 		return Number.call(value)
 
-	resultSelf = cls.super_(PyToA, '__call__').call()
-	resultSelf.obj._value = value
-	return resultSelf
+	self = cls.super_(PyToA, '__call__').call()
+	self._value = value
+	return self
 
 
 @addMethodToClass(PyToA, 'eval')
@@ -45,7 +45,7 @@ def _(self, *args, **kwargs):
 @addMethod(PyToA, '__getAttribute__')
 def _(self, key):
 	try:
-		return self.super_(PyToA, '__getAttribute__').call(key).obj
+		return self.super_(PyToA, '__getAttribute__').call(key)
 	except AAttributeNotFound:
 		pass
 
@@ -67,7 +67,7 @@ def _(self):
 @addMethod(PyToA, Bool)
 def _(self):
 	res = bool(self._value)
-	return Result.fromObj(Bool.True_) if res else Result.fromObj(Bool.False_)
+	return Bool.True_ if res else Bool.False_
 
 
 @addMethod(PyToA, String)

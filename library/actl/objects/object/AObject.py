@@ -24,7 +24,7 @@ class AObject:
 	@property
 	def _getAttribute(self):
 		try:
-			return Result.fromObj(self.lookupAttributeInHead('__getAttribute__'))
+			return self.lookupAttributeInHead('__getAttribute__')
 		except AAttributeNotFound('__getAttribute__').class_:
 			pass
 
@@ -40,7 +40,7 @@ class AObject:
 	@property
 	def _superGetAttribute(self):
 		try:
-			return Result.fromObj(self.lookupAttributeInHead('__superGetAttribute__'))
+			return self.lookupAttributeInHead('__superGetAttribute__')
 		except AAttributeNotFound('__superGetAttribute__').class_:
 			pass
 
@@ -79,9 +79,7 @@ class AObject:
 
 	def hasAttribute(self, key):
 		try:
-			result = self.getAttribute(key)
-			if isinstance(result, Result):
-				result.obj
+			self.getAttribute(key)
 		except AAttributeNotFound(key).class_:
 			return False
 		else:
@@ -135,9 +133,12 @@ class AObject:
 
 	def bindAttribute(self, attribute):
 		if not isinstance(attribute, AObject):
-			return Result.fromObj(attribute)
+			return attribute
 
-		resultAttributeGet = attribute.get
+		try:
+			resultAttributeGet = Result.fromObj(attribute.get)
+		except AAttributeNotFound as ex:
+			resultAttributeGet = Result.fromEx(ex)
 
 		@resultAttributeGet.finally_
 		def result(obj=default, ex=default):
@@ -146,8 +147,8 @@ class AObject:
 					raise ex
 
 				if attribute.isinstance_(self.Function):
-					applyFunc = attribute.getAttribute('apply').call.obj
-					return applyFunc(self).obj
+					applyFunc = attribute.getAttribute('apply').call
+					return applyFunc(self)
 
 				return attribute
 
@@ -166,7 +167,7 @@ class AObject:
 
 		AObject._stringSeen.add(id(self))
 
-		name = self.getAttribute('__class__').obj.getAttribute('__name__').obj
+		name = self.getAttribute('__class__').getAttribute('__name__')
 		selfToStr = f'{name}<'
 
 		for key, value in self._head.items():
@@ -201,7 +202,7 @@ class AObject:
 		try:
 			from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 
-			string = String.call(self).obj
+			string = String.call(self)
 			return string.toPyString()
 		except Exception as ex:
 			return f'Error during convert<{id(self)}> to string: {ex}'

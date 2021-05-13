@@ -1,5 +1,5 @@
 from actl import opcodes
-from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass
+from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass, Result
 from std.base.objects import Function, class_ as stdClass
 
 
@@ -90,20 +90,25 @@ class _ResultFrame(_Frame):
 			raise
 
 	@classmethod
-	def wrap(cls, executor, result):
-		if result.isResolved():
+	def wrap(cls, executor, dst, result):
+		if not isinstance(result, Result):
+			executor.scope[dst] = result
 			return
 
-		return cls(executor, result)
+		@result.then
+		def storeResult(res):
+			executor.scope[dst] = res
+
+		return cls(executor, storeResult)
 
 
 @Executor.addHandler(type(Object))
 def _(executor, opcode):
 	def getHandler():
-		class_ = opcode.getAttribute('__class__').obj
+		class_ = opcode.getAttribute('__class__')
 		for parent in [
 			class_,
-			*class_.getAttribute('__parents__').obj
+			*class_.getAttribute('__parents__')
 		]:
 			if parent in Executor.HANDLERS:
 				return Executor.HANDLERS[parent]
@@ -128,13 +133,10 @@ def _(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
 def _(executor, opcode):
 	assert opcode.typeb == '('
-	resultCall = opcode.function(*opcode.args, **opcode.kwargs)
 
-	@resultCall.then
-	def setDstForResultCall(returnValue):
-		executor.scope[opcode.dst] = returnValue
+	result = opcode.function(*opcode.args, **opcode.kwargs)
 
-	return _ResultFrame.wrap(executor, setDstForResultCall)
+	return _ResultFrame.wrap(executor, opcode.dst, result)
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION)
@@ -145,13 +147,10 @@ def _ExecutorHandler_callFunction(executor, opcode):
 	args = [executor.scope[varName] for varName in opcode.args]
 	kwargs = {argName: executor.scope[varName] for argName, varName in opcode.kwargs.items()}
 
-	resultCall = function.call(*args, **kwargs)
+	result = function.call(*args, **kwargs)
 
-	@resultCall.then
-	def setDstForResultCall(returnValue):
-		executor.scope[opcode.dst] = returnValue
 
-	return _ResultFrame.wrap(executor, setDstForResultCall)
+	return _ResultFrame.wrap(executor, opcode.dst, result)
 
 
 @Executor.addHandler(opcodes.RETURN)
@@ -174,8 +173,8 @@ def _(executor, opcode):
 	pySecond = AToPy(second)
 	pyResult = pyFirst + pySecond
 
-	resultClass = first.getAttribute('__class__').obj
-	result = resultClass.call(pyResult).obj
+	resultClass = first.getAttribute('__class__')
+	result = resultClass.call(pyResult)
 
 	executor.scope[opcode.dst] = result
 
@@ -185,7 +184,7 @@ def _(executor, opcode):
 	object_ = executor.scope[opcode.object]
 	attribute = opcode.attribute
 
-	executor.scope[opcode.dst] = object_.getAttribute(attribute).obj
+	executor.scope[opcode.dst] = object_.getAttribute(attribute)
 
 
 @Executor.addHandler(opcodes.SET_ATTRIBUTE)
@@ -201,57 +200,57 @@ def _(executor, opcode):
 @_Frame.wrap
 def _(executor, opcode):
 	while True:
-		yield from opcode.getAttribute('conditionFrame').obj
-		res = Bool.call(executor.scope['_']).obj
+		yield from opcode.getAttribute('conditionFrame')
+		res = Bool.call(executor.scope['_'])
 		if not AToPy(res):
 			break
 
-		yield from opcode.getAttribute('code').obj
+		yield from opcode.getAttribute('code')
 
 
 @Executor.addHandler(Function)
 def _executeFunction(executor, opcode):
 	linkedFunction = Function.call(
-		opcode.getAttribute('name').obj,
-		opcode.getAttribute('signature').obj,
-		opcode.getAttribute('body').obj,
+		opcode.getAttribute('name'),
+		opcode.getAttribute('signature'),
+		opcode.getAttribute('body'),
 		executor.scope
-	).obj
-	executor.scope[opcode.getAttribute('name').obj] = linkedFunction
+	)
+	executor.scope[opcode.getAttribute('name')] = linkedFunction
 
 
 @Executor.addHandler(If)
 @_Frame.wrap
 def _(executor, opcode):
-	for conditionFrame, code in opcode.getAttribute('conditions').obj:
+	for conditionFrame, code in opcode.getAttribute('conditions'):
 		yield from conditionFrame
 		res = executor.scope['_']
-		res = Bool.call(res).obj
+		res = Bool.call(res)
 		if AToPy(res):
 			yield from code
 			return
 
 	if opcode.hasAttribute('elseCode'):
-		yield from opcode.getAttribute('elseCode').obj
+		yield from opcode.getAttribute('elseCode')
 
 
 @Executor.addHandler(actlClass)
 @_Frame.wrap
 def _executeClass(executor, opcode):
-	className = str(opcode.getAttribute('__name__').obj)
-	newClass = stdClass.call(className, {}).obj
+	className = str(opcode.getAttribute('__name__'))
+	newClass = stdClass.call(className, {})
 	executor.scope, prevScope = executor.scope.child(), executor.scope
 	executor.scope['__class__'] = newClass
 	executor.scope[className] = newClass
-	self_ = newClass.getAttribute('__self__').obj
+	self_ = newClass.getAttribute('__self__')
 
-	yield from opcode.getAttribute('body').obj
+	yield from opcode.getAttribute('body')
 
 	for key, value in executor.scope.getDiff():
 		if key in ['__class__', className, '__name__']:
 			continue
 
-		if Function == value.getAttribute('__class__').obj:
+		if Function == value.getAttribute('__class__'):
 			self_[key] = value
 			continue
 

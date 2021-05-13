@@ -11,7 +11,7 @@ def _(self):
 
 @addMethod(class_, String)
 def clsAsStr(self):
-	name = self.getAttribute('__name__').obj
+	name = self.getAttribute('__name__')
 	return String.call(f"class '{name}'")
 
 

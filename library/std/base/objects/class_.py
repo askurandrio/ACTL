@@ -16,7 +16,7 @@ def _class_call(_, name, scope):
 	for key, value in scope.items():
 		self.setAttribute(key, value)
 
-	return Result.fromObj(self)
+	return self
 
 
 @asDecorator(lambda rule: class_.setAttribute('__syntaxRule__', rule))
@@ -31,5 +31,5 @@ def _parseClass(parser, inp):
 	clsName = inpRule.pop(IsInstance(VARIABLE)).one().name
 	inpRule.pop(Token(':'))
 	body = CodeBlock(parser, inp).parse()
-	cls = class_.call(clsName, {'body': body}).obj
+	cls = class_.call(clsName, {'body': body})
 	inp.insert(0, [cls])

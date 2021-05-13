@@ -22,14 +22,14 @@ def _Number__init(self, value):
 @addMethod(Number, Bool)
 def _Number__Bool(self):
 	if self._value == 0:
-		return Result.fromObj(Bool.False_)
-	return Result.fromObj(Bool.True_)
+		return Bool.False_
+	return Bool.True_
 
 
 @addMethod(Number, String)
 def _Number__String(self):
-	class_ = self.getAttribute('__class__').obj
-	className = class_.getAttribute('__name__').obj
+	class_ = self.getAttribute('__class__')
+	className = class_.getAttribute('__name__')
 	toStr = f'{className}<{self._value}>'
 	return String.call(toStr)
 

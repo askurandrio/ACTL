@@ -81,12 +81,12 @@ def _Module__import_(self, name):
 
 		@packageResult.then
 		def result(_):
-			package = self.getAttribute(packageName).obj
+			package = self.getAttribute(packageName)
 			return package.getAttribute('import_').call(name)
 
 		return result
 
-	path = str(self.getAttribute('path').obj)
+	path = str(self.getAttribute('path'))
 	path = os.path.join(path, name)
 
 	resultModule = self.class_.call(path)
@@ -100,15 +100,13 @@ def _Module__import_(self, name):
 
 @addMethod(Module, '__getAttribute__')
 def _Module__getAttribute(self, key):
-	resultGetAttribute = self.super_(Module, '__getAttribute__').call(key)
-
 	try:
-		return Result.fromObj(resultGetAttribute.obj)
+		return self.super_(Module, '__getAttribute__').call(key)
 	except AAttributeNotFound(key=key).class_:
 		pass
 
-	scope = self.super_(Module, '__getAttribute__').call('scope').obj
-	return Result.fromObj(scope[key])
+	scope = self.super_(Module, '__getAttribute__').call('scope')
+	return scope[key]
 
 
 @Buffer.wrap

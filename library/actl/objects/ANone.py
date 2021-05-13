@@ -4,12 +4,12 @@ from actl.objects.object.utils import addMethod, addMethodToClass
 
 
 NoneType = makeClass('NoneType')
-ANone = NoneType.call().obj
+ANone = NoneType.call()
 
 
 @addMethodToClass(NoneType, '__call__')
 def _(_):
-	return Result.fromObj(ANone)
+	return ANone
 
 
 @addMethod(NoneType, AToPy)

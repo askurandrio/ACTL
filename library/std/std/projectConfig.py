@@ -9,7 +9,7 @@ def getInitialScope(project):
 def getBuildExecutor(project):
 	executor = project['std/base', 'buildExecutor']
 	executor.frames.append(iter([
-		CALL_FUNCTION_STATIC('_tmpVarTrash', inject.call.obj,	args=[project])
+		CALL_FUNCTION_STATIC('_tmpVarTrash', inject.call,	args=[project])
 	]))
 
 	return executor

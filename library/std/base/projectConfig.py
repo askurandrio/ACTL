@@ -46,7 +46,7 @@ def getInitialScope(project):
 		('__project__', 'project.this')
 	):
 		pyVar = eval(pyName)
-		var = objects.PyToA.call(pyVar).obj
+		var = objects.PyToA.call(pyVar)
 		scope[varName] = var
 
 	return Scope(scope)

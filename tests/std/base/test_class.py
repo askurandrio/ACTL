@@ -19,19 +19,19 @@ def test_simpleClassDeclare(execute):
 			'T',
 			{
 				'body': (
-					opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', function=Number.call.obj, args=['1']),
+					opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', function=Number.call, args=['1']),
 					opcodes.SET_VARIABLE('a', '_tmpVar1_1')
 				)
 			}
-		).obj
+		)
 	]
 
 	assert execute.executed.scope['T'] == class_.call(
 		'T',
 		{
-			'a': Number.call(1).obj
+			'a': Number.call(1)
 		}
-	).obj
+	)
 
 
 def test_classWithInitMethod(execute):
@@ -49,17 +49,17 @@ def test_classWithInitMethod(execute):
 				'body': (
 					Function.call(
 						'__init__',
-						Signature.call(['self', 'a']).obj,
+						Signature.call(['self', 'a']),
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.RETURN('None')
 						),
 						None
-					).obj,
+					),
 				)
 			}
-		).obj,
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call.obj, args=['1']),
+		),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, args=['1']),
 		opcodes.CALL_FUNCTION('_tmpVar2', 'C', args=['_tmpVar1']),
 		opcodes.SET_VARIABLE('c', '_tmpVar2')
 	]
@@ -70,17 +70,17 @@ def test_classWithInitMethod(execute):
 			'__self__': {
 				'__init__': Function.call(
 					'__init__',
-					Signature.call(['self', 'a']).obj,
+					Signature.call(['self', 'a']),
 					(
 						opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 						opcodes.RETURN('None')
 					),
 					ANY
-				).obj
+				)
 			}
 		}
-	).obj
-	assert str(String.call(execute.executed.scope['c']).obj) == 'C<a=Number<1>>'
+	)
+	assert str(String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
 
 
 def test_classWithMethod(execute):
@@ -101,30 +101,30 @@ def test_classWithMethod(execute):
 				'body': (
 					Function.call(
 						'method',
-						Signature.call(['self', 'a']).obj,
+						Signature.call(['self', 'a']),
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call.obj, args=['2']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, args=['2']),
 							opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
 							opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
 							opcodes.RETURN('a')
 						),
 						None
-					).obj,
+					),
 				)
 			}
-		).obj,
+		),
 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
 		opcodes.GET_ATTRIBUTE('_tmpVar1', 'c', 'method'),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call.obj, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, args=['1']),
 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar1', args=['_tmpVar2']),
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]
 
-	assert str(String.call(execute.executed.scope['c']).obj) == 'C<a=Number<1>>'
-	assert execute.executed.scope['tMethodResult'] == Number.call('3').obj
+	assert str(String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
+	assert execute.executed.scope['tMethodResult'] == Number.call('3')
 
 
 def test_classWithTwoMethod(execute):
@@ -150,22 +150,22 @@ def test_classWithTwoMethod(execute):
 				'body': (
 					Function.call(
 						'methodA',
-						Signature.call(['self', 'a']).obj,
+						Signature.call(['self', 'a']),
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call.obj, args=['2']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, args=['2']),
 							opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
 							opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
 							opcodes.RETURN('a')
 						),
 						None
-					).obj,
+					),
 					Function.call(
 						'methodB',
-						Signature.call(['self', 'b']).obj,
+						Signature.call(['self', 'b']),
 						(
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call.obj, args=['1']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, args=['1']),
 							opcodes.CALL_OPERATOR('_tmpVar2_2', 'b', '+', '_tmpVar2_1'),
 							opcodes.SET_VARIABLE('b', '_tmpVar2_2'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_3', 'self', 'methodA'),
@@ -173,15 +173,15 @@ def test_classWithTwoMethod(execute):
 							opcodes.RETURN('_tmpVar2_4')
 						),
 						None
-					).obj
+					)
 				),
 
 			}
-		).obj,
+		),
 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
 		opcodes.GET_ATTRIBUTE('_tmpVar1', 'c', 'methodB'),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call.obj, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, args=['1']),
 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar1', args=['_tmpVar2']),
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]

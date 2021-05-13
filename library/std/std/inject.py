@@ -11,7 +11,7 @@ def inject(project):
 
 		yield CALL_FUNCTION_STATIC(
 			'_tmpVarTrash',
-			Import.call.obj,
+			Import.call,
 			kwargs={'fromName': 'std.std.init', 'importName': '*'}
 		)
 		try:

@@ -23,13 +23,13 @@ def _Function_apply(self, *applyArgs):
 	def appliedFunction(*args):
 		return self.call(*applyArgs, *args)
 
-	return Result.fromObj(appliedFunction)
+	return appliedFunction
 
 
 @addMethod(Function, String)
 def _Function__String(self):
-	name = self.getAttribute('name').obj
-	args = ', '.join(self.getAttribute('signature').obj.getAttribute('args').obj)
+	name = self.getAttribute('name')
+	args = ', '.join(self.getAttribute('signature').getAttribute('args'))
 	return String.call(f'fun {name}({args})')
 
 

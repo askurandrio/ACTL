@@ -23,4 +23,4 @@ def _syntaxRule(parser, inp):
 	condition = tuple(inpRule.pop(Parsed(Token(':'))))
 	inpRule.pop(Token(':'))
 	code = CodeBlock(parser, inp).parse()
-	inp.insert(0, [While.call(condition, code).obj])
+	inp.insert(0, [While.call(condition, code)])

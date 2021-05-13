@@ -21,14 +21,14 @@ def test_simpleImport(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'testModule',
-			Import.call.obj,
+			Import.call,
 			kwargs={'importName': 'testModule'}
 		)
 	]
 
 	testModule = execute.executed.scope['testModule']
 	assert testModule.isinstance_(Module)
-	assert str(testModule.getAttribute('a').obj) == 'Number<1>'
+	assert str(testModule.getAttribute('a')) == 'Number<1>'
 
 
 def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
@@ -42,15 +42,15 @@ def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'testPackage',
-			Import.call.obj,
+			Import.call,
 			kwargs={'importName': 'testPackage.testModule'}
 		)
 	]
 
 	testPackage = execute.executed.scope['testPackage']
 	assert testPackage.isinstance_(Module)
-	testModule = testPackage.getAttribute('testModule').obj
-	assert str(testModule.getAttribute('a').obj) == 'Number<1>'
+	testModule = testPackage.getAttribute('testModule')
+	assert str(testModule.getAttribute('a')) == 'Number<1>'
 
 
 def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
@@ -63,7 +63,7 @@ def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'_tmpVarTrash',
-			Import.call.obj,
+			Import.call,
 			kwargs={'fromName': 'testModule', 'importName': '*'}
 		)
 	]
@@ -81,7 +81,7 @@ def test_importFromModuleImportName(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'_tmpVarTrash',
-			Import.call.obj,
+			Import.call,
 			kwargs={'fromName': 'testModule', 'importName': 'a'}
 		)
 	]
@@ -101,15 +101,15 @@ def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'testMainPackage',
-			Import.call.obj,
+			Import.call,
 			kwargs={'importName': 'testMainPackage.testPackage.testModule'}
 		)
 	]
 
 	testMainPackage = execute.executed.scope['testMainPackage']
-	testPackage = testMainPackage.getAttribute('testPackage').obj
-	testModule = testPackage.getAttribute('testModule').obj
-	assert str(testModule.getAttribute('a').obj) == 'Number<1>'
+	testPackage = testMainPackage.getAttribute('testPackage')
+	testModule = testPackage.getAttribute('testModule')
+	assert str(testModule.getAttribute('a')) == 'Number<1>'
 
 
 def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, _mockIsDir):
@@ -124,7 +124,7 @@ def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, _mockI
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'_tmpVarTrash',
-			Import.call.obj,
+			Import.call,
 			kwargs={
 				'fromName': 'testMainPackage.testPackage.testModule',
 				'importName': '*'

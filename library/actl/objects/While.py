@@ -9,8 +9,8 @@ While = makeClass('While')
 def _(cls, conditionFrame, code=None):
 	resultSelf = cls.super_(While, '__call__').call()
 
-	resultSelf.obj.setAttribute('conditionFrame', conditionFrame)
+	resultSelf.setAttribute('conditionFrame', conditionFrame)
 	if code is not None:
-		resultSelf.obj.setAttribute('code', code)
+		resultSelf.setAttribute('code', code)
 
 	return resultSelf

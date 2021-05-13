@@ -11,12 +11,12 @@ makeClass.Object = Object
 @addMethod(Object, '__getAttribute__')
 def object__getAttribute(self, key):
 	try:
-		return Result.fromObj(self.lookupSpecialAttribute(key))
+		return self.lookupSpecialAttribute(key)
 	except AAttributeIsNotSpecial(key).class_:
 		pass
 
 	try:
-		return Result.fromObj(self.lookupAttributeInHead(key))
+		return self.lookupAttributeInHead(key)
 	except AAttributeNotFound(key).class_:
 		pass
 
@@ -27,7 +27,7 @@ def object__getAttribute(self, key):
 	else:
 		return self.bindAttribute(attribute)
 
-	return Result.fromEx(AAttributeNotFound(key))
+	raise AAttributeNotFound(key)
 
 
 @addMethod(Object, '__superGetAttribute__')
@@ -64,4 +64,4 @@ def Object__call(self, *args, **kwargs):
 
 @addMethod(Object, '__init__')
 def object__init(_):
-	return Result.fromObj(None)
+	return None

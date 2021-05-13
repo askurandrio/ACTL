@@ -28,4 +28,4 @@ def String__call(cls, value=''):
 
 	self = _AString({'__class__': cls})
 	self._value = value
-	return Result.fromObj(self)
+	return self

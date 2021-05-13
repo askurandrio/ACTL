@@ -16,7 +16,7 @@ class _ApplySyntaxObjectSyntaxRule:
 	@classmethod
 	def match(cls, parser, inp):
 		for syntaxObject in cls._getSyntaxObjects(parser, inp):
-			syntaxRule = syntaxObject.getAttribute('__syntaxRule__').obj
+			syntaxRule = syntaxObject.getAttribute('__syntaxRule__')
 			if not isinstance(syntaxRule, list):
 				syntaxRule = [syntaxRule]
 
@@ -108,7 +108,7 @@ def _(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call.obj, args=[string]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, args=[string]))
 
 	inp.insert(0, [dst])
 
@@ -122,7 +122,7 @@ def _isDigit(_, token):
 def _(*args, parser=None):
 	number = ''.join(args)
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call.obj, args=[number]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, args=[number]))
 	return [dst]
 
 
@@ -304,7 +304,7 @@ def _parseVector(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Token('['))
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call.obj, args=[]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Vector.call, args=[]))
 
 	if not inpRule.startsWith(Token(']')):
 		appendVarName = parser.makeTmpVar().name

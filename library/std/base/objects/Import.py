@@ -25,9 +25,9 @@ def _Import__call(cls, fromName=None, importName=None):
 
 			if '.' in fromName:
 				for moduleName in fromName.split('.')[1:]:
-					module = module.getAttribute(moduleName).obj
+					module = module.getAttribute(moduleName)
 
-			for key, value in module.getAttribute('scope').obj.getDiff():
+			for key, value in module.getAttribute('scope').getDiff():
 				if (importName != '*') and (key != importName):
 					continue
 
@@ -58,7 +58,7 @@ def _parseImport(_, _1, returnVar, *nameVars):
 		for nameVar in (returnVar, *nameVars)
 	)
 	return [
-		CALL_FUNCTION_STATIC(returnVar.name, Import.call.obj, kwargs={'importName': importName})
+		CALL_FUNCTION_STATIC(returnVar.name, Import.call, kwargs={'importName': importName})
 	]
 
 
@@ -91,7 +91,7 @@ def _parseFromImport(*args):
 	return [
 		CALL_FUNCTION_STATIC(
 			'_tmpVarTrash',
-			Import.call.obj,
+			Import.call,
 			kwargs={'fromName': fromName, 'importName': importName}
 		)
 	]

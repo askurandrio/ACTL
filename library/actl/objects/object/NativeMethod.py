@@ -21,7 +21,7 @@ class NativeMethod(AObject):
 
 	@property
 	def get(self):
-		return Result.fromObj(self._get)
+		return self._get
 
 	def toPyString(self):
 		return f'{type(self).__name__}({self._rawMethod})'
@@ -40,7 +40,7 @@ class NativeFunction(AObject):
 
 	@property
 	def call(self):
-		return Result.fromObj(self._function)
+		return self._function
 
 	def toPyString(self):
 		return f'{type(self).__name__}({self._function})'

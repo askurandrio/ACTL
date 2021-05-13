@@ -36,6 +36,8 @@ class Result:
 		return result
 
 	def join(self, resultForJoin):
+		resultForJoin = Result.fromObj(resultForJoin)
+
 		@resultForJoin.then
 		def result(_):
 			if self.isResolved():
@@ -104,10 +106,7 @@ class Result:
 			except Exception as ex: # pylint: disable=broad-except
 				return Result.fromEx(ex)
 
-			if isinstance(result, Result):
-				return result
-
-			return Result.fromObj(result)
+			return result
 
 		if _ResultObj.isExAvailable(self._obj):
 			return Result.fromEx(_ResultObj.getEx(self._obj))
@@ -137,9 +136,7 @@ class Result:
 			except Exception as ex: # pylint: disable=broad-except
 				return Result.fromEx(ex)
 
-			if isinstance(result, Result):
-				return result
-			return Result.fromObj(result)
+			return result
 
 		return Result(_handler={'finally': handler}, _parent=self)
 
@@ -151,6 +148,8 @@ class Result:
 
 	@classmethod
 	def fromObj(cls, obj):
+		if isinstance(obj, cls):
+			return obj
 		return cls(obj=_ResultObj(obj=obj))
 
 	@classmethod

@@ -6,7 +6,7 @@ from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNot
 
 def class__getAttribute(self, key):
 	try:
-		return Result.fromObj(self.lookupSpecialAttribute(key))
+		return self.lookupSpecialAttribute(key)
 	except AAttributeIsNotSpecial(key).class_:
 		pass
 
@@ -36,7 +36,7 @@ def class__getAttribute(self, key):
 
 
 def class__superGetAttribute(self, for_, key):
-	parents = self.getAttribute('__parents__').obj
+	parents = self.getAttribute('__parents__')
 
 	if for_ in parents:
 		forIndex = parents.index(for_)
