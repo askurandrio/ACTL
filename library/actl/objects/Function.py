@@ -1,4 +1,5 @@
 from actl.objects.object import makeClass, addMethod, NativeFunction, Result
+from actl.objects.String import String
 
 
 Function = makeClass('Function')
@@ -23,6 +24,13 @@ def _Function_apply(self, *applyArgs):
 		return self.call(*applyArgs, *args)
 
 	return Result.fromObj(appliedFunction)
+
+
+@addMethod(Function, String)
+def _Function__String(self):
+	name = self.getAttribute('name').obj
+	args = ', '.join(self.getAttribute('signature').obj.getAttribute('args').obj)
+	return String.call(f'fun {name}({args})')
 
 
 @addMethod(Signature, '__init__')

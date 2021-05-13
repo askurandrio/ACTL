@@ -156,10 +156,35 @@ class AObject:
 		return result
 
 	def toPyString(self):
+		if not hasattr(AObject, '_stringSeen'):
+			AObject._stringSeen = set()
+
+			try:
+				return self.toPyString()
+			finally:
+				del AObject._stringSeen
+
+		AObject._stringSeen.add(id(self))
+
 		name = self.getAttribute('__class__').obj.getAttribute('__name__').obj
-		head = self._head
-		head = {key: value for key, value in head.items() if key != '__class__'}
-		return f'{name}<{head}>'
+		selfToStr = f'{name}<'
+
+		for key, value in self._head.items():
+			if key == '__class__':
+				continue
+
+			if id(value) in AObject._stringSeen:
+				reprValue = '↑...'
+			else:
+				AObject._stringSeen.add(id(value))
+				reprValue = repr(value)
+
+			selfToStr = f'{selfToStr}{key}={reprValue}, '
+
+		if selfToStr[-2:] == ', ':
+			selfToStr = selfToStr[:-2]
+
+		return f'{selfToStr}>'
 
 	def __eq__(self, other):
 		if not isinstance(other, AObject):
@@ -173,19 +198,6 @@ class AObject:
 		return str(self)
 
 	def __str__(self):
-		if not hasattr(AObject, '_stack'):
-			AObject._stack = set()
-
-			try:
-				return str(self)
-			finally:
-				del AObject._stack
-
-		if id(self) in AObject._stack:
-			return '{...}'
-
-		AObject._stack.add(id(self))
-
 		try:
 			from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
 

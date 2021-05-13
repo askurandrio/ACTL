@@ -80,7 +80,7 @@ def test_classWithInitMethod(execute):
 			}
 		}
 	).obj
-	assert str(String.call(execute.executed.scope['c']).obj) == "C<{'a': Number<1>}>"
+	assert str(String.call(execute.executed.scope['c']).obj) == 'C<a=Number<1>>'
 
 
 def test_classWithMethod(execute):
@@ -123,7 +123,7 @@ def test_classWithMethod(execute):
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]
 
-	assert str(String.call(execute.executed.scope['c']).obj) == "C<{'a': Number<1>}>"
+	assert str(String.call(execute.executed.scope['c']).obj) == 'C<a=Number<1>>'
 	assert execute.executed.scope['tMethodResult'] == Number.call('3').obj
 
 
@@ -186,5 +186,5 @@ def test_classWithTwoMethod(execute):
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]
 
-	assert str(execute.executed.scope['c']) == "C<{'a': Number<2>}>"
+	assert str(execute.executed.scope['c']) == 'C<a=Number<2>>'
 	assert str(execute.executed.scope['tMethodResult']) == 'Number<4>'
