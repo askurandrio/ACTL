@@ -45,7 +45,7 @@ def _(self, *args, **kwargs):
 @addMethod(PyToA, '__getAttribute__')
 def _(self, key):
 	try:
-		return self.super_(PyToA, '__getAttribute__').call(key)
+		return self.super_(PyToA, '__getAttribute__').call(key).obj
 	except AAttributeNotFound:
 		pass
 

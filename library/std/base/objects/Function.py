@@ -1,5 +1,6 @@
 from itertools import zip_longest
 from actl import objects
+from actl import opcodes
 from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from actl import asDecorator
@@ -29,7 +30,8 @@ def _Function__call(self, *args):
 			executor.scope[argName] = argValue
 
 		try:
-			yield from body
+			for opcode in body:
+				yield opcode
 		except GeneratorExit:
 			executor.scope = prevScope
 

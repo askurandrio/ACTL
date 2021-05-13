@@ -29,7 +29,11 @@ class Executor:
 			error = KeyError(f'Opcode<"{opcode}"> is not expected')
 			self.frames[-1].throw(error)
 
-		res = handler(self, opcode)
+		try:
+			res = handler(self, opcode)
+		except Exception as ex:
+			self.frames[-1].throw(ex)
+
 		if isinstance(res, _Frame):
 			self.frames.append(iter(res))
 
