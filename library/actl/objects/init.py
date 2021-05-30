@@ -5,7 +5,7 @@ from actl.objects.object.utils import addMethod, addMethodToClass
 
 
 @addMethod(String, AToPy)
-def _(self):
+def _String__AToPy(self):
 	return self._value  # pylint: disable=protected-access
 
 

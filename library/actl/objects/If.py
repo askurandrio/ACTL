@@ -8,7 +8,7 @@ else_ = makeClass('_Else').call()
 
 
 @addMethodToClass(If, '__call__')
-def _(cls, ifCondition, *elifConditions, elseCode=None):
+def _If__call(cls, ifCondition, *elifConditions, elseCode=None):
 	resultSelf = cls.super_(If, '__call__').call()
 
 	conditions = (ifCondition,) + elifConditions

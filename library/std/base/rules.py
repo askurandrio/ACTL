@@ -100,7 +100,7 @@ def _parseSetVariable(dst, _, _1, _2, src):
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
-def _(inp, parser):
+def _parseString(inp, parser):
 	start = [inp.pop()]
 	string = ''
 	while not inp.startsWith(start):
@@ -119,7 +119,7 @@ def _isDigit(_, token):
 
 
 @RULES.add(Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True)
-def _(*args, parser=None):
+def _parseNumber(*args, parser=None):
 	number = ''.join(args)
 	dst = parser.makeTmpVar()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, args=[number]))

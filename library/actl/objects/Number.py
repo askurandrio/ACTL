@@ -35,5 +35,5 @@ def _Number__String(self):
 
 
 @addMethod(Number, AToPy)
-def _(self):
+def _Number__AToPy(self):
 	return self._value

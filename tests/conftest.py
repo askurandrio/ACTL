@@ -112,22 +112,22 @@ def _toTuple(arg):
 @_toTuple.register(Buffer)
 @_toTuple.register(list)
 @_toTuple.register(tuple)
-def _(arg):
+def _toTuple__iter(arg):
 	return tuple(arg)
 
 
 @_toTuple.register(dict)
-def _(arg):
+def _toTuple__dict(arg):
 	return tuple(sorted(arg.items(), key=lambda pair: pair[0]))
 
 
 @_toTuple.register
-def _(arg: type(Object)):
+def _toTuple__Object(arg: type(Object)):
 	return _toTuple(arg._head)
 
 
 @_toTuple.register
-def _(arg: DynamicOpCode):
+def _toTuple__DynamicOpCode(arg: DynamicOpCode):
 	res = [('type', type(arg))]
 	res.extend((attr, getattr(arg, attr)) for attr in type(arg).__slots__)
 	return tuple(res)

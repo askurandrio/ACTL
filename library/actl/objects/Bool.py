@@ -14,7 +14,7 @@ Bool.False_._value = False
 
 
 @addMethodToClass(Bool, '__call__')
-def _(_, val):
+def _Bool__call(_, val):
 	if val in (Bool.True_, Bool.False_):
 		return val
 
@@ -22,5 +22,5 @@ def _(_, val):
 
 
 @addMethod(Bool, AToPy)
-def _(self):
+def _Bool__AToPy(self):
 	return self._value

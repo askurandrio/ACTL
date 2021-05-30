@@ -92,12 +92,12 @@ class Lazy:
 
 
 @Project.addDefaultHandler('setKey')
-def _(project, arg):
+def _setKeyHandler(project, arg):
 	project[arg['key']] = arg['value']
 
 
 @Project.addDefaultHandler('include')
-def _(project, projectF):
+def _includeHandler(project, projectF):
 	fileName = os.path.join(DIR_LIBRARY, projectF)
 
 	while os.path.isdir(fileName):
@@ -112,7 +112,7 @@ def _(project, projectF):
 
 
 @Project.addDefaultHandler('py-execExternalFunction')
-def _(project, arg):
+def _pyExecExtrnalFunctionHandler(project, arg):
 	function = importFrom(arg)
 	function(project)
 

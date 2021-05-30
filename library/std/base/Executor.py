@@ -116,7 +116,7 @@ class _ResultFrame(_Frame):
 
 
 @Executor.addHandler(type(Object))
-def _(executor, opcode):
+def _objectHandler(executor, opcode):
 	def getHandler():
 		class_ = opcode.getAttribute('__class__')
 		for parent in [
@@ -134,19 +134,19 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(opcodes.VARIABLE)
-def _(executor, opcode):
+def _VARIABLE__handler(executor, opcode):
 	pass
 
 
 @Executor.addHandler(opcodes.SET_VARIABLE)
-def _(executor, opcode):
+def _SET_VARIABLE__handler(executor, opcode):
 	src = executor.scope[opcode.src]
 
 	executor.scope[opcode.dst] = src
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
-def _(executor, opcode):
+def _CALL_FUNCTION_STATIC__handler(executor, opcode):
 	assert opcode.typeb == '('
 
 	result = opcode.function(*opcode.args, **opcode.kwargs)
@@ -155,7 +155,7 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(opcodes.CALL_FUNCTION)
-def _ExecutorHandler_callFunction(executor, opcode):
+def _CALL_FUNCTION__handler(executor, opcode):
 	function = executor.scope[opcode.function]
 
 	assert opcode.typeb == '('
@@ -169,7 +169,7 @@ def _ExecutorHandler_callFunction(executor, opcode):
 
 
 @Executor.addHandler(opcodes.RETURN)
-def _(executor, opcode):
+def _RETURN__handler(executor, opcode):
 	returnVal = executor.scope[opcode.var]
 
 	while not isinstance(executor.frames[-1], _ResultFrame):
@@ -179,7 +179,7 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(opcodes.CALL_OPERATOR)
-def _(executor, opcode):
+def _CALL_OPERATOR__handler(executor, opcode):
 	first = executor.scope[opcode.first]
 	second = executor.scope[opcode.second]
 	assert opcode.operator == '+'
@@ -195,7 +195,7 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(opcodes.GET_ATTRIBUTE)
-def _(executor, opcode):
+def _GET_ATTRIBUTE__handler(executor, opcode):
 	object_ = executor.scope[opcode.object]
 	attribute = opcode.attribute
 
@@ -203,7 +203,7 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(opcodes.SET_ATTRIBUTE)
-def _(executor, opcode):
+def _SET_ATTRIBUTE__handler(executor, opcode):
 	object_ = executor.scope[opcode.object]
 	attribute = opcode.attribute
 	src = executor.scope[opcode.src]
@@ -213,7 +213,7 @@ def _(executor, opcode):
 
 @Executor.addHandler(While)
 @_Frame.wrap
-def _(executor, opcode):
+def _While__handler(executor, opcode):
 	while True:
 		yield from opcode.getAttribute('conditionFrame')
 		res = Bool.call(executor.scope[opcode.getAttribute('conditionFrame')[-1].name])
@@ -224,7 +224,7 @@ def _(executor, opcode):
 
 
 @Executor.addHandler(Function)
-def _executeFunction(executor, opcode):
+def _Function__handler(executor, opcode):
 	linkedFunction = Function.call(
 		opcode.getAttribute('name'),
 		opcode.getAttribute('signature'),
@@ -236,7 +236,7 @@ def _executeFunction(executor, opcode):
 
 @Executor.addHandler(If)
 @_Frame.wrap
-def _(executor, opcode):
+def _If__handler(executor, opcode):
 	for conditionFrame, code in opcode.getAttribute('conditions'):
 		yield from conditionFrame
 		res = executor.scope[conditionFrame[-1].name]
@@ -251,7 +251,7 @@ def _(executor, opcode):
 
 @Executor.addHandler(actlClass)
 @_Frame.wrap
-def _executeClass(executor, opcode):
+def _actlClass__handler(executor, opcode):
 	className = str(opcode.getAttribute('__name__'))
 	newClass = stdClass.call(className, {})
 	executor.scope, prevScope = executor.scope.child(), executor.scope

@@ -8,10 +8,10 @@ ANone = NoneType.call()
 
 
 @addMethodToClass(NoneType, '__call__')
-def _(_):
+def _NoneType__call(_):
 	return ANone
 
 
 @addMethod(NoneType, AToPy)
-def _(_):
+def __NoneType__AToPy(_):
 	return None

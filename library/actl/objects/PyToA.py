@@ -13,7 +13,7 @@ PyToA = makeClass('PyToA')
 
 
 @addMethodToClass(PyToA, '__call__')
-def _(cls, value):
+def _PyToA__call(cls, value):
 	if isinstance(value, type(Object)):
 		return value
 
@@ -29,13 +29,13 @@ def _(cls, value):
 
 
 @addMethodToClass(PyToA, 'eval')
-def _(cls, code):
+def _PyToA__eval(cls, code):
 	code = str(AToPy(code))
 	return cls.call(eval(code))  # pylint: disable=eval-used
 
 
 @addMethod(PyToA, '__call__')
-def _(self, *args, **kwargs):
+def _PyToA__call(self, *args, **kwargs):
 	args = [AToPy(arg) for arg in args]
 	kwargs = {key: AToPy(value) for key, value in kwargs.items()}
 	res = self._value(*args, **kwargs)
@@ -43,7 +43,7 @@ def _(self, *args, **kwargs):
 
 
 @addMethod(PyToA, '__getAttribute__')
-def _(self, key):
+def _PyToA__getAttribute(self, key):
 	try:
 		return self.super_(PyToA, '__getAttribute__').call(key)
 	except AAttributeNotFound:
@@ -60,16 +60,16 @@ def _(self, key):
 
 
 @addMethod(PyToA, AToPy)
-def _(self):
+def _PyToA__AToPY(self):
 	return self._value
 
 
 @addMethod(PyToA, Bool)
-def _(self):
+def _PyToA__Bool(self):
 	res = bool(self._value)
 	return Bool.True_ if res else Bool.False_
 
 
 @addMethod(PyToA, String)
-def _(self):
+def _PyToA__String(self):
 	return String.call(str(self._value))
