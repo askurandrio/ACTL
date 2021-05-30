@@ -23,6 +23,8 @@ def getRules(_):
 
 def getInitialScope(project):
 	scope = {}
+	lt = lambda first, second: first < second
+
 	for varName, pyName in (
 		('print', 'print'),
 		('readInput', 'input'),
@@ -43,7 +45,8 @@ def getInitialScope(project):
 		('import', 'std.base.objects.Import'),
 		('from', 'std.base.objects.From'),
 		('pyEval', 'eval'),
-		('__project__', 'project.this')
+		('__project__', 'project.this'),
+		('lt', 'lt')
 	):
 		pyVar = eval(pyName)
 		var = objects.PyToA.call(pyVar)

@@ -5,3 +5,4 @@ pytest-xdist==2.2.0
 pylint==2.6.0
 coverage-badge==1.0.1
 pytest-mock==3.1.0
+snakeviz=2.1.0
