@@ -3,11 +3,11 @@
 
 -  py-externalKey:
     from: std.std.projectConfig
-    import: getInitialScope
-    name: initialScope
+    import: getRules
+    name: rules
 
 
 -  py-externalKey:
     from: std.std.projectConfig
-    import: getBuildExecutor
-    name: buildExecutor
+    import: getInitialScope
+    name: initialScope
