@@ -13,7 +13,7 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Project:
 	_DEFAULT_HANDLERS = {}
 
-	def __init__(self, projectF=None, source=None, this=None):
+	def __init__(self, source=None, this=None):
 		self._head = {
 			'handlers': copy.copy(self._DEFAULT_HANDLERS)
 		}
@@ -25,19 +25,6 @@ class Project:
 						'key': 'this',
 						'value': this
 					}
-				}
-			])
-
-		if projectF is not None:
-			self.processSource([
-				{
-					'setKey': {
-						'key': 'projectF',
-						'value': projectF
-					}
-				},
-				{
-					'include': projectF
 				}
 			])
 

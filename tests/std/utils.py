@@ -8,13 +8,13 @@ class AbstractExecute:
 	def __init__(self):
 		self.isParsed = False
 		self.isExecuted = False
-		self._project = Project(self._PROJECT_NAME)
+		self._project = Project(source=[{'include': self._PROJECT_NAME}])
 
 	def flush(self):
 		self.isParsed = False
 		self.isExecuted = False
 		buildScope = self.scope
-		self._project = Project(self._PROJECT_NAME)
+		self._project = Project(source=[{'include': self._PROJECT_NAME}])
 		self._project['buildScope'] = buildScope
 
 	@property

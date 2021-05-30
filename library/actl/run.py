@@ -6,39 +6,32 @@ import actl
 
 
 def main(projectF=None, mainF=None, source=None):
-	if projectF is not None:
+	if projectF is None:
 		if mainF is None:
-			project = actl.Project(projectF=projectF)
+			projectF = 'std/repl'
 		else:
-			project = actl.Project(source=[
-				{
-					'include': projectF
-				},
-				{
-					'setKey': {
-						'key': 'mainF',
-						'value': mainF
-					}
+			projectF = 'std'
+
+	projectSource = [{'include': projectF}]
+
+	if mainF is not None:
+		projectSource = [
+			*projectSource,
+			{
+				'setKey': {
+					'key': 'mainF',
+					'value': mainF
 				}
-			])
-	elif mainF is not None:
-		project = actl.Project(source=[
-				{
-					'include': 'std/base'
-				},
-				{
-					'setKey': {
-						'key': 'mainF',
-						'value': mainF
-					}
-				}
-			])
-	else:
-		project = actl.Project(projectF='std/repl')
+			}
+		]
 
 	if source is not None:
-		project.processSource(source)
+		projectSource = [
+			*projectSource,
+			*source
+		]
 
+	project = actl.Project(source=projectSource)
 	project['build']()
 
 
