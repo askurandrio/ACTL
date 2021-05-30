@@ -35,7 +35,7 @@ def test_simple_while(execute):
 		opcodes.VARIABLE(name='_tmpVar1_2')
 	)
 
-	assert not AToPy(execute.executed.scope['_'])
+	assert execute.executed
 	assert cond.call_count == 2
 	print_.assert_called_once_with(1)
 
@@ -67,6 +67,6 @@ def test_whileWithFullCodeBlock(execute):
 		opcodes.VARIABLE(name='_tmpVar1_2')
 	)
 
-	assert not AToPy(execute.executed.scope['_'])
+	assert execute.executed
 	assert cond.call_count == 2
 	print_.assert_called_once_with(1)

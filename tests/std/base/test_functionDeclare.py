@@ -28,7 +28,7 @@ def test_simpleFunctionDeclare(execute):
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='f', args=[]),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) is None
+	assert AToPy(execute.executed.scope['_tmpVar1']) is None
 	mock.assert_called_once_with()
 
 
@@ -54,7 +54,7 @@ def test_declareMultiLineFunction(execute):
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='f', args=[]),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) is None
+	assert AToPy(execute.executed.scope['_tmpVar1']) is None
 	mock.assert_called_once_with(1)
 
 
@@ -80,7 +80,7 @@ def test_declareFunctionWithArg(execute):
 		opcodes.VARIABLE(name='_tmpVar2')
 	]
 
-	assert AToPy(execute.executed.scope['_']) is None
+	assert AToPy(execute.executed.scope['_tmpVar2']) is None
 	mock.assert_called_once_with(1)
 
 

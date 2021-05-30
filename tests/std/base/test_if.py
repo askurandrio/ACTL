@@ -50,7 +50,7 @@ def test_ifFalse(execute):
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 	)
 
-	assert not AToPy(execute.executed.scope['_'])
+	assert 'a' not in execute.executed.scope
 
 
 def test_ifElif(execute):

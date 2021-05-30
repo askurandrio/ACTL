@@ -16,7 +16,7 @@ def test_pointOperator(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
 
-	assert execute.executed.scope['_'] == execute.scope['print'].getAttribute('__call__')
+	assert execute.executed.scope['_tmpVar1'] == execute.scope['print'].getAttribute('__call__')
 
 
 def test_add(execute):
@@ -30,7 +30,7 @@ def test_add(execute):
 	]
 
 
-	assert execute.executed.scope['_'] == Number.call('3')
+	assert execute.executed.scope['_tmpVar3'] == Number.call('3')
 
 
 def test_setAddResult(execute):

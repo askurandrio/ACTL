@@ -12,7 +12,7 @@ def test_varWithEndLine(execute):
 	execute('var\n')
 
 	assert execute.parsed.code == [opcodes.VARIABLE(name='var')]
-	assert execute.executed.scope['_'] == one
+	assert execute.executed
 
 
 def test_setVariable(execute):

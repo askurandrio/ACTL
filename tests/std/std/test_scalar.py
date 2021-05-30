@@ -14,7 +14,7 @@ def test_emptyVector(execute):
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	vector = execute.executed.scope['_']
+	vector = execute.executed.scope['_tmpVar1']
 	assert vector.getAttribute('__class__') is execute.scope['Vector']
 
 
@@ -28,5 +28,5 @@ def test_vectorWithNumber(execute):
 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar2', args=['_tmpVar4']),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	vector = execute.executed.scope['_']
+	vector = execute.executed.scope['_tmpVar1']
 	assert vector.getAttribute('__class__') is execute.scope['Vector']

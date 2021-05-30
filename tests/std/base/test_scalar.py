@@ -14,7 +14,7 @@ def test_var(execute):
 	assert execute.parsed.code == [
 		opcodes.VARIABLE(name='var')
 	]
-	assert execute.executed.scope['_'] == one
+	assert execute.executed
 
 
 def test_floatNumber(execute):
@@ -26,7 +26,7 @@ def test_floatNumber(execute):
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) == 1.1
+	assert AToPy(execute.executed.scope['_tmpVar1']) == 1.1
 
 
 def test_negativeNumber(execute):
@@ -38,4 +38,4 @@ def test_negativeNumber(execute):
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) == -1
+	assert AToPy(execute.executed.scope['_tmpVar1']) == -1

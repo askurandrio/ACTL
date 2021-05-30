@@ -4,7 +4,7 @@ from std.base.objects import Function, class_ as stdClass
 
 
 class Executor:
-	HANDLERS = {}
+	_HANDLERS = {}
 
 	def __init__(self, code, scope):
 		self.scope = scope
@@ -24,7 +24,7 @@ class Executor:
 
 	def _executeOpcode(self, opcode):
 		try:
-			handler = self.HANDLERS[type(opcode)]
+			handler = self.getHandlerFor(type(opcode))
 		except KeyError:
 			error = KeyError(f'Opcode<"{opcode}"> is not expected')
 			self.frames[-1].throw(error)
@@ -40,8 +40,21 @@ class Executor:
 	@classmethod
 	def addHandler(cls, opcode):
 		def decorator(handler):
-			cls.HANDLERS[opcode] = handler
+			cls._HANDLERS[opcode] = handler
 		return decorator
+
+	@classmethod
+	def getHandlerFor(cls, opcodeType):
+		for parent in cls.__mro__:
+			if not hasattr(parent, '_HANDLERS'):
+				continue
+
+			try:
+				return parent._HANDLERS[opcodeType]
+			except KeyError:
+				pass
+
+		raise KeyError(f'opcodeType<{opcodeType}> is not expected')
 
 
 class _Frame:
@@ -110,8 +123,10 @@ def _(executor, opcode):
 			class_,
 			*class_.getAttribute('__parents__')
 		]:
-			if parent in Executor.HANDLERS:
-				return Executor.HANDLERS[parent]
+			try:
+				return executor.getHandlerFor(parent)
+			except KeyError:
+				pass
 
 		raise RuntimeError(f'Handler for {opcode} not found')
 
@@ -120,7 +135,7 @@ def _(executor, opcode):
 
 @Executor.addHandler(opcodes.VARIABLE)
 def _(executor, opcode):
-	executor.scope['_'] = executor.scope[opcode.name]
+	pass
 
 
 @Executor.addHandler(opcodes.SET_VARIABLE)
@@ -201,7 +216,7 @@ def _(executor, opcode):
 def _(executor, opcode):
 	while True:
 		yield from opcode.getAttribute('conditionFrame')
-		res = Bool.call(executor.scope['_'])
+		res = Bool.call(executor.scope[opcode.getAttribute('conditionFrame')[-1].name])
 		if not AToPy(res):
 			break
 
@@ -224,7 +239,7 @@ def _executeFunction(executor, opcode):
 def _(executor, opcode):
 	for conditionFrame, code in opcode.getAttribute('conditions'):
 		yield from conditionFrame
-		res = executor.scope['_']
+		res = executor.scope[conditionFrame[-1].name]
 		res = Bool.call(res)
 		if AToPy(res):
 			yield from code

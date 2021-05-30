@@ -16,7 +16,7 @@ def test_call(execute, testF):
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='testF'),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
 	testF.assert_called_once_with()
 
 
@@ -30,7 +30,7 @@ def test_callWithArg(execute, testF):
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='testF', args=['arg']),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
 	testF.assert_called_once_with(arg)
 
 
@@ -44,7 +44,7 @@ def test_callWithString(execute, testF):
 		),
 		opcodes.VARIABLE(name='_tmpVar2')
 	]
-	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	assert AToPy(execute.executed.scope['_tmpVar2']) == testF.return_value
 	testF.assert_called_once_with('s')
 
 
@@ -62,7 +62,7 @@ def test_callWithTwoArg(execute, testF):
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
 	testF.assert_called_once_with(first, second)
 
 
@@ -78,7 +78,7 @@ def test_callWithNamedArg(execute, testF):
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
 	testF.assert_called_once_with(argName=arg)
 
 
@@ -96,7 +96,7 @@ def test_callWithArgAndNamedArg(execute, testF):
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
-	assert AToPy(execute.executed.scope['_']) == testF.return_value
+	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
 	testF.assert_called_once_with(first, secondName=second)
 
 
