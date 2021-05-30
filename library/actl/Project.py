@@ -1,4 +1,3 @@
-
 import os
 import copy
 import logging
@@ -82,6 +81,9 @@ class Project:
 			base = base[key]
 		base[keys[-1]] = value
 
+	def __delitem__(self, key):
+		del self._head[key]
+
 	@classmethod
 	def addDefaultHandler(cls, name):
 		def decorator(func):
@@ -109,7 +111,12 @@ def _(project, arg):
 
 @Project.addDefaultHandler('include')
 def _(project, projectF):
-	fileName = os.path.join(DIR_LIBRARY, projectF, f'{os.path.basename(projectF)}.yaml')
+	fileName = os.path.join(DIR_LIBRARY, projectF)
+
+	while os.path.isdir(fileName):
+		fileName = os.path.join(fileName, os.path.basename(projectF))
+
+	fileName = fileName + '.yaml'
 	with open(fileName) as file:
 		source = yaml.load(file, Loader=yaml.SafeLoader)
 	subProject = Project(source=source, this=project.this)
