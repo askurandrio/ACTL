@@ -1,3 +1,6 @@
+ORDER_KEY = 1
+
+
 def test_VectorAppend(execute):
 	execute(
 		'v = Vector()\n'

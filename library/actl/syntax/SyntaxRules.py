@@ -2,8 +2,13 @@ from .SyntaxRule import SyntaxRule
 
 
 class SyntaxRules:
-	def __init__(self, rules=None):
-		self._rules = [] if rules is None else rules
+	def __init__(self, from_=None):
+		if from_ is None:
+			rules = []
+		else:
+			rules = list(from_)
+
+		self._rules = rules
 
 	def match(self, parser, buff):
 		for rule in self._rules:
