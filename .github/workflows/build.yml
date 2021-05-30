@@ -13,10 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0 
-  
+          fetch-depth: 0
+
       - name: set-up
         run: python3.8 -m pip install -r ./etc/requirements.txt
 
       - name: pytest
         run: PYTHONPATH=./library python3.8 -m pytest ./tests -x -vv --cov=library --cov-report term-missing --cov-branch --no-cov-on-fail
+
+      - name: pylint-for-impove
+        run: PYTHONPATH=./library pylint library tests || true
