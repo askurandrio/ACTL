@@ -21,10 +21,10 @@ class DeclaredClass:
 				f'Attribute<{name}> already declared as {getattr(self, name)}'
 			setattr(self, name, value)
 
-		for name, value in self._defaults.items():
+		for name, valueFactory in self._defaults.items():
 			if hasattr(self, name):
 				continue
-			setattr(self, name, value)
+			setattr(self, name, valueFactory())
 
 		for name in self.__slots__:
 			assert hasattr(self, name), \
@@ -32,6 +32,9 @@ class DeclaredClass:
 
 	def _getAttributes(self):
 		return {key: getattr(self, key) for key in self.__slots__}
+
+	def __hash__(self):
+		return hash(str(self))
 
 	def __eq__(self, other):
 		if type(self) != type(other):  # pylint: disable=unidiomatic-typecheck
@@ -57,6 +60,13 @@ class DeclaredClass:
 	@classmethod
 	def create(cls, name, *attributes, **defaults):
 		attributes = cls.__slots__ + attributes + tuple(defaults)
-		defaults = {**cls._defaults, **defaults}
+		defaults = {
+			**cls._defaults,
+			**{
+				key: (lambda value=value: value)
+				for key, value in
+				defaults.items()
+			}
+		}
 		class_ = type(name, (cls,), {'__slots__': attributes, '_defaults': defaults})
 		return class_

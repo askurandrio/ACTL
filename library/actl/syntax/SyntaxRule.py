@@ -51,13 +51,13 @@ class SyntaxRule:
 
 	@classmethod
 	def wrap(cls, *template, manualApply=False, useParser=False):
-		def decorator(func):
-			if isclass(func):
-				class_ = func
-
+		def decorator(userFunc):
+			if isclass(userFunc):
 				def func(*args, **kwargs):
-					instance = class_(*args, **kwargs)
+					instance = userFunc(*args, **kwargs)
 					return instance.parse()
+			else:
+				func = userFunc
 
 			return cls(Template(*template), func, manualApply, useParser)
 

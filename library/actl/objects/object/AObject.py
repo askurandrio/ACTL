@@ -10,6 +10,7 @@ sys.setrecursionlimit(500)
 
 class AObject:
 	Function = None
+	Object = None
 
 	def __init__(self, head):
 		self._head = head

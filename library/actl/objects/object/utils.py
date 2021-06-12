@@ -4,8 +4,8 @@ from actl.objects.object.class_ import class_
 
 
 def makeClass(name, parents=()):
-	if makeClass.Object:
-		parents = (*parents, makeClass.Object)
+	if AObject.Object:
+		parents = (*parents, AObject.Object)
 
 	return AObject({
 		'__name__': name,
@@ -13,9 +13,6 @@ def makeClass(name, parents=()):
 		'__parents__': parents,
 		'__self__': {}
 	})
-
-
-makeClass.Object = None
 
 
 def addMethod(cls, name):

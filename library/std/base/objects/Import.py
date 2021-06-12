@@ -15,21 +15,22 @@ def _Import__call(cls, fromName=None, importName=None):
 	if fromName is None:
 		return Module.call(name=importName)
 
-	moduleResult = cls.call(importName=fromName)
+	packageResult = cls.call(importName=fromName)
 
-	@moduleResult.then
-	def result(module):
+	@packageResult.then
+	def result(package):
 		@Result.fromExecute
 		def result(executor):
-			nonlocal module
+			module = package
 
 			if '.' in fromName:
 				for moduleName in fromName.split('.')[1:]:
 					module = module.getAttribute(moduleName)
 
 			for key, value in module.getAttribute('scope').getDiff():
-				if (importName != '*') and (key != importName):
-					continue
+				if importName != '*':
+					if key != importName:
+						continue
 
 				executor.scope[key] = value
 

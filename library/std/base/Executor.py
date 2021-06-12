@@ -148,7 +148,7 @@ def _SET_VARIABLE__handler(executor, opcode):
 
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
 def _CALL_FUNCTION_STATIC__handler(executor, opcode):
-	assert opcode.typeb == '('
+	assert opcode.typeb == '(', breakpoint()
 
 	result = opcode.function(*opcode.args, **opcode.kwargs)
 

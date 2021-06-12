@@ -6,7 +6,9 @@ from actl.opcodes import VARIABLE
 
 
 class Parser:
-	def __init__(self, scope, rules, buff, endLine=Token('\n'), makeTmpVar=None):
+	def __init__(
+		self, scope, rules, buff, endLine=Token('\n'), makeTmpVar=None
+	):
 		self.scope = scope
 		self.rules = rules
 		self.buff = buff

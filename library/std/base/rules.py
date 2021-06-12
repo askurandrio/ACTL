@@ -25,6 +25,8 @@ class _ApplySyntaxObjectSyntaxRule:
 				if apply:
 					return apply
 
+		return None
+
 	@staticmethod
 	def _getSyntaxObjects(parser, inp):
 		scope = parser.scope

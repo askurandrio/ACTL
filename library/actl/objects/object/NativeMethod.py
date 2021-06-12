@@ -14,9 +14,7 @@ class NativeMethod(AObject):
 
 	@property
 	def class_(self):
-		from actl.objects.object import Object
-
-		return Object
+		return AObject.Object
 
 	@property
 	def get(self):
@@ -33,9 +31,7 @@ class NativeFunction(AObject):
 
 	@property
 	def class_(self):
-		from actl.objects.object import Object
-
-		return Object
+		return AObject.Object
 
 	@property
 	def call(self):

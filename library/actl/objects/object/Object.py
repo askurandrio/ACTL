@@ -5,7 +5,7 @@ from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
 
 
 Object = makeClass('Object')
-makeClass.Object = Object
+AObject.Object = Object
 
 
 @addMethod(Object, '__getAttribute__')
