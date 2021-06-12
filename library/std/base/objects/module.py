@@ -1,6 +1,6 @@
 import os
 
-from actl import DIR_LIBRARY
+from actl import DIR_LIBRARY, ResolveException, ReturnException
 from actl.Buffer import Buffer
 from actl.objects import addMethod, addMethodToClass, makeClass, AAttributeNotFound, AToPy, Result
 from actl.opcodes import RETURN
@@ -41,12 +41,9 @@ def _Module__init(self, path):
 	isPackage = os.path.isdir(path)
 	if not isPackage:
 		path = f'{path}.a'
-	moduleScope = None
 
 	@Result.fromExecute
-	def resultExecuteModule(executor):
-		nonlocal moduleScope
-
+	def result(executor):
 		project = AToPy(executor.scope['__project__'])
 		moduleScope = project['initialScope'].child()
 		executor.scope, prevScope = moduleScope, executor.scope
@@ -58,14 +55,14 @@ def _Module__init(self, path):
 
 		try:
 			yield RETURN('None')
-		except GeneratorExit:
-			executor.scope = prevScope
+		except ResolveException:
+			pass
 
-	@resultExecuteModule.then
-	def result(_):
+		executor.scope = prevScope
 		self.setAttribute('scope', moduleScope)
 		self.setAttribute('path', path)
-		return self
+
+		raise ReturnException(self)
 
 	return result
 

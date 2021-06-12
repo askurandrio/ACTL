@@ -1,8 +1,8 @@
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, Parsed, Many, Or, End
-from actl.objects import addMethodToClass, makeClass, Result
-from actl.utils import asDecorator
+from actl.objects import addMethodToClass, makeClass
+from actl.utils import ResolveException, asDecorator, ReturnException
 from std.base.objects.module import Module
 
 
@@ -17,26 +17,25 @@ def _Import__call(cls, fromName=None, importName=None):
 
 	packageResult = cls.call(importName=fromName)
 
-	@packageResult.then
-	def result(package):
-		@Result.fromExecute
-		def result(executor):
-			module = package
+	@packageResult.thenExecute
+	def result(executor, module):
+		if '.' in fromName:
+			for moduleName in fromName.split('.')[1:]:
+				module = module.getAttribute(moduleName)
 
-			if '.' in fromName:
-				for moduleName in fromName.split('.')[1:]:
-					module = module.getAttribute(moduleName)
+		for key, value in module.getAttribute('scope').getDiff():
+			if importName != '*':
+				if key != importName:
+					continue
 
-			for key, value in module.getAttribute('scope').getDiff():
-				if importName != '*':
-					if key != importName:
-						continue
+			executor.scope[key] = value
 
-				executor.scope[key] = value
-
+		try:
 			yield RETURN('None')
+		except ResolveException:
+			pass
 
-		return result
+		raise ReturnException(module)
 
 	return result
 

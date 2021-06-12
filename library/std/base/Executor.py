@@ -1,6 +1,5 @@
-from actl import opcodes
-from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass
-from actl.objects.object.Result import Result
+from actl import opcodes, ResolveException, ReturnException
+from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass, Result
 from std.base.objects import Function, class_ as stdClass
 
 
@@ -84,19 +83,30 @@ class _ResultFrame(_Frame):
 		self._executor = executor
 		self._finalResult = result
 		self._result = result.getParent()
+		self._opcode = None
 		super().__init__(self._result.getExecute()(self._executor))
 
-	def return_(self, returnValue):
-		self._head.close()
+	def return_(self, resolveValue):
+		try:
+			self._opcode = self._head.throw(ResolveException(resolveValue))
+		except ReturnException as ex:
+			self._return(ex.returnValue)
 
+	def _return(self, returnValue):
+		self._head.close()
 		self._result = self._result.resolve(returnValue)
 		if self._result is None:
 			self._head = iter('')
 			assert self._executor.frames.pop(-1) == self
-		else:
-			self._head = self._result.getExecute()(self._executor)
+			return
+
+		self._head = self._result.getExecute()(self._executor)
 
 	def __next__(self):
+		if self._opcode is not None:
+			opcode, self._opcode = self._opcode, None
+			return opcode
+
 		try:
 			return super().__next__()
 		except StopIteration:

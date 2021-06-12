@@ -49,6 +49,17 @@ class Result:
 
 		return result
 
+	def thenExecute(self, executeFunc):
+		@self.then
+		def result(obj):
+			@Result.fromExecute
+			def resultExecution(executor):
+				return executeFunc(executor, obj)
+
+			return resultExecution
+
+		return result
+
 	def getExecute(self):
 		_ResultObj.checkEx(self._obj)
 		return _ResultObj.getExecute(self._obj)

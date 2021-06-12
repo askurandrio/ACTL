@@ -2,7 +2,7 @@ from itertools import zip_longest
 from actl import objects
 from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
-from actl import asDecorator
+from actl import asDecorator, ResolveException, ReturnException
 from std.base.rules import CodeBlock
 
 
@@ -30,8 +30,9 @@ def _Function__call(self, *args):
 		try:
 			for opcode in body:
 				yield opcode
-		except GeneratorExit:
+		except ResolveException as ex:
 			executor.scope = prevScope
+			raise ReturnException(ex.resolveValue) from ex
 
 	return result
 
