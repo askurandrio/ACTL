@@ -1,7 +1,7 @@
 from actl.objects.AToPy import AToPy
 from actl.objects.object import Object, class_
 from actl.objects.String import String
-from actl.objects.object.utils import addMethod, addMethodToClass
+from actl.objects.object.utils import addMethod
 
 
 @addMethod(String, AToPy)

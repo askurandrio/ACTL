@@ -2,10 +2,10 @@ default = object()
 
 
 def asDecorator(func):
-   def decorator(functionForDecorate):
-      return func(functionForDecorate)
+	def decorator(functionForDecorate):
+		return func(functionForDecorate)
 
-   return decorator
+	return decorator
 
 
 class DeclaredClass:
@@ -43,11 +43,11 @@ class DeclaredClass:
 		attributesToStr = ', '.join(
 			repr(attributes[key])
 			for key in self.__slots__
-			if key not in self._defaults.keys()
+			if key not in self._defaults
 		)
 		notDefaultAttributesToStr = ', '.join(
 			f'{key}={attributes[key]!r}'
-			for key in self._defaults.keys()
+			for key in self._defaults
 			if self._defaults[key] != attributes[key]
 		)
 		if notDefaultAttributesToStr:
@@ -56,7 +56,7 @@ class DeclaredClass:
 
 	@classmethod
 	def create(cls, name, *attributes, **defaults):
-		attributes = cls.__slots__ + attributes + tuple(defaults.keys())
+		attributes = cls.__slots__ + attributes + tuple(defaults)
 		defaults = {**cls._defaults, **defaults}
 		class_ = type(name, (cls,), {'__slots__': attributes, '_defaults': defaults})
 		return class_

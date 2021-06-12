@@ -1,5 +1,4 @@
 # pylint: disable=arguments-differ, useless-super-delegation
-from actl.objects.object.Result import Result
 from actl.objects.object.AObject import AObject
 
 

@@ -1,3 +1,5 @@
+# pylint: disable=protected-access
+
 import weakref
 from actl.utils import default
 

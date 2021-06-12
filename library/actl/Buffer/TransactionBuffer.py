@@ -57,6 +57,8 @@ class TransactionBuffer:
 				return realIndex
 			shiftIndex += 1
 
+		raise RuntimeError('Unexpected branch')
+
 	def __repr__(self):
 		return f'{type(self).__name__}({self._origin[self._shiftIndex(0):self._shiftIndex(10)]})'
 

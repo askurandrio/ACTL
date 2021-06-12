@@ -1,10 +1,8 @@
 from itertools import zip_longest
 from actl import objects
-from actl import opcodes
 from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from actl import asDecorator
-from actl.syntax.BreakPoint import BreakPoint
 from std.base.rules import CodeBlock
 
 

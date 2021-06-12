@@ -41,7 +41,7 @@ def getBuild(project):
 		while project.this['_build']:
 			try:
 				project.this['std/base', 'build']()
-			except Exception:
+			except Exception:  # pylint: disable=broad-except
 				if '_debug' in project.this['buildScope']:
 					pdb.post_mortem()
 				if project.this['_catchEx']:

@@ -1,5 +1,6 @@
 from actl import opcodes
-from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass, Result
+from actl.objects import While, Bool, If, AToPy, Object, class_ as actlClass
+from actl.objects.object.Result import Result
 from std.base.objects import Function, class_ as stdClass
 
 
@@ -106,7 +107,7 @@ class _ResultFrame(_Frame):
 	def wrap(cls, executor, dst, result):
 		if not isinstance(result, Result):
 			executor.scope[dst] = result
-			return
+			return None
 
 		@result.then
 		def storeResult(res):
@@ -134,7 +135,7 @@ def _objectHandler(executor, opcode):
 
 
 @Executor.addHandler(opcodes.VARIABLE)
-def _VARIABLE__handler(executor, opcode):
+def _VARIABLE__handler(_, _1):
 	pass
 
 

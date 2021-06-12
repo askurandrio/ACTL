@@ -1,5 +1,5 @@
 from actl import opcodes
-from actl.objects import Bool, Number
+from actl.objects import Number
 
 
 ORDER_KEY = 2

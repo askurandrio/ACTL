@@ -1,4 +1,4 @@
-from actl.objects import makeClass, class_ as actlClass, addMethodToClass, Result
+from actl.objects import makeClass, class_ as actlClass, addMethodToClass
 from actl.opcodes import VARIABLE
 from actl.syntax import SyntaxRule, Value, Token, IsInstance
 from actl import asDecorator

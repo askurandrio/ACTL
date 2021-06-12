@@ -63,10 +63,10 @@ def End(parser, buff):
 
 	if parser in IS_APPLYING_END_DICT:
 		return Token('\n')(parser, buff)
-	else:
-		IS_APPLYING_END_DICT[parser] = True
 
-		try:
-			return parser.endLine(parser, buff)
-		finally:
-			del IS_APPLYING_END_DICT[parser]
+	IS_APPLYING_END_DICT[parser] = True
+
+	try:
+		return parser.endLine(parser, buff)
+	finally:
+		del IS_APPLYING_END_DICT[parser]

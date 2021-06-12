@@ -1,6 +1,5 @@
 from actl import opcodes
-from actl.objects import String, Number
-from actl.opcodes.opcodes import SET_VARIABLE
+from actl.objects import Number
 
 
 ORDER_KEY = 7

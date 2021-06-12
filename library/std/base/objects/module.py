@@ -1,4 +1,3 @@
-from logging import addLevelName
 import os
 
 from actl import DIR_LIBRARY
@@ -80,11 +79,11 @@ def _Module__import_(self, name):
 		packageResult = self.getAttribute('import_').call(packageName)
 
 		@packageResult.then
-		def result(_):
+		def packageImportResult(_):
 			package = self.getAttribute(packageName)
 			return package.getAttribute('import_').call(name)
 
-		return result
+		return packageImportResult
 
 	path = str(self.getAttribute('path'))
 	path = os.path.join(path, name)

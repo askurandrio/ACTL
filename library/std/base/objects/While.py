@@ -1,5 +1,4 @@
 from actl import objects
-from actl.objects.object.utils import addMethod
 from actl.syntax import SyntaxRule, Value, Token, Parsed
 from actl.syntax.BufferRule import BufferRule
 from actl.utils import asDecorator

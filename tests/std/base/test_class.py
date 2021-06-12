@@ -1,7 +1,7 @@
-from unittest.mock import ANY, call
+from unittest.mock import ANY
 
 from actl import opcodes
-from actl.objects import Number, Signature, String, PyToA
+from actl.objects import Number, Signature, String
 from std.base.objects import class_, Function
 
 

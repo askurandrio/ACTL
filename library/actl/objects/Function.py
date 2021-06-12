@@ -1,4 +1,4 @@
-from actl.objects.object import makeClass, addMethod, NativeFunction, Result
+from actl.objects.object import makeClass, addMethod, NativeFunction
 from actl.objects.String import String
 
 

@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 from actl import opcodes
-from actl.objects import PyToA, AToPy, Number
+from actl.objects import PyToA, Number
 from std.base.objects import While
 
 

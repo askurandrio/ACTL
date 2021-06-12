@@ -3,7 +3,7 @@ from actl.Buffer import TransactionBuffer, Buffer
 from actl.objects import String, Number
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
-	BufferRule, Parsed, Not, BreakPoint, AbstractTemplate
+	BufferRule, Parsed, Not
 from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, \
 	CALL_OPERATOR, GET_ATTRIBUTE, SET_ATTRIBUTE
 

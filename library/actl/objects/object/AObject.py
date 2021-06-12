@@ -3,7 +3,6 @@ import sys
 from actl.utils import default
 from actl.objects.object.Result import Result
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
-from actl.opcodes.opcodes import RETURN
 
 
 sys.setrecursionlimit(500)
@@ -204,5 +203,5 @@ class AObject:
 
 			string = String.call(self)
 			return string.toPyString()
-		except Exception as ex:
+		except Exception as ex:  # pylint: disable=broad-except
 			return f'Error during convert<{id(self)}> to string: {ex}'

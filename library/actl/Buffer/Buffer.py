@@ -23,8 +23,8 @@ class Buffer:
 	def one(self):
 		try:
 			res, = self
-		except ValueError:
-			raise ValueError(f'len({self}) != 1')
+		except ValueError as ex:
+			raise ValueError(f'len({self}) != 1') from ex
 		return res
 
 	def pop(self, index=0):
