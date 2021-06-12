@@ -5,10 +5,11 @@
 
 ACTL this compiler A in C++
 
-1. while expression
-2. set expression
-3. function input
-4. String.split
+1. while expression - done
+2. set expression - done
+3. function input - done
+4. String.split - in progress
+    1. std.std.String
 5. unpacking args
 6. String -> Number
 7. function print
