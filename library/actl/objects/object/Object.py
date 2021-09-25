@@ -1,4 +1,3 @@
-from actl.objects.object.Result import Result
 from actl.objects.object.AObject import AObject
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
 from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
@@ -9,9 +8,9 @@ AObject.Object = Object
 
 
 @addMethod(Object, '__getAttribute__')
-def object__getAttribute(self, key):
+async def object__getAttribute(self, key):
 	try:
-		return self.lookupSpecialAttribute(key)
+		return await self.lookupSpecialAttribute(key)
 	except AAttributeIsNotSpecial(key).class_:
 		pass
 
@@ -25,13 +24,13 @@ def object__getAttribute(self, key):
 	except AAttributeNotFound(key).class_:
 		pass
 	else:
-		return self.bindAttribute(attribute)
+		return await self.bindAttribute(attribute)
 
 	raise AAttributeNotFound(key)
 
 
 @addMethod(Object, '__superGetAttribute__')
-def object__superGetAttribute(self, for_, key):
+async def object__superGetAttribute(self, for_, key):
 	class_ = self.class_
 	parents = class_.parents
 
@@ -46,22 +45,22 @@ def object__superGetAttribute(self, for_, key):
 		except KeyError:
 			pass
 		else:
-			return self.bindAttribute(attribute)
+			return await self.bindAttribute(attribute)
 
 	raise AAttributeNotFound(key)
 
 
 @addMethodToClass(Object, '__call__')
-def Object__call(self, *args, **kwargs):
-	assert not isinstance(self, Result)
+async def Object__call(self, *args, **kwargs):
+	assert isinstance(self, AObject)
 	instance = AObject({'__class__': self})
 
-	init = instance.getAttribute('__init__')
-	initResult = init.call(*args, **kwargs)
+	initMethod = await instance.getAttribute('__init__')
+	await initMethod.call(*args, **kwargs)
 
-	return Result.fromObj(instance).join(initResult)
+	return instance
 
 
 @addMethod(Object, '__init__')
-def object__init(_):
+async def object__init(_):
 	return None

@@ -5,16 +5,16 @@ def test_ObjectAsPyStr():
 	assert str(Object) == "class 'Object'"
 
 
-def test_objectAsPyStr():
-	assert str(Object.call()) == "Object<>"
+async def test_objectAsPyStr():
+	assert str(await Object.call()) == "Object<>"
 
 
-def test_recursiveObjectAsStr():
-	obj = Object.call()
+async def test_recursiveObjectAsStr():
+	obj = await Object.call()
 	obj.setAttribute('obj', obj)
 	assert str(obj) == 'Object<obj=↑...>'
 
 
-def test_strWhile():
+async def test_strWhile():
 	assert str(While) == "class 'While'"
-	assert str(While.call([])) == 'While<conditionFrame=[]>'
+	assert str(await While.call([])) == 'While<conditionFrame=[]>'

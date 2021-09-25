@@ -1,16 +1,14 @@
 from actl.objects.object import makeClass
-from actl.objects.object.utils import addMethodToClass
+from actl.objects.object.utils import addMethod
 
 
 While = makeClass('While')
 
 
-@addMethodToClass(While, '__call__')
-def _While__call(cls, conditionFrame, code=None):
-	resultSelf = cls.super_(While, '__call__').call()
-
-	resultSelf.setAttribute('conditionFrame', conditionFrame)
+@addMethod(While, '__init__')
+async def _While__init(self, conditionFrame, code=None):
+	self.setAttribute('conditionFrame', conditionFrame)
 	if code is not None:
-		resultSelf.setAttribute('code', code)
+		self.setAttribute('code', code)
 
-	return resultSelf
+	return self

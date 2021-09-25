@@ -1,7 +1,7 @@
 import sys
+import traceback
 
-from actl.utils import default
-from actl.objects.object.Result import Result
+from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
 
 
@@ -11,47 +11,47 @@ sys.setrecursionlimit(500)
 class AObject:
 	Function = None
 	Object = None
+	String = None
 
 	def __init__(self, head):
 		self._head = head
 
-	@property
-	def getAttribute(self):
-		getAttribute = self.lookupSpecialAttribute('__getAttribute__')
+	async def getAttribute(self, name):
+		try:
+			return await self.lookupSpecialAttribute(name)
+		except AAttributeIsNotSpecial(key=name).class_:
+			pass
 
-		return getAttribute.call
+		getAttribute = await self.getAttribute('__getAttribute__')
 
-	@property
-	def _getAttribute(self):
+		return await getAttribute.call(name)
+
+	async def _get_getAttribute(self):
 		try:
 			return self.lookupAttributeInHead('__getAttribute__')
 		except AAttributeNotFound('__getAttribute__').class_:
 			pass
 
 		getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
-		return self.bindAttribute(getAttribute)
+		return await self.bindAttribute(getAttribute)
 
-	@property
-	def get(self):
-		get = self.getAttribute('__get__')
+	async def get(self, instance):
+		get = await self.getAttribute('__get__')
 
-		return get.call
+		return await get.call(instance)
 
-	@property
-	def _superGetAttribute(self):
+	async def _get_superGetAttribute(self):
 		try:
 			return self.lookupAttributeInHead('__superGetAttribute__')
 		except AAttributeNotFound('__superGetAttribute__').class_:
 			pass
 
 		superGetAttribute = self.lookupAttributeInClsSelf('__superGetAttribute__')
-		return self.bindAttribute(superGetAttribute)
+		return await self.bindAttribute(superGetAttribute)
 
-	@property
-	def super_(self):
-		superGetAttribute = self.lookupSpecialAttribute('__superGetAttribute__')
-
-		return superGetAttribute.call
+	async def super_(self, for_, name):
+		superGetAttribute = await self.lookupSpecialAttribute('__superGetAttribute__')
+		return await superGetAttribute.call(for_, name)
 
 	def lookupAttributeInClsSelf(self, key):
 		class_ = self.class_
@@ -77,19 +77,18 @@ class AObject:
 	def setAttribute(self, key, value):
 		self._head[key] = value
 
-	def hasAttribute(self, key):
+	async def hasAttribute(self, key):
 		try:
-			self.getAttribute(key)
+			await self.getAttribute(key)
 		except AAttributeNotFound(key).class_:
 			return False
 		else:
 			return True
 
-	@property
-	def call(self):
-		call = self.getAttribute('__call__')
+	async def call(self, *args, **kwargs):
+		call = await self.getAttribute('__call__')
 
-		return call.call
+		return await call.call(*args, **kwargs)
 
 	@property
 	def class_(self):
@@ -103,7 +102,7 @@ class AObject:
 	def parents(self):
 		return self.lookupAttributeInHead('__parents__')
 
-	def lookupSpecialAttribute(self, key):
+	async def lookupSpecialAttribute(self, key):
 		if key == '__class__':
 			return self.class_
 
@@ -114,60 +113,48 @@ class AObject:
 			return self.parents
 
 		if key == '__getAttribute__':
-			return self._getAttribute
+			return await self._get_getAttribute()
 
 		if key == '__superGetAttribute__':
-			return self._superGetAttribute
+			return await self._get_superGetAttribute()
 
 		raise AAttributeIsNotSpecial(key)
 
-	def isinstance_(self, cls):
-		if self.class_ == cls:
+	def isinstance_(self, instance):
+		if instance.class_ == self:
 			return True
 
-		for parent in self.class_.parents:
-			if parent == cls:
+		for parent in instance.class_.parents:
+			if parent == self:
 				return True
 
 		return False
 
-	def bindAttribute(self, attribute):
+	async def bindAttribute(self, attribute):
 		if not isinstance(attribute, AObject):
 			return attribute
 
-		try:
-			resultAttributeGet = Result.fromObj(attribute.get)
-		except AAttributeNotFound as ex:
-			resultAttributeGet = Result.fromEx(ex)
+		if await attribute.hasAttribute('__get__'):
+			return await attribute.get(self)
 
-		@resultAttributeGet.finally_
-		def result(obj=default, ex=default):
-			if ex is not default:
-				if not isinstance(ex, AAttributeNotFound('__get__').class_):
-					raise ex
+		if self.Function.isinstance_(attribute):
+			applyFunc = await attribute.getAttribute('apply')
+			return await applyFunc.call(self)
 
-				if attribute.isinstance_(self.Function):
-					applyFunc = attribute.getAttribute('apply').call
-					return applyFunc(self)
+		return attribute
 
-				return attribute
-
-			return obj.call(self)
-
-		return result
-
-	def toPyString(self):
+	async def toPyString(self):
 		if not hasattr(AObject, '_stringSeen'):
 			AObject._stringSeen = set()
 
 			try:
-				return self.toPyString()
+				return await self.toPyString()
 			finally:
 				del AObject._stringSeen
 
 		AObject._stringSeen.add(id(self))
 
-		name = self.getAttribute('__class__').getAttribute('__name__')
+		name = await self.class_.getAttribute('__name__')
 		selfToStr = f'{name}<'
 
 		for key, value in self._head.items():
@@ -200,9 +187,9 @@ class AObject:
 
 	def __str__(self):
 		try:
-			from actl.objects.String import String  # pylint: disable=cyclic-import, import-outside-toplevel
-
-			string = String.call(self)
-			return string.toPyString()
+			string = executeSyncCoroutine(self.String.call(self))
+			pyString = executeSyncCoroutine(string.toPyString())
+			return pyString
 		except Exception as ex:  # pylint: disable=broad-except
+			traceback.print_exc()
 			return f'Error during convert<{id(self)}> to string: {ex}'

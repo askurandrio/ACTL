@@ -8,14 +8,14 @@ from std.base.objects import class_, Function
 ORDER_KEY = 9
 
 
-def test_simpleClassDeclare(execute):
+async def test_simpleClassDeclare(execute):
 	execute(
 		'class T:\n'
 		'    a = 1'
 	)
 
 	assert execute.parsed.code == [
-		class_.call(
+		await class_.call(
 			'T',
 			{
 				'body': (
@@ -26,15 +26,15 @@ def test_simpleClassDeclare(execute):
 		)
 	]
 
-	assert execute.executed.scope['T'] == class_.call(
+	assert execute.executed.scope['T'] == await class_.call(
 		'T',
 		{
-			'a': Number.call(1)
+			'a': await Number.call(1)
 		}
 	)
 
 
-def test_classWithInitMethod(execute):
+async def test_classWithInitMethod(execute):
 	execute(
 		'class C:\n'
 		'    fun __init__(self, a):\n'
@@ -43,13 +43,13 @@ def test_classWithInitMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		class_.call(
+		await class_.call(
 			'C',
 			{
 				'body': (
-					Function.call(
+					await Function.call(
 						'__init__',
-						Signature.call(['self', 'a']),
+						await Signature.call(['self', 'a']),
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.RETURN('None')
@@ -64,13 +64,13 @@ def test_classWithInitMethod(execute):
 		opcodes.SET_VARIABLE('c', '_tmpVar2')
 	]
 
-	assert execute.executed.scope['C'] == class_.call(
+	assert execute.executed.scope['C'] == await class_.call(
 		'C',
 		{
 			'__self__': {
-				'__init__': Function.call(
+				'__init__': await Function.call(
 					'__init__',
-					Signature.call(['self', 'a']),
+					await Signature.call(['self', 'a']),
 					(
 						opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 						opcodes.RETURN('None')
@@ -80,10 +80,10 @@ def test_classWithInitMethod(execute):
 			}
 		}
 	)
-	assert str(String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
+	assert str(await String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
 
 
-def test_classWithMethod(execute):
+async def test_classWithMethod(execute):
 	execute(
 		'class C:\n'
 		'    fun method(self, a):\n'
@@ -95,13 +95,13 @@ def test_classWithMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		class_.call(
+		await class_.call(
 			'C',
 			{
 				'body': (
-					Function.call(
+					await Function.call(
 						'method',
-						Signature.call(['self', 'a']),
+						await Signature.call(['self', 'a']),
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
@@ -123,11 +123,11 @@ def test_classWithMethod(execute):
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]
 
-	assert str(String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
-	assert execute.executed.scope['tMethodResult'] == Number.call('3')
+	assert str(await String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
+	assert execute.executed.scope['tMethodResult'] == await Number.call('3')
 
 
-def test_classWithTwoMethod(execute):
+async def test_classWithTwoMethod(execute):
 	execute(
 		'class C:\n'
 		'    fun methodA(self, a):\n'
@@ -144,13 +144,13 @@ def test_classWithTwoMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		class_.call(
+		await class_.call(
 			'C',
 			{
 				'body': (
-					Function.call(
+					await Function.call(
 						'methodA',
-						Signature.call(['self', 'a']),
+						await Signature.call(['self', 'a']),
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
@@ -161,9 +161,9 @@ def test_classWithTwoMethod(execute):
 						),
 						None
 					),
-					Function.call(
+					await Function.call(
 						'methodB',
-						Signature.call(['self', 'b']),
+						await Signature.call(['self', 'b']),
 						(
 							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, args=['1']),
 							opcodes.CALL_OPERATOR('_tmpVar2_2', 'b', '+', '_tmpVar2_1'),

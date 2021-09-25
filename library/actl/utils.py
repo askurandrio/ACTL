@@ -70,15 +70,3 @@ class DeclaredClass:
 		}
 		class_ = type(name, (cls,), {'__slots__': attributes, '_defaults': defaults})
 		return class_
-
-
-class ResolveException(Exception):
-	def __init__(self, resolveValue):
-		self.resolveValue = resolveValue
-		super().__init__(str(resolveValue))
-
-
-class ReturnException(Exception):
-	def __init__(self, returnValue):
-		self.returnValue = returnValue
-		super().__init__(str(returnValue))

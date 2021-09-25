@@ -49,7 +49,7 @@ def getInitialScope(project):
 		('lt', 'lt')
 	):
 		pyVar = eval(pyName)
-		var = objects.PyToA.call(pyVar)
+		var = objects.executeSyncCoroutine(objects.PyToA.call(pyVar))
 		scope[varName] = var
 
 	return Scope(scope)

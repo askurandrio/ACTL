@@ -11,7 +11,7 @@ from actl.opcodes import opcodes
 ORDER_KEY = 5
 
 
-def test_call(execute, testF):
+async def test_call(execute, testF):
 	execute('testF()')
 
 	assert execute.parsed.code == [
@@ -22,9 +22,9 @@ def test_call(execute, testF):
 	testF.assert_called_once_with()
 
 
-def test_callWithArg(execute, testF):
+async def test_callWithArg(execute, testF):
 	arg = Mock()
-	execute.scope['arg'] = PyToA.call(arg)
+	execute.scope['arg'] = await PyToA.call(arg)
 
 	execute('testF(arg)')
 
@@ -36,7 +36,7 @@ def test_callWithArg(execute, testF):
 	testF.assert_called_once_with(arg)
 
 
-def test_callWithString(execute, testF):
+async def test_callWithString(execute, testF):
 	execute('testF("s")')
 
 	assert execute.parsed.code == [
@@ -50,11 +50,11 @@ def test_callWithString(execute, testF):
 	testF.assert_called_once_with('s')
 
 
-def test_callWithTwoArg(execute, testF):
+async def test_callWithTwoArg(execute, testF):
 	first = Mock()
 	second = Mock()
-	execute.scope['first'] = PyToA.call(first)
-	execute.scope['second'] = PyToA.call(second)
+	execute.scope['first'] = await PyToA.call(first)
+	execute.scope['second'] = await PyToA.call(second)
 
 	execute('testF(first, second)')
 
@@ -68,9 +68,9 @@ def test_callWithTwoArg(execute, testF):
 	testF.assert_called_once_with(first, second)
 
 
-def test_callWithNamedArg(execute, testF):
+async def test_callWithNamedArg(execute, testF):
 	arg = Mock()
-	execute.scope['arg'] = PyToA.call(arg)
+	execute.scope['arg'] = await PyToA.call(arg)
 
 	execute('testF(argName=arg)')
 
@@ -84,11 +84,11 @@ def test_callWithNamedArg(execute, testF):
 	testF.assert_called_once_with(argName=arg)
 
 
-def test_callWithArgAndNamedArg(execute, testF):
+async def test_callWithArgAndNamedArg(execute, testF):
 	first = Mock()
 	second = Mock()
-	execute.scope['first'] = PyToA.call(first)
-	execute.scope['second'] = PyToA.call(second)
+	execute.scope['first'] = await PyToA.call(first)
+	execute.scope['second'] = await PyToA.call(second)
 
 	execute('testF(first, secondName=second)')
 
@@ -103,8 +103,8 @@ def test_callWithArgAndNamedArg(execute, testF):
 
 
 @pytest.fixture
-def testF(execute):
+async def testF(execute):
 	mock = Mock()
-	execute.scope['testF'] = PyToA.call(mock)
+	execute.scope['testF'] = await PyToA.call(mock)
 
 	return mock

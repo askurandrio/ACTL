@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 from actl.Buffer import TransactionBuffer, Buffer
-from actl.objects import String, Number
+from actl.objects import String, Number, executeSyncCoroutine
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
 	BufferRule, Parsed, Not
@@ -16,7 +16,7 @@ class _ApplySyntaxObjectSyntaxRule:
 	@classmethod
 	def match(cls, parser, inp):
 		for syntaxObject in cls._getSyntaxObjects(parser, inp):
-			syntaxRule = syntaxObject.getAttribute('__syntaxRule__')
+			syntaxRule = executeSyncCoroutine(syntaxObject.getAttribute('__syntaxRule__'))
 			if not isinstance(syntaxRule, list):
 				syntaxRule = [syntaxRule]
 
@@ -35,9 +35,9 @@ class _ApplySyntaxObjectSyntaxRule:
 			if (VARIABLE != token) or (token.name not in scope):
 				continue
 
-			token = scope[token.name]
-			if token.hasAttribute('__syntaxRule__'):
-				yield token
+			tokenValue = scope[token.name]
+			if executeSyncCoroutine(tokenValue.hasAttribute('__syntaxRule__')):
+				yield tokenValue
 
 
 @CustomTemplate.createToken

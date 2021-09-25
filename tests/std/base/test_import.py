@@ -11,7 +11,7 @@ from std.base.objects import Module, Import
 ORDER_KEY = 10
 
 
-def test_simpleImport(execute, _mockOpen, _mockIsDir):
+async def test_simpleImport(execute, _mockOpen, _mockIsDir):
 	_mockIsDir('testModule', False)
 	_mockOpen('testModule.a', 'a = 1')
 	execute(
@@ -27,11 +27,11 @@ def test_simpleImport(execute, _mockOpen, _mockIsDir):
 	]
 
 	testModule = execute.executed.scope['testModule']
-	assert testModule.isinstance_(Module)
-	assert str(testModule.getAttribute('a')) == 'Number<1>'
+	assert Module.isinstance_(testModule)
+	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
-def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
+async def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 	_mockIsDir('testPackage', True)
 	_mockIsDir('testPackage/testModule', False)
 	_mockOpen('testPackage/testModule.a', 'a = 1')
@@ -48,12 +48,12 @@ def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 	]
 
 	testPackage = execute.executed.scope['testPackage']
-	assert testPackage.isinstance_(Module)
-	testModule = testPackage.getAttribute('testModule')
-	assert str(testModule.getAttribute('a')) == 'Number<1>'
+	assert Module.isinstance_(testPackage)
+	testModule = await testPackage.getAttribute('testModule')
+	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
-def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
+async def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
 	_mockIsDir('testModule', False)
 	_mockOpen('testModule.a', 'a = 1')
 	execute(
@@ -71,7 +71,7 @@ def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
-def test_importFromModuleImportName(execute, _mockOpen, _mockIsDir):
+async def test_importFromModuleImportName(execute, _mockOpen, _mockIsDir):
 	_mockIsDir('testModule', False)
 	_mockOpen('testModule.a', 'a = 1')
 	execute(
@@ -89,7 +89,7 @@ def test_importFromModuleImportName(execute, _mockOpen, _mockIsDir):
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
-def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
+async def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
@@ -107,12 +107,12 @@ def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
 	]
 
 	testMainPackage = execute.executed.scope['testMainPackage']
-	testPackage = testMainPackage.getAttribute('testPackage')
-	testModule = testPackage.getAttribute('testModule')
-	assert str(testModule.getAttribute('a')) == 'Number<1>'
+	testPackage = await testMainPackage.getAttribute('testPackage')
+	testModule = await testPackage.getAttribute('testModule')
+	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
-def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, _mockIsDir):
+async def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, _mockIsDir):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)

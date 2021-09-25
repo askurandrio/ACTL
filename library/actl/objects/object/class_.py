@@ -3,9 +3,9 @@ from actl.objects.object.NativeMethod import NativeFunction, NativeMethod
 from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
 
 
-def class__getAttribute(self, key):
+async def class__getAttribute(self, key):
 	try:
-		return self.lookupSpecialAttribute(key)
+		return await self.lookupSpecialAttribute(key)
 	except AAttributeIsNotSpecial(key).class_:
 		pass
 
@@ -14,14 +14,14 @@ def class__getAttribute(self, key):
 	except AAttributeNotFound(key).class_:
 		pass
 	else:
-		return self.bindAttribute(attribute)
+		return await self.bindAttribute(attribute)
 
 	try:
 		attribute = self.lookupAttributeInClsSelf(key)
 	except AAttributeNotFound(key).class_:
 		pass
 	else:
-		return self.bindAttribute(attribute)
+		return await self.bindAttribute(attribute)
 
 	for parent in self.parents:
 		try:
@@ -29,13 +29,13 @@ def class__getAttribute(self, key):
 		except AAttributeNotFound(key).class_:
 			pass
 		else:
-			return self.bindAttribute(attribute)
+			return await self.bindAttribute(attribute)
 
 	raise AAttributeNotFound(key)
 
 
-def class__superGetAttribute(self, for_, key):
-	parents = self.getAttribute('__parents__')
+async def class__superGetAttribute(self, for_, key):
+	parents = await self.getAttribute('__parents__')
 
 	if for_ in parents:
 		forIndex = parents.index(for_)
@@ -47,7 +47,7 @@ def class__superGetAttribute(self, for_, key):
 		except AAttributeNotFound(key).class_:
 			pass
 		else:
-			return self.bindAttribute(attribute)
+			return await self.bindAttribute(attribute)
 
 	raise AAttributeNotFound(key)
 

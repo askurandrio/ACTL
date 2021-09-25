@@ -1,9 +1,9 @@
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE
-from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, Parsed, Many, Or, End
 from actl.objects import addMethodToClass, makeClass
-from actl.utils import ResolveException, asDecorator, ReturnException
+from actl.utils import asDecorator
 from std.base.objects.module import Module
+from std.base.executor.utils import bindExecutor
 
 
 Import = makeClass('import')
@@ -11,33 +11,25 @@ From = makeClass('From')
 
 
 @addMethodToClass(Import, '__call__')
-def _Import__call(cls, fromName=None, importName=None):
+async def _Import__call(cls, fromName=None, importName=None):
 	if fromName is None:
-		return Module.call(name=importName)
+		return await Module.call(name=importName)
 
-	packageResult = cls.call(importName=fromName)
+	module = await cls.call(importName=fromName)
 
-	@packageResult.thenExecute
-	def result(executor, module):
-		if '.' in fromName:
-			for moduleName in fromName.split('.')[1:]:
-				module = module.getAttribute(moduleName)
+	if '.' in fromName:
+		for moduleName in fromName.split('.')[1:]:
+			module = await module.getAttribute(moduleName)
 
-		for key, value in module.getAttribute('scope').getDiff():
-			if importName != '*':
-				if key != importName:
-					continue
+	executor = await bindExecutor()
+	for key, value in (await module.getAttribute('scope')).getDiff():
+		if importName != '*':
+			if key != importName:
+				continue
 
-			executor.scope[key] = value
+		executor.scope[key] = value
 
-		try:
-			yield RETURN('None')
-		except ResolveException:
-			pass
-
-		raise ReturnException(module)
-
-	return result
+	return module
 
 
 @asDecorator(lambda rule: Import.setAttribute('__syntaxRule__',  rule))

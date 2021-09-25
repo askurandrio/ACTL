@@ -1,5 +1,6 @@
 import traceback
 import signal
+import inspect
 import importlib
 import os
 from functools import singledispatch
@@ -8,7 +9,7 @@ from itertools import zip_longest
 import pytest
 
 from actl.Buffer import Buffer
-from actl.objects import Object
+from actl.objects import Object, executeSyncCoroutine
 from actl.opcodes import DynamicOpCode
 
 
@@ -131,3 +132,30 @@ def _toTuple__DynamicOpCode(arg: DynamicOpCode):
 	res = [('type', type(arg))]
 	res.extend((attr, getattr(arg, attr)) for attr in type(arg).__slots__)
 	return tuple(res)
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_pyfunc_call(pyfuncitem):
+	pyfuncitem.obj = _wrapAsyncFunction(pyfuncitem.obj)
+
+	yield
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_fixture_setup(fixturedef, request):
+	if inspect.iscoroutinefunction(fixturedef.func):
+		fixturedef.func = _wrapAsyncFunction(fixturedef.func)
+
+	yield
+
+
+def _wrapAsyncFunction(function):
+	def wrapper(*args, **kwargs):
+		result = function(*args, **kwargs)
+
+		if inspect.iscoroutine(result):
+			result = executeSyncCoroutine(result)
+
+		return result
+
+	return wrapper

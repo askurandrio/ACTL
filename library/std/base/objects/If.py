@@ -43,7 +43,7 @@ class IfSyntax:
 			conditions, elseCode = self._getFromFullCodeBlock()
 		else:
 			conditions, elseCode = self._getFromInlineCodeBlock()
-		if_ = If.call(*conditions, elseCode=elseCode)
+		if_ = objects.executeSyncCoroutine(If.call(*conditions, elseCode=elseCode))
 		self._inp.insert(0, [if_])
 
 	def _getFromFullCodeBlock(self):

@@ -1,9 +1,10 @@
 from itertools import zip_longest
-from actl import objects
+from actl import objects, asDecorator
 from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
-from actl import asDecorator, ResolveException, ReturnException
 from std.base.rules import CodeBlock
+from std.base.executor.Executor import Executor
+from std.base.executor.utils import bindExecutor, CallFrame
 
 
 Function = objects.makeClass('Function', (objects.Function,))
@@ -11,28 +12,24 @@ _default = object()
 
 
 @objects.addMethod(Function, '__call__')
-def _Function__call(self, *args):
-	callScope = self.getAttribute('scope')
-	signature = self.getAttribute('signature')
-	argNames = signature.getAttribute('args')
-	body = self.getAttribute('body')
+async def _Function__call(self, *args):
+	callScope = await self.getAttribute('scope')
+	signature = await self.getAttribute('signature')
+	argNames = await signature.getAttribute('args')
+	body = await self.getAttribute('body')
 
-	@objects.Result.fromExecute
-	def result(executor):
-		executor.scope, prevScope = callScope.child(), executor.scope
-		for argName, argValue in zip_longest(argNames, args, fillvalue=_default):
-			assert argName is not _default, \
-					f'argName is default, argValue is {argValue}'
-			assert argValue is not _default, \
-					f'argValue is default, argName is {argName}'
-			executor.scope[argName] = argValue
+	executor = await bindExecutor()
+	executor.scope, prevScope = callScope.child(), executor.scope
 
-		try:
-			for opcode in body:
-				yield opcode
-		except ResolveException as ex:
-			executor.scope = prevScope
-			raise ReturnException(ex.resolveValue) from ex
+	for argName, argValue in zip_longest(argNames, args, fillvalue=_default):
+		assert argName is not _default, \
+				f'argName is default, argValue is {argValue}'
+		assert argValue is not _default, \
+				f'argValue is default, argName is {argName}'
+		executor.scope[argName] = argValue
+
+	result = await CallFrame(body)
+	executor.scope = prevScope
 
 	return result
 
@@ -60,7 +57,8 @@ class _ParseFunction:
 			body = self._parseBody()
 		else:
 			body = None
-		self._inp.insert(0, [Function.call(name, signature, body, None)])
+		function = objects.executeSyncCoroutine(Function.call(name, signature, body, None))
+		self._inp.insert(0, [function])
 
 	def _parseName(self):
 		return self._inpRule.pop(IsInstance(VARIABLE)).one().name
@@ -77,7 +75,7 @@ class _ParseFunction:
 				self._inpRule.pop(Token(','), Maybe(Token(' ')))
 
 		self._inpRule.pop(Token(')'))
-		signature = objects.Signature.call(args)
+		signature = objects.executeSyncCoroutine(objects.Signature.call(args))
 		return signature
 
 	def _parseBody(self):
@@ -91,3 +89,14 @@ class _ParseFunction:
 			)
 
 		return body
+
+
+@Executor.addHandler(Function)
+async def _Function__handler(executor, opcode):
+	linkedFunction = await Function.call(
+		await opcode.getAttribute('name'),
+		await opcode.getAttribute('signature'),
+		await opcode.getAttribute('body'),
+		executor.scope
+	)
+	executor.scope[await opcode.getAttribute('name')] = linkedFunction

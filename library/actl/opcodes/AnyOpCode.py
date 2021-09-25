@@ -31,4 +31,5 @@ class AnyOpCode(metaclass=MetaAnyOpCode):  # pylint: disable=R0903
 
 
 class DynamicOpCode(AnyOpCode, DeclaredClass):
-	pass
+	def __repr__(self):
+		return DeclaredClass.__repr__(self)

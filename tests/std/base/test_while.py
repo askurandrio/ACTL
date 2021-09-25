@@ -8,65 +8,65 @@ from std.base.objects import While
 ORDER_KEY = 4
 
 
-def test_simple_while(execute):
+async def test_simple_while(execute):
 	def cond_():
 		called, cond_.called = cond_.called, True
 		return not called
 
 	condIt = iter((True, False))
-	cond = Mock(side_effect=lambda: next(condIt))
-	print_ = Mock()
-	execute.scope['cond'] = PyToA.call(cond)
-	execute.initialScope['print'] = PyToA.call(print_)
+	conditionMock = Mock(side_effect=lambda: next(condIt))
+	codeMock = Mock()
+	execute.scope['conditionMock'] = await PyToA.call(conditionMock)
+	execute.initialScope['codeMock'] = await PyToA.call(codeMock)
 
-	execute('while cond(): print(1)')
+	execute('while conditionMock(): codeMock(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttribute('__class__') is While
-	assert cycle.getAttribute('conditionFrame') == (
-		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='cond'),
+	assert await cycle.getAttribute('__class__') is While
+	assert await cycle.getAttribute('conditionFrame') == (
+		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='conditionMock'),
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
-	assert cycle.getAttribute('code') == (
+	assert await cycle.getAttribute('code') == (
 		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
-			dst='_tmpVar1_2', function='print', args=['_tmpVar1_1']
+			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
 		),
 		opcodes.VARIABLE(name='_tmpVar1_2')
 	)
 
 	assert execute.executed
-	assert cond.call_count == 2
-	print_.assert_called_once_with(1)
+	assert conditionMock.call_count == 2
+	codeMock.assert_called_once_with(1)
 
 
-def test_whileWithFullCodeBlock(execute):
+async def test_whileWithFullCodeBlock(execute):
 	def cond_():
 		called, cond_.called = cond_.called, True
 		return not called
 
 	cond_.called = False
-	cond = Mock(side_effect=cond_)
-	print_ = Mock()
-	execute.scope['cond'] = PyToA.call(cond)
-	execute.initialScope['print'] = PyToA.call(print_)
+	conditionMock = Mock(side_effect=cond_)
+	codeMock = Mock()
+	execute.scope['conditionMock'] = await PyToA.call(conditionMock)
+	execute.initialScope['codeMock'] = await PyToA.call(codeMock)
 
-	execute('while cond():\n print(1)')
+	execute('while conditionMock():\n codeMock(1)')
 
 	cycle = execute.parsed.code.one()
-	assert cycle.getAttribute('__class__') is While
-	assert cycle.getAttribute('conditionFrame') == (
-		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='cond'),
+	assert await cycle.getAttribute('__class__') is While
+	assert await cycle.getAttribute('conditionFrame') == (
+		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='conditionMock'),
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
-	assert cycle.getAttribute('code') == (
+	assert await cycle.getAttribute('code') == (
 		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
 		opcodes.CALL_FUNCTION(
-			dst='_tmpVar1_2', function='print', args=['_tmpVar1_1']
+			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
 		),
 		opcodes.VARIABLE(name='_tmpVar1_2')
 	)
 
 	assert execute.executed
-	assert cond.call_count == 2
-	print_.assert_called_once_with(1)
+	assert conditionMock.call_count == 2
+	codeMock.assert_called_once_with(1)

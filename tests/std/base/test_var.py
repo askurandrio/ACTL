@@ -5,8 +5,8 @@ from actl.objects import Number, AToPy
 ORDER_KEY = 2
 
 
-def test_varWithEndLine(execute):
-	one = Number.call(1)
+async def test_varWithEndLine(execute):
+	one = await Number.call(1)
 	execute.scope['var'] = one
 
 	execute('var\n')

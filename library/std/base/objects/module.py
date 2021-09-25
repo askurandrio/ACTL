@@ -1,107 +1,88 @@
 import os
 
-from actl import DIR_LIBRARY, ResolveException, ReturnException
+from actl import DIR_LIBRARY
 from actl.Buffer import Buffer
-from actl.objects import addMethod, addMethodToClass, makeClass, AAttributeNotFound, AToPy, Result
-from actl.opcodes import RETURN
+from actl.objects import addMethod, addMethodToClass, makeClass, AAttributeNotFound, AToPy
+from std.base.executor.Executor import Frame
+from std.base.executor.utils import bindExecutor
 
 
 Module = makeClass('Module')
 
 
 @addMethodToClass(Module, '__call__')
-def _Module__call(cls, path=None, name=None):
+async def _Module__call(cls, path=None, name=None):
 	if path is not None:
-		return cls.super_(Module, '__call__').call(path)
+		superCall = await cls.super_(Module, '__call__')
+		return await superCall.call(path)
 
 	if '.' not in name:
 		path = os.path.join(DIR_LIBRARY, name)
-		return cls.call(path)
+		return await cls.call(path)
 
 	packageName = name[:name.find('.')]
 	name = name[name.find('.')+1:]
 
-	packageResult = cls.call(name=packageName)
+	package = await cls.call(name=packageName)
+	importMethod = await package.getAttribute('import_')
+	await importMethod.call(name)
 
-	@packageResult.then
-	def result(package):
-		resultImport = package.getAttribute('import_').call(name)
-
-		@resultImport.then
-		def result(_):
-			return package
-
-		return result
-
-	return result
+	return package
 
 
 @addMethod(Module, '__init__')
-def _Module__init(self, path):
+async def _Module__init(self, path):
 	isPackage = os.path.isdir(path)
 	if not isPackage:
 		path = f'{path}.a'
 
-	@Result.fromExecute
-	def result(executor):
-		project = AToPy(executor.scope['__project__'])
-		moduleScope = project['initialScope'].child()
-		executor.scope, prevScope = moduleScope, executor.scope
+	executor = await bindExecutor()
+	project = AToPy(executor.scope['__project__'])
+	moduleScope = project['initialScope'].child()
+	executor.scope, prevScope = moduleScope, executor.scope
 
-		if not isPackage:
-			input_ = _open(path)
-			parsedInput = project['parseInput'](moduleScope, input_)
-			yield from parsedInput
+	if not isPackage:
+		input_ = _open(path)
+		parsedInput = project['parseInput'](moduleScope, input_)
+		await Frame(parsedInput)
 
-		try:
-			yield RETURN('None')
-		except ResolveException:
-			pass
+	executor.scope = prevScope
+	self.setAttribute('scope', moduleScope)
+	self.setAttribute('path', path)
 
-		executor.scope = prevScope
-		self.setAttribute('scope', moduleScope)
-		self.setAttribute('path', path)
-
-		raise ReturnException(self)
-
-	return result
+	return self
 
 
 @addMethod(Module, 'import_')
-def _Module__import_(self, name):
+async def _Module__import_(self, name):
 	if '.' in name:
-		packageName = name[:name.find('.')]
-		name = name[name.find('.')+1:]
+		subPackageName = name[:name.find('.')]
+		moduleName = name[name.find('.')+1:]
 
-		packageResult = self.getAttribute('import_').call(packageName)
+		importMethod = await self.getAttribute('import_')
+		await importMethod.call(subPackageName)
+		subPackage = await self.getAttribute(subPackageName)
+		subPackageImportMethod = await subPackage.getAttribute('import_')
+		await subPackageImportMethod.call(moduleName)
+		return
 
-		@packageResult.then
-		def packageImportResult(_):
-			package = self.getAttribute(packageName)
-			return package.getAttribute('import_').call(name)
-
-		return packageImportResult
-
-	path = str(self.getAttribute('path'))
+	path = str(await self.getAttribute('path'))
 	path = os.path.join(path, name)
 
-	resultModule = self.class_.call(path)
-
-	@resultModule.then
-	def result(module):
-		self.setAttribute(name, module)
-
-	return result
+	module = await self.class_.call(path)
+	self.setAttribute(name, module)
 
 
 @addMethod(Module, '__getAttribute__')
-def _Module__getAttribute(self, key):
+async def _Module__getAttribute(self, key):
+	superGetAttribute = await self.super_(Module, '__getAttribute__')
+
 	try:
-		return self.super_(Module, '__getAttribute__').call(key)
+		return await superGetAttribute.call(key)
 	except AAttributeNotFound(key=key).class_:
 		pass
 
-	scope = self.super_(Module, '__getAttribute__').call('scope')
+	scope = await superGetAttribute.call('scope')
 	return scope[key]
 
 

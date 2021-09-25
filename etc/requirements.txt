@@ -7,3 +7,4 @@ coverage-badge==1.0.1
 pytest-mock==3.1.0
 snakeviz==2.1.0
 pylint-ignore==2021.1018
+coverage-badge==1.0.1

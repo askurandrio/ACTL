@@ -1,5 +1,5 @@
 from actl.objects.String import String
-from actl.objects.object import Object
+from actl.objects.object import Object, executeSyncCoroutine
 
 
 class _MetaAToPy(type):
@@ -7,8 +7,9 @@ class _MetaAToPy(type):
 		if not isinstance(value, type(Object)):
 			return value
 
-		if value.hasAttribute(AToPy):
-			return value.getAttribute(AToPy).call()
+		if executeSyncCoroutine(value.hasAttribute(AToPy)):
+			toAToPyMethod = executeSyncCoroutine(value.getAttribute(AToPy))
+			return executeSyncCoroutine(toAToPyMethod.call())
 
 		return super().__call__(value)
 

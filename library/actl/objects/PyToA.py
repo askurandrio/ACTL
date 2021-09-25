@@ -13,7 +13,7 @@ PyToA = makeClass('PyToA')
 
 
 @addMethodToClass(PyToA, '__call__')
-def _PyToA__call(cls, value):
+async def _PyToA__call(cls, value):
 	if isinstance(value, type(Object)):
 		return value
 
@@ -23,29 +23,33 @@ def _PyToA__call(cls, value):
 	if isinstance(value, (int, float)):
 		return Number.call(value)
 
-	self = cls.super_(PyToA, '__call__').call()
+	superCall = await cls.super_(PyToA, '__call__')
+	self = await superCall.call()
 	self._value = value
 	return self
 
 
 @addMethodToClass(PyToA, 'eval')
-def _PyToA__eval(cls, code):
+async def _PyToA__eval(cls, code):
 	code = str(AToPy(code))
-	return cls.call(eval(code))  # pylint: disable=eval-used
+	result = eval(code)  # pylint: disable=eval-used
+	return await cls.call(result)
 
 
 @addMethod(PyToA, '__call__')
-def _PyToA__call(self, *args, **kwargs):
+async def _PyToA__call(self, *args, **kwargs):
 	args = [AToPy(arg) for arg in args]
 	kwargs = {key: AToPy(value) for key, value in kwargs.items()}
 	res = self._value(*args, **kwargs)
-	return PyToA.call(res)
+	return await PyToA.call(res)
 
 
 @addMethod(PyToA, '__getAttribute__')
-def _PyToA__getAttribute(self, key):
+async def _PyToA__getAttribute(self, key):
+	superGetAttribute = await self.super_(PyToA, '__getAttribute__')
+
 	try:
-		return self.super_(PyToA, '__getAttribute__').call(key)
+		return await superGetAttribute.call(key)
 	except AAttributeNotFound:
 		pass
 
@@ -55,21 +59,22 @@ def _PyToA__getAttribute(self, key):
 		except AttributeError:
 			pass
 		else:
-			return PyToA.call(value)
+			return await PyToA.call(value)
+
 	raise AAttributeNotFound(key)
 
 
 @addMethod(PyToA, AToPy)
-def _PyToA__AToPY(self):
+async def _PyToA__AToPY(self):
 	return self._value
 
 
 @addMethod(PyToA, Bool)
-def _PyToA__Bool(self):
+async def _PyToA__Bool(self):
 	res = bool(self._value)
 	return Bool.True_ if res else Bool.False_
 
 
 @addMethod(PyToA, String)
-def _PyToA__String(self):
-	return String.call(str(self._value))
+async def _PyToA__String(self):
+	return await String.call(str(self._value))

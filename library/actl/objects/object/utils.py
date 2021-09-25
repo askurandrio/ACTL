@@ -1,6 +1,7 @@
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeMethod import NativeMethod
 from actl.objects.object.class_ import class_
+from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
 
 
 def makeClass(name, parents=()):
@@ -18,7 +19,8 @@ def makeClass(name, parents=()):
 def addMethod(cls, name):
 	def decorator(function):
 		aFunction = NativeMethod(function)
-		cls.getAttribute('__self__')[name] = aFunction
+		self_ = executeSyncCoroutine(cls.getAttribute('__self__'))
+		self_[name] = aFunction
 
 	return decorator
 

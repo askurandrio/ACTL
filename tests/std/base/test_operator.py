@@ -5,7 +5,7 @@ from actl.objects import Number
 ORDER_KEY = 7
 
 
-def test_pointOperator(execute):
+async def test_pointOperator(execute):
 	execute('print.__call__')
 
 	assert execute.parsed.code == [
@@ -15,10 +15,10 @@ def test_pointOperator(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
 
-	assert execute.executed.scope['_tmpVar1'] == execute.scope['print'].getAttribute('__call__')
+	assert execute.executed.scope['_tmpVar1'] == await execute.scope['print'].getAttribute('__call__')
 
 
-def test_add(execute):
+async def test_add(execute):
 	execute('1 + 2')
 
 	assert execute.parsed.code == [
@@ -29,10 +29,10 @@ def test_add(execute):
 	]
 
 
-	assert execute.executed.scope['_tmpVar3'] == Number.call('3')
+	assert execute.executed.scope['_tmpVar3'] == await Number.call('3')
 
 
-def test_setAddResult(execute):
+async def test_setAddResult(execute):
 	execute('a = 1 + 2')
 
 	assert execute.parsed.code == [
@@ -42,4 +42,4 @@ def test_setAddResult(execute):
 		opcodes.SET_VARIABLE('a', '_tmpVar3')
 	]
 
-	assert execute.executed.scope['a'] == Number.call('3')
+	assert execute.executed.scope['a'] == await Number.call('3')

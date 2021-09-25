@@ -2,7 +2,7 @@
 
 import json
 
-from actl.objects import PyToA
+from actl.objects import PyToA, executeSyncCoroutine
 
 
 def test_CtrlD(run):
@@ -98,5 +98,5 @@ def test_mainF(run):
 
 def getInitialScope(project):
 	scope = project.this['std/base', 'initialScope']
-	scope['print'] = PyToA.call(lambda inp: print(f'mocked: {inp}'))
+	scope['print'] = executeSyncCoroutine(PyToA.call(lambda inp: print(f'mocked: {inp}')))
 	return scope

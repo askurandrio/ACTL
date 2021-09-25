@@ -1,20 +1,16 @@
-from actl.objects.object import makeClass
-from actl.objects.object.utils import addMethodToClass
+from actl.objects.object import makeClass, executeSyncCoroutine
+from actl.objects.object.utils import addMethod
 
 
 If = makeClass('If')
-elif_ = makeClass('_Elif').call()
-else_ = makeClass('_Else').call()
+elif_ = executeSyncCoroutine(makeClass('_Elif').call())
+else_ = executeSyncCoroutine(makeClass('_Else').call())
 
 
-@addMethodToClass(If, '__call__')
-def _If__call(cls, ifCondition, *elifConditions, elseCode=None):
-	resultSelf = cls.super_(If, '__call__').call()
-
+@addMethod(If, '__init__')
+async def _If__init(self, ifCondition, *elifConditions, elseCode=None):
 	conditions = (ifCondition,) + elifConditions
 
-	resultSelf.setAttribute('conditions', conditions)
+	self.setAttribute('conditions', conditions)
 	if elseCode is not None:
-		resultSelf.setAttribute('elseCode', elseCode)
-
-	return resultSelf
+		self.setAttribute('elseCode', elseCode)

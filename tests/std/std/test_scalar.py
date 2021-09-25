@@ -5,7 +5,7 @@ from actl.objects import Number
 ORDER_KEY = 2
 
 
-def test_emptyVector(execute):
+async def test_emptyVector(execute):
 	execute('[]')
 
 	assert execute.parsed.code == [
@@ -15,10 +15,10 @@ def test_emptyVector(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	vector = execute.executed.scope['_tmpVar1']
-	assert vector.getAttribute('__class__') is execute.scope['Vector']
+	assert await vector.getAttribute('__class__') is execute.scope['Vector']
 
 
-def test_vectorWithNumber(execute):
+async def test_vectorWithNumber(execute):
 	execute('[1]')
 
 	assert execute.parsed.code == [
@@ -29,4 +29,4 @@ def test_vectorWithNumber(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
 	vector = execute.executed.scope['_tmpVar1']
-	assert vector.getAttribute('__class__') is execute.scope['Vector']
+	assert await vector.getAttribute('__class__') is execute.scope['Vector']

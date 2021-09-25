@@ -5,8 +5,8 @@ from actl.objects import Number, AToPy
 ORDER_KEY = 1
 
 
-def test_var(execute):
-	one = Number.call(1)
+async def test_var(execute):
+	one = await Number.call(1)
 	execute.scope['var'] = one
 
 	execute('var')
@@ -17,7 +17,7 @@ def test_var(execute):
 	assert execute.executed
 
 
-def test_floatNumber(execute):
+async def test_floatNumber(execute):
 	execute('1.1')
 
 	assert execute.parsed.code == [
@@ -29,7 +29,7 @@ def test_floatNumber(execute):
 	assert AToPy(execute.executed.scope['_tmpVar1']) == 1.1
 
 
-def test_negativeNumber(execute):
+async def test_negativeNumber(execute):
 	execute('-1')
 
 	assert execute.parsed.code == [

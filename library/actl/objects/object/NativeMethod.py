@@ -5,7 +5,7 @@ from actl.objects.object.AObject import AObject
 class NativeMethod(AObject):
 	def __init__(self, rawMethod):
 		@NativeFunction
-		def get(aSelf):
+		async def get(aSelf):
 			return NativeFunction(self._rawMethod).apply(aSelf)
 
 		super().__init__({})
@@ -16,11 +16,16 @@ class NativeMethod(AObject):
 	def class_(self):
 		return AObject.Object
 
-	@property
-	def get(self):
-		return self._get
+	async def lookupSpecialAttribute(self, key):
+		if key == '__get__':
+			return self
 
-	def toPyString(self):
+		return await super().lookupSpecialAttribute(key)
+
+	async def get(self, instance):
+		return await self._get.call(instance)
+
+	async def toPyString(self):
 		return f'{type(self).__name__}({self._rawMethod})'
 
 
@@ -33,15 +38,20 @@ class NativeFunction(AObject):
 	def class_(self):
 		return AObject.Object
 
-	@property
-	def call(self):
-		return self._function
+	async def call(self, *args, **kwargs):
+		return await self._function(*args, **kwargs)
 
-	def toPyString(self):
+	async def toPyString(self):
 		return f'{type(self).__name__}({self._function})'
 
 	def apply(self, *args):
 		return type(self)(_AppliedFunction(self._function, *args))
+
+	async def lookupSpecialAttribute(self, key):
+		if key == '__call__':
+			return self
+
+		return await super().lookupSpecialAttribute(key)
 
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):
@@ -54,8 +64,8 @@ class _AppliedFunction:
 		self._function = function
 		self._args = args
 
-	def __call__(self, *args, **kwargs):
-		return self._function(*self._args, *args, **kwargs)
+	async def __call__(self, *args, **kwargs):
+		return await self._function(*self._args, *args, **kwargs)
 
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):

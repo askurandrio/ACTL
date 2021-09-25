@@ -4,7 +4,7 @@ from actl.objects.object.utils import addMethodToClass
 
 
 class _AString(type(Object)):
-	def toPyString(self):
+	async def toPyString(self):
 		return self._value
 
 
@@ -22,10 +22,14 @@ String = _AStringClass({
 
 
 @addMethodToClass(String, '__call__')
-def String__call(cls, value=''):
+async def String__call(cls, value=''):
 	if isinstance(value, type(Object)):
-		return value.getAttribute(String).call()
+		toStringMethod = await value.getAttribute(String)
+		return await toStringMethod.call()
 
 	self = _AString({'__class__': cls})
 	self._value = value
 	return self
+
+
+type(Object).String = String

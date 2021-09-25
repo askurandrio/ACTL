@@ -8,18 +8,18 @@ from std.base.objects import Function
 ORDER_KEY = 6
 
 
-def test_simpleFunctionDeclare(execute):
+async def test_simpleFunctionDeclare(execute):
 	mock = Mock()
-	execute.initialScope['print'] = PyToA.call(mock)
+	execute.initialScope['mock'] = await PyToA.call(mock)
 
-	execute('fun f(): print()\nf()')
+	execute('fun f(): mock()\nf()')
 
 	assert execute.parsed.code == [
-		Function.call(
+		await Function.call(
 			'f',
-			Signature.call([]),
+			await Signature.call([]),
 			(
-				opcodes.CALL_FUNCTION('_tmpVar1_1', 'print'),
+				opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock'),
 				opcodes.VARIABLE('_tmpVar1_1'),
 				opcodes.RETURN('None')
 			),
@@ -32,20 +32,20 @@ def test_simpleFunctionDeclare(execute):
 	mock.assert_called_once_with()
 
 
-def test_declareMultiLineFunction(execute):
+async def test_declareMultiLineFunction(execute):
 	mock = Mock()
-	execute.initialScope['print'] = PyToA.call(mock)
+	execute.initialScope['mock'] = await PyToA.call(mock)
 
-	execute('fun f():\n a = 1\n print(a)\nf()')
+	execute('fun f():\n a = 1\n mock(a)\nf()')
 
 	assert execute.parsed.code == [
-		Function.call(
+		await Function.call(
 			'f',
-			Signature.call([]),
+			await Signature.call([]),
 			(
 				opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
 				opcodes.SET_VARIABLE(dst='a', src='_tmpVar1_1'),
-				opcodes.CALL_FUNCTION(dst='_tmpVar1_2', function='print', args=['a']),
+				opcodes.CALL_FUNCTION(dst='_tmpVar1_2', function='mock', args=['a']),
 				opcodes.VARIABLE(name='_tmpVar1_2'),
 				opcodes.RETURN('None')
 			),
@@ -58,18 +58,18 @@ def test_declareMultiLineFunction(execute):
 	mock.assert_called_once_with(1)
 
 
-def test_declareFunctionWithArg(execute):
+async def test_declareFunctionWithArg(execute):
 	mock = Mock()
-	execute.initialScope['print'] = PyToA.call(mock)
+	execute.initialScope['mock'] = await PyToA.call(mock)
 
-	execute('fun f(arg): print(arg)\nf(1)')
+	execute('fun f(arg): mock(arg)\nf(1)')
 
 	assert execute.parsed.code == [
-		Function.call(
+		await Function.call(
 			'f',
-			Signature.call(['arg']),
+			await Signature.call(['arg']),
 			(
-				opcodes.CALL_FUNCTION('_tmpVar1_1', 'print', args=['arg']),
+				opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock', args=['arg']),
 				opcodes.VARIABLE('_tmpVar1_1'),
 				opcodes.RETURN('None')
 			),
@@ -84,10 +84,7 @@ def test_declareFunctionWithArg(execute):
 	mock.assert_called_once_with(1)
 
 
-def test_functionWithReturn(execute):
-	mock = Mock()
-	execute.initialScope['print'] = PyToA.call(mock)
-
+async def test_functionWithReturn(execute):
 	execute(
 		'fun f():\n'
 		'    return 1\n'
@@ -95,9 +92,9 @@ def test_functionWithReturn(execute):
 	)
 
 	assert execute.parsed.code == [
-		Function.call(
+		await Function.call(
 			'f',
-			Signature.call([]),
+			await Signature.call([]),
 			(
 				opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', Number.call, args=['1']),
 				opcodes.RETURN('_tmpVar1_1')
@@ -108,4 +105,4 @@ def test_functionWithReturn(execute):
 		opcodes.VARIABLE('_tmpVar1')
 	]
 
-	assert execute.executed.scope['_tmpVar1'] == Number.call('1')
+	assert execute.executed.scope['_tmpVar1'] == await Number.call('1')
