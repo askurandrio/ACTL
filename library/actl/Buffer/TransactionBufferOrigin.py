@@ -4,7 +4,8 @@ class TransactionBufferOrigin:
 		self._shift = shift
 
 	def startsWith(self, tmpl):
-		return self._origin[self._shift:].startsWith(tmpl)
+		tmpl = self._origin[:self._shift] + tmpl
+		return self._origin.startsWith(tmpl)
 
 	def pop(self, index=0):
 		return self._origin.pop(self._shift + index)

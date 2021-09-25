@@ -9,7 +9,8 @@ ACTL this compiler A in C++
 2. set expression - done
 3. function input - done
 4. String.split - in progress
-    1. std.std.String
+    1. std.std.String - in progress
+        1. Allow class inheritance - done
 5. unpacking args
 6. String -> Number
 7. function print

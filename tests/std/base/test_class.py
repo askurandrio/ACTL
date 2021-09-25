@@ -1,7 +1,7 @@
-from unittest.mock import ANY
+from unittest.mock import ANY, Mock
 
 from actl import opcodes
-from actl.objects import Number, Signature, String
+from actl.objects import Number, Signature, String, PyToA
 from std.base.objects import class_, Function
 
 
@@ -17,6 +17,7 @@ async def test_simpleClassDeclare(execute):
 	assert execute.parsed.code == [
 		await class_.call(
 			'T',
+			(),
 			{
 				'body': (
 					opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', function=Number.call, args=['1']),
@@ -28,6 +29,7 @@ async def test_simpleClassDeclare(execute):
 
 	assert execute.executed.scope['T'] == await class_.call(
 		'T',
+		(),
 		{
 			'a': await Number.call(1)
 		}
@@ -45,6 +47,7 @@ async def test_classWithInitMethod(execute):
 	assert execute.parsed.code == [
 		await class_.call(
 			'C',
+			(),
 			{
 				'body': (
 					await Function.call(
@@ -66,6 +69,7 @@ async def test_classWithInitMethod(execute):
 
 	assert execute.executed.scope['C'] == await class_.call(
 		'C',
+		(),
 		{
 			'__self__': {
 				'__init__': await Function.call(
@@ -97,6 +101,7 @@ async def test_classWithMethod(execute):
 	assert execute.parsed.code == [
 		await class_.call(
 			'C',
+			(),
 			{
 				'body': (
 					await Function.call(
@@ -146,6 +151,7 @@ async def test_classWithTwoMethod(execute):
 	assert execute.parsed.code == [
 		await class_.call(
 			'C',
+			(),
 			{
 				'body': (
 					await Function.call(
@@ -188,3 +194,82 @@ async def test_classWithTwoMethod(execute):
 
 	assert str(execute.executed.scope['c']) == 'C<a=Number<2>>'
 	assert str(execute.executed.scope['tMethodResult']) == 'Number<4>'
+
+
+async def test_classInherit(execute):
+	mock = Mock()
+	execute.scope['mock'] = await PyToA.call(mock)
+
+	execute(
+		'class Base:\n'
+		'    fun baseMethod(self):\n'
+		'        mock(1)\n'
+	)
+
+	assert execute.parsed.code == [
+		await class_.call(
+			'Base',
+			(),
+			{
+				'body': (
+					await Function.call(
+						'baseMethod',
+						await Signature.call(['self']),
+						(
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, args=['1']),
+							opcodes.CALL_FUNCTION('_tmpVar2_2', 'mock', args=['_tmpVar2_1']),
+							opcodes.VARIABLE('_tmpVar2_2'),
+							opcodes.RETURN('None')
+						),
+						None
+					),
+				)
+			}
+		)
+	]
+	execute.flush()
+	execute(
+		'class Inherit(Base):\n'
+		'    fun inheritMerhod(self):\n'
+		'        mock(2)\n'
+		'\n'
+		'inherit = Inherit()\n'
+		'inherit.baseMethod()\n'
+		'inherit.inheritMerhod()\n'
+	)
+
+	assert execute.parsed.code == [
+		await class_.call(
+			'Inherit',
+			(execute.parsed.scope['Base'],),
+			{
+				'body': (
+					await Function.call(
+						'inheritMerhod',
+						await Signature.call(['self']),
+						(
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, args=['2']),
+							opcodes.CALL_FUNCTION('_tmpVar2_2', 'mock', args=['_tmpVar2_1']),
+							opcodes.VARIABLE('_tmpVar2_2'),
+							opcodes.RETURN('None')
+						),
+						None
+					),
+				)
+			}
+		),
+		opcodes.CALL_FUNCTION('_tmpVar1', 'Inherit'),
+		opcodes.SET_VARIABLE('inherit', '_tmpVar1'),
+		opcodes.GET_ATTRIBUTE('_tmpVar1', 'inherit', 'baseMethod'),
+		opcodes.CALL_FUNCTION('_tmpVar2', '_tmpVar1'),
+		opcodes.VARIABLE('_tmpVar2'),
+		opcodes.GET_ATTRIBUTE('_tmpVar1', 'inherit', 'inheritMerhod'),
+		opcodes.CALL_FUNCTION('_tmpVar2', '_tmpVar1',),
+		opcodes.VARIABLE('_tmpVar2'),
+	]
+
+	assert execute.executed.scope['inherit']
+	assert mock.call_args_list == [
+		((1,),),
+		((2,),)
+	]

@@ -6,7 +6,10 @@ from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
 
 def makeClass(name, parents=()):
 	if AObject.Object:
-		parents = (*parents, AObject.Object)
+		parents = [*parents, AObject.Object]
+
+	while (len(parents) > 1) and (parents[-1] == parents[-2]):
+		parents.pop(-1)
 
 	return AObject({
 		'__name__': name,

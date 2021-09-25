@@ -5,7 +5,7 @@ from actl.objects import \
 		addMethodToClass, \
 		executeSyncCoroutine
 from actl.opcodes import VARIABLE
-from actl.syntax import SyntaxRule, Value, Token, IsInstance
+from actl.syntax import SyntaxRule, Value, Token, IsInstance, Maybe, Parsed
 from actl import asDecorator
 from actl.syntax.BufferRule import BufferRule
 from std.base.rules import CodeBlock
@@ -16,8 +16,8 @@ class_ = makeClass('class_', (actlClass,))
 
 
 @addMethodToClass(class_, '__call__')
-async def _class_call(_, name, scope):
-	self = makeClass(name)
+async def _class_call(_, name, parents,  scope):
+	self = makeClass(name, parents)
 
 	for key, value in scope.items():
 		self.setAttribute(key, value)
@@ -27,24 +27,36 @@ async def _class_call(_, name, scope):
 
 @asDecorator(lambda rule: class_.setAttribute('__syntaxRule__', rule))
 @SyntaxRule.wrap(
-	Value(class_), Token(' '), IsInstance(VARIABLE),
+	Value(class_),
+	Token(' '),
+	IsInstance(VARIABLE),
+	Maybe(Token('('), IsInstance(VARIABLE), Token(')')),
 	useParser=True,
 	manualApply=True
 )
 def _parseClass(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Value(class_), Token(' '))
-	clsName = inpRule.pop(IsInstance(VARIABLE)).one().name
+	className = inpRule.pop(IsInstance(VARIABLE)).one().name
+
+	parents = []
+	if inpRule.startsWith(Token('(')):
+		inpRule.pop(Token('('))
+		parentName = inpRule.pop(Parsed(Token(')'))).one().name
+		parents.append(parser.scope[parentName])
+		inpRule.pop(Token(')'))
+
 	inpRule.pop(Token(':'))
 	body = CodeBlock(parser, inp).parse()
-	cls = executeSyncCoroutine(class_.call(clsName, {'body': body}))
+	cls = executeSyncCoroutine(class_.call(className, parents, {'body': body}))
 	inp.insert(0, [cls])
 
 
 @Executor.addHandler(actlClass)
 async def _actlClass__handler(executor, opcode):
 	className = str(await opcode.getAttribute('__name__'))
-	newClass = await class_.call(className, {})
+	parents = await opcode.getAttribute('__parents__')
+	newClass = await class_.call(className, parents, {})
 	executor.scope, prevScope = executor.scope.child(), executor.scope
 	executor.scope['__class__'] = newClass
 	executor.scope[className] = newClass

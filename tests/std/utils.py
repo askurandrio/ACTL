@@ -11,6 +11,7 @@ class AbstractExecute:
 		self._project = Project(source=[{'include': self._PROJECT_NAME}])
 
 	def flush(self):
+		assert self.executed
 		self.isParsed = False
 		self.isExecuted = False
 		buildScope = self.scope

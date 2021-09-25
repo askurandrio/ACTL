@@ -6,12 +6,11 @@ class Buffer:
 	_emptyIter = iter(())
 
 	def __init__(self, head=_emptyIter):
-		if isinstance(head, Iterator):
-			self._buff = []
-			self._head = iter(head)
-		else:
-			self._buff = list(head)
-			self._head = self._emptyIter
+		self._buff = []
+		self._head = iter(head)
+
+		if isinstance(head, (tuple, list, range)):
+			self.loadAll()
 
 	def watch(self, func):
 		def watch(elem):
@@ -56,6 +55,9 @@ class Buffer:
 
 		if isinstance(index, slice):
 			index = index.stop
+			if index is None:
+				index = -1
+
 			if index > 0:
 				index -= 1
 
