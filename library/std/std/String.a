@@ -4,4 +4,7 @@ class String(String):
         second = self.index(separator, -1)
 
     fun index(self, subString, default):
-        index = 0
+        result = 0
+
+        while result < 2:
+            result = result + 1
