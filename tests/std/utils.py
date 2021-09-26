@@ -41,7 +41,7 @@ class AbstractExecute:
 
 	@property
 	def executed(self):
-		if self.isExecuted:
+		if self.parsed.isExecuted:
 			return self
 
 		self._project.this['buildExecutor'].execute()

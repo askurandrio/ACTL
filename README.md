@@ -13,6 +13,8 @@ ACTL this compiler A in C++
         1. Allow class inheritance - done
         2. Add String__split stub - done
         3. Add String__index stub - done
+        3. Add simple operator handling - done
+        3. Add complex operator handling - in progress
 5. unpacking args
 6. String -> Number
 7. function print

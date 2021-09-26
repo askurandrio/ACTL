@@ -129,11 +129,13 @@ async def _RETURN__handler(executor, opcode):
 async def _CALL_OPERATOR__handler(executor, opcode):
 	first = executor.scope[opcode.first]
 	second = executor.scope[opcode.second]
-	assert opcode.operator == '+'
 
 	pyFirst = AToPy(first)
 	pySecond = AToPy(second)
-	pyResult = pyFirst + pySecond
+	pyResult = eval(  # pylint: disable=eval-used
+		f'pyFirst {opcode.operator} pySecond',
+		{'pyFirst': pyFirst, 'pySecond': pySecond}
+	)
 
 	resultClass = await first.getAttribute('__class__')
 	result = await resultClass.call(pyResult)

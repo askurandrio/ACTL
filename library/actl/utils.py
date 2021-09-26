@@ -1,3 +1,6 @@
+import inspect
+
+
 default = object()
 
 
@@ -70,3 +73,18 @@ class DeclaredClass:
 		}
 		class_ = type(name, (cls,), {'__slots__': attributes, '_defaults': defaults})
 		return class_
+
+
+def bindEternalIdx():
+	frame = inspect.currentframe().f_back
+	codePlaceId = frame.f_code.co_filename, frame.f_lineno
+
+	if codePlaceId not in bindEternalIdx.store:
+		bindEternalIdx.store[codePlaceId] = -1
+
+	bindEternalIdx.store[codePlaceId] += 1
+
+	return bindEternalIdx.store[codePlaceId]
+
+
+bindEternalIdx.store = {}

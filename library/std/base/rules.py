@@ -282,20 +282,36 @@ def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
 	]
 
 
+
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token(' '),
-	Token('+'),
+	CustomTemplate.asArg(
+		Or(
+			(Token('+'),),
+			(Token('-'),),
+			(Token('*'),),
+			(Token('/'),),
+			(Token('<='),),
+			(Token('>='),),
+			(Token('<'),),
+			(Token('>'),),
+			(Token('!='),),
+			(Token('=='),)
+		),
+		'operator'
+	),
 	Token(' '),
 	Parsed(),
 	IsInstance(VARIABLE),
 	useParser=True
 )
-def _parseAdd(first, _, token, _1, second, parser):
+def _parseOperator(first, _, _1, second, operator, parser):
 	dst = parser.makeTmpVar()
+	operator = ''.join(operator)
 
 	parser.define(
-		CALL_OPERATOR(dst=dst.name, first=first.name, operator=token, second=second.name)
+		CALL_OPERATOR(dst=dst.name, first=first.name, operator=operator, second=second.name)
 	)
 
 	return [dst]
