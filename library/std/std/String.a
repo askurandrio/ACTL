@@ -1,0 +1,3 @@
+class String(String):
+    fun split(self, template):
+        pass

@@ -1,7 +1,7 @@
 ORDER_KEY = 1
 
 
-def test_VectorAppend(execute):
+def test_Vector__append(execute):
 	execute(
 		'v = Vector()\n'
 		'v.append(1)'

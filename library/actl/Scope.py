@@ -28,6 +28,8 @@ class Scope:
 
 
 class _ScopeChild(Scope):
+	allowOverride = False  # TODO: improve this situation
+
 	def __init__(self, parent):
 		self._parent = parent
 		super().__init__({})
@@ -39,9 +41,8 @@ class _ScopeChild(Scope):
 			yield key, value
 
 	def get(self, key, default=None):
-		if key in self._parent:
-			return self._parent[key]
-		return super().get(key, default)
+		default = self._parent.get(key, default=default)
+		return super().get(key, default=default)
 
 	def __contains__(self, key):
 		if key in self._parent:
@@ -49,12 +50,15 @@ class _ScopeChild(Scope):
 		return super().__contains__(key)
 
 	def __getitem__(self, key):
-		if key in self._parent:
-			return self._parent[key]
-		return super().__getitem__(key)
+		try:
+			return super().__getitem__(key)
+		except KeyError:
+			pass
+
+		return self._parent[key]
 
 	def __setitem__(self, key, value):
-		if key in self._parent:
+		if (not self.allowOverride) and (key in self._parent):
 			raise RuntimeError(key)
 		super().__setitem__(key, value)
 

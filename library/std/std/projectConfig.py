@@ -10,6 +10,7 @@ def getRules(_):
 
 def getInitialScope(project):
 	initialScope = project['std/base']['initialScope'].child()
+	type(initialScope).allowOverride = True
 	project.this['initialScope'] = initialScope
 
 	Executor(
@@ -25,4 +26,5 @@ def getInitialScope(project):
 
 	del project.this['initialScope']
 
+	type(initialScope).allowOverride = False
 	return initialScope
