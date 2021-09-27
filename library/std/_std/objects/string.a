@@ -1,5 +1,5 @@
-from std.std.objects.property import Property
-from std.std.objects._internals import getStringLength
+from std._std.objects.property import Property
+from std._std.objects._internals import getStringLength
 
 
 class String(String):

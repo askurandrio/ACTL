@@ -31,6 +31,7 @@ def pytest_collection_modifyitems(session, config, items):
 
 		while filePath != '':
 			moduleName = filePath.replace('/', '.')
+			print(moduleName)
 			module = importlib.import_module(moduleName)
 			order_key = getattr(module, 'ORDER_KEY', float('inf'))
 			order_keys.insert(0, order_key)
