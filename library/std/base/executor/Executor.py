@@ -18,6 +18,9 @@ class Executor:
 			except StopIteration:
 				self.frames.pop(-1)
 				continue
+			except Exception as ex:
+				self.frames.pop(-1)
+				self.frames[-1].throw(ex)
 
 			self._executeOpcode(opcode)
 

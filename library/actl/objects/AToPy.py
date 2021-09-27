@@ -22,5 +22,6 @@ class AToPy(metaclass=_MetaAToPy):
 		return str(self)
 
 	def __str__(self):
-		res = self._value.getAttribute(String).call()
-		return type(self)(res)
+		toStringMethod = executeSyncCoroutine(self._value.getAttribute(String))
+		aString = executeSyncCoroutine(toStringMethod.call())
+		return type(self)(aString)

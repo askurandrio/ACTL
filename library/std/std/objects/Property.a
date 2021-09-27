@@ -1,0 +1,6 @@
+class Property:
+    fun __init__(self, getter):
+        self._getter = getter
+
+    fun __get__(self, instance):
+        return self._getter(instance)

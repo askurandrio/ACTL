@@ -31,8 +31,9 @@ async def _Function__String(self):
 	name = await self.getAttribute('name')
 	signature = await self.getAttribute('signature')
 	signatureArgs = await signature.getAttribute('args')
+	body = await self.getAttribute('body')
 	args = ', '.join(signatureArgs)
-	return await String.call(f'fun {name}({args})')
+	return await String.call(f'fun {name}({args}): {body}')
 
 
 @addMethod(Signature, '__init__')

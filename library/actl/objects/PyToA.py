@@ -50,7 +50,7 @@ async def _PyToA__getAttribute(self, key):
 
 	try:
 		return await superGetAttribute.call(key)
-	except AAttributeNotFound:
+	except AAttributeNotFound(key=key).class_:
 		pass
 
 	if isinstance(key, str):

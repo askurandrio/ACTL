@@ -1,5 +1,4 @@
 from itertools import zip_longest
-import traceback
 from actl import objects, asDecorator
 from actl.opcodes import VARIABLE, RETURN
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe

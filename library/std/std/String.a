@@ -1,4 +1,10 @@
+from std.std.objects.property import Property
+from std.std.objects._internals import getStringLength
+
+
 class String(String):
+    length = Property(getStringLength)
+
     fun split(self, separator):
         first = 0
         second = self.index(separator, -1)
@@ -6,5 +12,5 @@ class String(String):
     fun index(self, subString, default):
         result = 0
 
-        while result < 2:
+        while result < self.length:
             result = result + 1

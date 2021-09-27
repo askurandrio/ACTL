@@ -73,6 +73,10 @@ async def _actlClass__handler(executor, opcode):
 			self_[key] = value
 			continue
 
+		if executeSyncCoroutine(value.hasAttribute('__get__')):
+			self_[key] = value
+			continue
+
 		newClass.setAttribute(key, value)
 
 	executor.scope = prevScope
