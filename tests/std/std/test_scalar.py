@@ -6,8 +6,6 @@ ORDER_KEY = 2
 
 
 async def test_emptyVector(execute):
-	execute.executeInInitialScope('from std._std.objects.vector import Vector')
-
 	execute('[]')
 
 	assert execute.parsed.code == [
@@ -21,8 +19,6 @@ async def test_emptyVector(execute):
 
 
 async def test_vectorWithNumber(execute):
-	execute.executeInInitialScope('from std._std.objects.vector import Vector')
-
 	execute('[1]')
 
 	assert execute.parsed.code == [

@@ -1,0 +1,4 @@
+_pyStdModule = PyToA.eval("__import__('std.std.objects.internals')")
+_pyInternalsModule = _pyStdModule.std.objects.internals
+
+getStringLength = _pyInternalsModule.getStringLength

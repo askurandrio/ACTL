@@ -2,8 +2,6 @@ ORDER_KEY = 1
 
 
 def test_Vector__append(execute):
-	execute.executeInInitialScope('from std._std.objects.vector import Vector')
-
 	execute(
 		'v = Vector()\n'
 		'v.append(1)'

@@ -9,4 +9,4 @@ def execute():
 
 
 class _Execute(AbstractExecute):
-	_PROJECT_NAME = 'std/_std'
+	_PROJECT_NAME = 'std'

@@ -5,7 +5,7 @@ import logging
 from .utils import *
 from . import objects
 from . import opcodes
-from .Buffer import Buffer
+from . import Buffer
 from .Parser import Parser
 from .Project import *
 from .Scope import Scope
