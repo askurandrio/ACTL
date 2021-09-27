@@ -1,9 +1,34 @@
-from actl.syntax import Token, Parsed, Or, BufferRule, SyntaxRules
-from actl.opcodes import CALL_FUNCTION_STATIC, GET_ATTRIBUTE, CALL_FUNCTION
+from actl.syntax import Token, Parsed, Or, BufferRule, SyntaxRules, IsInstance
+from actl.opcodes import CALL_FUNCTION_STATIC, GET_ATTRIBUTE, CALL_FUNCTION, VARIABLE
 from std.base.rules import RULES as stdRULES
 
 
 RULES = SyntaxRules(stdRULES)
+
+
+@RULES.add(IsInstance(VARIABLE), Token('['), manualApply=True, useParser=True)
+def _parseSlice(parser, inp):
+	inpRule = BufferRule(parser, inp)
+	collectionName = inpRule.pop(IsInstance(VARIABLE)).one().name
+	inpRule.pop(Token('['))
+
+	startDeclarationCode = inpRule.pop(Parsed(':'))
+	startVariable = startDeclarationCode.pop(-1)
+	parser.define(*startDeclarationCode)
+	inpRule.pop(Token(':]'))
+
+	sliceVariable = parser.makeTmpVar()
+	parser.define(CALL_FUNCTION_STATIC(dst=sliceVariable.name, function='Slice', args=[startVariable]))
+
+	getItemMethodVariable = parser.makeTmpVar()
+	parser.define(GET_ATTRIBUTE(getItemMethodVariable.name, collectionName.name, '__getitem__'))
+
+	subCollectionVariable = parser.makeTmpVar()
+	parser.define(
+		CALL_FUNCTION(subCollectionVariable.name, getItemMethodVariable.name, args=[sliceVariable])
+	)
+
+	inp.insert(0, [subCollectionVariable])
 
 
 @RULES.add(Token('['), manualApply=True, useParser=True)

@@ -14,3 +14,4 @@ class String(String):
 
         while result < self.length:
             result = result + 1
+            subString = self[result:]
