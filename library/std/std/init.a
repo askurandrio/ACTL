@@ -1,2 +1,2 @@
-from std.std.Vector import Vector
-from std.std.String import String
+from std.std.objects.vector import Vector
+from std.std.objects.string import String
