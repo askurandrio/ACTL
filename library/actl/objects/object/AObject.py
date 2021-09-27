@@ -2,13 +2,14 @@ import sys
 import traceback
 
 from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
-from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
+from actl.objects.object.exceptions import AAttributeNotFound
 
 
 sys.setrecursionlimit(500)
 
 
 class AObject:
+	_default = object()
 	Function = None
 	Object = None
 	String = None
@@ -17,23 +18,25 @@ class AObject:
 		self._head = head
 
 	async def getAttribute(self, name):
-		try:
-			return await self.lookupSpecialAttribute(name)
-		except AAttributeIsNotSpecial(key=name).class_:
-			pass
+		attribute, isSuccess = await self.lookupSpecialAttribute(name)
+		if isSuccess:
+			return attribute
 
 		getAttribute = await self.getAttribute('__getAttribute__')
 
 		return await getAttribute.call(name)
 
 	async def _get_getAttribute(self):
-		try:
-			return self.lookupAttributeInHead('__getAttribute__')
-		except AAttributeNotFound('__getAttribute__').class_:
-			pass
+		getAttribute, isSuccess = self.lookupAttributeInHead('__getAttribute__')
+		if isSuccess:
+			return getAttribute, True
 
-		getAttribute = self.lookupAttributeInClsSelf('__getAttribute__')
-		return await self.bindAttribute(getAttribute)
+		getAttribute, isSuccess = self.lookupAttributeInClsSelf('__getAttribute__')
+		if isSuccess:
+			bindedGetAttribute = await self.bindAttribute(getAttribute)
+			return bindedGetAttribute, True
+
+		return None, False
 
 	async def get(self, instance):
 		get = await self.getAttribute('__get__')
@@ -41,16 +44,20 @@ class AObject:
 		return await get.call(instance)
 
 	async def _get_superGetAttribute(self):
-		try:
-			return self.lookupAttributeInHead('__superGetAttribute__')
-		except AAttributeNotFound('__superGetAttribute__').class_:
-			pass
+		superGetAttribute, isSuccess = self.lookupAttributeInHead('__superGetAttribute__')
+		if superGetAttribute:
+			return superGetAttribute, True
 
-		superGetAttribute = self.lookupAttributeInClsSelf('__superGetAttribute__')
-		return await self.bindAttribute(superGetAttribute)
+		superGetAttribute, isSuccess = self.lookupAttributeInClsSelf('__superGetAttribute__')
+		if isSuccess:
+			bindedSuperGetAttribute = await self.bindAttribute(superGetAttribute)
+			return bindedSuperGetAttribute, True
+
+		return None, False
 
 	async def super_(self, for_, name):
-		superGetAttribute = await self.lookupSpecialAttribute('__superGetAttribute__')
+		superGetAttribute, isSuccess = await self.lookupSpecialAttribute('__superGetAttribute__')
+		AAttributeNotFound.check(isSuccess, key='__superGetAttribute__')
 		return await superGetAttribute.call(for_, name)
 
 	def lookupAttributeInClsSelf(self, key):
@@ -60,19 +67,19 @@ class AObject:
 		for cls in [class_, *parents]:
 			self_ = cls.self_
 			try:
-				return self_[key]
+				return self_[key], True
 			except KeyError:
 				pass
 
-		raise AAttributeNotFound(key)
+		return None, False
 
 	def lookupAttributeInHead(self, key):
-		try:
-			return self._head[key]
-		except KeyError:
-			pass
+		attribute = self._head.get(key, self._default)
 
-		raise AAttributeNotFound(key)
+		if attribute is self._default:
+			return None, False
+
+		return attribute, True
 
 	def setAttribute(self, key, value):
 		self._head[key] = value
@@ -80,7 +87,7 @@ class AObject:
 	async def hasAttribute(self, key):
 		try:
 			await self.getAttribute(key)
-		except AAttributeNotFound(key).class_:
+		except AAttributeNotFound.class_(key):
 			return False
 		else:
 			return True
@@ -92,25 +99,31 @@ class AObject:
 
 	@property
 	def class_(self):
-		return self.lookupAttributeInHead('__class__')
+		class_, isSucess = self.lookupAttributeInHead('__class__')
+		AAttributeNotFound.check(isSucess, key='__class__')
+		return class_
 
 	@property
 	def self_(self):
-		return self.lookupAttributeInHead('__self__')
+		self_, isSucess = self.lookupAttributeInHead('__self__')
+		AAttributeNotFound.check(isSucess, key='__self__')
+		return self_
 
 	@property
 	def parents(self):
-		return self.lookupAttributeInHead('__parents__')
+		parents, isSucess = self.lookupAttributeInHead('__parents__')
+		AAttributeNotFound.check(isSucess, key='__parents__')
+		return parents
 
 	async def lookupSpecialAttribute(self, key):
 		if key == '__class__':
-			return self.class_
+			return self.class_, True
 
 		if key == '__self__':
-			return self.self_
+			return self.self_, True
 
 		if key == '__parents__':
-			return self.parents
+			return self.parents, True
 
 		if key == '__getAttribute__':
 			return await self._get_getAttribute()
@@ -118,7 +131,7 @@ class AObject:
 		if key == '__superGetAttribute__':
 			return await self._get_superGetAttribute()
 
-		raise AAttributeIsNotSpecial(key)
+		return None, False
 
 	def isinstance_(self, instance):
 		if instance.class_ == self:

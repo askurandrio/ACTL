@@ -1,5 +1,5 @@
 from actl.objects.object.AObject import AObject
-from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
+from actl.objects.object.exceptions import AAttributeNotFound
 from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
 
 
@@ -9,22 +9,18 @@ AObject.Object = Object
 
 @addMethod(Object, '__getAttribute__')
 async def object__getAttribute(self, key):
-	try:
-		return await self.lookupSpecialAttribute(key)
-	except AAttributeIsNotSpecial(key).class_:
-		pass
+	attribute, isSuccess = await self.lookupSpecialAttribute(key)
+	if isSuccess:
+		return attribute
 
-	try:
-		return self.lookupAttributeInHead(key)
-	except AAttributeNotFound(key).class_:
-		pass
+	attribute, isSuccess = self.lookupAttributeInHead(key)
+	if isSuccess:
+		return attribute
 
-	try:
-		attribute = self.lookupAttributeInClsSelf(key)
-	except AAttributeNotFound(key).class_:
-		pass
-	else:
-		return await self.bindAttribute(attribute)
+	attribute, isSuccess = self.lookupAttributeInClsSelf(key)
+	if isSuccess:
+		bindedAttribute = await self.bindAttribute(attribute)
+		return bindedAttribute
 
 	raise AAttributeNotFound(key)
 

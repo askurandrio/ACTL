@@ -18,7 +18,7 @@ class NativeMethod(AObject):
 
 	async def lookupSpecialAttribute(self, key):
 		if key == '__get__':
-			return self
+			return self, True
 
 		return await super().lookupSpecialAttribute(key)
 
@@ -49,7 +49,7 @@ class NativeFunction(AObject):
 
 	async def lookupSpecialAttribute(self, key):
 		if key == '__call__':
-			return self
+			return self, True
 
 		return await super().lookupSpecialAttribute(key)
 

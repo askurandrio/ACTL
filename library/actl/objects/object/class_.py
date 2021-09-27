@@ -1,35 +1,28 @@
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeMethod import NativeFunction, NativeMethod
-from actl.objects.object.exceptions import AAttributeIsNotSpecial, AAttributeNotFound
+from actl.objects.object.exceptions import AAttributeNotFound
 
 
 async def class__getAttribute(self, key):
-	try:
-		return await self.lookupSpecialAttribute(key)
-	except AAttributeIsNotSpecial(key).class_:
-		pass
+	attribute, isSuccess = await self.lookupSpecialAttribute(key)
+	if isSuccess:
+		return attribute
 
-	try:
-		attribute = self.lookupAttributeInHead(key)
-	except AAttributeNotFound(key).class_:
-		pass
-	else:
-		return await self.bindAttribute(attribute)
+	attribute, isSuccess = self.lookupAttributeInHead(key)
+	if isSuccess:
+		bindedAttribute = await self.bindAttribute(attribute)
+		return bindedAttribute
 
-	try:
-		attribute = self.lookupAttributeInClsSelf(key)
-	except AAttributeNotFound(key).class_:
-		pass
-	else:
-		return await self.bindAttribute(attribute)
+	attribute, isSuccess = self.lookupAttributeInClsSelf(key)
+	if isSuccess:
+		bindedAttribute = await self.bindAttribute(attribute)
+		return bindedAttribute
 
 	for parent in self.parents:
-		try:
-			attribute = parent.lookupAttributeInHead(key)
-		except AAttributeNotFound(key).class_:
-			pass
-		else:
-			return await self.bindAttribute(attribute)
+		attribute, isSuccess = parent.lookupAttributeInHead(key)
+		if isSuccess:
+			bindedAttribute = await self.bindAttribute(attribute)
+			return bindedAttribute
 
 	raise AAttributeNotFound(key)
 
@@ -42,12 +35,10 @@ async def class__superGetAttribute(self, for_, key):
 		parents = parents[forIndex+1:]
 
 	for parent in parents:
-		try:
-			attribute = parent.lookupAttributeInHead(key)
-		except AAttributeNotFound(key).class_:
-			pass
-		else:
-			return await self.bindAttribute(attribute)
+		attribute, isSucess = parent.lookupAttributeInHead(key)
+		if isSucess:
+			bindedAttribute = await self.bindAttribute(attribute)
+			return bindedAttribute
 
 	raise AAttributeNotFound(key)
 

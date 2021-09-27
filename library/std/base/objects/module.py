@@ -79,7 +79,7 @@ async def _Module__getAttribute(self, key):
 
 	try:
 		return await superGetAttribute.call(key)
-	except AAttributeNotFound(key=key).class_:
+	except AAttributeNotFound.class_(key=key):
 		pass
 
 	scope = await superGetAttribute.call('scope')
