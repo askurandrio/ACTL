@@ -35,19 +35,23 @@ class CallFrame:
 		returnValue = self._default
 
 		def cleanup():
-			while len(executor.frames) != cleanup.framesLength:
-				frame = executor.frames.pop(-1)
+			while cleanup.frames:
+				frame = cleanup.frames.pop(-1)
 				frame.close()
-
-			executor.return_ = cleanup.oldExecutorReturn
 
 		def return_(detachedReturnValue):
 			nonlocal returnValue
+
+			while len(executor.frames) != return_.framesLength:
+				cleanup.frames.insert(0, executor.frames.pop(-1))
+
 			returnValue = detachedReturnValue
+			executor.return_ = return_.oldExecutorReturn
 
 		executor = yield from bindExecutor().__await__()
-		cleanup.framesLength = len(executor.frames)
-		executor.return_, cleanup.oldExecutorReturn = return_, executor.return_
+		return_.framesLength = len(executor.frames) + 1
+		cleanup.frames = []
+		executor.return_, return_.oldExecutorReturn = return_, executor.return_
 
 		for opcode in self._code:
 			if returnValue is not self._default:

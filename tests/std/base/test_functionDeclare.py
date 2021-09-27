@@ -106,3 +106,15 @@ async def test_functionWithReturn(execute):
 	]
 
 	assert execute.executed.scope['_tmpVar1'] == await Number.call('1')
+
+
+
+async def test_returnFromWhile(execute):
+	execute(
+		'fun f():\n'
+		'    while True:\n'
+		'        return 1\n'
+		'f()'
+	)
+
+	assert execute.executed.scope['_tmpVar1'] == await Number.call('1')
