@@ -28,7 +28,7 @@ async def test_simple_while(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert await cycle.getAttribute('code') == (
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
 		),
@@ -60,7 +60,7 @@ async def test_whileWithFullCodeBlock(execute):
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert await cycle.getAttribute('code') == (
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
 		),

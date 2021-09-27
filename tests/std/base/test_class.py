@@ -20,7 +20,7 @@ async def test_simpleClassDeclare(execute):
 			(),
 			{
 				'body': (
-					opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', function=Number.call, args=['1']),
+					opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', function=Number.call, staticArgs=['1']),
 					opcodes.SET_VARIABLE('a', '_tmpVar1_1')
 				)
 			}
@@ -62,7 +62,7 @@ async def test_classWithInitMethod(execute):
 				)
 			}
 		),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION('_tmpVar2', 'C', args=['_tmpVar1']),
 		opcodes.SET_VARIABLE('c', '_tmpVar2')
 	]
@@ -110,7 +110,7 @@ async def test_classWithMethod(execute):
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, args=['2']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, staticArgs=['2']),
 							opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
 							opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
 							opcodes.RETURN('a')
@@ -123,7 +123,7 @@ async def test_classWithMethod(execute):
 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
 		opcodes.GET_ATTRIBUTE('_tmpVar1', 'c', 'method'),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar1', args=['_tmpVar2']),
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]
@@ -160,7 +160,7 @@ async def test_classWithTwoMethod(execute):
 						(
 							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, args=['2']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, staticArgs=['2']),
 							opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
 							opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
 							opcodes.RETURN('a')
@@ -171,7 +171,7 @@ async def test_classWithTwoMethod(execute):
 						'methodB',
 						await Signature.call(['self', 'b']),
 						(
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, args=['1']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['1']),
 							opcodes.CALL_OPERATOR('_tmpVar2_2', 'b', '+', '_tmpVar2_1'),
 							opcodes.SET_VARIABLE('b', '_tmpVar2_2'),
 							opcodes.GET_ATTRIBUTE('_tmpVar2_3', 'self', 'methodA'),
@@ -187,7 +187,7 @@ async def test_classWithTwoMethod(execute):
 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
 		opcodes.GET_ATTRIBUTE('_tmpVar1', 'c', 'methodB'),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar1', args=['_tmpVar2']),
 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3')
 	]
@@ -216,7 +216,7 @@ async def test_classInherit(execute):
 						'baseMethod',
 						await Signature.call(['self']),
 						(
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, args=['1']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['1']),
 							opcodes.CALL_FUNCTION('_tmpVar2_2', 'mock', args=['_tmpVar2_1']),
 							opcodes.VARIABLE('_tmpVar2_2'),
 							opcodes.RETURN('None')
@@ -248,7 +248,7 @@ async def test_classInherit(execute):
 						'inheritMerhod',
 						await Signature.call(['self']),
 						(
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, args=['2']),
+							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['2']),
 							opcodes.CALL_FUNCTION('_tmpVar2_2', 'mock', args=['_tmpVar2_1']),
 							opcodes.VARIABLE('_tmpVar2_2'),
 							opcodes.RETURN('None')

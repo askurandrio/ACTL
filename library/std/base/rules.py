@@ -110,7 +110,7 @@ def _parseString(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, args=[string]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, staticArgs=[string]))
 
 	inp.insert(0, [dst])
 
@@ -124,7 +124,7 @@ def _isDigit(_, token):
 def _parseNumber(*args, parser=None):
 	number = ''.join(args)
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, args=[number]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, staticArgs=[number]))
 	return [dst]
 
 

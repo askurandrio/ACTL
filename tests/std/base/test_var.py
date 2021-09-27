@@ -20,7 +20,7 @@ def test_setVariable(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, args=['1']
+			dst='_tmpVar1', function=Number.call, staticArgs=['1']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar1')
 	]

@@ -104,8 +104,12 @@ async def _SET_VARIABLE__handler(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
 async def _CALL_FUNCTION_STATIC__handler(executor, opcode):
 	assert opcode.typeb == '(', f'{opcode.typeb} is unexpected typeb'
+	args = [
+		*opcode.staticArgs,
+		*(executor.scope[varName] for varName in opcode.args)
+	]
 
-	result = await opcode.function(*opcode.args, **opcode.kwargs)
+	result = await opcode.function(*args, **opcode.kwargs)
 
 	executor.scope[opcode.dst] = result
 

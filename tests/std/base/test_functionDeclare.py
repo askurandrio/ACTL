@@ -43,7 +43,7 @@ async def test_declareMultiLineFunction(execute):
 			'f',
 			await Signature.call([]),
 			(
-				opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, args=['1']),
+				opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, staticArgs=['1']),
 				opcodes.SET_VARIABLE(dst='a', src='_tmpVar1_1'),
 				opcodes.CALL_FUNCTION(dst='_tmpVar1_2', function='mock', args=['a']),
 				opcodes.VARIABLE(name='_tmpVar1_2'),
@@ -75,7 +75,7 @@ async def test_declareFunctionWithArg(execute):
 			),
 			None
 		),
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=Number.call, args=['1']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION(dst='_tmpVar2', function='f', args=['_tmpVar1']),
 		opcodes.VARIABLE(name='_tmpVar2')
 	]
@@ -96,7 +96,7 @@ async def test_functionWithReturn(execute):
 			'f',
 			await Signature.call([]),
 			(
-				opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', Number.call, args=['1']),
+				opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', Number.call, staticArgs=['1']),
 				opcodes.RETURN('_tmpVar1_1')
 			),
 			None

@@ -22,7 +22,7 @@ async def test_floatNumber(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, args=['1.1']
+			dst='_tmpVar1', function=Number.call, staticArgs=['1.1']
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]
@@ -34,7 +34,7 @@ async def test_negativeNumber(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, args=['-1']
+			dst='_tmpVar1', function=Number.call, staticArgs=['-1']
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	]

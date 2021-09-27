@@ -15,13 +15,13 @@ async def test_simple_if(execute):
 			(
 				(
 					opcodes.CALL_FUNCTION_STATIC(
-						dst='_tmpVar1', function=Number.call, args=['1']
+						dst='_tmpVar1', function=Number.call, staticArgs=['1']
 					),
 					opcodes.VARIABLE(name='_tmpVar1')
 				),
 				(
 					opcodes.CALL_FUNCTION_STATIC(
-						dst='_tmpVar2', function=Number.call, args=['2']
+						dst='_tmpVar2', function=Number.call, staticArgs=['2']
 					),
 					opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 				)
@@ -39,13 +39,13 @@ async def test_ifFalse(execute):
 	conditionFrame, code = Buffer(await if_.getAttribute('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, args=['0']
+			dst='_tmpVar1', function=Number.call, staticArgs=['0']
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar2', function=Number.call, args=['1']
+			dst='_tmpVar2', function=Number.call, staticArgs=['1']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 	)
@@ -62,13 +62,13 @@ async def test_ifElif(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar1', function=Number.call, args=['0']
+					dst='_tmpVar1', function=Number.call, staticArgs=['0']
 				),
 				opcodes.VARIABLE(name='_tmpVar1')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar2', function=Number.call, args=['1']
+					dst='_tmpVar2', function=Number.call, staticArgs=['1']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 			)
@@ -76,13 +76,13 @@ async def test_ifElif(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar3', function=Number.call, args=['1']
+					dst='_tmpVar3', function=Number.call, staticArgs=['1']
 				),
 				opcodes.VARIABLE(name='_tmpVar3')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar4', function=Number.call, args=['2']
+					dst='_tmpVar4', function=Number.call, staticArgs=['2']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4')
 			)
@@ -99,19 +99,19 @@ async def test_ifElse(execute):
 	conditionFrame, code = Buffer(await if_.getAttribute('conditions')).one()
 	assert conditionFrame == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, args=['0']
+			dst='_tmpVar1', function=Number.call, staticArgs=['0']
 		),
 		opcodes.VARIABLE(name='_tmpVar1')
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar2', function=Number.call, args=['1']
+			dst='_tmpVar2', function=Number.call, staticArgs=['1']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 	)
 	assert await if_.getAttribute('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar3', function=Number.call, args=['2']
+			dst='_tmpVar3', function=Number.call, staticArgs=['2']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar3')
 	)
@@ -127,13 +127,13 @@ async def test_ifElifElseWithFullCodeBlock(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar1', function=Number.call, args=['0']
+					dst='_tmpVar1', function=Number.call, staticArgs=['0']
 				),
 				opcodes.VARIABLE(name='_tmpVar1')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar2', function=Number.call, args=['1']
+					dst='_tmpVar2', function=Number.call, staticArgs=['1']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
 			)
@@ -141,13 +141,13 @@ async def test_ifElifElseWithFullCodeBlock(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar3', function=Number.call, args=['0']
+					dst='_tmpVar3', function=Number.call, staticArgs=['0']
 				),
 				opcodes.VARIABLE(name='_tmpVar3')
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar4', function=Number.call, args=['2']
+					dst='_tmpVar4', function=Number.call, staticArgs=['2']
 				),
 				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4')
 			)
@@ -155,7 +155,7 @@ async def test_ifElifElseWithFullCodeBlock(execute):
 	)
 	assert await if_.getAttribute('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar5', function=Number.call, args=['3']
+			dst='_tmpVar5', function=Number.call, staticArgs=['3']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar5')
 	)
