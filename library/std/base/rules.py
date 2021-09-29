@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 from actl.Buffer import TransactionBuffer, Buffer
-from actl.objects import String, Number, executeSyncCoroutine
+from actl.objects import Number, executeSyncCoroutine
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
 	BufferRule, Parsed, Not
@@ -110,7 +110,7 @@ def _parseString(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=String.call, staticArgs=[string]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='String', staticArgs=[string]))
 
 	inp.insert(0, [dst])
 

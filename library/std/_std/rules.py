@@ -18,7 +18,13 @@ def _parseSlice(parser, inp):
 	inpRule.pop(Token(':]'))
 
 	sliceVariable = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=sliceVariable.name, function='Slice', args=[startVariable.name, 'None', 'None']))
+	parser.define(
+		CALL_FUNCTION_STATIC(
+			dst=sliceVariable.name,
+			function='Slice',
+			args=[startVariable.name, 'None', 'None']
+		)
+	)
 
 	getItemMethodVariable = parser.makeTmpVar()
 	parser.define(GET_ATTRIBUTE(getItemMethodVariable.name, collectionVariable.name, '__getItem__'))

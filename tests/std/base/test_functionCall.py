@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from actl.objects import AToPy, PyToA, String
+from actl.objects import AToPy, PyToA
 from actl.opcodes import opcodes
 
 
@@ -40,7 +40,7 @@ async def test_callWithString(execute, testF):
 	execute('testF("s")')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=String.call, staticArgs=['s']),
+		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function='String', staticArgs=['s']),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar2', function='testF', args=['_tmpVar1']
 		),

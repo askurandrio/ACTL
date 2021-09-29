@@ -35,4 +35,5 @@ async def test_Slice_syntaxInit(execute):
 
 	assert AToPy(execute.executed.scope['_tmpVar4']) == getItemMock.return_value
 	getItemMock.assert_called_once_with(AToPy(execute.executed.scope['_tmpVar2']))
-	assert str(execute.executed.scope['_tmpVar2']) == 'Slice<start=Number<2>, stop=NoneType<>, step=↑...>'
+	assert str(execute.executed.scope['_tmpVar2']) ==\
+		'Slice<start=Number<2>, stop=NoneType<>, step=↑...>'
