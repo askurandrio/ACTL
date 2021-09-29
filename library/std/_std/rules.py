@@ -9,23 +9,23 @@ RULES = SyntaxRules(stdRULES)
 @RULES.add(IsInstance(VARIABLE), Token('['), manualApply=True, useParser=True)
 def _parseSlice(parser, inp):
 	inpRule = BufferRule(parser, inp)
-	collectionName = inpRule.pop(IsInstance(VARIABLE)).one().name
+	collectionVariable = inpRule.pop(IsInstance(VARIABLE)).one()
 	inpRule.pop(Token('['))
 
-	startDeclarationCode = inpRule.pop(Parsed(':'))
+	startDeclarationCode = inpRule.pop(Parsed(Token(':')))
 	startVariable = startDeclarationCode.pop(-1)
 	parser.define(*startDeclarationCode)
 	inpRule.pop(Token(':]'))
 
 	sliceVariable = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=sliceVariable.name, function='Slice', args=[startVariable]))
+	parser.define(CALL_FUNCTION_STATIC(dst=sliceVariable.name, function='Slice', args=[startVariable.name, 'None', 'None']))
 
 	getItemMethodVariable = parser.makeTmpVar()
-	parser.define(GET_ATTRIBUTE(getItemMethodVariable.name, collectionName.name, '__getitem__'))
+	parser.define(GET_ATTRIBUTE(getItemMethodVariable.name, collectionVariable.name, '__getItem__'))
 
 	subCollectionVariable = parser.makeTmpVar()
 	parser.define(
-		CALL_FUNCTION(subCollectionVariable.name, getItemMethodVariable.name, args=[sliceVariable])
+		CALL_FUNCTION(subCollectionVariable.name, getItemMethodVariable.name, args=[sliceVariable.name])
 	)
 
 	inp.insert(0, [subCollectionVariable])

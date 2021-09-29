@@ -1,4 +1,3 @@
-import functools
 from actl import opcodes
 from actl.objects import While, Bool, If, AToPy, Object
 
@@ -19,9 +18,15 @@ class Executor:
 			except StopIteration:
 				self.frames.pop(-1)
 				continue
-			except Exception as ex:
-				self.frames.pop(-1)
-				self.frames[-1].throw(ex)
+			except Exception as nextEx:
+				try:
+					self.frames[-1].throw(nextEx)
+				except RuntimeError as throwEx:
+					if throwEx.args and (throwEx.args[0] == 'cannot reuse already awaited coroutine'):
+						self.frames.pop(-1)
+						self.frames[-1].throw(nextEx)
+
+					raise throwEx
 
 			self._executeOpcode(opcode)
 

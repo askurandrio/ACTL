@@ -1,4 +1,4 @@
-ORDER_KEY = 2
+ORDER_KEY = 3
 
 
 async def test_String__init(execute):

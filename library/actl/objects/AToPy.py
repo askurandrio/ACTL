@@ -18,6 +18,12 @@ class AToPy(metaclass=_MetaAToPy):
 	def __init__(self, value):
 		self._value = value
 
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+
+		return self._value == other._value
+
 	def __repr__(self):
 		return str(self)
 
