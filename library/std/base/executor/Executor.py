@@ -1,3 +1,4 @@
+import functools
 from actl import opcodes
 from actl.objects import While, Bool, If, AToPy, Object
 
@@ -109,7 +110,12 @@ async def _CALL_FUNCTION_STATIC__handler(executor, opcode):
 		*(executor.scope[varName] for varName in opcode.args)
 	]
 
-	result = await opcode.function(*args, **opcode.kwargs)
+	if isinstance(opcode.function, str):
+		function = executor.scope[opcode.function].call
+	else:
+		function = opcode.function
+
+	result = await function(*args, **opcode.kwargs)
 
 	executor.scope[opcode.dst] = result
 

@@ -1,0 +1,11 @@
+from std._std.objects._internals import addMethod
+from std._std.objects.string.string import String
+import std._std.objects.string.string__index
+
+
+fun String__split(self, separator):
+    first = 0
+    second = self.index(separator, -1)
+
+
+addMethod(String, 'split', String__split)

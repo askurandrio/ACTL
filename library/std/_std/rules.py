@@ -36,7 +36,7 @@ def _parseVector(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Token('['))
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=parser.scope['Vector'].call, args=[]))
+	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='Vector'))
 
 	if not inpRule.startsWith(Token(']')):
 		appendVarName = parser.makeTmpVar().name

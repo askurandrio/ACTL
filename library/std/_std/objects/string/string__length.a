@@ -1,0 +1,12 @@
+from std._std.objects.property import Property
+from std._std.objects._internals import addMethod
+from std._std.objects.string.string import String
+
+
+_pyStdModule = PyToA.eval("__import__('std._std.objects.string.internals')")
+_stringInternals = _pyStdModule._std.objects.string.internals
+
+String__length = Property(_stringInternals.getStringLength)
+
+
+addMethod(String, 'length', String__length)

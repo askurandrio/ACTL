@@ -1,0 +1,9 @@
+from std._std.objects._internals import addMethod
+from std._std.objects.vector.vector import Vector
+
+
+fun Vector__init(self):
+    self._head = PyToA.eval('[]')
+
+
+addMethod(Vector, '__init__', Vector__init)

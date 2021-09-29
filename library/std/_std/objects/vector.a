@@ -1,6 +1,0 @@
-class Vector:
-	fun __init__(self):
-		self._head = pyEval('[]')
-
-	fun append(self, element):
-		self._head.append(element)

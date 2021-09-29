@@ -11,18 +11,17 @@ class AbstractExecute:
 		self._project = Project(source=[{'include': self._PROJECT_NAME}])
 
 	def executeInInitialScope(self, code):
-		initialScope = self._project['initialScope']
-		initialScopeChild = initialScope.child()
-		type(initialScopeChild).allowOverride = True
+		scopeChildType = type(self.scope.child())
+		scopeChildType.allowOverride = True
 
 		Executor(
 			iter(
-				self._project['parseInput'](initialScope, Buffer(code))
+				self._project['parseInput'](self.scope, Buffer(code))
 			),
-			initialScope
+			self.scope
 		).execute()
 
-		type(initialScopeChild).allowOverride = False
+		scopeChildType.allowOverride = False
 
 	def flush(self):
 		assert self.executed
