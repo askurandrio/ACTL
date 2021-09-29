@@ -1,5 +1,7 @@
 import os
 
+import asyncstdlib
+
 from actl import DIR_LIBRARY
 from actl.Buffer import Buffer
 from actl.objects import addMethod, addMethodToClass, makeClass, AAttributeNotFound, AToPy
@@ -12,9 +14,18 @@ Module = makeClass('Module')
 
 @addMethodToClass(Module, '__call__')
 async def _Module__call(cls, path=None, name=None):
+	executor = await bindExecutor()
+	project = AToPy(executor.scope['__project__'])
+	projectMainF = project.this['projectF']
+
+	return await _Module__call_cached(cls, projectMainF, path, name)
+
+
+@asyncstdlib.lru_cache(maxsize=None)
+async def _Module__call_cached(cls, projectMainF, path, name):
 	if path is not None:
 		superCall = await cls.super_(Module, '__call__')
-		return await superCall.call(path)
+		return await superCall.call(projectMainF, path)
 
 	if '.' not in name:
 		path = os.path.join(DIR_LIBRARY, name)
@@ -31,7 +42,7 @@ async def _Module__call(cls, path=None, name=None):
 
 
 @addMethod(Module, '__init__')
-async def _Module__init(self, path):
+async def _Module__init(self, projectMainF, path):
 	isPackage = os.path.isdir(path)
 	if not isPackage:
 		path = f'{path}.a'

@@ -22,12 +22,13 @@ async def _Import__call(cls, fromName=None, importName=None):
 			module = await module.getAttribute(moduleName)
 
 	executor = await bindExecutor()
-	for key, value in (await module.getAttribute('scope')).getDiff():
-		if importName != '*':
-			if key != importName:
-				continue
 
-		executor.scope[key] = value
+	if importName == '*':
+		for key, value in (await module.getAttribute('scope')).getDiff():
+			executor.scope[key] = value
+	else:
+		attribute = await module.getAttribute(importName)
+		executor.scope[importName] = attribute
 
 	return module
 

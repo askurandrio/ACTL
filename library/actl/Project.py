@@ -107,6 +107,16 @@ def _includeHandler(project, projectF):
 	fileName = fileName + '.yaml'
 	with open(fileName) as file:
 		source = yaml.load(file, Loader=yaml.SafeLoader)
+		source = [
+			*source,
+			{
+				'setKey': {
+					'key': 'projectF',
+					'value': 'projectF'
+				}
+			}
+		]
+
 	subProject = Project(source=source, this=project.this)
 	project[projectF] = subProject
 	_recursiveUpdate(project._head, subProject._head)  # pylint: disable=protected-access
