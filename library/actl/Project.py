@@ -1,8 +1,8 @@
-import os
 import copy
+import os
+from collections import ChainMap
 import logging
 import importlib
-import typing
 
 import yaml
 
@@ -15,9 +15,13 @@ class Project:
 	_DEFAULT_HANDLERS = {}
 
 	def __init__(self, source=None, this=None):
-		self._head = {
-			'handlers': copy.copy(self._DEFAULT_HANDLERS)
-		}
+		self._head = {}
+		self['__parents__'] = []
+		self['handlers'] = InheritedDict(
+			'handlers',
+			copy.copy(self._DEFAULT_HANDLERS),
+			self
+		)
 
 		if this is not None:
 			self.processSource([
@@ -36,6 +40,10 @@ class Project:
 	def this(self):
 		return self._head.get('this', self)
 
+	@property
+	def parents(self):
+		return _ProjectParentsProxy(self)
+
 	def processSource(self, source):
 		assert isinstance(source, list), source
 
@@ -53,7 +61,15 @@ class Project:
 
 		res = self._head
 		for key in keys:
-			tmpRes = res[key]
+			try:
+				tmpRes = res[key]
+			except KeyError:
+				if self._head is not res:
+					raise
+				if key == '__parents__':
+					raise
+				tmpRes = self.parents[key]
+
 			if isinstance(tmpRes, Lazy):
 				tmpRes = tmpRes.evaluate()
 				res[key] = tmpRes
@@ -119,22 +135,13 @@ def _includeHandler(project, projectF):
 
 	subProject = Project(source=source, this=project.this)
 	project[projectF] = subProject
-	_recursiveUpdate(project._head, subProject._head)  # pylint: disable=protected-access
+	project['__parents__'].append(subProject)
 
 
 @Project.addDefaultHandler('py-execExternalFunction')
 def _pyExecExtrnalFunctionHandler(project, arg):
 	function = importFrom(arg)
 	function(project)
-
-
-def _recursiveUpdate(base, new):
-	for key, value in new.items():
-		if isinstance(value, dict):
-			base[key] = base.get(key, {})
-			_recursiveUpdate(base[key], value)
-		elif key not in base:
-			base[key] = value
 
 
 def importFrom(arg):
@@ -153,3 +160,31 @@ def importFrom(arg):
 		return getattr(from_, import_)
 	except AttributeError as ex:
 		raise RuntimeError(f'Error getting {import_} at py-execExternalFunction: {arg}') from ex
+
+
+class _ProjectParentsProxy:
+	def __init__(self, project):
+		self._project = project
+
+	def __getitem__(self, key):
+		for parent in self._project['__parents__']:
+			try:
+				return parent[key]
+			except KeyError:
+				pass
+
+		raise KeyError(f'This key not found: {key}')
+
+
+class InheritedDict(ChainMap):
+	def __init__(self, key, head, project):
+		self._key = key
+		self._head = head
+		self._project = project
+
+	@property
+	def maps(self):
+		maps = [self._head]
+		for parent in self._project['__parents__']:
+			maps.append(parent[self._key])
+		return maps
