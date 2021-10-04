@@ -92,3 +92,14 @@ def getBuild(project):
 		project.this['buildExecutor'].execute()
 
 	return build
+
+
+
+async def import_( name):
+	from std.base.objects import Module  # pylint: disable=import-outside-toplevel
+
+	return await Module.call(name=name)
+
+
+def getImport(_):
+	return import_

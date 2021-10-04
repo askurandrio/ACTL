@@ -1,8 +1,7 @@
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, Parsed, Many, Or, End
-from actl.objects import addMethodToClass, makeClass
+from actl.objects import addMethodToClass, makeClass, AToPy
 from actl.utils import asDecorator
-from std.base.objects.module import Module
 from std.base.executor.utils import bindExecutor
 
 
@@ -12,16 +11,17 @@ From = makeClass('From')
 
 @addMethodToClass(Import, '__call__')
 async def _Import__call(cls, fromName=None, importName=None):
+	executor = await bindExecutor()
+
 	if fromName is None:
-		return await Module.call(name=importName)
+		project = AToPy(executor.scope['__project__'])
+		return await project['import'](importName)
 
 	module = await cls.call(importName=fromName)
 
 	if '.' in fromName:
 		for moduleName in fromName.split('.')[1:]:
 			module = await module.getAttribute(moduleName)
-
-	executor = await bindExecutor()
 
 	if importName == '*':
 		for key, value in (await module.getAttribute('scope')).getDiff():
