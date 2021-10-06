@@ -8,7 +8,8 @@ class AbstractExecute:
 	def __init__(self):
 		self.isParsed = False
 		self.isExecuted = False
-		self._project = Project(source=[{'include': self._PROJECT_NAME}])
+		self._project = Project()
+		self._project.processSource([{'include': self._PROJECT_NAME}])
 
 	def executeInInitialScope(self, code):
 		scopeChildType = type(self.scope.child())
@@ -28,7 +29,8 @@ class AbstractExecute:
 		self.isParsed = False
 		self.isExecuted = False
 		buildScope = self.scope
-		self._project = Project(source=[{'include': self._PROJECT_NAME}])
+		self._project = Project()
+		self._project.processSource([{'include': self._PROJECT_NAME}])
 		self._project['buildScope'] = buildScope
 
 	@property
@@ -57,7 +59,7 @@ class AbstractExecute:
 		if self.parsed.isExecuted:
 			return self
 
-		self._project.this['buildExecutor'].execute()
+		self._project['buildExecutor'].execute()
 		self.isExecuted = True
 		return self.executed
 

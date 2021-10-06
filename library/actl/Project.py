@@ -14,35 +14,31 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Project:
 	_DEFAULT_HANDLERS = {}
 
-	def __init__(self, source=None, this=None):
-		self._head = {}
-		self['__parents__'] = []
-		self['__source__'] = []
+	def __init__(self):
+		self._head = {
+			'__parents__': [],
+			'__source__': [],
+			'__previous__': {}
+		}
 		self['handlers'] = InheritedDict(
 			'handlers',
 			copy.copy(self._DEFAULT_HANDLERS),
 			self
 		)
 
-		if this is not None:
-			self['this'] = this
-
-		if source:
-			self.processSource(source)
-
-	@property
-	def this(self):
-		return self._head.get('this', self)
-
 	@property
 	def parents(self):
 		return _ProjectParentsProxy(self)
+
+	@property
+	def previous(self):
+		return _ProjectPreviousProxy(self)
 
 	def processSource(self, source):
 		for command in source:
 			self['__source__'].append(command)
 			items = iter(command.items())
-			handlerName, arg = next(items)
+			handlerName, argument = next(items)
 			try:
 				next(items)
 			except StopIteration:
@@ -50,7 +46,7 @@ class Project:
 			else:
 				raise RuntimeError(f'len({command}) should be 1')
 			handler = self['handlers'][handlerName]
-			handler(self, arg)
+			handler(self, argument)
 
 	def __getitem__(self, keys):
 		if not isinstance(keys, tuple):
@@ -74,13 +70,11 @@ class Project:
 
 		return res
 
-	def __setitem__(self, keys, value):
-		if isinstance(keys, str):
-			keys = (keys,)
-		base = self._head
-		for key in keys[:-1]:
-			base = base[key]
-		base[keys[-1]] = value
+	def __setitem__(self, key, value):
+		if key in self._head:
+			self.previous.append(key, self._head[key])
+
+		self._head[key] = value
 
 	def __delitem__(self, key):
 		del self._head[key]
@@ -94,7 +88,7 @@ class Project:
 
 	def __repr__(self):
 		if 'projectF' in self._head:
-			head = 'projectF={!r}'.format(self._head['projectF'])
+			head = 'projectF={!r}'.format(self['projectF'])
 		else:
 			head = f'source={self._head}'
 		return f'{type(self).__name__}({head})'
@@ -103,6 +97,9 @@ class Project:
 class Lazy:
 	def __init__(self, evaluate):
 		self.evaluate = evaluate
+
+	def __repr__(self):
+		return f'{type(self).__name__}({self.evaluate})'
 
 
 @Project.addDefaultHandler('setKey')
@@ -125,15 +122,24 @@ def _includeHandler(project, projectF):
 			{
 				'setKey': {
 					'key': 'projectF',
-					'value': 'projectF'
+					'value': projectF
 				}
 			}
 		]
 
-	subProject = Project(source=source, this=project.this)
+	subProject = Project()
+	subProject.processSource(source)
+
+	for command in subProject['__source__']:
+		handlerName, argument = next(iter(command.items()))
+		if handlerName == 'include':
+			project[argument] = subProject[argument]
+			continue
+		project.processSource([command])
+
+	del project['projectF']
 	project[projectF] = subProject
 	project['__parents__'].append(subProject)
-	project.processSource(subProject['__source__'])
 
 
 @Project.addDefaultHandler('py-execExternalFunction')
@@ -186,3 +192,25 @@ class InheritedDict(ChainMap):
 		for parent in self._project['__parents__']:
 			maps.append(parent[self._key])
 		return maps
+
+
+class _ProjectPreviousProxy:
+	def __init__(self, project):
+		self._project = project
+
+	def append(self, key, value):
+		previous = self._project['__previous__']
+		if key not in previous:
+			previous[key] = []
+
+		previous[key].append(value)
+
+	def __getitem__(self, key):
+		previous = self._project['__previous__']
+		result = previous[key][-1]
+
+		if isinstance(result, Lazy):
+			previous[key][-1] = result.evaluate()
+			return self[key]
+
+		return result

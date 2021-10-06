@@ -16,7 +16,7 @@ Module = makeClass('Module')
 async def _Module__call(cls, path=None, name=None):
 	executor = await bindExecutor()
 	project = AToPy(executor.scope['__project__'])
-	projectMainF = project.this['projectF']
+	projectMainF = project['projectF']
 
 	return await _Module__call_cached(cls, projectMainF, path, name)
 

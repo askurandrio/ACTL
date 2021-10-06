@@ -6,7 +6,7 @@ from std.base.objects import Import
 def getInitialScope(project):
 	initialScope = project['std/_std']['initialScope'].child()
 	type(initialScope).allowOverride = True
-	project.this['initialScope'] = initialScope
+	project['initialScope'] = initialScope
 
 	Executor(
 		iter([
@@ -19,7 +19,7 @@ def getInitialScope(project):
 		initialScope
 	).execute()
 
-	del project.this['initialScope']
+	del project['initialScope']
 
 	type(initialScope).allowOverride = False
 	return initialScope

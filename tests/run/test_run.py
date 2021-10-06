@@ -97,6 +97,6 @@ def test_mainF(run):
 
 
 def getInitialScope(project):
-	scope = project.this['std/base', 'initialScope']
+	scope = project['std/base', 'initialScope']
 	scope['print'] = executeSyncCoroutine(PyToA.call(lambda inp: print(f'mocked: {inp}')))
 	return scope

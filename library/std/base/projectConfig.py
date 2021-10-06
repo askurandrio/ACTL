@@ -14,7 +14,7 @@ def pyExternalKey(project, arg):
 
 
 def loadHandlerPyExternalKey(project):
-	project['handlers', 'py-externalKey'] = pyExternalKey
+	project['handlers']['py-externalKey'] = pyExternalKey
 
 
 def getRules(_):
@@ -44,7 +44,7 @@ def getInitialScope(project):
 		('class', 'std.base.objects.class_'),
 		('import', 'std.base.objects.Import'),
 		('from', 'std.base.objects.From'),
-		('__project__', 'project.this'),
+		('__project__', 'project'),
 		('lt', 'lt')
 	):
 		pyVar = eval(pyName)
@@ -57,7 +57,7 @@ def getInitialScope(project):
 def getInput(project):
 	@Buffer.wrap
 	def make():
-		for line in open(project.this['mainF']):
+		for line in open(project['mainF']):
 			for char in line:
 				yield char
 
@@ -66,30 +66,30 @@ def getInput(project):
 
 def getParseInput(project):
 	def parseInput(scope, input_):
-		return Parser(scope, project.this['rules'], input_)
+		return Parser(scope, project['rules'], input_)
 
 	return parseInput
 
 
 def getBuildScope(project):
-	return project.this['initialScope'].child()
+	return project['initialScope'].child()
 
 
 def getBuildParser(project):
-	return project.this['parseInput'](
-		project.this['buildScope'], project.this['input']
+	return project['parseInput'](
+		project['buildScope'], project['input']
 	)
 
 
 def getBuildExecutor(project):
 	return std.base.Executor(
-		project.this['buildParser'], project.this['buildScope']
+		project['buildParser'], project['buildScope']
 	)
 
 
 def getBuild(project):
 	def build():
-		project.this['buildExecutor'].execute()
+		project['buildExecutor'].execute()
 
 	return build
 

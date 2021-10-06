@@ -31,7 +31,8 @@ def main(projectF=None, mainF=None, source=None):
 			*source
 		]
 
-	project = actl.Project(source=projectSource)
+	project = actl.Project()
+	project.processSource(projectSource)
 	project['build']()
 
 
