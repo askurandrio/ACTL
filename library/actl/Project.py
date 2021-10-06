@@ -17,6 +17,7 @@ class Project:
 	def __init__(self, source=None, this=None):
 		self._head = {}
 		self['__parents__'] = []
+		self['__source__'] = []
 		self['handlers'] = InheritedDict(
 			'handlers',
 			copy.copy(self._DEFAULT_HANDLERS),
@@ -24,14 +25,7 @@ class Project:
 		)
 
 		if this is not None:
-			self.processSource([
-				{
-					'setKey': {
-						'key': 'this',
-						'value': this
-					}
-				}
-			])
+			self['this'] = this
 
 		if source:
 			self.processSource(source)
@@ -45,13 +39,16 @@ class Project:
 		return _ProjectParentsProxy(self)
 
 	def processSource(self, source):
-		assert isinstance(source, list), source
-
-		while source:
-			command = source.pop(0)
-			assert isinstance(command, dict), command
-			assert len(command) == 1, command
-			handlerName, arg = next(iter(command.items()))
+		for command in source:
+			self['__source__'].append(command)
+			items = iter(command.items())
+			handlerName, arg = next(items)
+			try:
+				next(items)
+			except StopIteration:
+				pass
+			else:
+				raise RuntimeError(f'len({command}) should be 1')
 			handler = self['handlers'][handlerName]
 			handler(self, arg)
 
@@ -136,6 +133,7 @@ def _includeHandler(project, projectF):
 	subProject = Project(source=source, this=project.this)
 	project[projectF] = subProject
 	project['__parents__'].append(subProject)
+	project.processSource(subProject['__source__'])
 
 
 @Project.addDefaultHandler('py-execExternalFunction')
