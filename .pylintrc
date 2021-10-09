@@ -1,4 +1,14 @@
 [MESSAGES CONTROL]
-	disable=missing-module-docstring,missing-function-docstring,missing-class-docstring,too-few-public-methods,invalid-name,bad-continuation,bad-mcs-method-argument,fixme,no-member
+	disable=
+		missing-docstring,
+		too-few-public-methods,
+		invalid-name,
+		bad-continuation,
+		bad-mcs-method-argument,
+		fixme,
+		no-member,
+		too-many-arguments
 [FORMAT]
 	indent-string='	'
+[MASTER]
+	init-hook='import sys; sys.path.append("./library")'
