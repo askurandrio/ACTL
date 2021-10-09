@@ -15,7 +15,7 @@ async def _Import__call(cls, fromName=None, importName=None):
 
 	if fromName is None:
 		project = AToPy(executor.scope['__project__'])
-		return await project['import'](importName)
+		return await project['import'](name=importName)
 
 	module = await cls.call(importName=fromName)
 

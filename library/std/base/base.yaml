@@ -11,7 +11,7 @@
 
 -  py-externalKey:
     from: std.base.projectConfig
-    import: getImport
+    import: Importer
     name: import
 
 

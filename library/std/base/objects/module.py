@@ -1,92 +1,43 @@
-import os
-
-import asyncstdlib
-
-from actl import DIR_LIBRARY
 from actl.Buffer import Buffer
-from actl.objects import addMethod, addMethodToClass, makeClass, AAttributeNotFound, AToPy
+from actl.objects import addMethod, makeClass, AAttributeNotFound, AToPy
 from std.base.executor.Executor import Frame
 from std.base.executor.utils import bindExecutor
 
 
-Module = makeClass('Module')
+Package = makeClass('Package')
+Module = makeClass('Module', parents=(Package,))
 
 
-@addMethodToClass(Module, '__call__')
-async def _Module__call(cls, path=None, name=None):
+@addMethod(Package, '__init__')
+async def _Package__init(self, path):
 	executor = await bindExecutor()
 	project = AToPy(executor.scope['__project__'])
-	projectMainF = project['projectF']
-
-	return await _Module__call_cached(cls, projectMainF, path, name)
-
-
-@asyncstdlib.lru_cache(maxsize=None)
-async def _Module__call_cached(cls, projectMainF, path, name):
-	if path is not None:
-		superCall = await cls.super_(Module, '__call__')
-		return await superCall.call(projectMainF, path)
-
-	if '.' not in name:
-		path = os.path.join(DIR_LIBRARY, name)
-		return await cls.call(path)
-
-	packageName = name[:name.find('.')]
-	name = name[name.find('.')+1:]
-
-	package = await cls.call(name=packageName)
-	importMethod = await package.getAttribute('import_')
-	await importMethod.call(name)
-
-	return package
+	scope = project['initialScope'].child()
+	self.setAttribute('scope', scope)
+	self.setAttribute('path', path)
 
 
 @addMethod(Module, '__init__')
-async def _Module__init(self, projectMainF, path):
-	isPackage = os.path.isdir(path)
-	if not isPackage:
-		path = f'{path}.a'
+async def _Module__init(self, path):
+	superInit = await self.super_(Module, '__init__')
+	await superInit.call(path)
 
 	executor = await bindExecutor()
 	project = AToPy(executor.scope['__project__'])
-	moduleScope = project['initialScope'].child()
+	moduleScope = await self.getAttribute('scope')
 	executor.scope, prevScope = moduleScope, executor.scope
 
-	if not isPackage:
-		input_ = _open(path)
-		parsedInput = project['parseInput'](moduleScope, input_)
-		await Frame(parsedInput)
+	input_ = _open(path)
+	parsedInput = project['parseInput'](moduleScope, input_)
+	await Frame(parsedInput)
 
 	executor.scope = prevScope
-	self.setAttribute('scope', moduleScope)
-	self.setAttribute('path', path)
-
-	return self
 
 
-@addMethod(Module, 'import_')
-async def _Module__import_(self, name):
-	if '.' in name:
-		subPackageName = name[:name.find('.')]
-		moduleName = name[name.find('.')+1:]
 
-		importMethod = await self.getAttribute('import_')
-		await importMethod.call(subPackageName)
-		subPackage = await self.getAttribute(subPackageName)
-		subPackageImportMethod = await subPackage.getAttribute('import_')
-		await subPackageImportMethod.call(moduleName)
-		return
-
-	path = str(await self.getAttribute('path'))
-	path = os.path.join(path, name)
-
-	module = await self.class_.call(path)
-	self.setAttribute(name, module)
-
-
-@addMethod(Module, '__getAttribute__')
-async def _Module__getAttribute(self, key):
-	superGetAttribute = await self.super_(Module, '__getAttribute__')
+@addMethod(Package, '__getAttribute__')
+async def _Package__getAttribute(self, key):
+	superGetAttribute = await self.super_(Package, '__getAttribute__')
 
 	try:
 		return await superGetAttribute.call(key)
@@ -94,7 +45,11 @@ async def _Module__getAttribute(self, key):
 		pass
 
 	scope = await superGetAttribute.call('scope')
-	return scope[key]
+
+	try:
+		return scope[key]
+	except KeyError as ex:
+		raise AAttributeNotFound(key) from ex
 
 
 @Buffer.wrap

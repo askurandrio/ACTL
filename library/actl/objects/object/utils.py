@@ -24,6 +24,7 @@ def addMethod(cls, name):
 		aFunction = NativeMethod(function)
 		self_ = executeSyncCoroutine(cls.getAttribute('__self__'))
 		self_[name] = aFunction
+		return function
 
 	return decorator
 

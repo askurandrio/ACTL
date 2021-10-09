@@ -1,6 +1,12 @@
+import os
+from posixpath import basename
+
+import asyncstdlib
+from asyncstdlib.functools import cache
+
 from actl import Parser, Scope, objects
 from actl.Buffer import Buffer
-from actl.Project import Lazy, importFrom
+from actl.Project import DIR_LIBRARY, Lazy, importFrom
 import std
 
 
@@ -94,12 +100,80 @@ def getBuild(project):
 	return build
 
 
+class Importer:
+	def __init__(self, currentProject):
+		self._currentProject = currentProject
+		self._cache = {}
 
-async def import_( name):
-	from std.base.objects import Module  # pylint: disable=import-outside-toplevel
+	async def __call__(self, name=None, path=None):
+		key = (name, path)
 
-	return await Module.call(name=name)
+		if key in self._cache:
+			return self._cache[key]
 
+		self._cache[key] = await self._call(name=name, path=path)
+		return await self(name=name, path=path)
 
-def getImport(_):
-	return import_
+	async def _call(self, name, path):
+		if path is not None:
+			return await self._importPath(path)
+
+		if '.' in name:
+			return await self._importPackage(name)
+
+		for dirLibrary in self._getLibraryDirs():
+			path = os.path.join(dirLibrary, name)
+			if os.path.isdir(path) or os.path.isfile(f'{path}.a'):
+				return await self(path=path)
+
+		raise RuntimeError(f'Module {name} not found')
+
+	def _getLibraryDirs(self):
+		yield DIR_LIBRARY
+
+		try:
+			projectF = self._currentProject['projectF']
+		except KeyError:
+			return
+
+		yield os.path.dirname(projectF)
+
+	async def _importPackage(self, name):
+		names = name.split('.')
+		mainPackage = await self(names.pop(0))
+		package = mainPackage
+
+		while names:
+			if await package.hasAttribute('__forProject__'):
+				name = names[0]
+				project = objects.AToPy(await package.getAttribute('__forProject__'))
+				subPackage = await project['import']('.'.join(names))
+				names = []
+			else:
+				name = names.pop(0)
+				packagePath = await package.getAttribute('path')
+				packagePath = os.path.join(packagePath, name)
+				subPackage = await self(path=packagePath)
+
+			package.setAttribute(name, subPackage)
+			package = subPackage
+
+		return mainPackage
+
+	async def _importPath(self, path):
+		from std.base.objects import Package, Module  # pylint: disable=import-outside-toplevel
+
+		if os.path.isdir(path):
+			package = await Package.call(path)
+
+			pathBaseName = os.path.basename(path)
+			yamlPath = os.path.join(path, f'{pathBaseName}.yaml')
+			if os.path.isfile(yamlPath):
+				project = self._currentProject.loadProject(yamlPath)
+				aProject = await objects.PyToA.call(project)
+				package.setAttribute('__forProject__', aProject)
+
+			return package
+
+		path = f'{path}.a'
+		return await Module.call(path)

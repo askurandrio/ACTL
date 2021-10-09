@@ -5,7 +5,7 @@ import pytest
 
 from actl import DIR_LIBRARY
 from actl.opcodes import CALL_FUNCTION_STATIC
-from std.base.objects import Module, Import
+from std.base.objects import Module, Import, Package
 
 
 ORDER_KEY = 10
@@ -48,7 +48,7 @@ async def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 	]
 
 	testPackage = execute.executed.scope['testPackage']
-	assert Module.isinstance_(testPackage)
+	assert Package.isinstance_(testPackage)
 	testModule = await testPackage.getAttribute('testModule')
 	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
@@ -135,8 +135,48 @@ async def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
+class _PathChecker:
+	def __init__(self, mocker, mockFunction):
+		self._result = {}
+		mocker.patch(mockFunction, self._check)
+
+	def _check(self, path):
+		try:
+			return self._result[path]
+		except KeyError as ex:
+			reason = f'path<{path} is not expected, only these defined {list(self._result)}'
+			raise RuntimeError(reason) from ex
+
+	def __call__(self, path, checkResult):
+		path = os.path.join(DIR_LIBRARY, path)
+		self._result[path] = checkResult
+
+
+class _DirChecker(_PathChecker):
+	def __init__(self, mocker, mockFunction, mockIsFile):
+		super().__init__(mocker, mockFunction)
+		self._mockIsFile = mockIsFile
+
+	def __call__(self, path, checkResult):
+		super().__call__(path, checkResult)
+		if checkResult:
+			fullPath = os.path.join(DIR_LIBRARY, path)
+			yamlPath = os.path.join(fullPath, os.path.basename(fullPath))
+			self._mockIsFile(f'{yamlPath}.yaml', False)
+
+
 @pytest.fixture
-def _mockOpen(mocker):
+def _mockIsFile(mocker):
+	return _PathChecker(mocker, 'os.path.isfile')
+
+
+@pytest.fixture
+def _mockIsDir(mocker, _mockIsFile):
+	return _DirChecker(mocker, 'os.path.isdir', _mockIsFile)
+
+
+@pytest.fixture
+def _mockOpen(mocker, _mockIsFile):
 	mockFileName = None
 	mockContent = None
 
@@ -151,21 +191,7 @@ def _mockOpen(mocker):
 		nonlocal mockContent
 		mockFileName = os.path.join(DIR_LIBRARY, fileName)
 		mockContent = content
+		_mockIsFile(fileName, True)
 
 	mocker.patch('std.base.objects.module.open', _open)
 	return setContent
-
-
-@pytest.fixture
-def _mockIsDir(mocker):
-	result = {}
-
-	def isDir(path):
-		return result[path]
-
-	def addResult(path, checkResult):
-		path = os.path.join(DIR_LIBRARY, path)
-		result[path] = checkResult
-
-	mocker.patch('os.path.isdir', isDir)
-	return addResult

@@ -3,6 +3,7 @@ import os
 from collections import ChainMap
 import logging
 import importlib
+from functools import lru_cache
 
 import yaml
 
@@ -37,16 +38,19 @@ class Project:
 	def processSource(self, source):
 		for command in source:
 			self['__source__'].append(command)
-			items = iter(command.items())
-			handlerName, argument = next(items)
-			try:
-				next(items)
-			except StopIteration:
-				pass
-			else:
-				raise RuntimeError(f'len({command}) should be 1')
-			handler = self['handlers'][handlerName]
-			handler(self, argument)
+			self.executeCommand(command)
+
+	def executeCommand(self, command):
+		items = iter(command.items())
+		handlerName, argument = next(items)
+		try:
+			next(items)
+		except StopIteration:
+			pass
+		else:
+			raise RuntimeError(f'len({command}) should be 1')
+		handler = self['handlers'][handlerName]
+		handler(self, argument)
 
 	def __getitem__(self, keys):
 		if not isinstance(keys, tuple):
@@ -80,6 +84,34 @@ class Project:
 		del self._head[key]
 
 	@classmethod
+	@lru_cache(maxsize=None)
+	def loadProject(cls, projectF):
+		if not os.path.isabs(projectF):
+			fileName = os.path.join(DIR_LIBRARY, projectF)
+
+			while os.path.isdir(fileName):
+				fileName = os.path.join(fileName, os.path.basename(projectF))
+
+			fileName = fileName + '.yaml'
+			return cls.loadProject(fileName)
+
+		with open(projectF) as file:
+			source = yaml.load(file, Loader=yaml.SafeLoader)
+			source = [
+				*source,
+				{
+					'setKey': {
+						'key': 'projectF',
+						'value': projectF
+					}
+				}
+			]
+
+		subProject = Project()
+		subProject.processSource(source)
+		return subProject
+
+	@classmethod
 	def addDefaultHandler(cls, name):
 		def decorator(func):
 			cls._DEFAULT_HANDLERS[name] = func
@@ -90,8 +122,8 @@ class Project:
 		if 'projectF' in self._head:
 			head = 'projectF={!r}'.format(self['projectF'])
 		else:
-			head = f'source={self._head}'
-		return f'{type(self).__name__}({head})'
+			head = 'source={}'.format(self['__source__'])
+		return f'{type(self).__name__}<{head}>'
 
 
 class Lazy:
@@ -109,35 +141,14 @@ def _setKeyHandler(project, arg):
 
 @Project.addDefaultHandler('include')
 def _includeHandler(project, projectF):
-	fileName = os.path.join(DIR_LIBRARY, projectF)
-
-	while os.path.isdir(fileName):
-		fileName = os.path.join(fileName, os.path.basename(projectF))
-
-	fileName = fileName + '.yaml'
-	with open(fileName) as file:
-		source = yaml.load(file, Loader=yaml.SafeLoader)
-		source = [
-			*source,
-			{
-				'setKey': {
-					'key': 'projectF',
-					'value': projectF
-				}
-			}
-		]
-
-	subProject = Project()
-	subProject.processSource(source)
+	subProject = project.loadProject(projectF)
 
 	for command in subProject['__source__']:
-		handlerName, argument = next(iter(command.items()))
-		if handlerName == 'include':
-			project[argument] = subProject[argument]
+		if ('setKey' in command) and (command['setKey']['key'] == 'projectF'):
 			continue
-		project.processSource([command])
 
-	del project['projectF']
+		project.executeCommand(command)
+
 	project[projectF] = subProject
 	project['__parents__'].append(subProject)
 
