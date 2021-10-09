@@ -135,6 +135,21 @@ async def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
+async def test_importNotFound(execute, _mockIsDir, _mockIsFile):
+	_mockIsDir('m404', False)
+	_mockIsFile('m404.a', False)
+	stdLibraryDirecory = execute.project['std/base']['libraryDirectory']
+	_mockIsDir('m404', False, dirLibrary=stdLibraryDirecory)
+	_mockIsFile('m404.a', False, dirLibrary=stdLibraryDirecory)
+
+	execute('import m404')
+
+	try:
+		assert execute.executed
+	except RuntimeError as ex:
+		assert ex.args == ('Module m404 not found',)
+
+
 class _PathChecker:
 	def __init__(self, mocker, mockFunction):
 		self._result = {}
@@ -147,8 +162,8 @@ class _PathChecker:
 			reason = f'path<{path} is not expected, only these defined {list(self._result)}'
 			raise RuntimeError(reason) from ex
 
-	def __call__(self, path, checkResult):
-		path = os.path.join(DIR_LIBRARY, path)
+	def __call__(self, path, checkResult, dirLibrary=DIR_LIBRARY):
+		path = os.path.join(dirLibrary, path)
 		self._result[path] = checkResult
 
 
@@ -157,8 +172,8 @@ class _DirChecker(_PathChecker):
 		super().__init__(mocker, mockFunction)
 		self._mockIsFile = mockIsFile
 
-	def __call__(self, path, checkResult):
-		super().__call__(path, checkResult)
+	def __call__(self, path, checkResult, dirLibrary=DIR_LIBRARY):
+		super().__call__(path, checkResult, dirLibrary=dirLibrary)
 		if checkResult:
 			fullPath = os.path.join(DIR_LIBRARY, path)
 			yamlPath = os.path.join(fullPath, os.path.basename(fullPath))

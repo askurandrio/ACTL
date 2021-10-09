@@ -55,3 +55,9 @@
     from: std.base.projectConfig
     import: getBuildExecutor
     name: buildExecutor
+
+
+-  py-externalKey:
+    from: std.base.projectConfig
+    import: getLibraryDirectory
+    name: libraryDirectory

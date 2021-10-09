@@ -1,8 +1,4 @@
 import os
-from posixpath import basename
-
-import asyncstdlib
-from asyncstdlib.functools import cache
 
 from actl import Parser, Scope, objects
 from actl.Buffer import Buffer
@@ -98,6 +94,11 @@ def getBuild(project):
 		project['buildExecutor'].execute()
 
 	return build
+
+
+def getLibraryDirectory(project):
+	projectF = project['projectF']
+	return os.path.dirname(projectF)
 
 
 class Importer:
