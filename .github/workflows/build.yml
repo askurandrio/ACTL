@@ -19,7 +19,7 @@ jobs:
         run: python3.8 -m pip install -r ./etc/requirements.txt
 
       - name: pytest
-        run: PYTHONPATH=./library python3.8 -m pytest --cov=library --cov-report term-missing --cov-branch --no-cov-on-fail ./tests -x --cov-fail-under 93 -vv
+        run: PYTHONPATH=./library python3.8 -m pytest --cov=library --cov-report term-missing --cov-branch --no-cov-on-fail ./tests -x --cov-fail-under 94 -vv
 
       - name: pylint
         run: PYTHONPATH=./library pylint-ignore library tests || true
