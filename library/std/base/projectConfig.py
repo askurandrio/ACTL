@@ -5,6 +5,7 @@ from actl.Buffer import Buffer
 from actl.Project import DIR_LIBRARY, Lazy, importFrom
 from actl.objects.PyToA import PyToA
 import std
+from std.base.executor import bindExecutor
 
 
 def pyExternalKey(project, arg):
@@ -47,6 +48,8 @@ def getInitialScope(project):
 		('class', 'std.base.objects.class_'),
 		('import', 'std.base.objects.Import'),
 		('from', 'std.base.objects.From'),
+		('Module', 'std.base.objects.Module'),
+		('Package', 'std.base.objects.Package'),
 		('__project__', 'project'),
 		('lt', 'lt')
 	):
@@ -138,11 +141,9 @@ class Importer:
 		yield DIR_LIBRARY
 
 		try:
-			projectF = self._currentProject['projectF']
+			yield self._currentProject['libraryDirectory']
 		except KeyError:
 			return
-
-		yield os.path.dirname(projectF)
 
 	async def _importPackage(self, name):
 		names = name.split('.')
@@ -150,8 +151,8 @@ class Importer:
 		mainPackage = await self('.'.join(names))
 		package = mainPackage
 
-		for name in names[1:]:
-			package = await package.getAttribute(name)
+		for subModuleName in names[1:]:
+			package = await package.getAttribute(subModuleName)
 
 		if await package.hasAttribute(moduleName):
 			return mainPackage
@@ -169,7 +170,7 @@ class Importer:
 		return mainPackage
 
 	async def _importPath(self, path):
-		from std.base.objects import Package, Module  # pylint: disable=import-outside-toplevel
+		executor = await bindExecutor()
 
 		if os.path.isdir(path):
 			pathBaseName = os.path.basename(path)
@@ -179,12 +180,12 @@ class Importer:
 				if project != self._currentProject:
 					return await project['import'].getProjectPackage()
 
-				package = await Package.call(path)
+				package = await executor.scope['Package'].call(path)
 				aProject = await PyToA.call(self._currentProject)
 				package.setAttribute('__forProject__', aProject)
 				return package
 
-			return await Package.call(path)
+			return await executor.scope['Package'].call(path)
 
 		path = f'{path}.a'
-		return await Module.call(path)
+		return await executor.scope['Module'].call(path)
