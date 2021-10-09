@@ -18,30 +18,17 @@ class Executor:
 			except StopIteration:
 				self.frames.pop(-1)
 				continue
-			except Exception as nextEx:
-				try:
-					self.frames[-1].throw(nextEx)
-				except RuntimeError as throwEx:
-					if throwEx.args and (throwEx.args[0] == 'cannot reuse already awaited coroutine'):
-						self.frames.pop(-1)
-						self.frames[-1].throw(nextEx)
-
-					raise throwEx
 
 			self._executeOpcode(opcode)
 
 	def _executeOpcode(self, opcode):
 		try:
 			handler = self.getHandlerFor(type(opcode))
-		except KeyError:
-			error = KeyError(f'Opcode<"{opcode}"> is not expected')
-			self.frames[-1].throw(error)
+		except KeyError as ex:
+			raise KeyError(f'Opcode<"{opcode}"> is not expected') from ex
 
-		try:
-			coroutine = handler(self, opcode)
-			self.frames.append(coroutine.__await__())
-		except Exception as ex:
-			self.frames[-1].throw(ex)
+		coroutine = handler(self, opcode)
+		self.frames.append(coroutine.__await__())
 
 	@classmethod
 	def addHandler(cls, opcode):
@@ -68,9 +55,6 @@ class Frame:
 
 	def __init__(self, head):
 		self._head = iter(head)
-
-	def throw(self, error):
-		self._head.throw(error)
 
 	def __await__(self):
 		yield from self._head

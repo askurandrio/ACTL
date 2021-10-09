@@ -3,6 +3,7 @@ import os
 from actl import Parser, Scope, objects
 from actl.Buffer import Buffer
 from actl.Project import DIR_LIBRARY, Lazy, importFrom
+from actl.objects.PyToA import PyToA
 import std
 
 
@@ -115,6 +116,10 @@ class Importer:
 		self._cache[key] = await self._call(name=name, path=path)
 		return await self(name=name, path=path)
 
+	async def getProjectPackage(self):
+		projectF = self._currentProject['projectF']
+		return await self(path=os.path.dirname(projectF))
+
 	async def _call(self, name, path):
 		if path is not None:
 			return await self._importPath(path)
@@ -141,23 +146,25 @@ class Importer:
 
 	async def _importPackage(self, name):
 		names = name.split('.')
-		mainPackage = await self(names.pop(0))
+		moduleName = names.pop(-1)
+		mainPackage = await self('.'.join(names))
 		package = mainPackage
 
-		while names:
-			if await package.hasAttribute('__forProject__'):
-				name = names[0]
-				project = objects.AToPy(await package.getAttribute('__forProject__'))
-				subPackage = await project['import']('.'.join(names))
-				names = []
-			else:
-				name = names.pop(0)
-				packagePath = await package.getAttribute('path')
-				packagePath = os.path.join(packagePath, name)
-				subPackage = await self(path=packagePath)
+		for name in names[1:]:
+			package = await package.getAttribute(name)
 
-			package.setAttribute(name, subPackage)
-			package = subPackage
+		if await package.hasAttribute(moduleName):
+			return mainPackage
+
+		if await package.hasAttribute('__forProject__'):
+			project = objects.AToPy(await package.getAttribute('__forProject__'))
+			module = await project['import'](moduleName)
+		else:
+			packagePath = await package.getAttribute('path')
+			modulePath = os.path.join(packagePath, moduleName)
+			module = await self(path=modulePath)
+
+		package.setAttribute(moduleName, module)
 
 		return mainPackage
 
@@ -165,16 +172,19 @@ class Importer:
 		from std.base.objects import Package, Module  # pylint: disable=import-outside-toplevel
 
 		if os.path.isdir(path):
-			package = await Package.call(path)
-
 			pathBaseName = os.path.basename(path)
 			yamlPath = os.path.join(path, f'{pathBaseName}.yaml')
 			if os.path.isfile(yamlPath):
 				project = self._currentProject.loadProject(yamlPath)
-				aProject = await objects.PyToA.call(project)
-				package.setAttribute('__forProject__', aProject)
+				if project != self._currentProject:
+					return await project['import'].getProjectPackage()
 
-			return package
+				package = await Package.call(path)
+				aProject = await PyToA.call(self._currentProject)
+				package.setAttribute('__forProject__', aProject)
+				return package
+
+			return await Package.call(path)
 
 		path = f'{path}.a'
 		return await Module.call(path)
