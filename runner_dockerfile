@@ -1,4 +1,4 @@
-FROM myoung34/github-runner:ubuntu-bionic
+FROM myoung34/github-runner:ubuntu-focal
 
 RUN \
 	apt-get update && \
@@ -6,6 +6,7 @@ RUN \
 	apt-get install apt-utils && \
 	apt-get install -y python3-pip python3.8-dev curl python3-setuptools
 
+RUN ln -s $(which python3.8) /bin/python
 
 COPY etc/requirements.txt /tmp/requirements.txt
-RUN python3 -m pip install -r /tmp/requirements.txt
+RUN python -m pip install -r /tmp/requirements.txt
