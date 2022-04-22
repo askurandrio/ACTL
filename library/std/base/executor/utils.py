@@ -1,28 +1,30 @@
 from actl.opcodes import DynamicOpCode
-from std.base.executor.Executor import Executor
+from std.base.executor.Executor import Executor, Frame
 
 
-_BIND_EXECUTOR = DynamicOpCode.create('BIND_EXECUTOR', 'executorTrap')
+_BIND_EXECUTOR = DynamicOpCode.create('BIND_EXECUTOR', 'executor')
 
 
 async def bindExecutor():
-	executorTrap = _ExecutorTrap()
-	await executorTrap
+	opcode = _BIND_EXECUTOR(executor=None)
+	await Frame((opcode,))
 
-	return executorTrap.executor
+	return opcode.executor
 
 
-class _ExecutorTrap:
-	def __init__(self):
-		self.executor = None
+def makeCoroutineResultSaver(coroutine):
+	async def wrapSaveCoroutineResult(saveCoroutineResult):
+		result = await coroutine
 
-	def __await__(self):
-		yield _BIND_EXECUTOR(executorTrap=self)
+		saveCoroutineResult(result)
+
+	return wrapSaveCoroutineResult
 
 
 @Executor.addHandler(_BIND_EXECUTOR)
 async def _BIND_EXECUTOR_handler(executor, opcode):
-	opcode.executorTrap.executor = executor
+	opcode.executor = executor
+
 
 
 class CallFrame:
@@ -39,19 +41,19 @@ class CallFrame:
 				frame = cleanup.frames.pop(-1)
 				frame.close()
 
-		def return_(detachedReturnValue):
+		def setReturnValue(detachedReturnValue):
 			nonlocal returnValue
 
-			while len(executor.frames) != return_.framesLength:
+			while len(executor.frames) != setReturnValue.framesLength:
 				cleanup.frames.insert(0, executor.frames.pop(-1))
 
 			returnValue = detachedReturnValue
-			executor.return_ = return_.oldExecutorReturn
+			executor.setReturnValue = setReturnValue.previusSetReturnValue
 
 		executor = yield from bindExecutor().__await__()
-		return_.framesLength = len(executor.frames) + 1
+		setReturnValue.framesLength = len(executor.frames) + 1
 		cleanup.frames = []
-		executor.return_, return_.oldExecutorReturn = return_, executor.return_
+		executor.setReturnValue, setReturnValue.previusSetReturnValue = setReturnValue, executor.setReturnValue
 
 		for opcode in self._code:
 			if returnValue is not self._default:

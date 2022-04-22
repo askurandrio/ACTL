@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 from actl.Buffer import TransactionBuffer, Buffer
-from actl.objects import Number, executeSyncCoroutine
+from actl.objects import AToPy, Number
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
 	BufferRule, Parsed, Not
@@ -15,8 +15,10 @@ RULES = SyntaxRules()
 class _ApplySyntaxObjectSyntaxRule:
 	@classmethod
 	def match(cls, parser, inp):
-		for syntaxObject in cls._getSyntaxObjects(parser, inp):
-			syntaxRule = executeSyncCoroutine(syntaxObject.getAttribute('__syntaxRule__'))
+		executeCoroutine = AToPy(parser.scope['__project__'])['buildExecutor'].executeCoroutine
+
+		for syntaxObject in cls._getSyntaxObjects(parser, inp, executeCoroutine):
+			syntaxRule = executeCoroutine(syntaxObject.getAttribute('__syntaxRule__'))
 			if not isinstance(syntaxRule, list):
 				syntaxRule = [syntaxRule]
 
@@ -28,7 +30,7 @@ class _ApplySyntaxObjectSyntaxRule:
 		return None
 
 	@staticmethod
-	def _getSyntaxObjects(parser, inp):
+	def _getSyntaxObjects(parser, inp, executeCoroutine):
 		scope = parser.scope
 
 		for token in BufferRule(parser, TransactionBuffer(inp)).popUntil(parser.endLine):
@@ -36,7 +38,7 @@ class _ApplySyntaxObjectSyntaxRule:
 				continue
 
 			tokenValue = scope[token.name]
-			if executeSyncCoroutine(tokenValue.hasAttribute('__syntaxRule__')):
+			if executeCoroutine(tokenValue.hasAttribute('__syntaxRule__')):
 				yield tokenValue
 
 

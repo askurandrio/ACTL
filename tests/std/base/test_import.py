@@ -4,16 +4,18 @@ from contextlib import contextmanager
 import pytest
 
 from actl import DIR_LIBRARY
-from actl.opcodes import CALL_FUNCTION_STATIC
-from std.base.objects import Module, Import, Package
+from actl.objects.AToPy import AToPy
+from actl.opcodes import CALL_FUNCTION_STATIC, SET_VARIABLE, GET_ATTRIBUTE
+from std.base.objects import Module, import_
+from std.base.objects.importDefinition import copyAlllIntoScope
 
 
 ORDER_KEY = 10
 
 
-async def test_simpleImport(execute, _mockOpen, _mockIsDir):
+async def test_simpleImport(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
-	_mockOpen('testModule.a', 'a = 1')
+	_mockFile('testModule.a', 'a = 1')
 	execute(
 		'import testModule'
 	)
@@ -21,8 +23,8 @@ async def test_simpleImport(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'testModule',
-			Import.call,
-			kwargs={'importName': 'testModule'}
+			import_.call,
+			staticArgs=('testModule',)
 		)
 	]
 
@@ -31,10 +33,10 @@ async def test_simpleImport(execute, _mockOpen, _mockIsDir):
 	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
-async def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
+async def test_importPackageAndModule(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testPackage', True)
 	_mockIsDir('testPackage/testModule', False)
-	_mockOpen('testPackage/testModule.a', 'a = 1')
+	_mockFile('testPackage/testModule.a', 'a = 1')
 	execute(
 		'import testPackage.testModule'
 	)
@@ -42,58 +44,62 @@ async def test_importPackageAndModule(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'testPackage',
-			Import.call,
-			kwargs={'importName': 'testPackage.testModule'}
-		)
+			import_.call,
+			staticArgs=('testPackage',)
+		),
+		SET_VARIABLE('_tmpVar1', 'testPackage'),
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule')
 	]
 
 	testPackage = execute.executed.scope['testPackage']
-	assert Package.isinstance_(testPackage)
+	assert Module.isinstance_(testPackage)
 	testModule = await testPackage.getAttribute('testModule')
 	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
-async def test_importFromModuleAllNames(execute, _mockOpen, _mockIsDir):
+async def test_importFromModuleAllNames(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
-	_mockOpen('testModule.a', 'a = 1')
+	_mockFile('testModule.a', 'a = 1')
 	execute(
 		'from testModule import *'
 	)
 
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
-			'_tmpVarTrash',
-			Import.call,
-			kwargs={'fromName': 'testModule', 'importName': '*'}
-		)
+			'_tmpVar1',
+			import_.call,
+			staticArgs=('testModule',)
+		),
+		CALL_FUNCTION_STATIC('_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__'))
 	]
 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
-async def test_importFromModuleImportName(execute, _mockOpen, _mockIsDir):
+async def test_importFromModuleImportName(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
-	_mockOpen('testModule.a', 'a = 1')
+	_mockFile('testModule.a', 'a = 1')
 	execute(
 		'from testModule import a'
 	)
 
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
-			'_tmpVarTrash',
-			Import.call,
-			kwargs={'fromName': 'testModule', 'importName': 'a'}
-		)
+			'_tmpVar1',
+			import_.call,
+			staticArgs=('testModule',)
+		),
+		GET_ATTRIBUTE('a', '_tmpVar1', 'a')
 	]
 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
 
 
-async def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
+async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
-	_mockOpen('testMainPackage/testPackage/testModule.a', 'a = 1')
+	_mockFile('testMainPackage/testPackage/testModule.a', 'a = 1')
 	execute(
 		'import testMainPackage.testPackage.testModule'
 	)
@@ -101,9 +107,12 @@ async def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
 			'testMainPackage',
-			Import.call,
-			kwargs={'importName': 'testMainPackage.testPackage.testModule'}
-		)
+			import_.call,
+			staticArgs=('testMainPackage',)
+		),
+		SET_VARIABLE('_tmpVar1', 'testMainPackage'),
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule')
 	]
 
 	testMainPackage = execute.executed.scope['testMainPackage']
@@ -112,24 +121,24 @@ async def test_importPackageAndPackageAndModule(execute, _mockOpen, _mockIsDir):
 	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
-async def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockOpen, _mockIsDir):
+async def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
-	_mockOpen('testMainPackage/testPackage/testModule.a', 'a = 1')
+	_mockFile('testMainPackage/testPackage/testModule.a', 'a = 1')
 	execute(
 		'from testMainPackage.testPackage.testModule import *'
 	)
 
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
-			'_tmpVarTrash',
-			Import.call,
-			kwargs={
-				'fromName': 'testMainPackage.testPackage.testModule',
-				'importName': '*'
-			}
-		)
+			'_tmpVar1',
+			import_.call,
+			staticArgs=('testMainPackage',)
+		),
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
+		CALL_FUNCTION_STATIC('_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__'))
 	]
 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
@@ -144,26 +153,54 @@ async def test_importNotFound(execute, _mockIsDir, _mockIsFile):
 
 	execute('import m404')
 
-	try:
+	with pytest.raises(RuntimeError, match='Module m404 not found'):
 		assert execute.executed
-	except RuntimeError as ex:
-		assert ex.args == ('Module m404 not found',)
+
+
+async def test_importFromAnotherProject(execute, _mockIsDir, _mockFile):
+	_mockIsDir('testProject', True, True)
+	_mockFile('testProject/testProject.yaml', '-  include: std/base')
+	_mockIsDir('testProject/testModule', False)
+	_mockFile('testProject/testModule.a', 'a = 1')
+	execute(
+		'import testProject.testModule'
+	)
+
+	testPackage = execute.executed.scope['testProject']
+	testPackageProject = AToPy(await testPackage.getAttribute('__project__'))
+	assert testPackageProject['projectF'].endswith('testProject/testProject.yaml')
+	testModule = await testPackage.getAttribute('testModule')
+	assert testPackageProject is AToPy(await testModule.getAttribute('__project__'))
+	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
 class _PathChecker:
 	def __init__(self, mocker, mockFunction):
+		super().__init__()
+		mocker.patch(mockFunction, self._mock)
 		self._result = {}
-		mocker.patch(mockFunction, self._check)
+		self._not_used = []
 
-	def _check(self, path):
+	def __enter__(self):
+		return self
+
+	def __exit__(self, *_):
+		assert not self._not_used
+
+	def _mock(self, path):
 		try:
-			return self._result[path]
+			result = self._result[path]
 		except KeyError as ex:
 			reason = f'path<{path} is not expected, only these defined {list(self._result)}'
 			raise RuntimeError(reason) from ex
 
+		if path in self._not_used:
+			self._not_used.remove(path)
+		return result
+
 	def __call__(self, path, checkResult, dirLibrary=DIR_LIBRARY):
 		path = os.path.join(dirLibrary, path)
+		assert path not in list(self._result)
 		self._result[path] = checkResult
 
 
@@ -172,41 +209,63 @@ class _DirChecker(_PathChecker):
 		super().__init__(mocker, mockFunction)
 		self._mockIsFile = mockIsFile
 
-	def __call__(self, path, checkResult, dirLibrary=DIR_LIBRARY):
+	def __call__(self, path, checkResult, isProjectDir=False, dirLibrary=DIR_LIBRARY):
 		super().__call__(path, checkResult, dirLibrary=dirLibrary)
-		if checkResult:
-			fullPath = os.path.join(DIR_LIBRARY, path)
-			yamlPath = os.path.join(fullPath, os.path.basename(fullPath))
-			self._mockIsFile(f'{yamlPath}.yaml', False)
+
+		if not checkResult:
+			return
+
+		self._mockIsFile(path, False)
+		if isProjectDir:
+			return
+
+		fullPath = os.path.join(DIR_LIBRARY, path)
+		yamlPath = os.path.join(fullPath, os.path.basename(fullPath))
+		self._mockIsFile(f'{yamlPath}.yaml', False)
+
+
+class _FileContentMock:
+	def __init__(self, mocker, mockIsFile):
+		super().__init__()
+		self._result = {}
+		self._mockIsFile = mockIsFile
+
+		mocker.patch('std.base.objects.module.open', self._mock)
+		mocker.patch('actl.project.open', self._mock)
+
+	@contextmanager
+	def _mock(self, fileName):
+		content = self._result[fileName]
+		assert content is not None
+		self._result[fileName] = None
+		yield content
+
+	def __call__(self, fileName, content):
+		fileName = os.path.join(DIR_LIBRARY, fileName)
+		self._result[fileName] = content
+		self._mockIsFile(fileName, True)
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, *_):
+		for _, content in self._result.items():
+			assert content is None
 
 
 @pytest.fixture
 def _mockIsFile(mocker):
-	return _PathChecker(mocker, 'os.path.isfile')
+	with _PathChecker(mocker, 'os.path.isfile') as mock:
+		yield mock
 
 
 @pytest.fixture
 def _mockIsDir(mocker, _mockIsFile):
-	return _DirChecker(mocker, 'os.path.isdir', _mockIsFile)
+	with _DirChecker(mocker, 'os.path.isdir', _mockIsFile) as mock:
+		yield mock
 
 
 @pytest.fixture
-def _mockOpen(mocker, _mockIsFile):
-	mockFileName = None
-	mockContent = None
-
-	@contextmanager
-	def _open(fileName):
-		assert mockFileName == fileName
-		yield mockContent
-
-
-	def setContent(fileName, content):
-		nonlocal mockFileName
-		nonlocal mockContent
-		mockFileName = os.path.join(DIR_LIBRARY, fileName)
-		mockContent = content
-		_mockIsFile(fileName, True)
-
-	mocker.patch('std.base.objects.module.open', _open)
-	return setContent
+def _mockFile(mocker, _mockIsFile):
+	with _FileContentMock(mocker, _mockIsFile) as mock:
+		yield mock

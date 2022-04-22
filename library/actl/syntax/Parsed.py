@@ -1,5 +1,7 @@
 from actl.syntax import BufferRule
+from actl.syntax.CustomTemplate import End
 from actl.syntax.Template import Template
+from actl.syntax.Or import Or
 from actl.syntax.AbstractTemplate import AbstractTemplate
 
 
@@ -24,3 +26,19 @@ class Parsed(AbstractTemplate):
 		subParser.parseLine(checkEndLineInBuff=self.checkEndLineInBuff)
 		res = BufferRule(parser, buff).popUntil(self.until)
 		return tuple(res)
+
+
+class MatchParsed(Parsed):
+	def __init__(self, *templates):
+		super().__init__(Or(templates, [End]), checkEndLineInBuff=True)
+
+	def __call__(self, parser, buff):
+		res = super().__call__(parser, buff)
+		if res:
+			return None
+
+		buff = BufferRule(parser, buff)
+		if buff.startsWith(self.until):
+			return buff.pop(self.until)
+
+		return None

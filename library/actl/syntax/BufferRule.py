@@ -33,6 +33,9 @@ class BufferRule:
 			res.append(self._buff.pop())
 		return res
 
+	def __iter__(self):
+		return iter(self._buff)
+
 	def index(self, *template):
 		template = Template(*template)
 		index = 0

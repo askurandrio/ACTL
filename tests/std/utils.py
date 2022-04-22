@@ -10,17 +10,14 @@ class AbstractExecute:
 		self.isExecuted = False
 		self.project = Project()
 		self.project.processSource([{'include': self._PROJECT_NAME}])
+		self.executor = None
 
 	def executeInInitialScope(self, code):
 		scopeChildType = type(self.scope.child())
 		scopeChildType.allowOverride = True
 
-		Executor(
-			iter(
-				self.project['parseInput'](self.scope, Buffer(code))
-			),
-			self.scope
-		).execute()
+		code = self.project['parseInput'](self.scope, Buffer(code))
+		Executor(self.scope).execute(code)
 
 		scopeChildType.allowOverride = False
 
@@ -59,7 +56,7 @@ class AbstractExecute:
 		if self.parsed.isExecuted:
 			return self
 
-		self.project['buildExecutor'].execute()
+		self.project['buildExecutor'].execute(self.project['buildParser'])
 		self.isExecuted = True
 		return self.executed
 

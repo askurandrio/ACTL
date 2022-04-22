@@ -16,3 +16,7 @@ class Token(AbstractTemplate):
 		res = inp[:len(self.token)]
 		del inp[:len(self.token)]
 		return res
+
+	@classmethod
+	def of(cls, element):
+		return cls((element,))

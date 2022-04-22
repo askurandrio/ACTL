@@ -1,25 +1,26 @@
-from actl.opcodes import CALL_FUNCTION_STATIC
 from std.base import Executor
-from std.base.objects import Import
+from std.base.projectConfig import getInitialScope as getInitialBaseScope
+from std.base.objects.importDefinition import import_, copyAlllIntoScope
+from actl.Scope import ScopeChild
 
 
 def getInitialScope(project):
-	initialScope = project['std/_std']['initialScope'].child()
-	type(initialScope).allowOverride = True
-	project['initialScope'] = initialScope
+	if not project['projectF'].endswith('ACTL/library/std/std/std.yaml'):
+		return project['std']['initialScope'].child()
 
-	Executor(
-		iter([
-			CALL_FUNCTION_STATIC(
-				'_tmpVarTrash',
-				Import.call,
-				kwargs={'fromName': 'std.std.init', 'importName': '*'}
-			)
-		]),
-		initialScope
-	).execute()
+	try:
+		return project['__initialScope']
+	except KeyError:
+		pass
 
-	del project['initialScope']
+	initialScope = getInitialBaseScope(project)
+	project['__initialScope'] = initialScope
+	ScopeChild.allowOverride = True
+	executor = Executor(project['__initialScope'])
+	initModule = executor.executeCoroutine(import_.call('std.std.init'))
+	executor.executeCoroutine(copyAlllIntoScope.call(initModule, initialScope))
 
-	type(initialScope).allowOverride = False
+	del project['__initialScope']
+	ScopeChild.allowOverride = False
+
 	return initialScope

@@ -5,13 +5,30 @@ from actl.objects import While, Bool, If, AToPy, Object
 class Executor:
 	_HANDLERS = {}
 
-	def __init__(self, code, scope):
+	def __init__(self, scope):
 		self.scope = scope
-		self.stack = []
-		self.frames = [iter(code)]
-		self.return_ = None
+		self.callStack = []
+		self.setReturnValue = None
+		self.frames = []
 
-	def execute(self):
+	def executeCoroutine(self, coroutine):
+		from std.base.executor.utils import makeCoroutineResultSaver
+
+		result = None
+
+		@makeCoroutineResultSaver(coroutine)
+		def saveCoroutineResult(res):
+			nonlocal result
+			result = res
+
+		self.execute(saveCoroutineResult.__await__())
+
+		return result
+
+	def execute(self, code):
+		previusCallStack, previusSetReturnValue, previusFrames = self.callStack, self.setReturnValue, self.frames
+		self.callStack, self.setReturnValue, self.frames = [], None, [iter(code)]
+
 		while self.frames:
 			try:
 				opcode = next(self.frames[-1])
@@ -20,6 +37,8 @@ class Executor:
 				continue
 
 			self._executeOpcode(opcode)
+
+		self.callStack, self.setReturnValue, self.frames = previusCallStack, previusSetReturnValue, previusFrames
 
 	def _executeOpcode(self, opcode):
 		try:
@@ -94,10 +113,10 @@ async def _SET_VARIABLE__handler(executor, opcode):
 @Executor.addHandler(opcodes.CALL_FUNCTION_STATIC)
 async def _CALL_FUNCTION_STATIC__handler(executor, opcode):
 	assert opcode.typeb == '(', f'{opcode.typeb} is unexpected typeb'
-	args = [
-		*opcode.staticArgs,
-		*(executor.scope[varName] for varName in opcode.args)
-	]
+
+	args = [*opcode.staticArgs]
+	for varName in opcode.args:
+		args.append(executor.scope[varName])
 
 	if isinstance(opcode.function, str):
 		function = executor.scope[opcode.function].call
@@ -124,7 +143,7 @@ async def _CALL_FUNCTION__handler(executor, opcode):
 @Executor.addHandler(opcodes.RETURN)
 async def _RETURN__handler(executor, opcode):
 	returnValue = executor.scope[opcode.var]
-	executor.return_(returnValue)
+	executor.setReturnValue(returnValue)
 
 
 @Executor.addHandler(opcodes.CALL_OPERATOR)

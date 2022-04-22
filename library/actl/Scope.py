@@ -3,7 +3,7 @@ class Scope:
 		self._head = head
 
 	def child(self):
-		return _ScopeChild(self)
+		return ScopeChild(self)
 
 	def get(self, key, default=None):
 		return self._head.get(key, default)
@@ -12,10 +12,13 @@ class Scope:
 		return key in self._head
 
 	def __getitem__(self, key):
+		if key == '__scope__':
+			return self
+
 		return self._head[key]
 
 	def __setitem__(self, key, value):
-		if key == '_tmpVarTrash':
+		if key == '_':
 			return
 
 		self._head[key] = value
@@ -27,7 +30,7 @@ class Scope:
 		return f'Scope<{reprHead}>'
 
 
-class _ScopeChild(Scope):
+class ScopeChild(Scope):
 	allowOverride = False  # TODO: improve this situation
 
 	def __init__(self, parent):
@@ -59,7 +62,7 @@ class _ScopeChild(Scope):
 
 	def __setitem__(self, key, value):
 		if (not self.allowOverride) and (key in self._parent):
-			raise RuntimeError(key)
+			raise RuntimeError(f'{key} is already defined in parent as {self._parent[key]}')
 		super().__setitem__(key, value)
 
 	def __repr__(self):
