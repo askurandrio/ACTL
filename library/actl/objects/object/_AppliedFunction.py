@@ -10,10 +10,7 @@ class AppliedFunction:
 		if not isinstance(other, type(self)):
 			return False
 
-		return (
-			(self._function == other._function) and
-			(self._args == other._args)
-		)
+		return (self._function == other._function) and (self._args == other._args)
 
 	def __repr__(self):
 		return str(self)

@@ -1,10 +1,11 @@
-from actl.objects import \
-		makeClass, \
-		class_ as actlClass, \
-		Function as actlFunction, \
-		Signature, \
-		executeSyncCoroutine, \
-		NativeFunction
+from actl.objects import (
+	makeClass,
+	class_ as actlClass,
+	Function as actlFunction,
+	Signature,
+	executeSyncCoroutine,
+	NativeFunction,
+)
 from actl.opcodes import VARIABLE, RETURN
 from actl.opcodes.opcodes import CALL_FUNCTION_STATIC
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, Maybe, Parsed
@@ -25,7 +26,7 @@ class_ = makeClass('class_', (actlClass,))
 	IsInstance(VARIABLE),
 	Maybe(Token('('), IsInstance(VARIABLE), Token(')')),
 	useParser=True,
-	manualApply=True
+	manualApply=True,
 )
 def _parseClass(parser, inp):
 	inpRule = BufferRule(parser, inp)
@@ -42,9 +43,7 @@ def _parseClass(parser, inp):
 	inpRule.pop(Token(':'))
 	body = CodeBlock(parser, inp).parse()
 	makeClassOpcode = CALL_FUNCTION_STATIC(
-		className,
-		buildClass.call,
-		staticArgs=(className, tuple(parents), body)
+		className, buildClass.call, staticArgs=(className, tuple(parents), body)
 	)
 	inp.insert(0, [makeClassOpcode])
 
@@ -57,15 +56,9 @@ async def buildClass(name, parents, body):
 	executor = await bindExecutor()
 	builder = await Function.call(
 		f'_build{name}',
-		await Signature.call([
-			'__class__',
-			name
-		]),
-		[
-			*body,
-			RETURN('__scope__')
-		],
-		executor.scope
+		await Signature.call(['__class__', name]),
+		[*body, RETURN('__scope__')],
+		executor.scope,
 	)
 	scope = await builder.call(cls, cls)
 	for key, value in scope.getDiff():

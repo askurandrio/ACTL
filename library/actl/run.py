@@ -15,21 +15,10 @@ def main(projectF=None, mainF=None, source=None):
 	projectSource = [{'include': projectF}]
 
 	if mainF is not None:
-		projectSource = [
-			*projectSource,
-			{
-				'setKey': {
-					'key': 'mainF',
-					'value': mainF
-				}
-			}
-		]
+		projectSource = [*projectSource, {'setKey': {'key': 'mainF', 'value': mainF}}]
 
 	if source is not None:
-		projectSource = [
-			*projectSource,
-			*source
-		]
+		projectSource = [*projectSource, *source]
 
 	project = actl.Project()
 	project.processSource(projectSource)
@@ -55,10 +44,7 @@ def parseArgs(argv):
 
 	assert not argv, argv
 	if 'source' in args:
-		args = {
-			**args,
-			'source': json.loads(args['source'])
-		}
+		args = {**args, 'source': json.loads(args['source'])}
 	return args
 
 

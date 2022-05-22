@@ -5,8 +5,17 @@ import pytest
 from actl import Parser, Scope
 from actl.Buffer import Buffer
 from actl.opcodes import VARIABLE
-from actl.syntax import SyntaxRules, Token, Many, IsInstance, Or, Maybe, Value, \
-	SyntaxRule, CustomTemplate
+from actl.syntax import (
+	SyntaxRules,
+	Token,
+	Many,
+	IsInstance,
+	Or,
+	Maybe,
+	Value,
+	SyntaxRule,
+	CustomTemplate,
+)
 
 
 @pytest.fixture

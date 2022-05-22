@@ -32,7 +32,7 @@ async def object__superGetAttribute(self, for_, key):
 
 	if for_ in parents:
 		forIndex = parents.index(for_)
-		parents = parents[forIndex + 1:]
+		parents = parents[forIndex + 1 :]
 
 	for parent in parents:
 		self_ = parent.self_

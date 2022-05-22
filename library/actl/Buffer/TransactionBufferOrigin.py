@@ -4,7 +4,7 @@ class TransactionBufferOrigin:
 		self._shift = shift
 
 	def startsWith(self, tmpl):
-		tmpl = self._origin[:self._shift] + tmpl
+		tmpl = self._origin[: self._shift] + tmpl
 		return self._origin.startsWith(tmpl)
 
 	def pop(self, index=0):
@@ -18,7 +18,7 @@ class TransactionBufferOrigin:
 		return self._origin[index]
 
 	def _shiftIndex(self, index):
-		if isinstance(index,  slice):
+		if isinstance(index, slice):
 			if index.start is not None:
 				indexStart = self._shift + index.start
 			else:

@@ -22,10 +22,8 @@ async def _Function__call(self, *args):
 	executor.scope, prevScope = callScope.child(), executor.scope
 
 	for argName, argValue in zip_longest(argNames, args, fillvalue=_default):
-		assert argName is not _default, \
-				f'argName is default, argValue is {argValue}'
-		assert argValue is not _default, \
-				f'argValue is default, argName is {argName}'
+		assert argName is not _default, f'argName is default, argValue is {argValue}'
+		assert argValue is not _default, f'argValue is default, argName is {argName}'
 		executor.scope[argName] = argValue
 
 	result = await CallFrame(body)
@@ -41,7 +39,7 @@ async def _Function__call(self, *args):
 	IsInstance(VARIABLE),
 	Token('('),
 	useParser=True,
-	manualApply=True
+	manualApply=True,
 )
 class _ParseFunction:
 	def __init__(self, parser, inp):
@@ -61,7 +59,7 @@ class _ParseFunction:
 			name,
 			Function.call,
 			staticArgs=(name, signature, body),
-			kwargs={'scope': '__scope__'}
+			kwargs={'scope': '__scope__'},
 		)
 		self._inp.insert(0, [makeFunctionOpcode])
 
@@ -88,9 +86,6 @@ class _ParseFunction:
 		body = CodeBlock(self._parser, self._inp).parse()
 
 		if (not body) or (RETURN != body[-1]):
-			body = (
-				*body,
-				RETURN('None')
-			)
+			body = (*body, RETURN('None'))
 
 		return body

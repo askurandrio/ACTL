@@ -21,24 +21,18 @@ class SyntaxRule:
 			kwargs = {}
 
 			if self._useParser:
-				kwargs = {
-					**kwargs,
-					'parser': parser
-				}
+				kwargs = {**kwargs, 'parser': parser}
 
 			if self._manualApply:
 				inp.insert(0, res)
-				kwargs = {
-					**kwargs,
-					'inp': inp
-				}
+				kwargs = {**kwargs, 'inp': inp}
 				self.func(**kwargs)
 				return
 
 			args = tuple(arg for arg in res if not isinstance(arg, NamedResult))
-			kwargs.update({
-				arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)
-			})
+			kwargs.update(
+				{arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)}
+			)
 			res = self.func(*args, **kwargs)
 			while hasattr(inp, 'origin'):
 				inp = inp.origin
@@ -53,9 +47,11 @@ class SyntaxRule:
 	def wrap(cls, *template, manualApply=False, useParser=False):
 		def decorator(userFunc):
 			if isclass(userFunc):
+
 				def func(*args, **kwargs):
 					instance = userFunc(*args, **kwargs)
 					return instance.parse()
+
 			else:
 				func = userFunc
 

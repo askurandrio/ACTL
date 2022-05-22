@@ -13,12 +13,14 @@ class _AStringClass(type(Object)):
 		return "class 'String'"
 
 
-String = _AStringClass({
-	'__name__': 'String',
-	'__class__': class_,
-	'__parents__': (Object,),
-	'__self__': {}
-})
+String = _AStringClass(
+	{
+		'__name__': 'String',
+		'__class__': class_,
+		'__parents__': (Object,),
+		'__self__': {},
+	}
+)
 
 
 @addMethodToClass(String, '__call__')

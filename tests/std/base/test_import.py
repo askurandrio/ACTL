@@ -16,16 +16,10 @@ ORDER_KEY = 10
 async def test_simpleImport(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
 	_mockFile('testModule.a', 'a = 1')
-	execute(
-		'import testModule'
-	)
+	execute('import testModule')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC(
-			'testModule',
-			import_.call,
-			staticArgs=('testModule',)
-		)
+		CALL_FUNCTION_STATIC('testModule', import_.call, staticArgs=('testModule',))
 	]
 
 	testModule = execute.executed.scope['testModule']
@@ -37,18 +31,12 @@ async def test_importPackageAndModule(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testPackage', True)
 	_mockIsDir('testPackage/testModule', False)
 	_mockFile('testPackage/testModule.a', 'a = 1')
-	execute(
-		'import testPackage.testModule'
-	)
+	execute('import testPackage.testModule')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC(
-			'testPackage',
-			import_.call,
-			staticArgs=('testPackage',)
-		),
+		CALL_FUNCTION_STATIC('testPackage', import_.call, staticArgs=('testPackage',)),
 		SET_VARIABLE('_tmpVar1', 'testPackage'),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule')
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
 	]
 
 	testPackage = execute.executed.scope['testPackage']
@@ -60,17 +48,13 @@ async def test_importPackageAndModule(execute, _mockFile, _mockIsDir):
 async def test_importFromModuleAllNames(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
 	_mockFile('testModule.a', 'a = 1')
-	execute(
-		'from testModule import *'
-	)
+	execute('from testModule import *')
 
 	assert execute.parsed.code == [
+		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testModule',)),
 		CALL_FUNCTION_STATIC(
-			'_tmpVar1',
-			import_.call,
-			staticArgs=('testModule',)
+			'_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__')
 		),
-		CALL_FUNCTION_STATIC('_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__'))
 	]
 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
@@ -79,17 +63,11 @@ async def test_importFromModuleAllNames(execute, _mockFile, _mockIsDir):
 async def test_importFromModuleImportName(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
 	_mockFile('testModule.a', 'a = 1')
-	execute(
-		'from testModule import a'
-	)
+	execute('from testModule import a')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC(
-			'_tmpVar1',
-			import_.call,
-			staticArgs=('testModule',)
-		),
-		GET_ATTRIBUTE('a', '_tmpVar1', 'a')
+		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testModule',)),
+		GET_ATTRIBUTE('a', '_tmpVar1', 'a'),
 	]
 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
@@ -100,19 +78,15 @@ async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
 	_mockFile('testMainPackage/testPackage/testModule.a', 'a = 1')
-	execute(
-		'import testMainPackage.testPackage.testModule'
-	)
+	execute('import testMainPackage.testPackage.testModule')
 
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC(
-			'testMainPackage',
-			import_.call,
-			staticArgs=('testMainPackage',)
+			'testMainPackage', import_.call, staticArgs=('testMainPackage',)
 		),
 		SET_VARIABLE('_tmpVar1', 'testMainPackage'),
 		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule')
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
 	]
 
 	testMainPackage = execute.executed.scope['testMainPackage']
@@ -121,24 +95,22 @@ async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
-async def test_importFromPackageAndPackageAndModuleAllNames(execute, _mockFile, _mockIsDir):
+async def test_importFromPackageAndPackageAndModuleAllNames(
+	execute, _mockFile, _mockIsDir
+):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
 	_mockFile('testMainPackage/testPackage/testModule.a', 'a = 1')
-	execute(
-		'from testMainPackage.testPackage.testModule import *'
-	)
+	execute('from testMainPackage.testPackage.testModule import *')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC(
-			'_tmpVar1',
-			import_.call,
-			staticArgs=('testMainPackage',)
-		),
+		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testMainPackage',)),
 		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
 		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
-		CALL_FUNCTION_STATIC('_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__'))
+		CALL_FUNCTION_STATIC(
+			'_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__')
+		),
 	]
 
 	assert str(execute.executed.scope['a']) == 'Number<1>'
@@ -162,9 +134,7 @@ async def test_importFromAnotherProject(execute, _mockIsDir, _mockFile):
 	_mockFile('testProject/testProject.yaml', '-  include: std/base')
 	_mockIsDir('testProject/testModule', False)
 	_mockFile('testProject/testModule.a', 'a = 1')
-	execute(
-		'import testProject.testModule'
-	)
+	execute('import testProject.testModule')
 
 	testPackage = execute.executed.scope['testProject']
 	testPackageProject = AToPy(await testPackage.getAttribute('__project__'))
@@ -191,7 +161,9 @@ class _PathChecker:
 		try:
 			result = self._result[path]
 		except KeyError as ex:
-			reason = f'path<{path} is not expected, only these defined {list(self._result)}'
+			reason = (
+				f'path<{path} is not expected, only these defined {list(self._result)}'
+			)
 			raise RuntimeError(reason) from ex
 
 		if path in self._not_used:

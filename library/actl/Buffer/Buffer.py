@@ -21,7 +21,7 @@ class Buffer:
 
 	def one(self):
 		try:
-			res, = self
+			(res,) = self
 		except ValueError as ex:
 			raise ValueError(f'len({self}) != 1') from ex
 		return res
@@ -42,7 +42,7 @@ class Buffer:
 	def startsWith(self, tmpl):
 		tmpl = list(tmpl)
 		self._load(len(tmpl))
-		return self._buff[:len(tmpl)] == tmpl
+		return self._buff[: len(tmpl)] == tmpl
 
 	def loadAll(self):
 		self._buff.extend(self._head)
@@ -61,7 +61,9 @@ class Buffer:
 			if index > 0:
 				index -= 1
 
-		assert index >= 0, 'use .loadAll() if you want load index with undefined count to load'
+		assert (
+			index >= 0
+		), 'use .loadAll() if you want load index with undefined count to load'
 
 		index = (index + 1) - len(self._buff)
 
@@ -135,6 +137,7 @@ class Buffer:
 	def wrap(cls, func):
 		def wrapper(*args, **kwargs):
 			return cls(func(*args, **kwargs))
+
 		return wrapper
 
 	@classmethod

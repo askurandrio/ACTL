@@ -36,11 +36,7 @@ def getRules(_):
 
 def _loadFromScope():
 	frame = inspect.currentframe().f_back
-	scope = {
-		**vars(builtins),
-		**frame.f_globals,
-		**frame.f_locals
-	}
+	scope = {**vars(builtins), **frame.f_globals, **frame.f_locals}
 
 	def loader(key):
 		names = key.split('.')
@@ -80,7 +76,7 @@ def getInitialScope(project):
 		('from', 'std.base.objects.From'),
 		('Module', 'std.base.objects.Module'),
 		('__project__', 'project'),
-		('lt', 'lt')
+		('lt', 'lt'),
 	):
 		pyVar = loader(pyName)
 		var = objects.executeSyncCoroutine(objects.PyToA.call(pyVar))
@@ -111,9 +107,7 @@ def getBuildScope(project):
 
 
 def getBuildParser(project):
-	return project['parseInput'](
-		project['buildScope'], project['input']
-	)
+	return project['parseInput'](project['buildScope'], project['input'])
 
 
 def getBuildExecutor(project):
@@ -121,7 +115,6 @@ def getBuildExecutor(project):
 
 
 def getBuild(project):
-
 	def build():
 		executor = project['buildExecutor']
 		code = project['buildParser']
@@ -189,7 +182,9 @@ class Importer:
 		executor = await bindExecutor()
 
 		if executor != self._currentProject['buildExecutor']:
-			return self._currentProject['buildExecutor'].executeCoroutine(self._currentProject['import'].importByPath(path))
+			return self._currentProject['buildExecutor'].executeCoroutine(
+				self._currentProject['import'].importByPath(path)
+			)
 
 		if os.path.isdir(path):
 			pathBaseName = os.path.basename(path)

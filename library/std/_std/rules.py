@@ -22,16 +22,24 @@ def _parseSlice(parser, inp):
 		CALL_FUNCTION_STATIC(
 			dst=sliceVariable.name,
 			function='Slice',
-			args=[startVariable.name, 'None', 'None']
+			args=[startVariable.name, 'None', 'None'],
 		)
 	)
 
 	getItemMethodVariable = parser.makeTmpVar()
-	parser.define(GET_ATTRIBUTE(getItemMethodVariable.name, collectionVariable.name, '__getItem__'))
+	parser.define(
+		GET_ATTRIBUTE(
+			getItemMethodVariable.name, collectionVariable.name, '__getItem__'
+		)
+	)
 
 	subCollectionVariable = parser.makeTmpVar()
 	parser.define(
-		CALL_FUNCTION(subCollectionVariable.name, getItemMethodVariable.name, args=[sliceVariable.name])
+		CALL_FUNCTION(
+			subCollectionVariable.name,
+			getItemMethodVariable.name,
+			args=[sliceVariable.name],
+		)
 	)
 
 	inp.insert(0, [subCollectionVariable])
@@ -46,9 +54,7 @@ def _parseVector(parser, inp):
 
 	if not inpRule.startsWith(Token(']')):
 		appendVarName = parser.makeTmpVar().name
-		parser.define(
-			GET_ATTRIBUTE(appendVarName, dst.name, 'append')
-		)
+		parser.define(GET_ATTRIBUTE(appendVarName, dst.name, 'append'))
 		appendResultVarName = parser.makeTmpVar().name
 
 		while not inpRule.startsWith(Token(']')):

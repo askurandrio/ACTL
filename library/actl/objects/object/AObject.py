@@ -75,11 +75,15 @@ class AObject(ReprToStr):
 		return await get.call(instance)
 
 	async def _get_superGetAttribute(self):
-		superGetAttribute, isSuccess = self.lookupAttributeInHead('__superGetAttribute__')
+		superGetAttribute, isSuccess = self.lookupAttributeInHead(
+			'__superGetAttribute__'
+		)
 		if superGetAttribute:
 			return superGetAttribute, True
 
-		superGetAttribute, isSuccess = self.lookupAttributeInClsSelf('__superGetAttribute__')
+		superGetAttribute, isSuccess = self.lookupAttributeInClsSelf(
+			'__superGetAttribute__'
+		)
 		if isSuccess:
 			bindedSuperGetAttribute = await self.bindAttribute(superGetAttribute)
 			return bindedSuperGetAttribute, True
@@ -87,7 +91,9 @@ class AObject(ReprToStr):
 		return None, False
 
 	async def super_(self, for_, name):
-		superGetAttribute, isSuccess = await self.lookupSpecialAttribute('__superGetAttribute__')
+		superGetAttribute, isSuccess = await self.lookupSpecialAttribute(
+			'__superGetAttribute__'
+		)
 		AAttributeNotFound.check(isSuccess, key='__superGetAttribute__')
 		return await superGetAttribute.call(for_, name)
 

@@ -13,7 +13,7 @@ async def test_setString(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', 'String', staticArgs=['s']),
-		opcodes.SET_VARIABLE('res', '_tmpVar1')
+		opcodes.SET_VARIABLE('res', '_tmpVar1'),
 	]
 	assert execute.executed.scope['res'] == await String.call('s')
 
@@ -31,7 +31,7 @@ async def test_setString(execute):
 		'1 >= 1',
 		'1 != 1',
 		'1 == 1',
-	]
+	],
 )
 def test_equality_with_py(execute, code):
 	pyResult = eval(code)  # pylint: disable=eval-used

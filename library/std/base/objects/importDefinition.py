@@ -1,5 +1,16 @@
 from actl.opcodes.opcodes import SET_VARIABLE
-from actl.syntax import SyntaxRule, Value, Token, IsInstance, MatchParsed, Many, Or, End, BufferRule, Maybe
+from actl.syntax import (
+	SyntaxRule,
+	Value,
+	Token,
+	IsInstance,
+	MatchParsed,
+	Many,
+	Or,
+	End,
+	BufferRule,
+	Maybe,
+)
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE, GET_ATTRIBUTE
 from actl.objects import NativeFunction, Object, executeSyncCoroutine, AToPy
 from actl import asDecorator, Buffer
@@ -23,25 +34,17 @@ async def copyAlllIntoScope(module, scope):
 		scope[key] = value
 
 
-@asDecorator(lambda rule: import_.setAttribute('__syntaxRule__',  rule))
+@asDecorator(lambda rule: import_.setAttribute('__syntaxRule__', rule))
 @SyntaxRule.wrap(
 	Value(import_),
 	Token(' '),
 	IsInstance(VARIABLE),
-	Many(
-		Token('.'),
-		MatchParsed(IsInstance(VARIABLE)),
-		minMatches=0
-	),
+	Many(Token('.'), MatchParsed(IsInstance(VARIABLE)), minMatches=0),
 	Maybe(
 		Token(' '),
-		MatchParsed(
-			Token.of(VARIABLE('as')),
-			Token(' '),
-			IsInstance(VARIABLE)
-		),
+		MatchParsed(Token.of(VARIABLE('as')), Token(' '), IsInstance(VARIABLE)),
 	),
-	useParser=True
+	useParser=True,
 )
 def _parseImport(*args, parser=None):
 	args = BufferRule(parser, Buffer(args))
@@ -71,21 +74,17 @@ def _parseImport(*args, parser=None):
 			yield GET_ATTRIBUTE(resultName, resultName, moduleName.name)
 
 
-@asDecorator(lambda rule: From.setAttribute('__syntaxRule__',  rule))
+@asDecorator(lambda rule: From.setAttribute('__syntaxRule__', rule))
 @SyntaxRule.wrap(
 	Value(From),
 	Token(' '),
 	MatchParsed(IsInstance(VARIABLE)),
-	Many(
-		Token('.'),
-		MatchParsed(IsInstance(VARIABLE)),
-		minMatches=0
-	),
+	Many(Token('.'), MatchParsed(IsInstance(VARIABLE)), minMatches=0),
 	Token(' '),
 	MatchParsed(Value(import_)),
 	Token(' '),
 	MatchParsed(Or([IsInstance(VARIABLE)], [Token('*')])),
-	useParser=True
+	useParser=True,
 )
 def _parseFromImport(*args, parser=None):
 	args = BufferRule(parser, Buffer(args))
@@ -93,13 +92,9 @@ def _parseFromImport(*args, parser=None):
 
 	codeModuleName = args.popUntil(Token(' '))
 	args.pop(Token(' '))
-	codeModuleImport = Buffer((
-		*args.pop(Value(import_)),
-		' ',
-		*codeModuleName,
-		*' as ',
-		parser.makeTmpVar()
-	))
+	codeModuleImport = Buffer(
+		(*args.pop(Value(import_)), ' ', *codeModuleName, *' as ', parser.makeTmpVar())
+	)
 	codeModuleImport = tuple(parser.subParser(codeModuleImport))
 	yield from codeModuleImport
 	args.pop(Token(' '))
@@ -107,7 +102,9 @@ def _parseFromImport(*args, parser=None):
 
 	for attributeName in args:
 		if '*' == attributeName:
-			yield CALL_FUNCTION_STATIC('_', copyAlllIntoScope.call, args=(moduleVarName, '__scope__'))
+			yield CALL_FUNCTION_STATIC(
+				'_', copyAlllIntoScope.call, args=(moduleVarName, '__scope__')
+			)
 			continue
 
 		yield GET_ATTRIBUTE(attributeName.name, moduleVarName, attributeName.name)

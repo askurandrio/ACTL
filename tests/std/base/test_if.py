@@ -17,14 +17,14 @@ async def test_simple_if(execute):
 					opcodes.CALL_FUNCTION_STATIC(
 						dst='_tmpVar1', function=Number.call, staticArgs=['1']
 					),
-					opcodes.VARIABLE(name='_tmpVar1')
+					opcodes.VARIABLE(name='_tmpVar1'),
 				),
 				(
 					opcodes.CALL_FUNCTION_STATIC(
 						dst='_tmpVar2', function=Number.call, staticArgs=['2']
 					),
-					opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
-				)
+					opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+				),
 			)
 		)
 	]
@@ -41,13 +41,13 @@ async def test_ifFalse(execute):
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar1', function=Number.call, staticArgs=['0']
 		),
-		opcodes.VARIABLE(name='_tmpVar1')
+		opcodes.VARIABLE(name='_tmpVar1'),
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar2', function=Number.call, staticArgs=['1']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
 	)
 
 	assert 'a' not in execute.executed.scope
@@ -64,29 +64,29 @@ async def test_ifElif(execute):
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar1', function=Number.call, staticArgs=['0']
 				),
-				opcodes.VARIABLE(name='_tmpVar1')
+				opcodes.VARIABLE(name='_tmpVar1'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar2', function=Number.call, staticArgs=['1']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
-			)
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+			),
 		),
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar3', function=Number.call, staticArgs=['1']
 				),
-				opcodes.VARIABLE(name='_tmpVar3')
+				opcodes.VARIABLE(name='_tmpVar3'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar4', function=Number.call, staticArgs=['2']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4')
-			)
-		)
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4'),
+			),
+		),
 	)
 	assert AToPy(execute.executed.scope['a']) == 2
 
@@ -101,19 +101,19 @@ async def test_ifElse(execute):
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar1', function=Number.call, staticArgs=['0']
 		),
-		opcodes.VARIABLE(name='_tmpVar1')
+		opcodes.VARIABLE(name='_tmpVar1'),
 	)
 	assert code == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar2', function=Number.call, staticArgs=['1']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
 	)
 	assert await if_.getAttribute('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar3', function=Number.call, staticArgs=['2']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar3')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar3'),
 	)
 	assert AToPy(execute.executed.scope['a']) == 2
 
@@ -129,34 +129,34 @@ async def test_ifElifElseWithFullCodeBlock(execute):
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar1', function=Number.call, staticArgs=['0']
 				),
-				opcodes.VARIABLE(name='_tmpVar1')
+				opcodes.VARIABLE(name='_tmpVar1'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar2', function=Number.call, staticArgs=['1']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2')
-			)
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+			),
 		),
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar3', function=Number.call, staticArgs=['0']
 				),
-				opcodes.VARIABLE(name='_tmpVar3')
+				opcodes.VARIABLE(name='_tmpVar3'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
 					dst='_tmpVar4', function=Number.call, staticArgs=['2']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4')
-			)
-		)
+				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4'),
+			),
+		),
 	)
 	assert await if_.getAttribute('elseCode') == (
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar5', function=Number.call, staticArgs=['3']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar5')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar5'),
 	)
 	assert AToPy(execute.executed.scope['a']) == 3

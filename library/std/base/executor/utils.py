@@ -26,7 +26,6 @@ async def _BIND_EXECUTOR_handler(executor, opcode):
 	opcode.executor = executor
 
 
-
 class CallFrame:
 	_default = object()
 
@@ -53,7 +52,10 @@ class CallFrame:
 		executor = yield from bindExecutor().__await__()
 		setReturnValue.framesLength = len(executor.frames) + 1
 		cleanup.frames = []
-		executor.setReturnValue, setReturnValue.previusSetReturnValue = setReturnValue, executor.setReturnValue
+		executor.setReturnValue, setReturnValue.previusSetReturnValue = (
+			setReturnValue,
+			executor.setReturnValue,
+		)
 
 		for opcode in self._code:
 			if returnValue is not self._default:

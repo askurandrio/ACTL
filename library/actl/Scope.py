@@ -62,7 +62,9 @@ class ScopeChild(Scope):
 
 	def __setitem__(self, key, value):
 		if (not self.allowOverride) and (key in self._parent):
-			raise RuntimeError(f'{key} is already defined in parent as {self._parent[key]}')
+			raise RuntimeError(
+				f'{key} is already defined in parent as {self._parent[key]}'
+			)
 		super().__setitem__(key, value)
 
 	def __repr__(self):

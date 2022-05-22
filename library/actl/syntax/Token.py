@@ -13,8 +13,8 @@ class Token(AbstractTemplate):
 			if element != inpElement:
 				return None
 
-		res = inp[:len(self.token)]
-		del inp[:len(self.token)]
+		res = inp[: len(self.token)]
+		del inp[: len(self.token)]
 		return res
 
 	@classmethod

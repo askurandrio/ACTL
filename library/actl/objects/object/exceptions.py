@@ -18,7 +18,9 @@ class _MetaAGenericKeyError(type, _GenericKeyExceptionMixin):
 		return cls('')
 
 
-class AGenericKeyError(Exception, _GenericKeyExceptionMixin, metaclass=_MetaAGenericKeyError):
+class AGenericKeyError(
+	Exception, _GenericKeyExceptionMixin, metaclass=_MetaAGenericKeyError
+):
 	_GCACHE = {}
 
 	@classmethod

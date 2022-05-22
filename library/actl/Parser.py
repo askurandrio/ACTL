@@ -6,9 +6,7 @@ from actl.opcodes import VARIABLE
 
 
 class Parser:
-	def __init__(
-		self, scope, rules, buff, endLine=Token('\n'), makeTmpVar=None
-	):
+	def __init__(self, scope, rules, buff, endLine=Token('\n'), makeTmpVar=None):
 		self.scope = scope
 		self.rules = rules
 		self.buff = buff
@@ -49,7 +47,9 @@ class Parser:
 			if isApplied:
 				self.buff.insert(0, flush)
 				flush = Buffer()
-				if checkEndLineInBuff and BufferRule(self, self.buff).startsWith(self.endLine):
+				if checkEndLineInBuff and BufferRule(self, self.buff).startsWith(
+					self.endLine
+				):
 					return
 				continue
 

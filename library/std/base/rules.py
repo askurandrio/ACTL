@@ -2,10 +2,28 @@
 from actl.Buffer import TransactionBuffer, Buffer
 from actl.objects import AToPy, Number
 from actl.opcodes.opcodes import RETURN
-from actl.syntax import SyntaxRules, CustomTemplate, IsInstance, Many, Or, Token, Maybe, Template, \
-	BufferRule, Parsed, Not
-from actl.opcodes import VARIABLE, SET_VARIABLE, CALL_FUNCTION, CALL_FUNCTION_STATIC, \
-	CALL_OPERATOR, GET_ATTRIBUTE, SET_ATTRIBUTE
+from actl.syntax import (
+	SyntaxRules,
+	CustomTemplate,
+	IsInstance,
+	Many,
+	Or,
+	Token,
+	Maybe,
+	Template,
+	BufferRule,
+	Parsed,
+	Not,
+)
+from actl.opcodes import (
+	VARIABLE,
+	SET_VARIABLE,
+	CALL_FUNCTION,
+	CALL_FUNCTION_STATIC,
+	CALL_OPERATOR,
+	GET_ATTRIBUTE,
+	SET_ATTRIBUTE,
+)
 
 
 RULES = SyntaxRules()
@@ -15,7 +33,9 @@ RULES = SyntaxRules()
 class _ApplySyntaxObjectSyntaxRule:
 	@classmethod
 	def match(cls, parser, inp):
-		executeCoroutine = AToPy(parser.scope['__project__'])['buildExecutor'].executeCoroutine
+		executeCoroutine = AToPy(parser.scope['__project__'])[
+			'buildExecutor'
+		].executeCoroutine
 
 		for syntaxObject in cls._getSyntaxObjects(parser, inp, executeCoroutine):
 			syntaxRule = executeCoroutine(syntaxObject.getAttribute('__syntaxRule__'))
@@ -33,7 +53,9 @@ class _ApplySyntaxObjectSyntaxRule:
 	def _getSyntaxObjects(parser, inp, executeCoroutine):
 		scope = parser.scope
 
-		for token in BufferRule(parser, TransactionBuffer(inp)).popUntil(parser.endLine):
+		for token in BufferRule(parser, TransactionBuffer(inp)).popUntil(
+			parser.endLine
+		):
 			if (VARIABLE != token) or (token.name not in scope):
 				continue
 
@@ -56,12 +78,7 @@ class VariableTemplate(Template):
 	def __init__(self):
 		super().__init__(
 			_isAcceptableName,
-			Maybe(Many(
-				Or(
-					[_isAcceptableName],
-					[_isAcceptableContinuesName]
-				)
-			))
+			Maybe(Many(Or([_isAcceptableName], [_isAcceptableContinuesName]))),
 		)
 
 	def __call__(self, parser, inp):
@@ -71,7 +88,7 @@ class VariableTemplate(Template):
 			return None
 
 		variable = VARIABLE(''.join(tokens))
-		del inp[:len(list(tokens))]
+		del inp[: len(list(tokens))]
 		return [variable]
 
 
@@ -79,9 +96,7 @@ class VariableTemplate(Template):
 def _parseReturn(*args):
 	*_, returnVar = args
 
-	return [
-		RETURN(returnVar.name)
-	]
+	return [RETURN(returnVar.name)]
 
 
 @RULES.add(VariableTemplate())
@@ -95,12 +110,10 @@ def _parseVar(var):
 	Token('='),
 	Token(' '),
 	Parsed(),
-	IsInstance(VARIABLE)
+	IsInstance(VARIABLE),
 )
 def _parseSetVariable(dst, _, _1, _2, src):
-	return [
-		SET_VARIABLE(dst.name, src.name)
-	]
+	return [SET_VARIABLE(dst.name, src.name)]
 
 
 @RULES.add(Or([Token('"')], [Token("'")]), manualApply=True, useParser=True)
@@ -112,7 +125,9 @@ def _parseString(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='String', staticArgs=[string]))
+	parser.define(
+		CALL_FUNCTION_STATIC(dst=dst.name, function='String', staticArgs=[string])
+	)
 
 	inp.insert(0, [dst])
 
@@ -122,20 +137,19 @@ def _isDigit(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
-@RULES.add(Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True)
+@RULES.add(
+	Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True
+)
 def _parseNumber(*args, parser=None):
 	number = ''.join(args)
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, staticArgs=[number]))
+	parser.define(
+		CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, staticArgs=[number])
+	)
 	return [dst]
 
 
-@RULES.add(
-	IsInstance(VARIABLE),
-	Token('('),
-	manualApply=True,
-	useParser=True
-)
+@RULES.add(IsInstance(VARIABLE), Token('('), manualApply=True, useParser=True)
 class _ParseFunctionCall:
 	def __init__(self, parser, inp):
 		self._parser = parser
@@ -184,7 +198,11 @@ class _ParseFunctionCall:
 
 		self._inpRule.pop(Token(')'))
 		dst = self._parser.makeTmpVar()
-		self._parser.define(CALL_FUNCTION(dst.name, functionName, typeb=opToken, args=args, kwargs=kwargs))
+		self._parser.define(
+			CALL_FUNCTION(
+				dst.name, functionName, typeb=opToken, args=args, kwargs=kwargs
+			)
+		)
 		self._inp.insert(0, [dst])
 
 
@@ -230,7 +248,9 @@ class CodeBlock:
 		return tuple(self.parser.subParser(code))
 
 	def getFirstIndent(self):
-		indent = self.inpRule.get(Many(Token(' '))) or self.inpRule.get(Many(Token('\t')))
+		indent = self.inpRule.get(Many(Token(' '))) or self.inpRule.get(
+			Many(Token('\t'))
+		)
 
 		assert len(set(indent)) == 1
 		return Template(*map(Token, indent))
@@ -252,15 +272,13 @@ class CodeBlock:
 	Token('.'),
 	VariableTemplate(),
 	Not(Token(' '), Token('=')),
-	useParser=True
+	useParser=True,
 )
 def _parseGetAttribute(object_, _, attribute, parser):
 	dst = parser.makeTmpVar()
 
 	parser.define(
-		GET_ATTRIBUTE(
-			dst=dst.name, object=object_.name, attribute=attribute.name
-		)
+		GET_ATTRIBUTE(dst=dst.name, object=object_.name, attribute=attribute.name)
 	)
 
 	return [dst]
@@ -274,15 +292,10 @@ def _parseGetAttribute(object_, _, attribute, parser):
 	Token('='),
 	Token(' '),
 	Parsed(),
-	IsInstance(VARIABLE)
+	IsInstance(VARIABLE),
 )
 def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
-	return [
-		SET_ATTRIBUTE(
-			object=object_.name, attribute=attribute.name, src=src.name
-		)
-	]
-
+	return [SET_ATTRIBUTE(object=object_.name, attribute=attribute.name, src=src.name)]
 
 
 @RULES.add(
@@ -299,21 +312,23 @@ def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
 			(Token('<'),),
 			(Token('>'),),
 			(Token('!='),),
-			(Token('=='),)
+			(Token('=='),),
 		),
-		'operator'
+		'operator',
 	),
 	Token(' '),
 	Parsed(),
 	IsInstance(VARIABLE),
-	useParser=True
+	useParser=True,
 )
 def _parseOperator(first, _, _1, second, operator, parser):
 	dst = parser.makeTmpVar()
 	operator = ''.join(operator)
 
 	parser.define(
-		CALL_OPERATOR(dst=dst.name, first=first.name, operator=operator, second=second.name)
+		CALL_OPERATOR(
+			dst=dst.name, first=first.name, operator=operator, second=second.name
+		)
 	)
 
 	return [dst]

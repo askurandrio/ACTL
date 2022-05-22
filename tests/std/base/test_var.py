@@ -22,6 +22,6 @@ def test_setVariable(execute):
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar1', function=Number.call, staticArgs=['1']
 		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar1')
+		opcodes.SET_VARIABLE(dst='a', src='_tmpVar1'),
 	]
 	assert AToPy(execute.executed.scope['a']) == 1

@@ -54,7 +54,6 @@ async def _Module__getAttribute(self, key):
 	except KeyError:
 		pass
 
-
 	project = AToPy(await self.getAttribute('__project__'))
 	dirLibrary = await self.getAttribute('__path__')
 	path = os.path.join(dirLibrary, key)

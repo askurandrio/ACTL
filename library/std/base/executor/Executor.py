@@ -26,7 +26,11 @@ class Executor:
 		return result
 
 	def execute(self, code):
-		previusCallStack, previusSetReturnValue, previusFrames = self.callStack, self.setReturnValue, self.frames
+		previusCallStack, previusSetReturnValue, previusFrames = (
+			self.callStack,
+			self.setReturnValue,
+			self.frames,
+		)
 		self.callStack, self.setReturnValue, self.frames = [], None, [iter(code)]
 
 		while self.frames:
@@ -38,7 +42,11 @@ class Executor:
 
 			self._executeOpcode(opcode)
 
-		self.callStack, self.setReturnValue, self.frames = previusCallStack, previusSetReturnValue, previusFrames
+		self.callStack, self.setReturnValue, self.frames = (
+			previusCallStack,
+			previusSetReturnValue,
+			previusFrames,
+		)
 
 	def _executeOpcode(self, opcode):
 		try:
@@ -53,6 +61,7 @@ class Executor:
 	def addHandler(cls, opcode):
 		def decorator(handler):
 			cls._HANDLERS[opcode] = handler
+
 		return decorator
 
 	@classmethod
@@ -83,10 +92,7 @@ class Frame:
 async def _objectHandler(executor, opcode):
 	async def getHandler():
 		class_ = await opcode.getAttribute('__class__')
-		for parent in [
-			class_,
-			*await class_.getAttribute('__parents__')
-		]:
+		for parent in [class_, *await class_.getAttribute('__parents__')]:
 			try:
 				return executor.getHandlerFor(parent)
 			except KeyError:
@@ -137,7 +143,9 @@ async def _CALL_FUNCTION__handler(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('
 	args = [executor.scope[varName] for varName in opcode.args]
-	kwargs = {argName: executor.scope[varName] for argName, varName in opcode.kwargs.items()}
+	kwargs = {
+		argName: executor.scope[varName] for argName, varName in opcode.kwargs.items()
+	}
 
 	result = await function.call(*args, **kwargs)
 
@@ -159,7 +167,7 @@ async def _CALL_OPERATOR__handler(executor, opcode):
 	pySecond = AToPy(second)
 	pyResult = eval(  # pylint: disable=eval-used
 		f'pyFirst {opcode.operator} pySecond',
-		{'pyFirst': pyFirst, 'pySecond': pySecond}
+		{'pyFirst': pyFirst, 'pySecond': pySecond},
 	)
 
 	resultClass = await first.getAttribute('__class__')

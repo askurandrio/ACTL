@@ -11,9 +11,7 @@ async def test_var(execute):
 
 	execute('var')
 
-	assert execute.parsed.code == [
-		opcodes.VARIABLE(name='var')
-	]
+	assert execute.parsed.code == [opcodes.VARIABLE(name='var')]
 	assert execute.executed
 
 
@@ -24,7 +22,7 @@ async def test_floatNumber(execute):
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar1', function=Number.call, staticArgs=['1.1']
 		),
-		opcodes.VARIABLE(name='_tmpVar1')
+		opcodes.VARIABLE(name='_tmpVar1'),
 	]
 	assert AToPy(execute.executed.scope['_tmpVar1']) == 1.1
 
@@ -36,6 +34,6 @@ async def test_negativeNumber(execute):
 		opcodes.CALL_FUNCTION_STATIC(
 			dst='_tmpVar1', function=Number.call, staticArgs=['-1']
 		),
-		opcodes.VARIABLE(name='_tmpVar1')
+		opcodes.VARIABLE(name='_tmpVar1'),
 	]
 	assert AToPy(execute.executed.scope['_tmpVar1']) == -1

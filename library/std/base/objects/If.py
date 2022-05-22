@@ -9,25 +9,27 @@ If = objects.makeClass('If', (objects.If,))
 
 
 @asDecorator(lambda rule: If.setAttribute('__syntaxRule__', rule))
-@SyntaxRule.wrap(
-	Value(If),
-	Token(' '),
-	useParser=True,
-	manualApply=True
-)
+@SyntaxRule.wrap(Value(If), Token(' '), useParser=True, manualApply=True)
 class IfSyntax:
 	_INLINE_IF_END = Or(
-		(Token(' '), Value(objects.elif_),),
+		(
+			Token(' '),
+			Value(objects.elif_),
+		),
 		(Value(objects.elif_),),
-		(Token(' '), Value(objects.else_),),
+		(
+			Token(' '),
+			Value(objects.else_),
+		),
 		(Value(objects.else_),),
-		(Token(' '), Token('\n'),),
-		(Token('\n'),)
+		(
+			Token(' '),
+			Token('\n'),
+		),
+		(Token('\n'),),
 	)
 	_ELIF_OR_ELSE_OR_ENDLINE = Or(
-		(Value(objects.elif_),),
-		(Value(objects.else_),),
-		(Token('\n'),)
+		(Value(objects.elif_),), (Value(objects.else_),), (Token('\n'),)
 	)
 
 	def __init__(self, parser, inp):
@@ -55,7 +57,9 @@ class IfSyntax:
 
 		def parseLine():
 			self._parser.subParser(self._inp, self._ELIF_OR_ELSE_OR_ENDLINE).parseLine()
-			line = BufferRule(self._parser, self._inp).popUntil(self._ELIF_OR_ELSE_OR_ENDLINE)
+			line = BufferRule(self._parser, self._inp).popUntil(
+				self._ELIF_OR_ELSE_OR_ENDLINE
+			)
 			self._inp.insert(0, line)
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
@@ -78,7 +82,9 @@ class IfSyntax:
 	def _getFromInlineCodeBlock(self):
 		def popCodeBlock():
 			self._parser.subParser(self._inp, self._INLINE_IF_END).parseLine()
-			codeBlock = BufferRule(self._parser, self._inp).popUntil(self._INLINE_IF_END)
+			codeBlock = BufferRule(self._parser, self._inp).popUntil(
+				self._INLINE_IF_END
+			)
 			return tuple(codeBlock)
 
 		self._inp.pop()

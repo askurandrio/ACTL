@@ -53,19 +53,18 @@ _default = object()
 
 def _getDiff(leftObject, rightObject, indent):
 	left = _toTuple(leftObject)
-	if isinstance(rightObject, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)):
+	if isinstance(
+		rightObject, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)
+	):
 		right = _toTuple(rightObject)
 	else:
 		return [
 			f'{indent}	left is {leftObject}',
 			f'{indent}	right is {rightObject}',
-			f'{indent}	right type<{type(rightObject).__name__}> is unexpected'
+			f'{indent}	right type<{type(rightObject).__name__}> is unexpected',
 		]
 
-	res = [
-		f'{indent}{leftObject} != ',
-		f'{indent}{rightObject}'
-	]
+	res = [f'{indent}{leftObject} != ', f'{indent}{rightObject}']
 
 	for idx, (first, second) in enumerate(zip_longest(left, right, fillvalue=_default)):
 		if first == second:
@@ -74,31 +73,19 @@ def _getDiff(leftObject, rightObject, indent):
 		res += [f'{indent}at {idx}']
 
 		if first is _default:
-			return [
-				*res,
-				f'{indent}	first is empty, second is {second}'
-			]
+			return [*res, f'{indent}	first is empty, second is {second}']
 
 		if second is _default:
-			return [
-				*res,
-				f'{indent}	second is empty, first is {first}'
-			]
+			return [*res, f'{indent}	second is empty, first is {first}']
 
 		if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)):
-			return [
-				*res,
-				*_getDiff(first, second, indent + '	')
-			]
+			return [*res, *_getDiff(first, second, indent + '	')]
 
-		return [
-			*res,
-			f'{indent}	{repr(first)} != {repr(second)}'
-		]
+		return [*res, f'{indent}	{repr(first)} != {repr(second)}']
 
 	return [
 		f'{indent}{type(leftObject)}{leftObject} != ',
-		f'{indent}{type(rightObject)}{rightObject}'
+		f'{indent}{type(rightObject)}{rightObject}',
 	]
 
 

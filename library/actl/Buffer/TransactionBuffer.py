@@ -37,7 +37,7 @@ class TransactionBuffer:
 			self._skippedIndexes.add(removeIndex)
 
 	def _shiftIndex(self, index):
-		if isinstance(index,  slice):
+		if isinstance(index, slice):
 			indexStart = 0 if index.start is None else index.start
 			indexStart = self._shiftIndex(indexStart)
 

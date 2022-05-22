@@ -1,4 +1,3 @@
-
 import sys
 import logging
 
@@ -13,7 +12,9 @@ from .Scope import Scope
 
 def _makeLogger():
 	logger = logging.getLogger('actl')
-	formatter = logging.Formatter('%(process)d %(asctime)s: [%(levelname)s] %(message)s')
+	formatter = logging.Formatter(
+		'%(process)d %(asctime)s: [%(levelname)s] %(message)s'
+	)
 
 	stdout = logging.StreamHandler(sys.stdout)
 	stdout.setFormatter(formatter)

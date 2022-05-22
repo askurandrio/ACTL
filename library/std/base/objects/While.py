@@ -9,12 +9,7 @@ While = objects.makeClass('While', (objects.While,))
 
 
 @asDecorator(lambda rule: While.setAttribute('__syntaxRule__', rule))
-@SyntaxRule.wrap(
-	Value(While),
-	Token(' '),
-	manualApply=True,
-	useParser=True
-)
+@SyntaxRule.wrap(Value(While), Token(' '), manualApply=True, useParser=True)
 def _syntaxRule(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	inpRule.pop(Value(While))

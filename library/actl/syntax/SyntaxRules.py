@@ -28,6 +28,7 @@ class SyntaxRules:
 
 			self.rawAdd(rule)
 			return func
+
 		return decorator
 
 	def __iter__(self):

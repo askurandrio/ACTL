@@ -37,7 +37,7 @@ def test_setExtraSource(run):
 			'py-externalKey': {
 				'from': 'tests.run.test_run',
 				'import': 'getInitialScope',
-				'name': 'initialScope'
+				'name': 'initialScope',
 			}
 		}
 	]
@@ -72,7 +72,7 @@ def test_projectFAndMainFAndSource(run):
 			'py-externalKey': {
 				'from': 'tests.run.test_run',
 				'import': 'getInitialScope',
-				'name': 'initialScope'
+				'name': 'initialScope',
 			}
 		}
 	]
@@ -98,5 +98,7 @@ def test_mainF(run):
 
 def getInitialScope(project):
 	scope = project['std/base', 'initialScope']
-	scope['print'] = executeSyncCoroutine(PyToA.call(lambda inp: print(f'mocked: {inp}')))
+	scope['print'] = executeSyncCoroutine(
+		PyToA.call(lambda inp: print(f'mocked: {inp}'))
+	)
 	return scope

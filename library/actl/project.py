@@ -16,15 +16,9 @@ class Project:
 	_DEFAULT_HANDLERS = {}
 
 	def __init__(self):
-		self._head = {
-			'__parents__': [],
-			'__source__': [],
-			'__previous__': {}
-		}
+		self._head = {'__parents__': [], '__source__': [], '__previous__': {}}
 		self['handlers'] = InheritedDict(
-			'handlers',
-			copy.copy(self._DEFAULT_HANDLERS),
-			self
+			'handlers', copy.copy(self._DEFAULT_HANDLERS), self
 		)
 
 	@property
@@ -97,15 +91,7 @@ class Project:
 
 		with open(projectF) as file:
 			source = yaml.load(file, Loader=yaml.SafeLoader)
-			source = [
-				*source,
-				{
-					'setKey': {
-						'key': 'projectF',
-						'value': projectF
-					}
-				}
-			]
+			source = [*source, {'setKey': {'key': 'projectF', 'value': projectF}}]
 
 		subProject = Project()
 		subProject.processSource(source)
@@ -116,6 +102,7 @@ class Project:
 		def decorator(func):
 			cls._DEFAULT_HANDLERS[name] = func
 			return func
+
 		return decorator
 
 	def __repr__(self):
@@ -164,17 +151,23 @@ def importFrom(arg):
 		from_ = arg['from']
 		import_ = arg['import']
 	except KeyError as ex:
-		raise RuntimeError(f'Error during getting py-execExternalFunction: {arg}') from ex
+		raise RuntimeError(
+			f'Error during getting py-execExternalFunction: {arg}'
+		) from ex
 
 	try:
 		from_ = importlib.import_module(from_)
 	except ImportError as ex:
-		raise RuntimeError(f'Error importing from_ at py-execExternalFunction: {arg}') from ex
+		raise RuntimeError(
+			f'Error importing from_ at py-execExternalFunction: {arg}'
+		) from ex
 
 	try:
 		return getattr(from_, import_)
 	except AttributeError as ex:
-		raise RuntimeError(f'Error getting {import_} at py-execExternalFunction: {arg}') from ex
+		raise RuntimeError(
+			f'Error getting {import_} at py-execExternalFunction: {arg}'
+		) from ex
 
 
 class _ProjectParentsProxy:

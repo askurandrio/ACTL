@@ -14,13 +14,15 @@ def makeClass(name, parents=(), self_=None, extraAttributes=None):
 	self_ = {} if self_ is None else self_
 	extraAttributes = {} if extraAttributes is None else extraAttributes
 
-	return AObject({
-		'__name__': name,
-		'__class__': class_,
-		'__parents__': parents,
-		'__self__': self_,
-		**extraAttributes
-	})
+	return AObject(
+		{
+			'__name__': name,
+			'__class__': class_,
+			'__parents__': parents,
+			'__self__': self_,
+			**extraAttributes,
+		}
+	)
 
 
 def addMethod(cls, name):

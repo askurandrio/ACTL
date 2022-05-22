@@ -1,4 +1,3 @@
-
 def executeSyncCoroutine(coroutine):
 	generator = coroutine.__await__()
 
@@ -9,4 +8,6 @@ def executeSyncCoroutine(coroutine):
 			return ex.args[0]
 		return None
 	else:
-		raise RuntimeError(f'Generator do not stopped. Info<opcode={opcode}, coroutine={coroutine}>')
+		raise RuntimeError(
+			f'Generator do not stopped. Info<opcode={opcode}, coroutine={coroutine}>'
+		)

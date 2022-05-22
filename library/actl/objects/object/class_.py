@@ -32,7 +32,7 @@ async def class__superGetAttribute(self, for_, key):
 
 	if for_ in parents:
 		forIndex = parents.index(for_)
-		parents = parents[forIndex+1:]
+		parents = parents[forIndex + 1 :]
 
 	for parent in parents:
 		attribute, isSucess = parent.lookupAttributeInHead(key)
@@ -43,13 +43,17 @@ async def class__superGetAttribute(self, for_, key):
 	raise AAttributeNotFound(key)
 
 
-class_ = AObject({
-	'__name__': 'class',
-	'__parents__': (),
-	'__self__': {
-		'__getAttribute__': NativeMethod(class__getAttribute),
-		'__superGetAttribute__': NativeMethod(class__superGetAttribute)
+class_ = AObject(
+	{
+		'__name__': 'class',
+		'__parents__': (),
+		'__self__': {
+			'__getAttribute__': NativeMethod(class__getAttribute),
+			'__superGetAttribute__': NativeMethod(class__superGetAttribute),
+		},
 	}
-})
+)
 class_.setAttribute('__class__', class_)
-class_.setAttribute('__getAttribute__', NativeFunction(class__getAttribute).apply(class_))
+class_.setAttribute(
+	'__getAttribute__', NativeFunction(class__getAttribute).apply(class_)
+)
