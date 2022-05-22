@@ -2,8 +2,7 @@ import os
 
 from actl.objects import makeClass, AToPy, addMethod, AAttributeNotFound
 from actl.Buffer import Buffer
-from std.base.executor.utils import bindExecutor
-from std.base.executor.Executor import Frame
+from std.base.executor import Frame, bindExecutor
 
 
 Module = makeClass('Module')

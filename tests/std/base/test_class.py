@@ -2,7 +2,7 @@ from unittest.mock import ANY, Mock
 
 from actl import opcodes
 from actl.objects import Number, Signature, String, PyToA, makeClass
-from std.base.objects import class_, Function
+from std.base.objects import Function
 from std.base.objects.class_ import buildClass
 
 
@@ -36,9 +36,7 @@ async def test_simpleClassDeclare(execute):
 
 
 async def test_classWithInitMethod(execute):
-	execute(
-		'class C:\n' '	fun __init__(self, a):\n' '		self.a = a\n' 'c = C(1)'
-	)
+	execute('class C:\n' '	fun __init__(self, a):\n' '		self.a = a\n' 'c = C(1)')
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(

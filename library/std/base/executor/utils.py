@@ -1,5 +1,6 @@
 from actl.opcodes import DynamicOpCode
-from std.base.executor.Executor import Executor, Frame
+from std.base.executor.Executor import Executor
+from std.base.executor.frame import Frame
 
 
 _BIND_EXECUTOR = DynamicOpCode.create('BIND_EXECUTOR', 'executor')

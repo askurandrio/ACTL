@@ -55,12 +55,12 @@ class DeclaredClass:
 		)
 		notDefaultAttributesToStr = ', '.join(
 			f'{key}={attributes[key]!r}'
-			for key in self._defaults
-			if self._defaults[key] != attributes[key]
+			for key, value in self._defaults.items()
+			if value != attributes[key]
 		)
 		if notDefaultAttributesToStr:
 			attributesToStr += f', {notDefaultAttributesToStr}'
-		return '{}({})'.format(type(self).__name__, attributesToStr)
+		return f'{type(self).__name__}({attributesToStr})'
 
 	@classmethod
 	def create(cls, name, *attributes, **defaults):

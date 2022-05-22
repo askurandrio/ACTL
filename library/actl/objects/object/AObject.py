@@ -242,7 +242,7 @@ class AObject(ReprToStr):
 
 			try:
 				selfToStr = str(self._head)
-			except Exception:
+			except Exception:  # pylint: disable=broad-except
 				selfToStr = id(self)
 
 			return f'Error during convert<{selfToStr}> to string: {type(ex)} "{ex}"'

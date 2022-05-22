@@ -21,15 +21,6 @@ def loadHandlerPyExternalKey(project):
 	project['handlers']['py-externalKey'] = pyExternalKey
 
 
-def getAfterLoad(project):
-	def afterLoad():
-		while project['lazyValues']:
-			key = project['lazyValues'].pop(0)
-			project[key]
-
-	return afterLoad
-
-
 def getRules(_):
 	return std.base.RULES
 
