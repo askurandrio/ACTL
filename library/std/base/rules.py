@@ -184,7 +184,7 @@ class _ParseFunctionCall:
 
 		self._inpRule.pop(Token(')'))
 		dst = self._parser.makeTmpVar()
-		self._parser.define(CALL_FUNCTION(dst.name, functionName, opToken, args, kwargs))
+		self._parser.define(CALL_FUNCTION(dst.name, functionName, typeb=opToken, args=args, kwargs=kwargs))
 		self._inp.insert(0, [dst])
 
 

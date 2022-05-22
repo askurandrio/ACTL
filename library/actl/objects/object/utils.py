@@ -4,18 +4,22 @@ from actl.objects.object.class_ import class_
 from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
 
 
-def makeClass(name, parents=()):
+def makeClass(name, parents=(), self_=None, extraAttributes=None):
 	if AObject.Object:
 		parents = [*parents, AObject.Object]
 
 	while (len(parents) > 1) and (parents[-1] == parents[-2]):
 		parents.pop(-1)
 
+	self_ = {} if self_ is None else self_
+	extraAttributes = {} if extraAttributes is None else extraAttributes
+
 	return AObject({
 		'__name__': name,
 		'__class__': class_,
 		'__parents__': parents,
-		'__self__': {}
+		'__self__': self_,
+		**extraAttributes
 	})
 
 

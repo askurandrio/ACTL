@@ -1,8 +1,9 @@
 from unittest.mock import ANY, Mock
 
 from actl import opcodes
-from actl.objects import Number, Signature, String, PyToA
+from actl.objects import Number, Signature, String, PyToA, makeClass
 from std.base.objects import class_, Function
+from std.base.objects.class_ import buildClass
 
 
 ORDER_KEY = 9
@@ -10,30 +11,35 @@ ORDER_KEY = 9
 
 async def test_simpleClassDeclare(execute):
 	execute(
-		'class T:\n'
+		'class C:\n'
 		'    a = 1'
 	)
 
 	assert execute.parsed.code == [
-		await class_.call(
-			'T',
-			(),
-			{
-				'body': (
+		opcodes.CALL_FUNCTION_STATIC(
+			'C',
+			buildClass.call,
+			staticArgs=(
+				'C',
+				(),
+				(
 					opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', function=Number.call, staticArgs=['1']),
 					opcodes.SET_VARIABLE('a', '_tmpVar1_1')
 				)
-			}
+			)
 		)
 	]
 
-	assert execute.executed.scope['T'] == await class_.call(
-		'T',
+	cls = execute.executed.scope['C']
+	assert cls == makeClass(
+		'C',
 		(),
-		{
+		extraAttributes={
 			'a': await Number.call(1)
 		}
 	)
+	assert str(cls) == "class 'C'"
+	assert str(await cls.call()) == 'C<>'
 
 
 async def test_classWithInitMethod(execute):
@@ -45,43 +51,47 @@ async def test_classWithInitMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		await class_.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'C',
-			(),
-			{
-				'body': (
-					await Function.call(
+			buildClass.call,
+			staticArgs=(
+				'C',
+				(),
+				(
+					opcodes.CALL_FUNCTION_STATIC(
 						'__init__',
-						await Signature.call(['self', 'a']),
-						(
-							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
-							opcodes.RETURN('None')
+						Function.call,
+						staticArgs=(
+							'__init__',
+							await Signature.call(['self', 'a']),
+							(
+								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
+								opcodes.RETURN('None')
+							),
 						),
-						None
+						kwargs={'scope': '__scope__'}
 					),
 				)
-			}
+			)
 		),
 		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION('_tmpVar2', 'C', args=['_tmpVar1']),
 		opcodes.SET_VARIABLE('c', '_tmpVar2')
 	]
 
-	assert execute.executed.scope['C'] == await class_.call(
+	assert execute.executed.scope['C'] == makeClass(
 		'C',
 		(),
-		{
-			'__self__': {
-				'__init__': await Function.call(
-					'__init__',
-					await Signature.call(['self', 'a']),
-					(
-						opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
-						opcodes.RETURN('None')
-					),
-					ANY
-				)
-			}
+		self_={
+			'__init__': await Function.call(
+				'__init__',
+				await Signature.call(['self', 'a']),
+				(
+					opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
+					opcodes.RETURN('None')
+				),
+				ANY
+			)
 		}
 	)
 	assert str(await String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
@@ -99,26 +109,32 @@ async def test_classWithMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		await class_.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'C',
-			(),
-			{
-				'body': (
-					await Function.call(
+			buildClass.call,
+			staticArgs=(
+				'C',
+				(),
+				(
+					opcodes.CALL_FUNCTION_STATIC(
 						'method',
-						await Signature.call(['self', 'a']),
-						(
-							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
-							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, staticArgs=['2']),
-							opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
-							opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
-							opcodes.RETURN('a')
+						Function.call,
+						staticArgs=(
+							'method',
+							await Signature.call(['self', 'a']),
+							(
+								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
+								opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
+								opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, staticArgs=['2']),
+								opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
+								opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
+								opcodes.RETURN('a')
+							),
 						),
-						None
+						kwargs={'scope': '__scope__'}
 					),
 				)
-			}
+			)
 		),
 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
@@ -149,40 +165,49 @@ async def test_classWithTwoMethod(execute):
 	)
 
 	assert execute.parsed.code == [
-		await class_.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'C',
-			(),
-			{
-				'body': (
-					await Function.call(
+			buildClass.call,
+			staticArgs=(
+				'C',
+				(),
+				(
+					opcodes.CALL_FUNCTION_STATIC(
 						'methodA',
-						await Signature.call(['self', 'a']),
-						(
-							opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
-							opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, staticArgs=['2']),
-							opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
-							opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
-							opcodes.RETURN('a')
+						Function.call,
+						staticArgs=(
+							'methodA',
+							await Signature.call(['self', 'a']),
+							(
+								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
+								opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
+								opcodes.CALL_FUNCTION_STATIC('_tmpVar2_2', Number.call, staticArgs=['2']),
+								opcodes.CALL_OPERATOR('_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'),
+								opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
+								opcodes.RETURN('a')
+							),
 						),
-						None
+						kwargs={'scope': '__scope__'}
 					),
-					await Function.call(
+					opcodes.CALL_FUNCTION_STATIC(
 						'methodB',
-						await Signature.call(['self', 'b']),
-						(
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['1']),
-							opcodes.CALL_OPERATOR('_tmpVar2_2', 'b', '+', '_tmpVar2_1'),
-							opcodes.SET_VARIABLE('b', '_tmpVar2_2'),
-							opcodes.GET_ATTRIBUTE('_tmpVar2_3', 'self', 'methodA'),
-							opcodes.CALL_FUNCTION('_tmpVar2_4', '_tmpVar2_3', args=['b']),
-							opcodes.RETURN('_tmpVar2_4')
+						Function.call,
+						staticArgs=(
+							'methodB',
+							await Signature.call(['self', 'b']),
+							(
+								opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['1']),
+								opcodes.CALL_OPERATOR('_tmpVar2_2', 'b', '+', '_tmpVar2_1'),
+								opcodes.SET_VARIABLE('b', '_tmpVar2_2'),
+								opcodes.GET_ATTRIBUTE('_tmpVar2_3', 'self', 'methodA'),
+								opcodes.CALL_FUNCTION('_tmpVar2_4', '_tmpVar2_3', args=['b']),
+								opcodes.RETURN('_tmpVar2_4')
+							),
 						),
-						None
+						kwargs={'scope': '__scope__'}
 					)
 				),
-
-			}
+			)
 		),
 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
@@ -206,27 +231,7 @@ async def test_classInherit(execute):
 		'        mock(1)\n'
 	)
 
-	assert execute.parsed.code == [
-		await class_.call(
-			'Base',
-			(),
-			{
-				'body': (
-					await Function.call(
-						'baseMethod',
-						await Signature.call(['self']),
-						(
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['1']),
-							opcodes.CALL_FUNCTION('_tmpVar2_2', 'mock', args=['_tmpVar2_1']),
-							opcodes.VARIABLE('_tmpVar2_2'),
-							opcodes.RETURN('None')
-						),
-						None
-					),
-				)
-			}
-		)
-	]
+	assert execute.executed
 	execute.flush()
 	execute(
 		'class Inherit(Base):\n'
@@ -239,24 +244,30 @@ async def test_classInherit(execute):
 	)
 
 	assert execute.parsed.code == [
-		await class_.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'Inherit',
-			(execute.parsed.scope['Base'],),
-			{
-				'body': (
-					await Function.call(
+			buildClass.call,
+			staticArgs=(
+				'Inherit',
+				(execute.parsed.scope['Base'],),
+				(
+					opcodes.CALL_FUNCTION_STATIC(
 						'inheritMerhod',
-						await Signature.call(['self']),
-						(
-							opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['2']),
-							opcodes.CALL_FUNCTION('_tmpVar2_2', 'mock', args=['_tmpVar2_1']),
-							opcodes.VARIABLE('_tmpVar2_2'),
-							opcodes.RETURN('None')
+						Function.call,
+						staticArgs=(
+							'inheritMerhod',
+							await Signature.call(['self']),
+							(
+								opcodes.CALL_FUNCTION_STATIC('_tmpVar2_1', Number.call, staticArgs=['2']),
+								opcodes.CALL_FUNCTION('_tmpVar2_2', 'mock', args=['_tmpVar2_1']),
+								opcodes.VARIABLE('_tmpVar2_2'),
+								opcodes.RETURN('None')
+							),
 						),
-						None
+						kwargs={'scope': '__scope__'}
 					),
 				)
-			}
+			)
 		),
 		opcodes.CALL_FUNCTION('_tmpVar1', 'Inherit'),
 		opcodes.SET_VARIABLE('inherit', '_tmpVar1'),

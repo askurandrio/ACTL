@@ -6,7 +6,9 @@ SET_VARIABLE = DynamicOpCode.create('SET_VARIABLE', 'dst', 'src')
 CALL_FUNCTION = DynamicOpCode.create(
 	'CALL_FUNCTION', 'dst', 'function', typeb='(', args=[], kwargs={}
 )
-CALL_FUNCTION_STATIC = CALL_FUNCTION.create('CALL_FUNCTION_STATIC', staticArgs=())
+CALL_FUNCTION_STATIC = DynamicOpCode.create(
+	'CALL_FUNCTION', 'dst', 'function', typeb='(', staticArgs=[], staticKwargs={}, args=[], kwargs={}
+)
 
 RETURN = DynamicOpCode.create('RETURN', 'var')
 CALL_OPERATOR = DynamicOpCode.create('CALL_OPERATOR', 'dst', 'first', 'operator', 'second')

@@ -1,6 +1,6 @@
 from itertools import zip_longest
 from actl import objects, asDecorator
-from actl.opcodes import VARIABLE, RETURN
+from actl.opcodes import VARIABLE, RETURN, CALL_FUNCTION_STATIC
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from std.base.rules import CodeBlock
 from std.base.executor.Executor import Executor
@@ -57,8 +57,13 @@ class _ParseFunction:
 			body = self._parseBody()
 		else:
 			body = None
-		function = objects.executeSyncCoroutine(Function.call(name, signature, body, None))
-		self._inp.insert(0, [function])
+		makeFunctionOpcode = CALL_FUNCTION_STATIC(
+			name,
+			Function.call,
+			staticArgs=(name, signature, body),
+			kwargs={'scope': '__scope__'}
+		)
+		self._inp.insert(0, [makeFunctionOpcode])
 
 	def _parseName(self):
 		return self._inpRule.pop(IsInstance(VARIABLE)).one().name
@@ -89,14 +94,3 @@ class _ParseFunction:
 			)
 
 		return body
-
-
-@Executor.addHandler(Function)
-async def _Function__handler(executor, opcode):
-	linkedFunction = await Function.call(
-		await opcode.getAttribute('name'),
-		await opcode.getAttribute('signature'),
-		await opcode.getAttribute('body'),
-		executor.scope
-	)
-	executor.scope[await opcode.getAttribute('name')] = linkedFunction

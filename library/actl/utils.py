@@ -17,6 +17,8 @@ class DeclaredClass:
 
 	def __init__(self, *args, **kwargs):
 		for idx, value in enumerate(args):
+			if self.__slots__[idx] in self._defaults:
+				raise RecursionError(f'Attribute<{self.__slots__[idx]}> should be named parameter')
 			setattr(self, self.__slots__[idx], value)
 
 		for name, value in kwargs.items():
@@ -73,6 +75,11 @@ class DeclaredClass:
 		}
 		class_ = type(name, (cls,), {'__slots__': attributes, '_defaults': defaults})
 		return class_
+
+
+class ReprToStr:
+	def __repr__(self):
+		return str(self)
 
 
 def bindEternalIdx():

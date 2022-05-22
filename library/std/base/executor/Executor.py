@@ -123,7 +123,11 @@ async def _CALL_FUNCTION_STATIC__handler(executor, opcode):
 	else:
 		function = opcode.function
 
-	result = await function(*args, **opcode.kwargs)
+	kwargs = {**opcode.staticKwargs}
+	for name, varName in opcode.kwargs.items():
+		kwargs[name] = executor.scope[varName]
+
+	result = await function(*args, **kwargs)
 
 	executor.scope[opcode.dst] = result
 

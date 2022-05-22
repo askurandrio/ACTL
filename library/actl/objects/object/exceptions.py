@@ -18,7 +18,7 @@ class _MetaAGenericKeyError(type, _GenericKeyExceptionMixin):
 		return cls('')
 
 
-class AGenericKeyError(Exception, metaclass=_MetaAGenericKeyError):
+class AGenericKeyError(Exception, _GenericKeyExceptionMixin, metaclass=_MetaAGenericKeyError):
 	_GCACHE = {}
 
 	@classmethod
@@ -28,7 +28,7 @@ class AGenericKeyError(Exception, metaclass=_MetaAGenericKeyError):
 		if clsKey in cls._GCACHE:
 			return cls._GCACHE[clsKey]
 
-		cls._GCACHE[clsKey] = type(f'{cls.__name__} for {key}', (cls,), {'_key': key})
+		cls._GCACHE[clsKey] = type(f'{cls.__name__} for {key}', (cls,), {'key': key})
 		return cls.class_(key)
 
 	@classmethod

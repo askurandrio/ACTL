@@ -15,15 +15,19 @@ async def test_simpleFunctionDeclare(execute):
 	execute('fun f(): mock()\nf()')
 
 	assert execute.parsed.code == [
-		await Function.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'f',
-			await Signature.call([]),
-			(
-				opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock'),
-				opcodes.VARIABLE('_tmpVar1_1'),
-				opcodes.RETURN('None')
+			Function.call,
+			staticArgs=(
+				'f',
+				await Signature.call([]),
+				(
+					opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock'),
+					opcodes.VARIABLE('_tmpVar1_1'),
+					opcodes.RETURN('None')
+				),
 			),
-			None
+			kwargs={'scope': '__scope__'}
 		),
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='f', args=[]),
 		opcodes.VARIABLE(name='_tmpVar1')
@@ -39,17 +43,21 @@ async def test_declareMultiLineFunction(execute):
 	execute('fun f():\n a = 1\n mock(a)\nf()')
 
 	assert execute.parsed.code == [
-		await Function.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'f',
-			await Signature.call([]),
-			(
-				opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, staticArgs=['1']),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar1_1'),
-				opcodes.CALL_FUNCTION(dst='_tmpVar1_2', function='mock', args=['a']),
-				opcodes.VARIABLE(name='_tmpVar1_2'),
-				opcodes.RETURN('None')
+			Function.call,
+			staticArgs=(
+				'f',
+				await Signature.call([]),
+				(
+					opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1_1', function=Number.call, staticArgs=['1']),
+					opcodes.SET_VARIABLE(dst='a', src='_tmpVar1_1'),
+					opcodes.CALL_FUNCTION(dst='_tmpVar1_2', function='mock', args=['a']),
+					opcodes.VARIABLE(name='_tmpVar1_2'),
+					opcodes.RETURN('None')
+				),
 			),
-			None
+			kwargs={'scope': '__scope__'}
 		),
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='f', args=[]),
 		opcodes.VARIABLE(name='_tmpVar1')
@@ -65,15 +73,19 @@ async def test_declareFunctionWithArg(execute):
 	execute('fun f(arg): mock(arg)\nf(1)')
 
 	assert execute.parsed.code == [
-		await Function.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'f',
-			await Signature.call(['arg']),
-			(
-				opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock', args=['arg']),
-				opcodes.VARIABLE('_tmpVar1_1'),
-				opcodes.RETURN('None')
+			Function.call,
+			staticArgs=(
+				'f',
+				await Signature.call(['arg']),
+				(
+					opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock', args=['arg']),
+					opcodes.VARIABLE('_tmpVar1_1'),
+					opcodes.RETURN('None')
+				),
 			),
-			None
+			kwargs={'scope': '__scope__'}
 		),
 		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function=Number.call, staticArgs=['1']),
 		opcodes.CALL_FUNCTION(dst='_tmpVar2', function='f', args=['_tmpVar1']),
@@ -92,14 +104,18 @@ async def test_functionWithReturn(execute):
 	)
 
 	assert execute.parsed.code == [
-		await Function.call(
+		opcodes.CALL_FUNCTION_STATIC(
 			'f',
-			await Signature.call([]),
-			(
-				opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', Number.call, staticArgs=['1']),
-				opcodes.RETURN('_tmpVar1_1')
+			Function.call,
+			staticArgs=(
+				'f',
+				await Signature.call([]),
+				(
+					opcodes.CALL_FUNCTION_STATIC('_tmpVar1_1', Number.call, staticArgs=['1']),
+					opcodes.RETURN('_tmpVar1_1')
+				),
 			),
-			None
+			kwargs={'scope': '__scope__'}
 		),
 		opcodes.CALL_FUNCTION('_tmpVar1', 'f', args=[]),
 		opcodes.VARIABLE('_tmpVar1')

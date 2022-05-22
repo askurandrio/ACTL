@@ -2,27 +2,20 @@ from actl.objects import \
 		makeClass, \
 		class_ as actlClass, \
 		Function as actlFunction, \
-		addMethodToClass, \
-		executeSyncCoroutine
-from actl.opcodes import VARIABLE
+		Signature, \
+		executeSyncCoroutine, \
+		NativeFunction
+from actl.opcodes import VARIABLE, RETURN
+from actl.opcodes.opcodes import CALL_FUNCTION_STATIC
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, Maybe, Parsed
 from actl import asDecorator
 from actl.syntax.BufferRule import BufferRule
 from std.base.rules import CodeBlock
-from std.base.executor.Executor import Executor, Frame
+from std.base.executor.utils import bindExecutor
+from std.base.objects.function import Function
 
 
 class_ = makeClass('class_', (actlClass,))
-
-
-@addMethodToClass(class_, '__call__')
-async def _class_call(_, name, parents,  scope):
-	self = makeClass(name, parents)
-
-	for key, value in scope.items():
-		self.setAttribute(key, value)
-
-	return self
 
 
 @asDecorator(lambda rule: class_.setAttribute('__syntaxRule__', rule))
@@ -48,25 +41,35 @@ def _parseClass(parser, inp):
 
 	inpRule.pop(Token(':'))
 	body = CodeBlock(parser, inp).parse()
-	cls = executeSyncCoroutine(class_.call(className, parents, {'body': body}))
-	inp.insert(0, [cls])
+	makeClassOpcode = CALL_FUNCTION_STATIC(
+		className,
+		buildClass.call,
+		staticArgs=(className, tuple(parents), body)
+	)
+	inp.insert(0, [makeClassOpcode])
 
 
-@Executor.addHandler(actlClass)
-async def _actlClass__handler(executor, opcode):
-	className = str(await opcode.getAttribute('__name__'))
-	parents = await opcode.getAttribute('__parents__')
-	newClass = await class_.call(className, parents, {})
-	executor.scope, prevScope = executor.scope.child(), executor.scope
-	executor.scope['__class__'] = newClass
-	executor.scope[className] = newClass
-	self_ = await newClass.getAttribute('__self__')
-	body = await opcode.getAttribute('body')
+@NativeFunction
+async def buildClass(name, parents, body):
+	cls = makeClass(name, parents)
+	self_ = await cls.getAttribute('__self__')
 
-	await Frame(body)
-
-	for key, value in executor.scope.getDiff():
-		if key in ['__class__', className, '__name__']:
+	executor = await bindExecutor()
+	builder = await Function.call(
+		f'_build{name}',
+		await Signature.call([
+			'__class__',
+			name
+		]),
+		[
+			*body,
+			RETURN('__scope__')
+		],
+		executor.scope
+	)
+	scope = await builder.call(cls, cls)
+	for key, value in scope.getDiff():
+		if key in ['__class__', name]:
 			continue
 
 		if actlFunction.isinstance_(value):
@@ -77,7 +80,6 @@ async def _actlClass__handler(executor, opcode):
 			self_[key] = value
 			continue
 
-		newClass.setAttribute(key, value)
+		cls.setAttribute(key, value)
 
-	executor.scope = prevScope
-	executor.scope[className] = newClass
+	return cls

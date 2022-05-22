@@ -1,6 +1,7 @@
 import sys
 import traceback
 
+from actl.utils import ReprToStr
 from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
 from actl.objects.object.exceptions import AAttributeNotFound
 
@@ -8,11 +9,41 @@ from actl.objects.object.exceptions import AAttributeNotFound
 sys.setrecursionlimit(500)
 
 
-class AObject:
+class _MethodGetterView:
+	def __init__(self, attributeName, pyAttributeName):
+		self._attributeName = attributeName
+		self._pyAttributeName = pyAttributeName
+
+	def __get__(self, obj, _):
+		pyMethod = getattr(obj, self._pyAttributeName)
+		return _MethodView(self._attributeName, pyMethod, obj)
+
+
+class _MethodView(ReprToStr):
+	def __init__(self, attributeName, pyMethod, obj):
+		self._attributeName = attributeName
+		self.pyMethod = pyMethod
+		self._obj = obj
+
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+
+		return self.pyMethod == other.pyMethod
+
+	def __call__(self, *args, **kwargs):
+		return self.pyMethod(*args, **kwargs)
+
+	def __str__(self):
+		return f'{self._obj}.{self._attributeName}'
+
+
+class AObject(ReprToStr):
 	_default = object()
 	Function = None
 	Object = None
 	String = None
+	call = _MethodGetterView('__call__', '_call')
 
 	def __init__(self, head):
 		self._head = head
@@ -92,7 +123,7 @@ class AObject:
 		else:
 			return True
 
-	async def call(self, *args, **kwargs):
+	async def _call(self, *args, **kwargs):
 		call = await self.getAttribute('__call__')
 
 		return await call.call(*args, **kwargs)
@@ -195,9 +226,6 @@ class AObject:
 	def __hash__(self):
 		return hash(str(self))
 
-	def __repr__(self):
-		return str(self)
-
 	def __str__(self):
 		try:
 			string = executeSyncCoroutine(self.String.call(self))
@@ -205,4 +233,10 @@ class AObject:
 			return pyString
 		except Exception as ex:  # pylint: disable=broad-except
 			traceback.print_exc()
-			return f'Error during convert<{id(self)}> to string: {ex}'
+
+			try:
+				selfToStr = str(self._head)
+			except Exception:
+				selfToStr = id(self)
+
+			return f'Error during convert<{selfToStr}> to string: {type(ex)} "{ex}"'
