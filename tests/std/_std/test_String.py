@@ -35,19 +35,10 @@ async def test_String_lengthFromSyntaxInit(execute):
 	assert execute.executed.scope['r'] == await execute.executed.scope['Number'].call(0)
 
 
-def test_String__index(execute):
-	execute.executeInInitialScope('from std._std.objects.string.string import String')
-	execute.executeInInitialScope('import std._std.objects.string.string__index')
-
-	execute('s = String()\n' 'r = s.index("v", -1)')
-
-	assert str(execute.executed.scope['r']) == 'NoneType<>'
-
-
-def test_String__split(execute):
+async def test_String__split(execute):
 	execute.executeInInitialScope('from std._std.objects.string.string import String')
 	execute.executeInInitialScope('import std._std.objects.string.string__split')
 
-	execute('s = String()\n' 'r = s.split("v")')
+	execute("s = '1v2'\nr = s.split('v')")
 
-	assert str(execute.executed.scope['r']) == 'NoneType<>'
+	assert str(execute.executed.scope['r']) == "Vector<_head=['1', '2']>"

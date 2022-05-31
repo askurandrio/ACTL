@@ -6,3 +6,21 @@ async def getStringLength(aString):
 	pyString = await aString.toPyString()
 	pyStringLength = len(pyString)
 	return await Number.call(pyStringLength)
+
+
+@NativeFunction
+async def makeString__split(String, Vector):
+	@NativeFunction
+	async def String__split(self, delimiter):
+		pyString = await self.toPyString()
+		pyDelimiter = await delimiter.toPyString()
+
+		vector = await Vector.call()
+		vectorAppend = await vector.getAttribute('append')
+
+		for pyStringPart in pyString.split(pyDelimiter):
+			await vectorAppend.call(await String.call(pyStringPart))
+
+		return vector
+
+	return String__split

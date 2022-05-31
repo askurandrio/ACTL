@@ -22,9 +22,9 @@ async def _Function__call(self, *args):
 	executor = await bindExecutor()
 	executor.scope, prevScope = callScope.child(), executor.scope
 
-	for argName, argValue in zip_longest(argNames, args, fillvalue=_default):
-		assert argName is not _default, f'argName is default, argValue is {argValue}'
-		assert argValue is not _default, f'argValue is default, argName is {argName}'
+	assert len(argNames) == len(args), f'len({argNames=}) != len({args=})'
+
+	for argName, argValue in zip(argNames, args):
 		executor.scope[argName] = argValue
 
 	result = await CallFrame(body)
