@@ -2,5 +2,6 @@
 
 set -e
 
+cd "$(dirname "$0")"
 
-PYTHONPATH=./library python ./library/actl/run.py "$@"
+PYTHONPATH=./library:. python ./library/actl/run.py "$@"
