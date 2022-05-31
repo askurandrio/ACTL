@@ -177,12 +177,12 @@ class AObject(ReprToStr):
 		if not isinstance(attribute, AObject):
 			return attribute
 
-		if await attribute.hasAttribute('__get__'):
-			return await attribute.get(self)
-
 		if self.Function.isinstance_(attribute):
 			applyFunc = await attribute.getAttribute('apply')
 			return await applyFunc.call(self)
+
+		if await attribute.hasAttribute('__get__'):
+			return await attribute.get(self)
 
 		return attribute
 

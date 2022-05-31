@@ -1,7 +1,7 @@
 from actl.objects import AToPy
-from actl.objects.object import makeClass
+from actl.objects.object import makeClass, addMethod, addMethodToClass
+from actl.signals import triggerSignal
 from actl.utils import executeSyncCoroutine
-from actl.objects.object.utils import addMethod, addMethodToClass
 
 
 ANoneType = makeClass('NoneType')
@@ -16,3 +16,6 @@ async def _NoneType__call(_):
 @addMethod(ANoneType, AToPy)
 async def __NoneType__AToPy(_):
 	return None
+
+
+executeSyncCoroutine(triggerSignal('actl.None:created', ANone))

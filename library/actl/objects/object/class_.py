@@ -1,6 +1,7 @@
 from actl.objects.object.AObject import AObject
-from actl.objects.object.NativeMethod import NativeFunction, NativeMethod
+from actl.objects.object.NativeMethod import NativeFunction
 from actl.objects.object.exceptions import AAttributeNotFound
+from actl.utils import executeSyncCoroutine
 
 
 async def class__getAttribute(self, key):
@@ -48,12 +49,12 @@ class_ = AObject(
 		'__name__': 'class',
 		'__parents__': (),
 		'__self__': {
-			'__getAttribute__': NativeMethod(class__getAttribute),
-			'__superGetAttribute__': NativeMethod(class__superGetAttribute),
+			'__getAttribute__': NativeFunction(class__getAttribute),
+			'__superGetAttribute__': NativeFunction(class__superGetAttribute),
 		},
 	}
 )
 class_.setAttribute('__class__', class_)
 class_.setAttribute(
-	'__getAttribute__', NativeFunction(class__getAttribute).apply(class_)
+	'__getAttribute__', executeSyncCoroutine(NativeFunction(class__getAttribute).apply(class_))
 )

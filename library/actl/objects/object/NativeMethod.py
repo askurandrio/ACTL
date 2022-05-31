@@ -8,7 +8,7 @@ class NativeMethod(AObject):
 	def __init__(self, rawMethod):
 		@NativeFunction
 		async def get(aSelf):
-			return NativeFunction(self._rawMethod).apply(aSelf)
+			return await NativeFunction(self._rawMethod).apply(aSelf)
 
 		super().__init__({})
 
