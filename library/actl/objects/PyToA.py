@@ -29,10 +29,12 @@ async def _PyToA__call(cls, value):
 	return self
 
 
-@addMethodToClass(PyToA, 'eval')
-async def _PyToA__eval(cls, code):
+@addMethodToClass(PyToA, 'exec')
+async def _PyToA__exec(cls, code, resultName):
 	code = str(AToPy(code))
-	result = eval(code)  # pylint: disable=eval-used
+	lc_scope = {}
+	exec(code, None, lc_scope)  # pylint: disable=exec-used
+	result = lc_scope[str(resultName)]
 	return await cls.call(result)
 
 
