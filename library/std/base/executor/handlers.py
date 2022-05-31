@@ -107,7 +107,7 @@ async def _SET_ATTRIBUTE__handler(executor, opcode):
 	attribute = opcode.attribute
 	src = executor.scope[opcode.src]
 
-	object_.setAttribute(attribute, src)
+	await object_.setAttribute(attribute, src)
 
 
 @Executor.addHandler(While)

@@ -11,7 +11,7 @@ async def test_objectAsPyStr():
 
 async def test_recursiveObjectAsStr():
 	obj = await Object.call()
-	obj.setAttribute('obj', obj)
+	await obj.setAttribute('obj', obj)
 	assert str(obj) == 'Object<obj=↑...>'
 
 

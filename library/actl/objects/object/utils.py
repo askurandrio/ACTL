@@ -39,6 +39,6 @@ def addMethod(cls, name):
 def addMethodToClass(cls, name):
 	def decorator(function):
 		aFunction = NativeMethod(function)
-		cls.setAttribute(name, aFunction)
+		cls.head[name] = aFunction
 
 	return decorator

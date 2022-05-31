@@ -14,7 +14,7 @@ class NativeMethod(AObject):
 
 		@onSignal('actl.Object:created', None)
 		async def _onObjectCreated(Object):
-			self._head['__class__'] = Object
+			self.head['__class__'] = Object
 
 		self._rawMethod = rawMethod
 		self._get = get

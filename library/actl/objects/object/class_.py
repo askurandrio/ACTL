@@ -44,17 +44,23 @@ async def class__superGetAttribute(self, for_, key):
 	raise AAttributeNotFound(key)
 
 
+async def class__setAttribute(self, key, value):
+	self.head[key] = value
+
+
 class_ = AObject(
 	{
 		'__name__': 'class',
 		'__parents__': (),
 		'__self__': {
 			'__getAttribute__': NativeFunction(class__getAttribute),
+			'__setAttribute__': NativeFunction(class__setAttribute),
 			'__superGetAttribute__': NativeFunction(class__superGetAttribute),
 		},
 	}
 )
-class_.setAttribute('__class__', class_)
-class_.setAttribute(
-	'__getAttribute__', executeSyncCoroutine(NativeFunction(class__getAttribute).apply(class_))
+
+class_.head['__class__'] = class_
+class_.head['__getAttribute__'] = executeSyncCoroutine(
+	NativeFunction(class__getAttribute).apply(class_)
 )

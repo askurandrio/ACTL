@@ -1,6 +1,10 @@
 from actl.objects.object.AObject import AObject
 from actl.objects.object.exceptions import AAttributeNotFound
-from actl.objects.object.utils import addMethod, addMethodToClass, makeClass
+from actl.objects.object.utils import (
+	addMethod,
+	addMethodToClass,
+	makeClass,
+)
 from actl.signals import triggerSignal
 from actl.utils import executeSyncCoroutine
 
@@ -61,6 +65,11 @@ async def Object__call(self, *args, **kwargs):
 @addMethod(Object, '__init__')
 async def object__init(_):
 	return None
+
+
+@addMethod(Object, '__setAttribute__')
+async def object__setAttribute(self, key, value):
+	self.head[key] = value
 
 
 executeSyncCoroutine(triggerSignal('actl.Object:created', Object))

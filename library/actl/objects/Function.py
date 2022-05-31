@@ -1,7 +1,7 @@
 from actl.objects.object import makeClass, addMethod, NativeFunction
 from actl.objects.String import String
-from actl.signals import triggerSignal
 from actl.utils import executeSyncCoroutine
+from actl.signals import triggerSignal
 
 
 Function = makeClass('Function')
@@ -10,10 +10,10 @@ Signature = makeClass('Signature')
 
 @addMethod(Function, '__init__')
 async def _Function_init(self, name, signature, body, scope):
-	self.setAttribute('name', name)
-	self.setAttribute('signature', signature)
-	self.setAttribute('body', body)
-	self.setAttribute('scope', scope)
+	await self.setAttribute('name', name)
+	await self.setAttribute('signature', signature)
+	await self.setAttribute('body', body)
+	await self.setAttribute('scope', scope)
 
 	return self
 
@@ -39,8 +39,7 @@ async def _Function__String(self):
 
 @addMethod(Signature, '__init__')
 async def _Signature_init(self, args):
-	self.setAttribute('args', args)
-	return self
+	await self.setAttribute('args', args)
 
 
 executeSyncCoroutine(triggerSignal('actl.Function:created', Function))

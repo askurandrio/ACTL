@@ -18,7 +18,9 @@ from std.base.objects.function import Function
 class_ = makeClass('class_', (actlClass,))
 
 
-@asDecorator(lambda rule: class_.setAttribute('__syntaxRule__', rule))
+@asDecorator(
+	lambda rule: executeSyncCoroutine(class_.setAttribute('__syntaxRule__', rule))
+)
 @SyntaxRule.wrap(
 	Value(class_),
 	Token(' '),
@@ -72,6 +74,6 @@ async def buildClass(name, parents, body):
 			self_[key] = value
 			continue
 
-		cls.setAttribute(key, value)
+		await cls.setAttribute(key, value)
 
 	return cls

@@ -64,6 +64,11 @@ async def _PyToA__getAttribute(self, key):
 	raise AAttributeNotFound(key)
 
 
+@addMethod(PyToA, '__setAttribute__')
+async def _PyToA__setAttribute(self, key, value):
+	setattr(self._value, key, value)
+
+
 @addMethod(PyToA, AToPy)
 async def _PyToA__AToPY(self):
 	return self._value

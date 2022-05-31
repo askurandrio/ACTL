@@ -12,6 +12,6 @@ else_ = executeSyncCoroutine(makeClass('_Else').call())
 async def _If__init(self, ifCondition, *elifConditions, elseCode=None):
 	conditions = (ifCondition,) + elifConditions
 
-	self.setAttribute('conditions', conditions)
+	await self.setAttribute('conditions', conditions)
 	if elseCode is not None:
-		self.setAttribute('elseCode', elseCode)
+		await self.setAttribute('elseCode', elseCode)

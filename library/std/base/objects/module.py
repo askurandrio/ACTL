@@ -24,10 +24,10 @@ async def _Module__init(self, path):
 
 		executor.scope = prevScope
 
-	self.setAttribute('__path__', path)
-	self.setAttribute('__scope__', moduleScope)
-	self.setAttribute('__modules__', {})
-	self.setAttribute('__project__', project)
+	await self.setAttribute('__path__', path)
+	await self.setAttribute('__scope__', moduleScope)
+	await self.setAttribute('__modules__', {})
+	await self.setAttribute('__project__', project)
 
 
 @addMethod(Module, '__getAttribute__')

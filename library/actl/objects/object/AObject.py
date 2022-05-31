@@ -1,8 +1,8 @@
 import traceback
 
+from actl.signals import onSignal
 from actl.utils import ReprToStr, executeSyncCoroutine
 from actl.objects.object.exceptions import AAttributeNotFound
-from actl.signals import onSignal
 
 
 class _MethodGetterView:
@@ -39,7 +39,7 @@ class AObject(ReprToStr):
 	call = _MethodGetterView('__call__', '_call')
 
 	def __init__(self, head):
-		self._head = head
+		self.head = head
 
 	async def getAttribute(self, name):
 		attribute, isSuccess = await self.lookupSpecialAttribute(name)
@@ -104,15 +104,16 @@ class AObject(ReprToStr):
 		return None, False
 
 	def lookupAttributeInHead(self, key):
-		attribute = self._head.get(key, self._default)
+		attribute = self.head.get(key, self._default)
 
 		if attribute is self._default:
 			return None, False
 
 		return attribute, True
 
-	def setAttribute(self, key, value):
-		self._head[key] = value
+	async def setAttribute(self, key, value):
+		setAttribute = await self.getAttribute('__setAttribute__')
+		await setAttribute.call(key, value)
 
 	async def hasAttribute(self, key):
 		try:
@@ -200,7 +201,7 @@ class AObject(ReprToStr):
 		name = await self.class_.getAttribute('__name__')
 		selfToStr = f'{name}<'
 
-		for key, value in self._head.items():
+		for key, value in self.head.items():
 			if key == '__class__':
 				continue
 
@@ -220,7 +221,7 @@ class AObject(ReprToStr):
 	def __eq__(self, other):
 		if not isinstance(other, AObject):
 			return False
-		return self._head == other._head
+		return self.head == other.head
 
 	def __hash__(self):
 		return hash(str(self))
@@ -234,7 +235,7 @@ class AObject(ReprToStr):
 			traceback.print_exc()
 
 			try:
-				selfToStr = str(self._head)
+				selfToStr = str(self.head)
 			except Exception:  # pylint: disable=broad-except
 				selfToStr = id(self)
 

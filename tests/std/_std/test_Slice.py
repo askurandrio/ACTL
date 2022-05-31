@@ -22,7 +22,7 @@ async def test_Slice_syntaxInit(execute):
 	execute.executeInInitialScope('from std._std.objects.slice import Slice')
 	collection = await Object.call()
 	getItemMock = Mock()
-	collection.setAttribute('__getItem__', await PyToA.call(getItemMock))
+	await collection.setAttribute('__getItem__', await PyToA.call(getItemMock))
 	execute.scope['collection'] = collection
 
 	execute('collection[2:]')

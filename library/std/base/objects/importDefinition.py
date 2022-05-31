@@ -35,7 +35,9 @@ async def copyAlllIntoScope(module, scope):
 		scope[key] = value
 
 
-@asDecorator(lambda rule: import_.setAttribute('__syntaxRule__', rule))
+@asDecorator(
+	lambda rule: executeSyncCoroutine(import_.setAttribute('__syntaxRule__', rule))
+)
 @SyntaxRule.wrap(
 	Value(import_),
 	Token(' '),
@@ -75,7 +77,9 @@ def _parseImport(*args, parser=None):
 			yield GET_ATTRIBUTE(resultName, resultName, moduleName.name)
 
 
-@asDecorator(lambda rule: From.setAttribute('__syntaxRule__', rule))
+@asDecorator(
+	lambda rule: executeSyncCoroutine(From.setAttribute('__syntaxRule__', rule))
+)
 @SyntaxRule.wrap(
 	Value(From),
 	Token(' '),

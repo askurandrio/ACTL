@@ -3,12 +3,13 @@ from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Parsed, Or, BufferRule
 from actl.utils import asDecorator, executeSyncCoroutine
 from std.base.rules import CodeBlock
+from actl.utils import executeSyncCoroutine
 
 
 If = objects.makeClass('If', (objects.If,))
 
 
-@asDecorator(lambda rule: If.setAttribute('__syntaxRule__', rule))
+@asDecorator(lambda rule: executeSyncCoroutine(If.setAttribute('__syntaxRule__', rule)))
 @SyntaxRule.wrap(Value(If), Token(' '), useParser=True, manualApply=True)
 class IfSyntax:
 	_INLINE_IF_END = Or(

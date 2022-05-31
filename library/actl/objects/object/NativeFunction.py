@@ -11,13 +11,13 @@ class NativeFunction(AObject):
 
 		@onSignal('actl.Function:created', None)
 		async def _onFunctionCreated(Function):
-			self._head['__class__'] = Function
+			self.head['__class__'] = Function
 
 		if self.class_ is None:
 
 			@onSignal('actl.Object:created')
 			async def _onObjectCreated(Object):
-				self._head['__class__'] = Object
+				self.head['__class__'] = Object
 
 	async def call(self, *args, **kwargs):
 		return await self._function(*args, **kwargs)
