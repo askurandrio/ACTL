@@ -1,12 +1,8 @@
-import sys
 import traceback
 
 from actl.utils import ReprToStr
 from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
 from actl.objects.object.exceptions import AAttributeNotFound
-
-
-sys.setrecursionlimit(500)
 
 
 class _MethodGetterView:

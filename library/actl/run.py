@@ -1,11 +1,13 @@
+import os
 import sys
-
 import json
-
-import actl
 
 
 def main(projectF=None, mainF=None, source=None):
+	recursionLimit = os.environ.get('RECURSION_LIMIT')
+	if recursionLimit is not None:
+		sys.setrecursionlimit(int(recursionLimit))
+
 	if projectF is None:
 		if mainF is None:
 			projectF = 'std/repl'
@@ -20,7 +22,9 @@ def main(projectF=None, mainF=None, source=None):
 	if source is not None:
 		projectSource = [*projectSource, *source]
 
-	project = actl.Project()
+	from actl import Project
+
+	project = Project()
 	project.processSource(projectSource)
 	project['build']()
 
