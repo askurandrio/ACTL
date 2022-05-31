@@ -3,15 +3,15 @@ from actl.objects.object import makeClass, executeSyncCoroutine
 from actl.objects.object.utils import addMethod, addMethodToClass
 
 
-NoneType = makeClass('NoneType')
-ANone = executeSyncCoroutine(NoneType.call())
+ANoneType = makeClass('NoneType')
+ANone = executeSyncCoroutine(ANoneType.call())
 
 
-@addMethodToClass(NoneType, '__call__')
+@addMethodToClass(ANoneType, '__call__')
 async def _NoneType__call(_):
 	return ANone
 
 
-@addMethod(NoneType, AToPy)
+@addMethod(ANoneType, AToPy)
 async def __NoneType__AToPy(_):
 	return None
