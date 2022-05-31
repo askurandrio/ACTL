@@ -1,3 +1,4 @@
+import inspect
 import itertools
 from collections.abc import Iterator
 
@@ -136,7 +137,12 @@ class Buffer:
 	@classmethod
 	def wrap(cls, func):
 		def wrapper(*args, **kwargs):
-			return cls(func(*args, **kwargs))
+			result = func(*args, **kwargs)
+
+			if inspect.iscoroutine(result):
+				result = result.__await__()
+
+			return cls(result)
 
 		return wrapper
 

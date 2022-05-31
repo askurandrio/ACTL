@@ -3,6 +3,10 @@ class AppliedFunction:
 		self._function = function
 		self._args = args
 
+	@property
+	def __name__(self):
+		return str(self)
+
 	async def __call__(self, *args, **kwargs):
 		return await self._function(*self._args, *args, **kwargs)
 
