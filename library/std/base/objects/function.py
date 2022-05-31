@@ -5,6 +5,7 @@ from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from std.base.rules import CodeBlock
 from std.base.executor.Executor import Executor
 from std.base.executor.utils import bindExecutor, CallFrame
+from actl.utils import executeSyncCoroutine
 
 
 Function = objects.makeClass('Function', (objects.Function,))
@@ -78,7 +79,7 @@ class _ParseFunction:
 				self._inpRule.pop(Token(','), Maybe(Token(' ')))
 
 		self._inpRule.pop(Token(')'))
-		signature = objects.executeSyncCoroutine(objects.Signature.call(args))
+		signature = executeSyncCoroutine(objects.Signature.call(args))
 		return signature
 
 	def _parseBody(self):

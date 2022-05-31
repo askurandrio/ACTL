@@ -1,5 +1,6 @@
 from actl.objects.String import String
-from actl.objects.object import Object, executeSyncCoroutine
+from actl.objects.object import Object
+from actl.utils import executeSyncCoroutine
 
 
 class _MetaAToPy(type):

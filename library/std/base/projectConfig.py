@@ -2,7 +2,15 @@ import inspect
 import os
 import builtins
 
-from actl import Parser, Scope, objects, DIR_LIBRARY, importFrom, Lazy
+from actl import (
+	Parser,
+	Scope,
+	objects,
+	DIR_LIBRARY,
+	importFrom,
+	Lazy,
+	executeSyncCoroutine,
+)
 from actl.Buffer import Buffer
 import std
 from std.base.executor import bindExecutor
@@ -70,7 +78,7 @@ def getInitialScope(project):
 		('lt', 'lt'),
 	):
 		pyVar = loader(pyName)
-		var = objects.executeSyncCoroutine(objects.PyToA.call(pyVar))
+		var = executeSyncCoroutine(objects.PyToA.call(pyVar))
 		scope[varName] = var
 
 	return Scope(scope)

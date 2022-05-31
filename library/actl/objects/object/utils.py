@@ -1,7 +1,7 @@
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeMethod import NativeMethod
 from actl.objects.object.class_ import class_
-from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
+from actl.utils import executeSyncCoroutine
 
 
 def makeClass(name, parents=(), self_=None, extraAttributes=None):

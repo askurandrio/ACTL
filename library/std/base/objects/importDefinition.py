@@ -12,8 +12,9 @@ from actl.syntax import (
 	Maybe,
 )
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE, GET_ATTRIBUTE
-from actl.objects import NativeFunction, Object, executeSyncCoroutine, AToPy
+from actl.objects import NativeFunction, Object, AToPy
 from actl import asDecorator, Buffer
+from actl.utils import executeSyncCoroutine
 from std.base.executor.utils import bindExecutor
 
 

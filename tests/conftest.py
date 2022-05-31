@@ -9,7 +9,8 @@ from itertools import zip_longest
 import pytest
 
 from actl.Buffer import Buffer
-from actl.objects import Object, executeSyncCoroutine
+from actl.objects import Object
+from actl.utils import executeSyncCoroutine
 from actl.opcodes import DynamicOpCode
 
 

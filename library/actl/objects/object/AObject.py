@@ -1,7 +1,6 @@
 import traceback
 
-from actl.utils import ReprToStr
-from actl.objects.object.executeSyncCoroutine import executeSyncCoroutine
+from actl.utils import ReprToStr, executeSyncCoroutine
 from actl.objects.object.exceptions import AAttributeNotFound
 
 

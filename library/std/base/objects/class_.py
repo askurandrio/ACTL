@@ -3,13 +3,12 @@ from actl.objects import (
 	class_ as actlClass,
 	Function as actlFunction,
 	Signature,
-	executeSyncCoroutine,
 	NativeFunction,
 )
 from actl.opcodes import VARIABLE, RETURN
 from actl.opcodes.opcodes import CALL_FUNCTION_STATIC
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, Maybe, Parsed
-from actl import asDecorator
+from actl import asDecorator, executeSyncCoroutine
 from actl.syntax.BufferRule import BufferRule
 from std.base.rules import CodeBlock
 from std.base.executor.utils import bindExecutor

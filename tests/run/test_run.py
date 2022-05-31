@@ -2,7 +2,8 @@
 
 import json
 
-from actl.objects import PyToA, executeSyncCoroutine
+from actl.objects import PyToA
+from actl.utils import executeSyncCoroutine
 
 
 def test_CtrlD(run):
