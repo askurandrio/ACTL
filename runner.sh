@@ -21,4 +21,5 @@ docker run --rm --name github-runner \
   -e RUNNER_GROUP="actl-group" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-actl:/tmp/github-runner-actl \
+  -d \
   runner_dockerfile
