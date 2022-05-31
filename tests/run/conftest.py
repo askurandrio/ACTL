@@ -1,89 +1,67 @@
-import sys
-from multiprocessing import Queue, Process
-from queue import Empty
+import fcntl
+import os
+import subprocess
+import time
 
 import pytest
 
-from actl.run import main, parseArgs
-
-
-class _AbstractIoQueue:
-	def __init__(self):
-		self._queue = Queue()
-		self._process = None
-
-	def bind(self, process):
-		self._process = process
-
-	def _get(self, timeout):
-		for _ in range(timeout * 2):
-			try:
-				return self._queue.get(timeout=0.5)
-			except Empty:
-				if (self._process is None) or (not self._process.is_alive()):
-					raise
-
-		raise Empty
-
-	def readAll(self):
-		def gen():
-			while self:
-				yield self._queue.get_nowait()
-
-		return list(gen())
-
-	def __bool__(self):
-		return not self._queue.empty()
-
-
-class _WriteIoQueue(_AbstractIoQueue):
-	def write(self, content):
-		self._queue.put(content)
-
-	def get(self):
-		return self._get(timeout=5)
-
-
-class _ReadIoQueue(_AbstractIoQueue):
-	def put(self, line):
-		self._queue.put(line)
-
-	def readline(self):
-		return self._get(timeout=5)
+from actl import DIR_LIBRARY
 
 
 class _Run:
-	def __init__(self):
-		self._process = None
-		self._stdin = _ReadIoQueue()
-		self._stdout = _WriteIoQueue()
-
-	def _target(self, args):
-		sys.stdin = self._stdin
-		sys.stdout = self._stdout
-		main(**parseArgs(list(args)))
+	_actlBinary = os.path.join(os.path.dirname(DIR_LIBRARY), 'actl')
 
 	def __enter__(self):
-		def run_(*args):
-			self._process = Process(target=self._target, args=(args,))
-			self._process.start()
-			self._stdin.bind(self._process)
-			self._stdout.bind(self._process)
+		return self
 
-		run_.stdin = self._stdin
-		run_.stdout = self._stdout
+	def __call__(self, *args):
+		import sys
 
-		return run_
+		self.process = subprocess.Popen(
+			args=[self._actlBinary, *args],
+			stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE,
+		)
+
+		fcntl.fcntl(self.process.stdout.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
+
+	def writeLine(self, line):
+		self.process.stdin.write(f'{line}\n'.encode())
+		self.process.stdin.flush()
+
+	def reader(self):
+		line = ''
+		startTime = time.time()
+
+		while True:
+			assert (time.time() - startTime) < 5, f'Timeout exceeded, {line=}'
+
+			char = self.process.stdout.read(1)
+			if char is None:
+				assert self.process.poll() is None, self.process.returncode
+				time.sleep(0.2)
+				continue
+
+			line += char.decode()
+			yield line
+
+	def readLine(self):
+		for line in self.reader():
+			if line.endswith('\n'):
+				return line
+
+	def readTemplate(self, template):
+		for line in self.reader():
+			if line == template:
+				break
 
 	def __exit__(self, *_):
-		self._process.join(timeout=5)
-		assert not self._stdin, self._stdin.readAll()
-		assert not self._stdout, self._stdout.readAll()
-		try:
-			assert not self._process.is_alive()
-		except AssertionError:
-			self._process.terminate()
-			raise
+		self.process.stdin.close()
+		self.process.wait(timeout=5)
+		assert self.process.returncode == 0, self.process.returncode
+
+		output = self.process.stdout.read()
+		assert not output, output
 
 
 @pytest.fixture

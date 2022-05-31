@@ -6,30 +6,25 @@ from actl.objects import PyToA
 from actl.utils import executeSyncCoroutine
 
 
-def test_CtrlD(run):
+def test_invitation(run):
 	run()
 
-	run.stdin.put('')
-	assert run.stdout.get() == '>>> '
+	run.readTemplate('>>> ')
 
 
 def test_setVar(run):
 	run()
-	assert run.stdout.get() == '>>> '
-	run.stdin.put('a = 1\n')
-	assert run.stdout.get() == '>>> '
-	run.stdin.put('print(a)\n')
-	assert run.stdout.get() == '1'
-	assert run.stdout.get() == '\n'
-	assert run.stdout.get() == '>>> '
-	run.stdin.put('')
+
+	run.writeLine('a = 1')
+	run.writeLine('print(a)')
+	assert run.readLine() == '>>> >>> 1\n'
+	run.readTemplate('>>> ')
 
 
 def test_expliciSetProjectF(run):
 	run('--projectF', 'std/repl')
 
-	run.stdin.put('')
-	assert run.stdout.get() == '>>> '
+	run.readTemplate('>>> ')
 
 
 def test_setExtraSource(run):
@@ -45,26 +40,21 @@ def test_setExtraSource(run):
 
 	run('--source', json.dumps(extraSource))
 
-	assert run.stdout.get() == '>>> '
-	run.stdin.put('print(1)\n')
-	assert run.stdout.get() == 'mocked: 1'
-	assert run.stdout.get() == '\n'
-	assert run.stdout.get() == '>>> '
-	run.stdin.put('')
+	run.writeLine('print(1)')
+	assert run.readLine() == '>>> mocked: 1\n'
+	run.readTemplate('>>> ')
 
 
 def test_explicitProjectFAndMainF(run):
 	run('--projectF', 'std/base', '--mainF', 'tests/actl/example.a')
 
-	assert run.stdout.get() == '1'
-	assert run.stdout.get() == '\n'
+	assert run.readLine() == '1\n'
 
 
 def test_projectFAndMainF(run):
 	run('std/base', 'tests/actl/example.a')
 
-	assert run.stdout.get() == '1'
-	assert run.stdout.get() == '\n'
+	assert run.readLine() == '1\n'
 
 
 def test_projectFAndMainFAndSource(run):
@@ -79,22 +69,19 @@ def test_projectFAndMainFAndSource(run):
 	]
 	run('std/base', 'tests/actl/example.a', json.dumps(extraSource))
 
-	assert run.stdout.get() == 'mocked: 1'
-	assert run.stdout.get() == '\n'
+	assert run.readLine() == 'mocked: 1\n'
 
 
 def test_explicitMainF(run):
 	run('--mainF', 'tests/actl/example.a')
 
-	assert run.stdout.get() == '1'
-	assert run.stdout.get() == '\n'
+	assert run.readLine() == '1\n'
 
 
 def test_mainF(run):
 	run('tests/actl/example.a')
 
-	assert run.stdout.get() == '1'
-	assert run.stdout.get() == '\n'
+	assert run.readLine() == '1\n'
 
 
 def getInitialScope(project):
