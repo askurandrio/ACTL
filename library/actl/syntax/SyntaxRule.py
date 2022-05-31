@@ -1,17 +1,19 @@
 from inspect import isclass
+
 from actl.syntax.NamedResult import NamedResult
 from actl.syntax.Template import Template
+from actl.utils import setFunctionName
 
 
 class SyntaxRule:
-	def __init__(self, template, func, manualApply=False, useParser=False):
-		self._template = template
+	def __init__(self, runTemplate, func, manualApply=False, useParser=False):
+		self._runTemplate = runTemplate
 		self.func = func
 		self._manualApply = manualApply
 		self._useParser = useParser
 
 	def match(self, parser, inp):
-		res = self._template(parser, inp)
+		res = self._runTemplate(parser, inp)
 		if res is None:
 			return None
 
@@ -41,11 +43,13 @@ class SyntaxRule:
 		return apply
 
 	def __repr__(self):
-		return f'{type(self).__name__}({self._template, self.func})'
+		return f'{type(self).__name__}({self._runTemplate.template, self.func})'
 
 	@classmethod
 	def wrap(cls, *template, manualApply=False, useParser=False):
 		def decorator(userFunc):
+			nonlocal template
+
 			if isclass(userFunc):
 
 				def func(*args, **kwargs):
@@ -55,6 +59,12 @@ class SyntaxRule:
 			else:
 				func = userFunc
 
-			return cls(Template(*template), func, manualApply, useParser)
+			template = Template(*template)
+			runTemplate = setFunctionName(
+				template.__call__, f'{userFunc.__name__}Template'
+			)
+			runTemplate.template = template
+
+			return cls(runTemplate, func, manualApply, useParser)
 
 		return decorator

@@ -4,6 +4,14 @@ import inspect
 default = object()
 
 
+def setFunctionName(function, name):
+	lc_scope = {'function': function}
+
+	exec(f'def {name}(*args, **kwargs):\n	return function(*args, **kwargs)', lc_scope)
+
+	return lc_scope[name]
+
+
 def asDecorator(func):
 	def decorator(functionForDecorate):
 		return func(functionForDecorate)
@@ -93,16 +101,27 @@ def executeSyncCoroutine(coroutine):
 		)
 
 
-def bindEternalIdx():
+def getEternalIdx():
 	frame = inspect.currentframe().f_back
 	codePlaceId = frame.f_code.co_filename, frame.f_lineno
 
-	if codePlaceId not in bindEternalIdx.store:
-		bindEternalIdx.store[codePlaceId] = -1
+	if codePlaceId not in getEternalIdx.store:
+		getEternalIdx.store[codePlaceId] = -1
 
-	bindEternalIdx.store[codePlaceId] += 1
+	def incr():
+		getEternalIdx.store[codePlaceId] += 1
+		return getEternalIdx.store[codePlaceId]
 
-	return bindEternalIdx.store[codePlaceId]
+	def decr():
+		getEternalIdx.store[codePlaceId] -= 1
+		return getEternalIdx.store[codePlaceId]
+
+	return incr, decr
 
 
-bindEternalIdx.store = {}
+def bindEternalIdx():
+	incr, _ = getEternalIdx()
+	return incr()
+
+
+getEternalIdx.store = {}
