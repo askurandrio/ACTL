@@ -1,6 +1,7 @@
 # pylint: disable=arguments-differ, useless-super-delegation
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeFunction import NativeFunction
+from actl.signals import onSignal
 
 
 class NativeMethod(AObject):
@@ -10,12 +11,13 @@ class NativeMethod(AObject):
 			return NativeFunction(self._rawMethod).apply(aSelf)
 
 		super().__init__({})
+
+		@onSignal('actl.Object:created', None)
+		async def _onObjectCreated(Object):
+			self._head['__class__'] = Object
+
 		self._rawMethod = rawMethod
 		self._get = get
-
-	@property
-	def class_(self):
-		return AObject.Object
 
 	async def lookupSpecialAttribute(self, key):
 		if key == '__get__':

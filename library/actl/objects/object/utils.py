@@ -5,8 +5,9 @@ from actl.utils import executeSyncCoroutine
 
 
 def makeClass(name, parents=(), self_=None, extraAttributes=None):
-	if AObject.Object:
-		parents = [*parents, AObject.Object]
+	Object = getattr(AObject, 'Object', None)
+	if Object is not None:
+		parents = [*parents, Object]
 
 	while (len(parents) > 1) and (parents[-1] == parents[-2]):
 		parents.pop(-1)

@@ -1,10 +1,11 @@
 from actl.objects.object import makeClass, addMethod, NativeFunction
 from actl.objects.String import String
+from actl.signals import triggerSignal
+from actl.utils import executeSyncCoroutine
 
 
 Function = makeClass('Function')
 Signature = makeClass('Signature')
-type(Function).Function = Function
 
 
 @addMethod(Function, '__init__')
@@ -40,3 +41,6 @@ async def _Function__String(self):
 async def _Signature_init(self, args):
 	self.setAttribute('args', args)
 	return self
+
+
+executeSyncCoroutine(triggerSignal('actl.Function:created', Function))

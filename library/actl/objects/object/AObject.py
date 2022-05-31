@@ -2,6 +2,7 @@ import traceback
 
 from actl.utils import ReprToStr, executeSyncCoroutine
 from actl.objects.object.exceptions import AAttributeNotFound
+from actl.signals import onSignal
 
 
 class _MethodGetterView:
@@ -35,9 +36,6 @@ class _MethodView(ReprToStr):
 
 class AObject(ReprToStr):
 	_default = object()
-	Function = None
-	Object = None
-	String = None
 	call = _MethodGetterView('__call__', '_call')
 
 	def __init__(self, head):
@@ -241,3 +239,18 @@ class AObject(ReprToStr):
 				selfToStr = id(self)
 
 			return f'Error during convert<{selfToStr}> to string: {type(ex)} "{ex}"'
+
+
+@onSignal('actl.Function:created')
+async def _onFunctionCreated(Function):
+	AObject.Function = Function
+
+
+@onSignal('actl.Object:created')
+async def _onObjectCreated(Object):
+	AObject.Object = Object
+
+
+@onSignal('actl.String:created')
+async def _onStringCreated(String):
+	AObject.String = String

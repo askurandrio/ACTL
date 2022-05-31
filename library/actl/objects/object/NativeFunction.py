@@ -1,5 +1,6 @@
 from actl.objects.object.AObject import AObject
 from actl.objects.object._AppliedFunction import AppliedFunction
+from actl.signals import onSignal
 
 
 class NativeFunction(AObject):
@@ -7,9 +8,9 @@ class NativeFunction(AObject):
 		self._function = function
 		super().__init__({})
 
-	@property
-	def class_(self):
-		return AObject.Object
+		@onSignal('actl.Object:created', None)
+		async def _onObjectCreated(Object):
+			self._head['__class__'] = Object
 
 	async def call(self, *args, **kwargs):
 		return await self._function(*args, **kwargs)

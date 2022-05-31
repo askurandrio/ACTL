@@ -1,6 +1,8 @@
 # pylint: disable=protected-access
 from actl.objects.object import Object, class_
 from actl.objects.object.utils import addMethodToClass
+from actl.signals import triggerSignal
+from actl.utils import executeSyncCoroutine
 
 
 class _AString(type(Object)):
@@ -34,4 +36,4 @@ async def String__call(cls, value=''):
 	return self
 
 
-type(Object).String = String
+executeSyncCoroutine(triggerSignal('actl.String:created', String))
