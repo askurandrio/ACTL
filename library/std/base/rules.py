@@ -238,7 +238,7 @@ class CodeBlock:
 			while self.inpRule.startsWith(
 				Many(Or([Token(' ')], [Token('\t')]), minMatches=0), Token('\n')
 			):
-				self.inpRule.popUntil(Token('\n'))
+				tuple(self.inpRule.popUntil(Token('\n')))
 				self.inpRule.pop(Token('\n'))
 
 		code.loadAll()

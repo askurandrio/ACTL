@@ -27,11 +27,10 @@ class BufferRule:
 			buff = default
 		return buff
 
+	@Buffer.wrap
 	def popUntil(self, *template):
-		res = Buffer()
 		while self._buff and (not self.startsWith(*template)):
-			res.append(self._buff.pop())
-		return res
+			yield self._buff.pop()
 
 	def __iter__(self):
 		return iter(self._buff)

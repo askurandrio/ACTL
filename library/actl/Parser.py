@@ -55,7 +55,7 @@ class Parser:
 
 			flush.append(self.buff.pop())
 
-		res = BufferRule(self, flush).popUntil(self.endLine)
+		res = tuple(BufferRule(self, flush).popUntil(self.endLine))
 		self.buff.insert(0, flush)
 
 		if insertDefiniton:
@@ -69,12 +69,12 @@ class Parser:
 				self.parseLine()
 			self.definition = Buffer()
 			res = BufferRule(self, self.buff).popUntil(self.endLine)
-			BufferRule(self, self.buff).pop(self.endLine, default=None)
 			for opcode in res:
 				try:
 					yield opcode
 				except Exception as ex:
 					raise self._makeSyntaxError(f'at res<{res}>') from ex
+			BufferRule(self, self.buff).pop(self.endLine, default=None)
 
 	def __str__(self):
 		return f'Parser<{self.__dict__}>'

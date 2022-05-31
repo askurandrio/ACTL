@@ -51,7 +51,7 @@ def _parseImport(*args, parser=None):
 	args.pop(Value(import_), Token(' '))
 
 	mainModuleName = args.pop(IsInstance(VARIABLE)).one().name
-	moduleNames = args.popUntil(Or([Token(' ')], [End]))
+	moduleNames = tuple(args.popUntil(Or([Token(' ')], [End])))
 
 	if args.startsWith(Token(' '), Token.of(VARIABLE('as'))):
 		args.pop(Token(' '), Token.of(VARIABLE('as')), Token(' '))
@@ -90,7 +90,7 @@ def _parseFromImport(*args, parser=None):
 	args = BufferRule(parser, Buffer(args))
 	args.pop(Value(From), Token(' '))
 
-	codeModuleName = args.popUntil(Token(' '))
+	codeModuleName = tuple(args.popUntil(Token(' ')))
 	args.pop(Token(' '))
 	codeModuleImport = Buffer(
 		(*args.pop(Value(import_)), ' ', *codeModuleName, *' as ', parser.makeTmpVar())
