@@ -3,7 +3,7 @@ from std._std.objects.vector.vector import Vector
 
 
 fun Vector__init(self):
-    self._head = PyToA.exec('head = []', 'head')
+	self._head = PyToA.exec('head = []', 'head')
 
 
 addMethod(Vector, '__init__', Vector__init)
