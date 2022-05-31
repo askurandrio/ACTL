@@ -1,10 +1,9 @@
 #!/bin/bash
 
 
-set -x
-set -e
+set -ex
 
 
-PYTHONPATH=./library python3.7 -m cProfile -o $1 $(realpath ./library/actl/run.py) $2 $3
+time PYTHONPATH=./library python -m cProfile -o $1 $(realpath ./library/actl/run.py) $2 $3
 
-python3.7 -m snakeviz $1
+python -m snakeviz $1
