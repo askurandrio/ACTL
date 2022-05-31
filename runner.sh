@@ -1,8 +1,7 @@
 #!/bin/bash
 
 
-set -x
-set -e
+set -xe
 
 
 container_id="$(docker ps -aqf "name=github-runner")"
