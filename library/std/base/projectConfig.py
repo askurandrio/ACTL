@@ -76,6 +76,7 @@ def getInitialScope(project):
 		('Module', 'std.base.objects.Module'),
 		('__project__', 'project'),
 		('lt', 'lt'),
+		('pass', 'None'),
 	):
 		pyVar = loader(pyName)
 		var = executeSyncCoroutine(objects.PyToA.call(pyVar))
