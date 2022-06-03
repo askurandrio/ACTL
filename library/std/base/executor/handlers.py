@@ -22,8 +22,8 @@ async def _objectHandler(executor, opcode):
 
 
 @Executor.addHandler(opcodes.VARIABLE)
-async def _VARIABLE__handler(_, _1):
-	pass
+async def _VARIABLE__handler(executor, opcode):
+	executor.scope[opcode.name]
 
 
 @Executor.addHandler(opcodes.SET_VARIABLE)
