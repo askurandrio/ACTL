@@ -25,7 +25,7 @@ def getInput(project):
 			try:
 				inp = input(msg) + '\n'
 			except EOFError:
-				project['_build'] = False
+				project['isBuild'] = False
 				break
 
 			yield from inp
@@ -34,17 +34,17 @@ def getInput(project):
 
 
 def getBuild(project):
-	project['_build'] = True
-	project['_catchEx'] = False
+	project['isBuild'] = True
+	project['isCatchEx'] = True
 
 	def build():
-		while project['_build']:
+		while project['isBuild']:
 			try:
 				project.previous['build']()
 			except Exception:  # pylint: disable=broad-except
-				if '_debug' in project['buildScope']:
+				if 'isDebug' in project['buildScope']:
 					pdb.post_mortem()
-				if project['_catchEx']:
+				if project['isCatchEx']:
 					traceback.print_exc()
 				else:
 					raise
