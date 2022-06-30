@@ -12,7 +12,7 @@ if [[ "${container_id}" ]]; then
 fi
 
 
-docker build -f runner_dockerfile -t runner_dockerfile .
+docker build -f runner_dockerfile -t runner_dockerfile --build-arg ACCESS_TOKEN=$1 .
 docker run --rm --name github-runner \
   -e REPO_URL="https://github.com/askurandrio/ACTL" \
   -e RUNNER_NAME="actl-tests" \

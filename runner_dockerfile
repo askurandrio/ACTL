@@ -10,3 +10,8 @@ RUN ln -s $(which python3.8) /bin/python
 
 COPY etc/requirements.txt /tmp/requirements.txt
 RUN python -m pip install -r /tmp/requirements.txt
+
+
+ARG ACCESS_TOKEN
+
+RUN cd /actions-runner && echo $ACCESS_TOKEN && RUNNER_ALLOW_RUNASROOT="1" ./config.sh --url https://github.com/askurandrio/ACTL --token $ACCESS_TOKEN
