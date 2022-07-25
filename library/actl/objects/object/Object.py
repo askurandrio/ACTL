@@ -68,11 +68,43 @@ async def object__setAttribute(self, key, value):
 	self.head[key] = value
 
 
+async def _toPyString(self):
+	if not hasattr(_toPyString, '_stringSeen'):
+		_toPyString._stringSeen = set()
+
+		try:
+			return await _toPyString(self)
+		finally:
+			del _toPyString._stringSeen
+
+	_toPyString._stringSeen.add(id(self))
+
+	name = await self.class_.getAttribute('__name__')
+	selfToStr = f'{name}<'
+
+	for key, value in self.head.items():
+		if key == '__class__':
+			continue
+
+		if id(value) in _toPyString._stringSeen:
+			reprValue = '↑...'
+		else:
+			_toPyString._stringSeen.add(id(value))
+			reprValue = repr(value)
+
+		selfToStr = f'{selfToStr}{key}={reprValue}, '
+
+	if selfToStr[-2:] == ', ':
+		selfToStr = selfToStr[:-2]
+
+	return f'{selfToStr}>'
+
+
 @onSignal('actl.String:created')
 async def _onStringCreated(String):
 	@Object.addMethod(String)
 	async def object__String(self):
-		pyString = await self.toPyString()
+		pyString = await _toPyString(self)
 		return await String.call(pyString)
 
 

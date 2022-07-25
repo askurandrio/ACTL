@@ -43,3 +43,8 @@ async def _onAToPyCreated(AToPy):
 
 
 executeSyncCoroutine(triggerSignal('actl.String:created', String))
+
+
+@String.addMethod(String)
+async def sting__String(self):
+	return self

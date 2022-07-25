@@ -187,37 +187,6 @@ class AObject(ReprToStr):
 
 		return attribute
 
-	async def toPyString(self):
-		if not hasattr(AObject, '_stringSeen'):
-			AObject._stringSeen = set()
-
-			try:
-				return await self.toPyString()
-			finally:
-				del AObject._stringSeen
-
-		AObject._stringSeen.add(id(self))
-
-		name = await self.class_.getAttribute('__name__')
-		selfToStr = f'{name}<'
-
-		for key, value in self.head.items():
-			if key == '__class__':
-				continue
-
-			if id(value) in AObject._stringSeen:
-				reprValue = '↑...'
-			else:
-				AObject._stringSeen.add(id(value))
-				reprValue = repr(value)
-
-			selfToStr = f'{selfToStr}{key}={reprValue}, '
-
-		if selfToStr[-2:] == ', ':
-			selfToStr = selfToStr[:-2]
-
-		return f'{selfToStr}>'
-
 	def __eq__(self, other):
 		if not isinstance(other, AObject):
 			return False

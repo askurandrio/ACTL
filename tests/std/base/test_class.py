@@ -81,6 +81,7 @@ async def test_classWithInitMethod(execute):
 			)
 		},
 	)
+
 	assert str(await String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
 
 
