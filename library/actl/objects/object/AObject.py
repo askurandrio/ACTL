@@ -1,3 +1,7 @@
+import imp
+
+
+import os
 import traceback
 
 from actl.signals import onSignal
@@ -198,10 +202,14 @@ class AObject(ReprToStr):
 	def __str__(self):
 		try:
 			string = executeSyncCoroutine(AObject.String.call(self))
-			pyString = executeSyncCoroutine(string.toPyString())
+			toPyStringMethod = executeSyncCoroutine(string.getAttribute('toPyString'))
+			pyString = executeSyncCoroutine(toPyStringMethod.call())
 			return pyString
 		except Exception as ex:  # pylint: disable=broad-except
 			traceback.print_exc()
+
+			if 'RERAISE_STR_ERROR' in os.environ:
+				raise
 
 			try:
 				selfToStr = str(self.head)

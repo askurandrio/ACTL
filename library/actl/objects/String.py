@@ -4,11 +4,6 @@ from actl.signals import triggerSignal, onSignal
 from actl.utils import executeSyncCoroutine
 
 
-class _AString(AObjectClass):
-	async def toPyString(self):
-		return self._value
-
-
 class _AStringClass(AObjectClass):
 	def __str__(self):
 		return "class 'String'"
@@ -30,16 +25,24 @@ async def String__call(cls, value=''):
 		toStringMethod = await value.getAttribute(String)
 		return await toStringMethod.call()
 
-	self = _AString({'__class__': cls})
+	parentCall = await cls.super_(String, '__call__')
+	self = await parentCall.call()
 	self._value = str(value)
 	return self
+
+
+@String.addMethod('toPyString')
+async def string__toPyString(self):
+	return self._value
 
 
 @onSignal('actl.AToPy:created')
 async def _onAToPyCreated(AToPy):
 	@String.addMethod(AToPy)
 	async def string__AToPy(self):
-		return await self.toPyString()
+		toPyStringMethod = await self.getAttribute('toPyString')
+		pyString = await toPyStringMethod.call()
+		return pyString
 
 
 executeSyncCoroutine(triggerSignal('actl.String:created', String))

@@ -3,7 +3,7 @@ from actl.objects import NativeFunction, Number
 
 @NativeFunction
 async def getStringLength(aString):
-	pyString = await aString.toPyString()
+	pyString = str(aString)
 	pyStringLength = len(pyString)
 	return await Number.call(pyStringLength)
 
@@ -12,8 +12,8 @@ async def getStringLength(aString):
 async def makeString__split(String, Vector):
 	@NativeFunction
 	async def String__split(self, delimiter):
-		pyString = await self.toPyString()
-		pyDelimiter = await delimiter.toPyString()
+		pyString = str(self)
+		pyDelimiter = str(delimiter)
 
 		vector = await Vector.call()
 		vectorAppend = await vector.getAttribute('append')
