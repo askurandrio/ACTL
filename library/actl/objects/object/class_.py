@@ -127,3 +127,11 @@ class_.head['__getAttribute__'] = executeSyncCoroutine(
 	class__getAttribute.apply(class_)
 )
 class_.head['__call__'] = class__call
+
+
+@onSignal('actl.String:created')
+async def _onStringCreated(String):
+	@class_.addMethod(String)
+	async def class__String(self):
+		name = await self.getAttribute('__name__')
+		return await String.call(f"class '{name}'")

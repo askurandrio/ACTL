@@ -1,6 +1,7 @@
 from actl.objects.String import String
 from actl.objects.object import AObject
 from actl.utils import executeSyncCoroutine
+from actl.signals import triggerSignal
 
 
 class _MetaAToPy(type):
@@ -32,3 +33,6 @@ class AToPy(metaclass=_MetaAToPy):
 		toStringMethod = executeSyncCoroutine(self._value.getAttribute(String))
 		aString = executeSyncCoroutine(toStringMethod.call())
 		return type(self)(aString)
+
+
+executeSyncCoroutine(triggerSignal('actl.AToPy:created', AToPy))

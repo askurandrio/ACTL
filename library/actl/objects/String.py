@@ -1,6 +1,6 @@
 # pylint: disable=protected-access
 from actl.objects.object import Object, class_, AObject, AObjectClass
-from actl.signals import triggerSignal
+from actl.signals import triggerSignal, onSignal
 from actl.utils import executeSyncCoroutine
 
 
@@ -33,6 +33,13 @@ async def String__call(cls, value=''):
 	self = _AString({'__class__': cls})
 	self._value = str(value)
 	return self
+
+
+@onSignal('actl.AToPy:created')
+async def _onAToPyCreated(AToPy):
+	@String.addMethod(AToPy)
+	async def string__AToPy(self):
+		return await self.toPyString()
 
 
 executeSyncCoroutine(triggerSignal('actl.String:created', String))
