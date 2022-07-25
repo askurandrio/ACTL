@@ -1,11 +1,11 @@
 from actl.objects.String import String
-from actl.objects.object import Object
+from actl.objects.object import AObject
 from actl.utils import executeSyncCoroutine
 
 
 class _MetaAToPy(type):
 	def __call__(self, value):
-		if not isinstance(value, type(Object)):
+		if not isinstance(value, AObject):
 			return value
 
 		if executeSyncCoroutine(value.hasAttribute(AToPy)):

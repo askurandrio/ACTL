@@ -3,18 +3,16 @@ from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.object import makeClass
-from actl.objects.object import AAttributeNotFound
-from actl.objects.object import Object
-from actl.objects.object.utils import addMethod, addMethodToClass
+from actl.objects.object import class_, AAttributeNotFound, Object, AObject
+from actl.utils import executeSyncCoroutine
 
 
-PyToA = makeClass('PyToA')
+PyToA = executeSyncCoroutine(class_.call('PyToA'))
 
 
-@addMethodToClass(PyToA, '__call__')
+@PyToA.addMethodToClass('__call__')
 async def _PyToA__call(cls, value):
-	if isinstance(value, type(Object)):
+	if isinstance(value, AObject):
 		return value
 
 	if isinstance(value, bool):
@@ -29,7 +27,7 @@ async def _PyToA__call(cls, value):
 	return self
 
 
-@addMethodToClass(PyToA, 'exec')
+@PyToA.addMethodToClass('exec')
 async def _PyToA__exec(cls, code, resultName):
 	code = str(AToPy(code))
 	lc_scope = {}
@@ -38,7 +36,7 @@ async def _PyToA__exec(cls, code, resultName):
 	return await cls.call(result)
 
 
-@addMethod(PyToA, '__call__')
+@PyToA.addMethod('__call__')
 async def _PyToA__call(self, *args, **kwargs):
 	args = [AToPy(arg) for arg in args]
 	kwargs = {key: AToPy(value) for key, value in kwargs.items()}
@@ -46,7 +44,7 @@ async def _PyToA__call(self, *args, **kwargs):
 	return await PyToA.call(res)
 
 
-@addMethod(PyToA, '__getAttribute__')
+@PyToA.addMethod('__getAttribute__')
 async def _PyToA__getAttribute(self, key):
 	superGetAttribute = await self.super_(PyToA, '__getAttribute__')
 
@@ -66,22 +64,22 @@ async def _PyToA__getAttribute(self, key):
 	raise AAttributeNotFound(key)
 
 
-@addMethod(PyToA, '__setAttribute__')
+@PyToA.addMethod('__setAttribute__')
 async def _PyToA__setAttribute(self, key, value):
 	setattr(self._value, key, value)
 
 
-@addMethod(PyToA, AToPy)
+@PyToA.addMethod(AToPy)
 async def _PyToA__AToPY(self):
 	return self._value
 
 
-@addMethod(PyToA, Bool)
+@PyToA.addMethod(Bool)
 async def _PyToA__Bool(self):
 	res = bool(self._value)
 	return Bool.True_ if res else Bool.False_
 
 
-@addMethod(PyToA, String)
+@PyToA.addMethod(String)
 async def _PyToA__String(self):
 	return await String.call(str(self._value))

@@ -8,11 +8,11 @@ from std.base.executor.utils import bindExecutor, CallFrame
 from actl.utils import executeSyncCoroutine
 
 
-Function = objects.makeClass('Function', (objects.Function,))
+Function = executeSyncCoroutine(objects.class_.call('Function', (objects.Function,)))
 _default = object()
 
 
-@objects.addMethod(Function, '__call__')
+@Function.addMethod('__call__')
 async def _Function__call(self, *args):
 	callScope = await self.getAttribute('scope')
 	signature = await self.getAttribute('signature')

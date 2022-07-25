@@ -228,7 +228,7 @@ class AObject(ReprToStr):
 
 	def __str__(self):
 		try:
-			string = executeSyncCoroutine(self.String.call(self))
+			string = executeSyncCoroutine(AObject.String.call(self))
 			pyString = executeSyncCoroutine(string.toPyString())
 			return pyString
 		except Exception as ex:  # pylint: disable=broad-except
@@ -242,14 +242,14 @@ class AObject(ReprToStr):
 			return f'Error during convert<{selfToStr}> to string: {type(ex)} "{ex}"'
 
 
+@onSignal('actl.NativeFunction:created')
+async def _onNativeFunctionCreated(NativeFunction):
+	AObject.Function = NativeFunction
+
+
 @onSignal('actl.Function:created')
 async def _onFunctionCreated(Function):
 	AObject.Function = Function
-
-
-@onSignal('actl.Object:created')
-async def _onObjectCreated(Object):
-	AObject.Object = Object
 
 
 @onSignal('actl.String:created')

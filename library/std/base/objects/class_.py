@@ -1,5 +1,4 @@
 from actl.objects import (
-	makeClass,
 	class_ as actlClass,
 	Function as actlFunction,
 	Signature,
@@ -15,7 +14,7 @@ from std.base.executor.utils import bindExecutor
 from std.base.objects.function import Function
 
 
-class_ = makeClass('class_', (actlClass,))
+class_ = executeSyncCoroutine(actlClass.call('class_', baseParent=actlClass))
 
 
 @asDecorator(
@@ -43,15 +42,15 @@ def _parseClass(parser, inp):
 
 	inpRule.pop(Token(':'))
 	body = CodeBlock(parser, inp).parse()
-	makeClassOpcode = CALL_FUNCTION_STATIC(
+	buildClassOpcode = CALL_FUNCTION_STATIC(
 		className, buildClass.call, staticArgs=(className, tuple(parents), body)
 	)
-	inp.insert(0, [makeClassOpcode])
+	inp.insert(0, [buildClassOpcode])
 
 
 @NativeFunction
 async def buildClass(name, parents, body):
-	cls = makeClass(name, parents)
+	cls = executeSyncCoroutine(actlClass.call(name, parents))
 	self_ = await cls.getAttribute('__self__')
 
 	executor = await bindExecutor()

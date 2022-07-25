@@ -1,11 +1,11 @@
 from actl import opcodes
-from actl.objects import While, Bool, If, AToPy, Object
+from actl.objects import While, Bool, If, AToPy, AObject
 
 from std.base.executor.frame import Frame
 from std.base.executor.Executor import Executor
 
 
-@Executor.addHandler(type(Object))
+@Executor.addHandler(AObject)
 async def _objectHandler(executor, opcode):
 	async def getHandler():
 		class_ = await opcode.getAttribute('__class__')

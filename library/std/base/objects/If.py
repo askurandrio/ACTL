@@ -6,27 +6,18 @@ from std.base.rules import CodeBlock
 from actl.utils import executeSyncCoroutine
 
 
-If = objects.makeClass('If', (objects.If,))
+If = executeSyncCoroutine(objects.class_.call('If', (objects.If,)))
 
 
 @asDecorator(lambda rule: executeSyncCoroutine(If.setAttribute('__syntaxRule__', rule)))
 @SyntaxRule.wrap(Value(If), Token(' '), useParser=True, manualApply=True)
 class IfSyntax:
 	_INLINE_IF_END = Or(
-		(
-			Token(' '),
-			Value(objects.elif_),
-		),
+		(Token(' '), Value(objects.elif_)),
 		(Value(objects.elif_),),
-		(
-			Token(' '),
-			Value(objects.else_),
-		),
+		(Token(' '), Value(objects.else_)),
 		(Value(objects.else_),),
-		(
-			Token(' '),
-			Token('\n'),
-		),
+		(Token(' '), Token('\n')),
 		(Token('\n'),),
 	)
 	_ELIF_OR_ELSE_OR_ENDLINE = Or(

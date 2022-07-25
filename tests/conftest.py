@@ -1,3 +1,4 @@
+from telnetlib import AO
 import traceback
 import signal
 import inspect
@@ -9,7 +10,7 @@ from itertools import zip_longest
 import pytest
 
 from actl.Buffer import Buffer
-from actl.objects import Object
+from actl.objects import AObject
 from actl.utils import executeSyncCoroutine
 from actl.opcodes import DynamicOpCode
 
@@ -43,7 +44,7 @@ def pytest_collection_modifyitems(session, config, items):
 
 
 def pytest_assertrepr_compare(op, left, right):
-	if isinstance(left, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)):
+	if isinstance(left, (Buffer, list, tuple, AObject, DynamicOpCode, dict)):
 		res = [''] + _getDiff(left, right, '')
 		return res
 	return None
@@ -54,9 +55,7 @@ _default = object()
 
 def _getDiff(leftObject, rightObject, indent):
 	left = _toTuple(leftObject)
-	if isinstance(
-		rightObject, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)
-	):
+	if isinstance(rightObject, (Buffer, list, tuple, AObject, DynamicOpCode, dict)):
 		right = _toTuple(rightObject)
 	else:
 		return [
@@ -79,7 +78,7 @@ def _getDiff(leftObject, rightObject, indent):
 		if second is _default:
 			return [*res, f'{indent}	second is empty, first is {first}']
 
-		if isinstance(first, (Buffer, list, tuple, type(Object), DynamicOpCode, dict)):
+		if isinstance(first, (Buffer, list, tuple, AObject, DynamicOpCode, dict)):
 			return [*res, *_getDiff(first, second, indent + '	')]
 
 		return [*res, f'{indent}	{repr(first)} != {repr(second)}']
@@ -111,7 +110,7 @@ def _toTuple__dict(arg):
 
 
 @_toTuple.register
-def _toTuple__Object(arg: type(Object)):
+def _toTuple__Object(arg: AObject):
 	return _toTuple(arg._head)
 
 

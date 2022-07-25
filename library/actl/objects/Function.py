@@ -1,14 +1,14 @@
-from actl.objects.object import makeClass, addMethod, NativeFunction
+from actl.objects.object import class_, NativeFunction
 from actl.objects.String import String
 from actl.utils import executeSyncCoroutine
 from actl.signals import triggerSignal
 
 
-Function = makeClass('Function')
-Signature = makeClass('Signature')
+Function = executeSyncCoroutine(class_.call('Function'))
+Signature = executeSyncCoroutine(class_.call('Signature'))
 
 
-@addMethod(Function, '__init__')
+@Function.addMethod('__init__')
 async def _Function_init(self, name, signature, body, scope):
 	await self.setAttribute('name', name)
 	await self.setAttribute('signature', signature)
@@ -18,7 +18,7 @@ async def _Function_init(self, name, signature, body, scope):
 	return self
 
 
-@addMethod(Function, 'apply')
+@Function.addMethod('apply')
 async def _Function_apply(self, *applyArgs):
 	@NativeFunction
 	async def appliedFunction(*args):
@@ -27,7 +27,7 @@ async def _Function_apply(self, *applyArgs):
 	return appliedFunction
 
 
-@addMethod(Function, String)
+@Function.addMethod(String)
 async def _Function__String(self):
 	name = await self.getAttribute('name')
 	signature = await self.getAttribute('signature')
@@ -37,7 +37,7 @@ async def _Function__String(self):
 	return await String.call(f'fun {name}({args}): {body}')
 
 
-@addMethod(Signature, '__init__')
+@Signature.addMethod('__init__')
 async def _Signature_init(self, args):
 	await self.setAttribute('args', args)
 

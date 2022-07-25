@@ -1,7 +1,8 @@
 from actl.objects.object.AObject import AObject
 from actl.objects.object._AppliedFunction import AppliedFunction
 from actl.objects.object.exceptions import AAttributeNotFound
-from actl.signals import onSignal
+from actl.signals import onSignal, triggerSignal
+from actl.utils import executeSyncCoroutine
 
 
 class NativeFunction(AObject):
@@ -54,6 +55,13 @@ class NativeFunction(AObject):
 			return False
 
 		return self._function == other._function
+
+	@classmethod
+	def isinstance_(cls, obj):
+		return isinstance(obj, cls)
+
+
+executeSyncCoroutine(triggerSignal('actl.NativeFunction:created', NativeFunction))
 
 
 @onSignal('actl.String:created')

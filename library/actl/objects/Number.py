@@ -2,13 +2,15 @@
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.object import makeClass, addMethod
+from actl.objects.object import class_
+
+from actl.utils import executeSyncCoroutine
 
 
-Number = makeClass('Number')
+Number = executeSyncCoroutine(class_.call('Number'))
 
 
-@addMethod(Number, '__init__')
+@Number.addMethod('__init__')
 async def _Number__init(self, value):
 	if isinstance(value, str):
 		if '.' in value:
@@ -18,14 +20,14 @@ async def _Number__init(self, value):
 	self._value = value
 
 
-@addMethod(Number, Bool)
+@Number.addMethod(Bool)
 async def _Number__Bool(self):
 	if self._value == 0:
 		return Bool.False_
 	return Bool.True_
 
 
-@addMethod(Number, String)
+@Number.addMethod(String)
 async def _Number__String(self):
 	class_ = await self.getAttribute('__class__')
 	className = await class_.getAttribute('__name__')
@@ -33,6 +35,6 @@ async def _Number__String(self):
 	return await String.call(toStr)
 
 
-@addMethod(Number, AToPy)
+@Number.addMethod(AToPy)
 async def _Number__AToPy(self):
 	return self._value

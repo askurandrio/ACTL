@@ -1,18 +1,14 @@
 from actl.objects.object.AObject import AObject
+from actl.objects.object.class_ import class_
 from actl.objects.object.exceptions import AAttributeNotFound
-from actl.objects.object.utils import (
-	addMethod,
-	addMethodToClass,
-	makeClass,
-)
 from actl.signals import triggerSignal
 from actl.utils import executeSyncCoroutine
 
 
-Object = makeClass('Object')
+Object = executeSyncCoroutine(class_.call('Object'))
 
 
-@addMethod(Object, '__getAttribute__')
+@Object.addMethod('__getAttribute__')
 async def object__getAttribute(self, key):
 	attribute, isSuccess = await self.lookupSpecialAttribute(key)
 	if isSuccess:
@@ -30,7 +26,7 @@ async def object__getAttribute(self, key):
 	raise AAttributeNotFound(key)
 
 
-@addMethod(Object, '__superGetAttribute__')
+@Object.addMethod('__superGetAttribute__')
 async def object__superGetAttribute(self, for_, key):
 	class_ = self.class_
 	parents = class_.parents
@@ -51,7 +47,7 @@ async def object__superGetAttribute(self, for_, key):
 	raise AAttributeNotFound(key)
 
 
-@addMethodToClass(Object, '__call__')
+@Object.addMethodToClass('__call__')
 async def Object__call(self, *args, **kwargs):
 	assert isinstance(self, AObject)
 	instance = AObject({'__class__': self})
@@ -62,12 +58,12 @@ async def Object__call(self, *args, **kwargs):
 	return instance
 
 
-@addMethod(Object, '__init__')
+@Object.addMethod('__init__')
 async def object__init(_):
 	return None
 
 
-@addMethod(Object, '__setAttribute__')
+@Object.addMethod('__setAttribute__')
 async def object__setAttribute(self, key, value):
 	self.head[key] = value
 

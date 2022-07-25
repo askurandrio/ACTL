@@ -6,7 +6,7 @@ from std.base.rules import CodeBlock
 from actl.utils import executeSyncCoroutine
 
 
-While = objects.makeClass('While', (objects.While,))
+While = executeSyncCoroutine(objects.class_.call('While', (objects.While,)))
 
 
 @asDecorator(

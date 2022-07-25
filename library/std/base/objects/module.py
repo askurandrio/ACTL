@@ -1,16 +1,17 @@
 import os
 
-from actl.objects import makeClass, AToPy, addMethod, AAttributeNotFound, Signature
+from actl.objects import class_, AToPy, AAttributeNotFound, Signature
 from actl.Buffer import Buffer
 from actl.opcodes.opcodes import RETURN
+from actl.utils import executeSyncCoroutine
 from std.base.objects.function import Function
 from std.base.executor import bindExecutor
 
 
-Module = makeClass('Module')
+Module = executeSyncCoroutine(class_.call('Module'))
 
 
-@addMethod(Module, '__init__')
+@Module.addMethod('__init__')
 async def _Module__init(self, path):
 	await self.setAttribute('__path__', path)
 	await self.setAttribute('__scope__', None)
@@ -24,7 +25,7 @@ async def _Module__init(self, path):
 		await executeModule.call()
 
 
-@addMethod(Module, '__getAttribute__')
+@Module.addMethod('__getAttribute__')
 async def _Module__getAttribute(self, key):
 	superGetAttribute = await self.super_(Module, '__getAttribute__')
 
@@ -60,7 +61,7 @@ async def _Module__getAttribute(self, key):
 	raise AAttributeNotFound(key)
 
 
-@addMethod(Module, '_executeModule')
+@Module.addMethod('_executeModule')
 async def _Module__executeModule(self):
 	path = await self.getAttribute('__path__')
 	project = await self.getAttribute('__project__')

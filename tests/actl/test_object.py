@@ -6,6 +6,7 @@ def test_ObjectAsPyStr():
 
 
 async def test_objectAsPyStr():
+	o = await Object.call()
 	assert str(await Object.call()) == "Object<>"
 
 

@@ -1,7 +1,7 @@
 from unittest.mock import ANY, Mock
 
 from actl import opcodes
-from actl.objects import Number, Signature, String, PyToA, makeClass
+from actl.objects import Number, Signature, String, PyToA, class_
 from std.base.objects import Function
 from std.base.objects.class_ import buildClass
 
@@ -30,7 +30,9 @@ async def test_simpleClassDeclare(execute):
 	]
 
 	cls = execute.executed.scope['C']
-	assert cls == makeClass('C', (), extraAttributes={'a': await Number.call(1)})
+	assert cls == await class_.call(
+		'C', (), extraAttributes={'a': await Number.call(1)}
+	)
 	assert str(cls) == "class 'C'"
 	assert str(await cls.call()) == 'C<>'
 
@@ -67,7 +69,7 @@ async def test_classWithInitMethod(execute):
 		opcodes.SET_VARIABLE('c', '_tmpVar2'),
 	]
 
-	assert execute.executed.scope['C'] == makeClass(
+	assert execute.executed.scope['C'] == await class_.call(
 		'C',
 		(),
 		self_={
@@ -274,10 +276,7 @@ async def test_classInherit(execute):
 		opcodes.CALL_FUNCTION('_tmpVar2', '_tmpVar1'),
 		opcodes.VARIABLE('_tmpVar2'),
 		opcodes.GET_ATTRIBUTE('_tmpVar1', 'inherit', 'inheritMerhod'),
-		opcodes.CALL_FUNCTION(
-			'_tmpVar2',
-			'_tmpVar1',
-		),
+		opcodes.CALL_FUNCTION('_tmpVar2', '_tmpVar1'),
 		opcodes.VARIABLE('_tmpVar2'),
 	]
 
