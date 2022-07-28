@@ -14,7 +14,7 @@ class NativeFunction(AObject):
 		async def _onFunctionCreated(Function):
 			self.head['__class__'] = Function
 
-		if self.class_ is None:
+		if self.head['__class__'] is None:
 
 			@onSignal('actl.Object:created')
 			async def _onObjectCreated(Object):
@@ -29,26 +29,26 @@ class NativeFunction(AObject):
 	async def apply(self, *args):
 		return type(self)(AppliedFunction(self._function, *args))
 
-	async def lookupSpecialAttribute(self, key):
-		if key == '__call__':
-			return self, True
+	async def _resolve__call__(self):
+		return self
 
-		if key == 'apply':
-			return NativeFunction(self.apply), True
+	async def _resolve_apply(self):
+		return NativeFunction(self.apply)
 
-		if key == 'name':
-			return await self.String.call(self._function.__name__), True
+	async def _resolve_name(self):
+		return await self.String.call(self._function.__name__)
 
-		if key == 'signature':
-			return self.emptySignature, True
+	async def _resolve_signature(self):
+		return self.emptySignature
 
-		if key in ('body', 'scope'):
-			return self.ANone, True
+	async def _resolve_body(self):
+		return self.ANone
 
-		if key == '__get__':
-			raise AAttributeNotFound('__get__')
+	async def _resolve_scope(self):
+		return self.ANone
 
-		return await super().lookupSpecialAttribute(key)
+	async def _resolve__get__(self):
+		raise AAttributeNotFound('__get__')
 
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):
@@ -57,7 +57,7 @@ class NativeFunction(AObject):
 		return self._function == other._function
 
 	@classmethod
-	def isinstance_(cls, obj):
+	async def isinstance_(cls, obj):
 		return isinstance(obj, cls)
 
 

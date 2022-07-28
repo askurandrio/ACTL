@@ -23,7 +23,7 @@ async def test_simpleImport(execute, _mockFile, _mockIsDir):
 	]
 
 	testModule = execute.executed.scope['testModule']
-	assert Module.isinstance_(testModule)
+	assert await Module.isinstance_(testModule)
 	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 
 
@@ -40,7 +40,7 @@ async def test_importPackageAndModule(execute, _mockFile, _mockIsDir):
 	]
 
 	testPackage = execute.executed.scope['testPackage']
-	assert Module.isinstance_(testPackage)
+	assert await Module.isinstance_(testPackage)
 	testModule = await testPackage.getAttribute('testModule')
 	assert str(await testModule.getAttribute('a')) == 'Number<1>'
 

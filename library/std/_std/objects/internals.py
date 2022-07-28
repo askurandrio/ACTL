@@ -5,4 +5,5 @@ from actl.objects import NativeFunction
 async def addMethod(cls, name, method):
 	name = str(name)
 
-	cls.self_[name] = method
+	self_ = await cls.getAttribute('__self__')
+	self_[name] = method

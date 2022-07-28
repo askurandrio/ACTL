@@ -62,27 +62,27 @@ async def class__call(
 
 @NativeFunction
 async def class__getAttribute(self, key):
-	attribute, isSuccess = await self.lookupSpecialAttribute(key)
+	attribute, isSuccess = await self.getAttribute.lookupSpecialAttribute(key)
 	if isSuccess:
 		return attribute
 
-	attribute, isSuccess = self.lookupAttributeInHead(key)
+	attribute, isSuccess = self.getAttribute.lookupAttributeInHead(key)
 	if isSuccess:
-		bindedAttribute = await self.bindAttribute(attribute)
+		bindedAttribute = await self.getAttribute.bind(attribute)
 		return bindedAttribute
 
-	attribute, isSuccess = self.lookupAttributeInClsSelf(key)
+	attribute, isSuccess = await self.getAttribute.lookupAttributeInClsSelf(key)
 	if isSuccess:
-		bindedAttribute = await self.bindAttribute(attribute)
+		bindedAttribute = await self.getAttribute.bind(attribute)
 		return bindedAttribute
 
-	for parent in self.parents:
+	for parent in await self.getAttribute('__parents__'):
 		if isinstance(parent, str):
 			assert False, parent
 
-		attribute, isSuccess = parent.lookupAttributeInHead(key)
+		attribute, isSuccess = parent.getAttribute.lookupAttributeInHead(key)
 		if isSuccess:
-			bindedAttribute = await self.bindAttribute(attribute)
+			bindedAttribute = await self.getAttribute.bind(attribute)
 			return bindedAttribute
 
 	raise AAttributeNotFound(key)
@@ -97,9 +97,9 @@ async def class__superGetAttribute(self, for_, key):
 		parents = parents[forIndex + 1 :]
 
 	for parent in parents:
-		attribute, isSucess = parent.lookupAttributeInHead(key)
+		attribute, isSucess = parent.getAttribute.lookupAttributeInHead(key)
 		if isSucess:
-			bindedAttribute = await self.bindAttribute(attribute)
+			bindedAttribute = await self.getAttribute.bind(attribute)
 			return bindedAttribute
 
 	raise AAttributeNotFound(key)

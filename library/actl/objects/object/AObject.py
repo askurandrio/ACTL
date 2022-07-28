@@ -1,3 +1,4 @@
+from calendar import c
 import imp
 
 
@@ -7,16 +8,6 @@ import traceback
 from actl.signals import onSignal
 from actl.utils import ReprToStr, executeSyncCoroutine
 from actl.objects.object.exceptions import AAttributeNotFound
-
-
-class _MethodGetterView:
-	def __init__(self, attributeName, pyAttributeName):
-		self._attributeName = attributeName
-		self._pyAttributeName = pyAttributeName
-
-	def __get__(self, obj, _):
-		pyMethod = getattr(obj, self._pyAttributeName)
-		return _MethodView(self._attributeName, pyMethod, obj)
 
 
 class _MethodView(ReprToStr):
@@ -38,68 +29,60 @@ class _MethodView(ReprToStr):
 		return f'{self._obj}.{self._attributeName}'
 
 
-class AObject(ReprToStr):
+class _GetAttributeView(ReprToStr):
 	_default = object()
-	call = _MethodGetterView('__call__', '_call')
 
-	def __init__(self, head):
-		self.head = head
+	def __init__(self, obj):
+		self._obj = obj
 
-	async def getAttribute(self, name):
-		attribute, isSuccess = await self.lookupSpecialAttribute(name)
-		if isSuccess:
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return False
+
+		return self._obj == other._obj
+
+	async def __call__(self, name):
+		attribute, found = await self.lookupSpecialAttribute(name)
+		if found:
 			return attribute
 
-		getAttribute = await self.getAttribute('__getAttribute__')
+		getAttribute = await self('__getAttribute__')
 
 		return await getAttribute.call(name)
 
-	async def _get_getAttribute(self):
-		getAttribute, isSuccess = self.lookupAttributeInHead('__getAttribute__')
-		if isSuccess:
-			return getAttribute, True
+	async def lookupSpecialAttribute(self, name):
+		if not isinstance(name, str):
+			return None, False
 
-		getAttribute, isSuccess = self.lookupAttributeInClsSelf('__getAttribute__')
-		if isSuccess:
-			bindedGetAttribute = await self.bindAttribute(getAttribute)
-			return bindedGetAttribute, True
+		if name.startswith('_'):
+			resolve_name = f'_resolve{name}'
+		else:
+			resolve_name = f'_resolve_{name}'
 
-		return None, False
-
-	async def get(self, instance):
-		get = await self.getAttribute('__get__')
-
-		return await get.call(instance)
-
-	async def _get_superGetAttribute(self):
-		superGetAttribute, isSuccess = self.lookupAttributeInHead(
-			'__superGetAttribute__'
-		)
-		if superGetAttribute:
-			return superGetAttribute, True
-
-		superGetAttribute, isSuccess = self.lookupAttributeInClsSelf(
-			'__superGetAttribute__'
-		)
-		if isSuccess:
-			bindedSuperGetAttribute = await self.bindAttribute(superGetAttribute)
-			return bindedSuperGetAttribute, True
+		resolve_method = getattr(self._obj, resolve_name, None)
+		if resolve_method is not None:
+			return await resolve_method(), True
 
 		return None, False
 
-	async def super_(self, for_, name):
-		superGetAttribute, isSuccess = await self.lookupSpecialAttribute(
-			'__superGetAttribute__'
-		)
-		AAttributeNotFound.check(isSuccess, key='__superGetAttribute__')
-		return await superGetAttribute.call(for_, name)
+	def lookupAttributeInHead(self, key):
+		attribute = self._obj.head.get(key, self._default)
 
-	def lookupAttributeInClsSelf(self, key):
-		class_ = self.class_
-		parents = class_.parents
+		if attribute is self._default:
+			return None, False
 
-		for cls in [class_, *parents]:
-			self_ = cls.self_
+		return attribute, True
+
+	async def lookupAttributeInClsSelf(self, key):
+		async def classes():
+			class_ = await self('__class__')
+			yield class_
+
+			for cls in await class_.getAttribute('__parents__'):
+				yield cls
+
+		async for cls in classes():
+			self_ = await cls.getAttribute('__self__')
 			try:
 				return self_[key], True
 			except KeyError:
@@ -107,13 +90,70 @@ class AObject(ReprToStr):
 
 		return None, False
 
-	def lookupAttributeInHead(self, key):
-		attribute = self.head.get(key, self._default)
+	async def bind(self, attribute):
+		if not isinstance(attribute, AObject):
+			return attribute
 
-		if attribute is self._default:
-			return None, False
+		if await self.Function.isinstance_(attribute):
+			applyFunc = await attribute.getAttribute('apply')
+			return await applyFunc.call(self._obj)
 
-		return attribute, True
+		if await attribute.hasAttribute('__get__'):
+			return await attribute.get(self._obj)
+
+		return attribute
+
+	def __str__(self):
+		return f'{self._obj}.getAttribute'
+
+
+class AObject(ReprToStr):
+	def __init__(self, head):
+		self.head = head
+
+	async def _resolve__getAttribute__(self):
+		getAttribute, isSuccess = self.getAttribute.lookupAttributeInHead(
+			'__getAttribute__'
+		)
+		if isSuccess:
+			return getAttribute
+
+		getAttribute, isSuccess = await self.getAttribute.lookupAttributeInClsSelf(
+			'__getAttribute__'
+		)
+		if isSuccess:
+			bindedGetAttribute = await self.getAttribute.bind(getAttribute)
+			return bindedGetAttribute
+
+		return None
+
+	async def get(self, instance):
+		get = await self.getAttribute('__get__')
+
+		return await get.call(instance)
+
+	async def _resolve__superGetAttribute__(self):
+		superGetAttribute, isSuccess = self.getAttribute.lookupAttributeInHead(
+			'__superGetAttribute__'
+		)
+		if superGetAttribute:
+			return superGetAttribute
+
+		superGetAttribute, isSuccess = await self.getAttribute.lookupAttributeInClsSelf(
+			'__superGetAttribute__'
+		)
+		if isSuccess:
+			bindedSuperGetAttribute = await self.getAttribute.bind(superGetAttribute)
+			return bindedSuperGetAttribute
+
+		return None
+
+	async def super_(self, for_, name):
+		superGetAttribute, isSuccess = await self.getAttribute.lookupSpecialAttribute(
+			'__superGetAttribute__'
+		)
+		AAttributeNotFound.check(isSuccess, key='__superGetAttribute__')
+		return await superGetAttribute.call(for_, name)
 
 	async def setAttribute(self, key, value):
 		setAttribute = await self.getAttribute('__setAttribute__')
@@ -127,69 +167,46 @@ class AObject(ReprToStr):
 		else:
 			return True
 
+	@property
+	def call(self):
+		return _MethodView('__call__', self._call, self)
+
+	@property
+	def getAttribute(self):
+		return _GetAttributeView(self)
+
 	async def _call(self, *args, **kwargs):
 		call = await self.getAttribute('__call__')
 
 		return await call.call(*args, **kwargs)
 
-	@property
-	def class_(self):
-		class_, isSucess = self.lookupAttributeInHead('__class__')
+	async def _resolve__class__(self):
+		class_, isSucess = self.getAttribute.lookupAttributeInHead('__class__')
 		AAttributeNotFound.check(isSucess, key='__class__')
 		return class_
 
-	@property
-	def self_(self):
-		self_, isSucess = self.lookupAttributeInHead('__self__')
+	async def _resolve__self__(self):
+		self_, isSucess = self.getAttribute.lookupAttributeInHead('__self__')
 		AAttributeNotFound.check(isSucess, key='__self__')
 		return self_
 
-	@property
-	def parents(self):
-		parents, isSucess = self.lookupAttributeInHead('__parents__')
+	async def _resolve__parents__(self):
+		parents, isSucess = self.getAttribute.lookupAttributeInHead('__parents__')
 		AAttributeNotFound.check(isSucess, key='__parents__')
 		return parents
 
-	async def lookupSpecialAttribute(self, key):
-		if key == '__class__':
-			return self.class_, True
+	async def isinstance_(self, instance):
+		class_ = await instance.getAttribute('__class__')
 
-		if key == '__self__':
-			return self.self_, True
-
-		if key == '__parents__':
-			return self.parents, True
-
-		if key == '__getAttribute__':
-			return await self._get_getAttribute()
-
-		if key == '__superGetAttribute__':
-			return await self._get_superGetAttribute()
-
-		return None, False
-
-	def isinstance_(self, instance):
-		if instance.class_ == self:
+		if class_ == self:
 			return True
 
-		for parent in instance.class_.parents:
+		parents = await class_.getAttribute('__parents__')
+		for parent in parents:
 			if parent == self:
 				return True
 
 		return False
-
-	async def bindAttribute(self, attribute):
-		if not isinstance(attribute, AObject):
-			return attribute
-
-		if self.Function.isinstance_(attribute):
-			applyFunc = await attribute.getAttribute('apply')
-			return await applyFunc.call(self)
-
-		if await attribute.hasAttribute('__get__'):
-			return await attribute.get(self)
-
-		return attribute
 
 	def __eq__(self, other):
 		if not isinstance(other, AObject):
@@ -221,12 +238,12 @@ class AObject(ReprToStr):
 
 @onSignal('actl.NativeFunction:created')
 async def _onNativeFunctionCreated(NativeFunction):
-	AObject.Function = NativeFunction
+	_GetAttributeView.Function = NativeFunction
 
 
 @onSignal('actl.Function:created')
 async def _onFunctionCreated(Function):
-	AObject.Function = Function
+	_GetAttributeView.Function = Function
 
 
 @onSignal('actl.String:created')

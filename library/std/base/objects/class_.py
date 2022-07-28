@@ -65,7 +65,7 @@ async def buildClass(name, parents, body):
 		if key in ['__class__', name]:
 			continue
 
-		if actlFunction.isinstance_(value):
+		if await actlFunction.isinstance_(value):
 			self_[key] = value
 			continue
 

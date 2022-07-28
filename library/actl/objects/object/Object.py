@@ -10,17 +10,17 @@ Object = executeSyncCoroutine(class_.call('Object'))
 
 @Object.addMethod('__getAttribute__')
 async def object__getAttribute(self, key):
-	attribute, isSuccess = await self.lookupSpecialAttribute(key)
+	attribute, isSuccess = await self.getAttribute.lookupSpecialAttribute(key)
 	if isSuccess:
 		return attribute
 
-	attribute, isSuccess = self.lookupAttributeInHead(key)
+	attribute, isSuccess = self.getAttribute.lookupAttributeInHead(key)
 	if isSuccess:
 		return attribute
 
-	attribute, isSuccess = self.lookupAttributeInClsSelf(key)
+	attribute, isSuccess = await self.getAttribute.lookupAttributeInClsSelf(key)
 	if isSuccess:
-		bindedAttribute = await self.bindAttribute(attribute)
+		bindedAttribute = await self.getAttribute.bind(attribute)
 		return bindedAttribute
 
 	raise AAttributeNotFound(key)
@@ -28,21 +28,21 @@ async def object__getAttribute(self, key):
 
 @Object.addMethod('__superGetAttribute__')
 async def object__superGetAttribute(self, for_, key):
-	class_ = self.class_
-	parents = class_.parents
+	class_ = await self.getAttribute('__class__')
+	parents = await class_.getAttribute('__parents__')
 
 	if for_ in parents:
 		forIndex = parents.index(for_)
 		parents = parents[forIndex + 1 :]
 
 	for parent in parents:
-		self_ = parent.self_
+		self_ = await parent.getAttribute('__self__')
 		try:
 			attribute = self_[key]
 		except KeyError:
 			pass
 		else:
-			return await self.bindAttribute(attribute)
+			return await self.getAttribute.bind(attribute)
 
 	raise AAttributeNotFound(key)
 
@@ -79,7 +79,8 @@ async def _toPyString(self):
 
 	_toPyString._stringSeen.add(id(self))
 
-	name = await self.class_.getAttribute('__name__')
+	class_ = await self.getAttribute('__class__')
+	name = await class_.getAttribute('__name__')
 	selfToStr = f'{name}<'
 
 	for key, value in self.head.items():

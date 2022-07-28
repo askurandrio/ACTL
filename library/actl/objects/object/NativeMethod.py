@@ -19,11 +19,8 @@ class NativeMethod(AObject):
 		self._rawMethod = rawMethod
 		self._get = get
 
-	async def lookupSpecialAttribute(self, key):
-		if key == '__get__':
-			return self, True
-
-		return await super().lookupSpecialAttribute(key)
+	async def _resolve__get__(self):
+		return self
 
 	async def get(self, instance):
 		return await self._get.call(instance)
