@@ -15,8 +15,6 @@ class _Run:
 		return self
 
 	def __call__(self, *args):
-		import sys
-
 		self.process = subprocess.Popen(
 			args=[self._actlBinary, *args],
 			stdin=subprocess.PIPE,
@@ -49,6 +47,8 @@ class _Run:
 		for line in self.reader():
 			if line.endswith('\n'):
 				return line
+		
+		raise RuntimeError('No line found')
 
 	def readTemplate(self, template):
 		for line in self.reader():

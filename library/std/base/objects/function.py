@@ -1,11 +1,9 @@
-from itertools import zip_longest
 from actl import objects, asDecorator
 from actl.utils import executeSyncCoroutine
 from actl.opcodes import VARIABLE, RETURN, CALL_FUNCTION_STATIC
 from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
 from std.base.rules import CodeBlock
 from std.base.executor.utils import bindExecutor, CallFrame
-from actl.utils import executeSyncCoroutine
 
 
 Function = executeSyncCoroutine(objects.class_.call('Function', (objects.Function,)))

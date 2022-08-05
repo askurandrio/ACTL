@@ -1,4 +1,3 @@
-from telnetlib import AO
 import traceback
 import signal
 import inspect

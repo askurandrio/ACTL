@@ -3,7 +3,6 @@ from actl.syntax import SyntaxRule, Value, Token, Parsed
 from actl.syntax.BufferRule import BufferRule
 from actl.utils import asDecorator, executeSyncCoroutine
 from std.base.rules import CodeBlock
-from actl.utils import executeSyncCoroutine
 
 
 While = executeSyncCoroutine(objects.class_.call('While', (objects.While,)))

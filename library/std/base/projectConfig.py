@@ -11,7 +11,6 @@ from actl import (
 	Lazy,
 	executeSyncCoroutine,
 )
-from actl.Buffer import Buffer
 import std
 from std.base.executor import bindExecutor
 

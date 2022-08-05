@@ -3,7 +3,7 @@ from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.object import class_, AAttributeNotFound, Object, AObject
+from actl.objects.object import class_, AAttributeNotFound, AObject
 from actl.utils import executeSyncCoroutine
 
 

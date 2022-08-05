@@ -6,8 +6,8 @@ def test_ObjectAsPyStr():
 
 
 async def test_objectAsPyStr():
-	o = await Object.call()
-	assert str(await Object.call()) == "Object<>"
+	obj = await Object.call()
+	assert str(obj) == "Object<>"
 
 
 async def test_recursiveObjectAsStr():
