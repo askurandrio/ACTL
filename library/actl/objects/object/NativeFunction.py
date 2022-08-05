@@ -47,7 +47,8 @@ class NativeFunction(AObject):
 	async def _resolve_scope(self):
 		return self.ANone
 
-	async def _resolve__get__(self):
+	@staticmethod
+	async def _resolve__get__():
 		raise AAttributeNotFound('__get__')
 
 	def __eq__(self, other):

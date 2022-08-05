@@ -206,7 +206,7 @@ class _FileContentMock:
 		mocker.patch('actl.project.open', self._mock)
 
 	@contextmanager
-	def _mock(self, fileName):
+	def _mock(self, fileName, **_):
 		content = self._result[fileName]
 		assert content is not None
 		self._result[fileName] = None

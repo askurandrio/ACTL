@@ -23,7 +23,7 @@ async def _objectHandler(executor, opcode):
 
 @Executor.addHandler(opcodes.VARIABLE)
 async def _VARIABLE__handler(executor, opcode):
-	executor.scope[opcode.name]
+	executor.scope[opcode.name]  # pylint: disable=pointless-statement
 
 
 @Executor.addHandler(opcodes.SET_VARIABLE)

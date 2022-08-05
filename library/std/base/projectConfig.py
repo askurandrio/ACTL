@@ -48,9 +48,9 @@ def _loadFromScope():
 	return loader
 
 
-def getInitialScope(project):
+def getInitialScope(project):  # pylint: disable=unused-argument
 	scope = {}
-	lt = lambda first, second: first < second
+	lt = lambda first, second: first < second  # pylint: disable=unused-variable
 	loader = _loadFromScope()
 
 	for varName, pyName in (
@@ -124,10 +124,10 @@ def getLibraryDirectory(project):
 def _cacheInSelf(method):
 	async def wrapper(self, *args):
 		key = (method, args)
-		if key in self._cache:
-			return self._cache[key]
+		if key in self.cache:
+			return self.cache[key]
 
-		self._cache[key] = await method(self, *args)
+		self.cache[key] = await method(self, *args)
 		return await wrapper(self, *args)
 
 	return wrapper
@@ -136,7 +136,7 @@ def _cacheInSelf(method):
 class Importer:
 	def __init__(self, currentProject):
 		self._currentProject = currentProject
-		self._cache = {}
+		self.cache = {}
 
 	@_cacheInSelf
 	async def importByName(self, name):
@@ -145,7 +145,7 @@ class Importer:
 			mainPackageName = names.pop(0)
 			mainPackage = await self.importByName(mainPackageName)
 			package = mainPackage
-			for name in names:
+			for name in names:  # pylint: disable=redefined-argument-from-local
 				package = await package.getAttribute(name)
 
 			return await self.importByName(name)

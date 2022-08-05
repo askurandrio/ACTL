@@ -79,7 +79,7 @@ async def _Module__executeModule(self):
 
 	@Buffer.wrap
 	def yieldParsedInput():
-		yield from parsedInput
+		yield from parsedInput  # pylint: disable=not-an-iterable
 		yield RETURN('__scope__')
 
 	name = f'{self}__executeModuleCode'
@@ -93,7 +93,7 @@ async def _Module__executeModule(self):
 
 @Buffer.wrap
 def _open(fileName):
-	with open(fileName) as file:
+	with open(fileName, encoding='utf-8') as file:
 		for line in file:
 			for char in line:
 				yield char

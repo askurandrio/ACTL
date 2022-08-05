@@ -3,7 +3,6 @@ from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, Parsed, Or, BufferRule
 from actl.utils import asDecorator, executeSyncCoroutine
 from std.base.rules import CodeBlock
-from actl.utils import executeSyncCoroutine
 
 
 If = executeSyncCoroutine(objects.class_.call('If', (objects.If,)))

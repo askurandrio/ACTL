@@ -31,7 +31,7 @@ async def _PyToA__call(cls, value):
 async def _PyToA__exec(cls, code, resultName):
 	code = str(AToPy(code))
 	lc_scope = {}
-	exec(code, None, lc_scope)  # pylint: disable=exec-used
+	exec(code, None, lc_scope)
 	result = lc_scope[str(resultName)]
 	return await cls.call(result)
 

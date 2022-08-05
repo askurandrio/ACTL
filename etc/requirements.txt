@@ -7,10 +7,8 @@ pytest-xdist==2.5.0
 pytest-cov==3.0.0
 pytest-xdist==2.5.0
 pylint==2.13.7
-pylint-ignore==2021.1024
 coverage-badge==1.1.0
 pytest-mock==3.7.0
 snakeviz==2.1.1
-pylint-ignore==2021.1024
 coverage-badge==1.1.0
 asyncstdlib==3.10.4

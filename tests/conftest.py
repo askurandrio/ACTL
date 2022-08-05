@@ -18,13 +18,15 @@ from actl.opcodes import DynamicOpCode
 def debugStuck():
 	def debug(_, frame):
 		print(traceback.format_stack(frame))
-		breakpoint()
+		breakpoint()  # pylint: disable=forgotten-debug-statement
 
 	signal.signal(signal.SIGALRM, debug)
 	signal.alarm(20)
 
 
-def pytest_collection_modifyitems(session, config, items):
+def pytest_collection_modifyitems(
+	session, config, items
+):  # pylint: disable=unused-argument
 	def getKey(item):
 		filePath, _, _1 = item.location
 		filePath = filePath.replace('.py', '')
@@ -42,7 +44,7 @@ def pytest_collection_modifyitems(session, config, items):
 	items.sort(key=getKey)
 
 
-def pytest_assertrepr_compare(op, left, right):
+def pytest_assertrepr_compare(op, left, right):  # pylint: disable=unused-argument
 	if isinstance(left, (Buffer, list, tuple, AObject, DynamicOpCode, dict)):
 		res = [''] + _getDiff(left, right, '')
 		return res
@@ -110,7 +112,7 @@ def _toTuple__dict(arg):
 
 @_toTuple.register
 def _toTuple__Object(arg: AObject):
-	return _toTuple(arg._head)
+	return _toTuple(arg.head)
 
 
 @_toTuple.register
@@ -128,7 +130,7 @@ def pytest_pyfunc_call(pyfuncitem):
 
 
 @pytest.hookimpl(hookwrapper=True)
-def pytest_fixture_setup(fixturedef, request):
+def pytest_fixture_setup(fixturedef, request):  # pylint: disable=unused-argument
 	if inspect.iscoroutinefunction(fixturedef.func):
 		fixturedef.func = _wrapAsyncFunction(fixturedef.func)
 

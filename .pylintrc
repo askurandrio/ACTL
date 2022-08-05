@@ -7,7 +7,19 @@
 		bad-mcs-method-argument,
 		fixme,
 		no-member,
-		too-many-arguments
+		too-many-arguments,
+		duplicate-code,
+		cyclic-import,
+		not-callable,
+		attribute-defined-outside-init,
+		consider-using-f-string,
+		super-init-not-called,
+		arguments-renamed,
+		arguments-differ,
+		invalid-overridden-method,
+		import-outside-toplevel,
+		global-statement,
+		exec-used
 [FORMAT]
 	indent-string='	'
 [MASTER]

@@ -15,7 +15,7 @@ class _Run:
 		return self
 
 	def __call__(self, *args):
-		self.process = subprocess.Popen(
+		self.process = subprocess.Popen(  # pylint: disable=consider-using-with
 			args=[self._actlBinary, *args],
 			stdin=subprocess.PIPE,
 			stdout=subprocess.PIPE,
@@ -47,7 +47,7 @@ class _Run:
 		for line in self.reader():
 			if line.endswith('\n'):
 				return line
-		
+
 		raise RuntimeError('No line found')
 
 	def readTemplate(self, template):

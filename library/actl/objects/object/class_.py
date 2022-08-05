@@ -1,4 +1,3 @@
-from re import A
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeMethod import NativeFunction
 from actl.objects.object.exceptions import AAttributeNotFound

@@ -29,8 +29,8 @@ async def _Number__Bool(self):
 
 @Number.addMethod(String)
 async def _Number__String(self):
-	class_ = await self.getAttribute('__class__')
-	className = await class_.getAttribute('__name__')
+	cls = await self.getAttribute('__class__')
+	className = await cls.getAttribute('__name__')
 	toStr = f'{className}<{self._value}>'
 	return await String.call(toStr)
 

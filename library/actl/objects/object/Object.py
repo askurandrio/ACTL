@@ -28,8 +28,8 @@ async def object__getAttribute(self, key):
 
 @Object.addMethod('__superGetAttribute__')
 async def object__superGetAttribute(self, for_, key):
-	class_ = await self.getAttribute('__class__')
-	parents = await class_.getAttribute('__parents__')
+	cls = await self.getAttribute('__class__')
+	parents = await cls.getAttribute('__parents__')
 
 	if for_ in parents:
 		forIndex = parents.index(for_)
@@ -69,6 +69,8 @@ async def object__setAttribute(self, key, value):
 
 
 async def _toPyString(self):
+	# pylint: disable=protected-access
+
 	if not hasattr(_toPyString, '_stringSeen'):
 		_toPyString._stringSeen = set()
 
@@ -79,8 +81,8 @@ async def _toPyString(self):
 
 	_toPyString._stringSeen.add(id(self))
 
-	class_ = await self.getAttribute('__class__')
-	name = await class_.getAttribute('__name__')
+	cls = await self.getAttribute('__class__')
+	name = await cls.getAttribute('__name__')
 	selfToStr = f'{name}<'
 
 	for key, value in self.head.items():

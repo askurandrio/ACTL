@@ -1,9 +1,10 @@
-from std.base import Executor
-from std.base.projectConfig import getInitialScope as getInitialBaseScope
-from std.base.objects.importDefinition import import_, copyAlllIntoScope
 from actl.Scope import ScopeChild
 from actl import opcodes, executeSyncCoroutine
 from actl.objects import NativeFunction, PyToA
+
+from std.base import Executor
+from std.base.projectConfig import getInitialScope as getInitialBaseScope
+from std.base.objects.importDefinition import import_, copyAlllIntoScope
 from std.base.objects import If
 
 

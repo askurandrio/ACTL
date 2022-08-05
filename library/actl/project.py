@@ -89,7 +89,7 @@ class Project:
 			fileName = fileName + '.yaml'
 			return cls.loadProject(fileName)
 
-		with open(projectF) as file:
+		with open(projectF, encoding='utf-8') as file:
 			source = yaml.load(file, Loader=yaml.SafeLoader)
 			source = [*source, {'setKey': {'key': 'projectF', 'value': projectF}}]
 
