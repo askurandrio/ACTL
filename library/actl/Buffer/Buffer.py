@@ -37,7 +37,7 @@ class Buffer:
 			self._load(loadIndex)
 		self._buff[index:index] = list(items)
 
-	def append(self, *items):  # pylint: disable=no-self-use
+	def append(self, *items):
 		self += items
 
 	def startsWith(self, tmpl):

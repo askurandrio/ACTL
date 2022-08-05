@@ -19,7 +19,7 @@ def test_Vector__append(execute):
 	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
 	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
 
-	execute('v = Vector()\n' 'v.append(1)')
+	execute('v = Vector()\nv.append(1)')
 
 	assert str(execute.executed.scope['v']) == 'Vector<_head=[1]>'
 

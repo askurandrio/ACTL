@@ -3,7 +3,6 @@
 		missing-docstring,
 		too-few-public-methods,
 		invalid-name,
-		bad-continuation,
 		bad-mcs-method-argument,
 		fixme,
 		no-member,

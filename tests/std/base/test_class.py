@@ -10,7 +10,7 @@ ORDER_KEY = 9
 
 
 async def test_simpleClassDeclare(execute):
-	execute('class C:\n' '	a = 1')
+	execute('class C:\n	a = 1')
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
@@ -38,7 +38,7 @@ async def test_simpleClassDeclare(execute):
 
 
 async def test_classWithInitMethod(execute):
-	execute('class C:\n' '	fun __init__(self, a):\n' '		self.a = a\n' 'c = C(1)')
+	execute('class C:\n	fun __init__(self, a):\n		self.a = a\nc = C(1)')
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
@@ -227,7 +227,7 @@ async def test_classInherit(execute):
 	mock = Mock()
 	execute.scope['mock'] = await PyToA.call(mock)
 
-	execute('class Base:\n' '	fun baseMethod(self):\n' '		mock(1)\n')
+	execute('class Base:\n	fun baseMethod(self):\n		mock(1)\n')
 
 	assert execute.executed
 	execute.flush()

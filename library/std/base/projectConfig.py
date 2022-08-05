@@ -49,8 +49,10 @@ def _loadFromScope():
 
 
 def getInitialScope(project):  # pylint: disable=unused-argument
+	def lt(first, second):  # pylint: disable=unused-variable
+		return first < second
+
 	scope = {}
-	lt = lambda first, second: first < second  # pylint: disable=unused-variable
 	loader = _loadFromScope()
 
 	for varName, pyName in (

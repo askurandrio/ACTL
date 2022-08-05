@@ -103,7 +103,7 @@ async def test_declareFunctionWithArg(execute):
 
 
 async def test_functionWithReturn(execute):
-	execute('fun f():\n' '	return 1\n' 'f()')
+	execute('fun f():\n	return 1\nf()')
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
@@ -129,6 +129,6 @@ async def test_functionWithReturn(execute):
 
 
 async def test_returnFromWhile(execute):
-	execute('fun f():\n' '	while True:\n' '		return 1\n' 'f()')
+	execute('fun f():\n	while True:\n		return 1\nf()')
 
 	assert execute.executed.scope['_tmpVar1'] == await Number.call('1')

@@ -21,7 +21,7 @@ async def test_String__length(execute):
 	execute.executeInInitialScope('from std._std.objects.string.string import String')
 	execute.executeInInitialScope('import std._std.objects.string.string__length')
 
-	execute('s = String()\n' 'r = s.length')
+	execute('s = String()\nr = s.length')
 
 	assert execute.executed.scope['r'] == await execute.executed.scope['Number'].call(0)
 
@@ -30,7 +30,7 @@ async def test_String_lengthFromSyntaxInit(execute):
 	execute.executeInInitialScope('from std._std.objects.string.string import String')
 	execute.executeInInitialScope('import std._std.objects.string.string__length')
 
-	execute('s = ""\n' 'r = s.length')
+	execute('s = ""\nr = s.length')
 
 	assert execute.executed.scope['r'] == await execute.executed.scope['Number'].call(0)
 
