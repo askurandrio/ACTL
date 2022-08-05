@@ -23,12 +23,6 @@
 
 -  py-externalKey:
     from: std.base.projectConfig
-    import: getInput
-    name: input
-
-
--  py-externalKey:
-    from: std.base.projectConfig
     import: getParseInput
     name: parseInput
 
@@ -43,12 +37,6 @@
     from: std.base.projectConfig
     import: getBuildScope
     name: buildScope
-
-
--  py-externalKey:
-    from: std.base.projectConfig
-    import: getBuildParser
-    name: buildParser
 
 
 -  py-externalKey:

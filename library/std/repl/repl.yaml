@@ -17,3 +17,9 @@
     from: std.repl.projectConfig
     import: getBuild
     name: build
+
+
+-  py-externalKey:
+    from: std.repl.projectConfig
+    import: getBuildCode
+    name: buildCode

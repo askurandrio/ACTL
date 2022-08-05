@@ -2,6 +2,9 @@ from std.base import Executor
 from std.base.projectConfig import getInitialScope as getInitialBaseScope
 from std.base.objects.importDefinition import import_, copyAlllIntoScope
 from actl.Scope import ScopeChild
+from actl import opcodes, executeSyncCoroutine
+from actl.objects import NativeFunction, PyToA
+from std.base.objects import If
 
 
 def getInitialScope(project):
@@ -24,3 +27,35 @@ def getInitialScope(project):
 	ScopeChild.allowOverride = False
 
 	return initialScope
+
+
+def getBuildCode(project):
+	yield opcodes.CALL_FUNCTION_STATIC(
+		'module', 'Module', staticArgs=[project['mainF']]
+	)
+	ifOpcode = executeSyncCoroutine(
+		If.call(
+			[
+				[
+					opcodes.CALL_FUNCTION_STATIC(
+						'hasMain',
+						_hasAttribute.call,
+						kwargs={'obj': 'module'},
+						staticKwargs={'attribute': 'main'},
+					),
+					opcodes.VARIABLE('hasMain'),
+				],
+				[
+					opcodes.GET_ATTRIBUTE('main', 'module', 'main'),
+					opcodes.CALL_FUNCTION_STATIC('_', 'main'),
+				],
+			]
+		)
+	)
+	yield ifOpcode
+
+
+@NativeFunction
+async def _hasAttribute(obj, attribute):
+	hasAttribute = await obj.hasAttribute(attribute)
+	return await PyToA.call(hasAttribute)

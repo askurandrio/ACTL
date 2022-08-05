@@ -85,16 +85,6 @@ def getInitialScope(project):
 	return Scope(scope)
 
 
-def getInput(project):
-	@Buffer.wrap
-	def make():
-		for line in open(project['mainF']):
-			for char in line:
-				yield char
-
-	return make()
-
-
 def getParseInput(project):
 	def parseInput(scope, input_):
 		return Parser(scope, project['rules'], input_)
@@ -106,10 +96,6 @@ def getBuildScope(project):
 	return project['initialScope'].child()
 
 
-def getBuildParser(project):
-	return project['parseInput'](project['buildScope'], project['input'])
-
-
 def getBuildExecutor(project):
 	return std.base.Executor(project['buildScope'])
 
@@ -117,7 +103,11 @@ def getBuildExecutor(project):
 def getBuild(project):
 	def build():
 		executor = project['buildExecutor']
-		code = project['buildParser']
+		code = project['buildCode']
+
+		# if 'SHOW_CODE_BEFORE_EXECUTION' in os.environ:
+		# 	code = Buffer(code).watch(print)
+
 		executor.execute(code)
 
 	return build

@@ -5,3 +5,9 @@
     from: std.std.projectConfig
     import: getInitialScope
     name: initialScope
+
+
+-  py-externalKey:
+    from: std.std.projectConfig
+    import: getBuildCode
+    name: buildCode

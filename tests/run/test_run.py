@@ -46,13 +46,13 @@ def test_setExtraSource(run):
 
 
 def test_explicitProjectFAndMainF(run):
-	run('--projectF', 'std/base', '--mainF', 'tests/actl/example.a')
+	run('--projectF', 'std', '--mainF', 'tests/actl/example.a')
 
 	assert run.readLine() == '1\n'
 
 
 def test_projectFAndMainF(run):
-	run('std/base', 'tests/actl/example.a')
+	run('std', 'tests/actl/example.a')
 
 	assert run.readLine() == '1\n'
 
@@ -67,7 +67,7 @@ def test_projectFAndMainFAndSource(run):
 			}
 		}
 	]
-	run('std/base', 'tests/actl/example.a', json.dumps(extraSource))
+	run('std', 'tests/actl/example.a', json.dumps(extraSource))
 
 	assert run.readLine() == 'mocked: 1\n'
 
@@ -90,3 +90,9 @@ def getInitialScope(project):
 		PyToA.call(lambda inp: print(f'mocked: {inp}'))
 	)
 	return scope
+
+
+def test_main(run):
+	run('tests/run/test_main.a')
+
+	assert run.readLine() == '1\n'

@@ -40,14 +40,14 @@ class AbstractExecute:
 
 	@property
 	def code(self):
-		return self.project['buildParser']
+		return self.project['buildCode']
 
 	@property
 	def parsed(self):
 		if self.isParsed:
 			return self
 
-		self.project['buildParser'] = Buffer(self.project['buildParser'])
+		self.project['buildCode'] = Buffer(self.project['buildCode'])
 		self.isParsed = True
 		return self.parsed
 
@@ -56,9 +56,10 @@ class AbstractExecute:
 		if self.parsed.isExecuted:
 			return self
 
-		self.project['buildExecutor'].execute(self.project['buildParser'])
+		self.project['buildExecutor'].execute(self.project['buildCode'])
 		self.isExecuted = True
 		return self.executed
 
 	def __call__(self, code):
-		self.project['input'] = Buffer(code)
+		buildCode = self.project['parseInput'](self.scope, Buffer(code))
+		self.project['buildCode'] = buildCode

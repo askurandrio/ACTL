@@ -50,3 +50,10 @@ def getBuild(project):
 					raise
 
 	return build
+
+
+def getBuildCode(project):
+	project['buildParser'] = project['parseInput'](
+		project['buildScope'], project['input']
+	)
+	return project['buildParser']
