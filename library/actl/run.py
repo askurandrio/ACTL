@@ -9,8 +9,8 @@ def main(projectF=None, mainF=None, source=None):
 	if recursionLimit is not None:
 		sys.setrecursionlimit(int(recursionLimit))
 
-	# if 'ENABLE_TRACEMALLOC' in os.environ:
-	# 	tracemalloc.enable()
+	if 'ENABLE_TRACEMALLOC' in os.environ:
+		tracemalloc.enable()
 
 	if projectF is None:
 		if mainF is None:
