@@ -18,7 +18,9 @@
 		invalid-overridden-method,
 		import-outside-toplevel,
 		global-statement,
-		exec-used
+		exec-used,
+		wildcard-import,
+		unused-wildcard-import
 [FORMAT]
 	indent-string='	'
 [MASTER]
