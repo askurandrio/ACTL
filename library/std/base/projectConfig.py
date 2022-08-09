@@ -106,9 +106,6 @@ def getBuild(project):
 		executor = project['buildExecutor']
 		code = project['buildCode']
 
-		# if 'SHOW_CODE_BEFORE_EXECUTION' in os.environ:
-		# 	code = Buffer(code).watch(print)
-
 		executor.execute(code)
 
 	return build

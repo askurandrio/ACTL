@@ -1,3 +1,6 @@
+import os
+
+
 class Executor:
 	_HANDLERS = {}
 
@@ -45,6 +48,9 @@ class Executor:
 		)
 
 	def _executeOpcode(self, opcode):
+		if 'SHOW_CODE_BEFORE_EXECUTION' in os.environ:
+			print(opcode)
+
 		try:
 			handler = self.getHandlerFor(type(opcode))
 		except KeyError as ex:
