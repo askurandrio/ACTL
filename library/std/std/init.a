@@ -1,2 +1,5 @@
 from std._std.objects.vector.vector import Vector
+import std._std.objects.vector.vector__init
+import std._std.objects.vector.vector__append
 from std._std.objects.string.string import String
+from std._std.objects._internals import Iter

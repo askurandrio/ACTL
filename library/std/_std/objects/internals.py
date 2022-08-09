@@ -15,8 +15,11 @@ Iter = executeSyncCoroutine(class_.call('Iter'))
 
 @Iter.addMethod('__init__')
 async def _Iter__init(self, collection):
-	head = await collection.getAttribute('_head')
-	self._head = iter(head._value)
+	if hasattr(collection, '_value'):
+		collection = collection._value
+	else:
+		collection = (await collection.getAttribute('_head'))._value
+	self._head = iter(collection)
 
 
 @Iter.addMethod('next')
