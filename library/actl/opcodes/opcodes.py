@@ -7,7 +7,7 @@ CALL_FUNCTION = DynamicOpCode.create(
 	'CALL_FUNCTION', 'dst', 'function', typeb='(', args=[], kwargs={}
 )
 CALL_FUNCTION_STATIC = DynamicOpCode.create(
-	'CALL_FUNCTION',
+	'CALL_FUNCTION_STATIC',
 	'dst',
 	'function',
 	typeb='(',
