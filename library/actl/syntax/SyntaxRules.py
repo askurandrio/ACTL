@@ -13,14 +13,29 @@ class SyntaxRules:
 		self._rules = rules
 
 	@contextmanager
-	def disable(self, rule):
-		index = self._rules.index(rule)
+	def disable(self, *rules):
+		def lookup(key):
+			if isinstance(key, SyntaxRule):
+				return key
 
-		del self._rules[index]
+			return next(
+				rule
+				for rule in self._rules
+				if isinstance(rule, SyntaxRule) and rule.func.__name__ == key
+			)
+
+		rules = [lookup(rule) for rule in rules]
+		indexes = []
+
+		for rule in rules:
+			index = self._rules.index(rule)
+			indexes.append(index)
+			del self._rules[index]
 
 		yield
 
-		self._rules.insert(index, rule)
+		for index, rule in reversed(tuple(zip(indexes, rules))):
+			self._rules.insert(index, rule)
 
 	def match(self, parser, buff):
 		for rule in self._rules:

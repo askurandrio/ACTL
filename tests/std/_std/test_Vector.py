@@ -1,3 +1,5 @@
+import pytest
+
 from actl import opcodes
 from actl.objects import Number
 
@@ -58,48 +60,63 @@ async def test_Vector_syntaxInitWithNumber(execute):
 	assert await vector.getAttribute('__class__') is execute.scope['Vector']
 
 
-async def test_Const_Vector_syntaxInit(execute):
+@pytest.mark.parametrize("length", list(range(2, 6)))
+async def test_ConstVector_syntaxInit(execute, length):
 	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
 	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
 	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
 
-	execute('1, 2, 3')
+	code = ', '.join(map(str, range(length)))
+	execute(code)
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, staticArgs=['1']),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['2']),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar3', Number.call, staticArgs=['3']),
+		*[
+			opcodes.CALL_FUNCTION_STATIC(
+				f'_tmpVar{index + 1}', Number.call, staticArgs=[str(index)]
+			)
+			for index in range(length)
+		],
 		opcodes.CALL_FUNCTION_STATIC(
-			'_tmpVar4', vector__of.call, args=['_tmpVar1', '_tmpVar2', '_tmpVar3']
+			f'_tmpVar{length + 1}',
+			vector__of.call,
+			args=[f'_tmpVar{index + 1}' for index in range(length)],
 		),
-		opcodes.VARIABLE('_tmpVar4'),
+		opcodes.VARIABLE(f'_tmpVar{length + 1}'),
 	]
 
-	assert str(execute.executed.scope['_tmpVar4']) == 'Vector<_head=[1, 2, 3]>'
+	assert (
+		str(execute.executed.scope[f'_tmpVar{length + 1}']) == f'Vector<_head=[{code}]>'
+	)
 
 
-async def test_ConstVector_packUnpack(execute):
+@pytest.mark.parametrize("length", list(range(2, 6)))
+async def test_ConstVector_packUnpack(execute, length):
 	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
 	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
 	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
 	execute.executeInInitialScope('from std._std.objects._internals import Iter')
 
-	execute('v = 1, 2, 3\na, b, c = v')
+	setCode = ', '.join(map(str, range(length)))
+	getCode = ', '.join(f'v{index}' for index in range(length))
+	execute(f'v = {setCode}\n{getCode} = v')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, staticArgs=['1']),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['2']),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar3', Number.call, staticArgs=['3']),
+		*[
+			opcodes.CALL_FUNCTION_STATIC(
+				f'_tmpVar{index + 1}', Number.call, staticArgs=[str(index)]
+			)
+			for index in range(length)
+		],
 		opcodes.CALL_FUNCTION_STATIC(
-			'_tmpVar4', vector__of.call, args=['_tmpVar1', '_tmpVar2', '_tmpVar3']
+			f'_tmpVar{length + 1}',
+			vector__of.call,
+			args=[f'_tmpVar{index + 1}' for index in range(length)],
 		),
-		opcodes.SET_VARIABLE('v', '_tmpVar4'),
+		opcodes.SET_VARIABLE('v', f'_tmpVar{length + 1}'),
 		opcodes.CALL_FUNCTION('_tmpVar1_1', 'Iter', args=['v']),
 		opcodes.GET_ATTRIBUTE('_tmpVar1_2', '_tmpVar1_1', 'next'),
-		opcodes.CALL_FUNCTION('a', '_tmpVar1_2'),
-		opcodes.CALL_FUNCTION('b', '_tmpVar1_2'),
-		opcodes.CALL_FUNCTION('c', '_tmpVar1_2'),
+		*[opcodes.CALL_FUNCTION(f'v{index}', '_tmpVar1_2') for index in range(length)],
 	]
 
-	for var, value in [['a', 1], ['b', 2], ['c', 3]]:
-		assert str(execute.executed.scope[var]) == str(value)
+	for index in range(length):
+		assert execute.executed.scope[f'v{index}'] == index
