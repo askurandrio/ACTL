@@ -1,6 +1,8 @@
 from actl import opcodes
 from actl.objects import Number
 
+from std._std.rules import vector__of
+
 
 ORDER_KEY = 1
 
@@ -54,3 +56,23 @@ async def test_Vector_syntaxInitWithNumber(execute):
 	]
 	vector = execute.executed.scope['_tmpVar1']
 	assert await vector.getAttribute('__class__') is execute.scope['Vector']
+
+
+async def test_Const_Vector_syntaxInit(execute):
+	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
+	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
+	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
+
+	execute('1, 2, 3')
+
+	assert execute.parsed.code == [
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, staticArgs=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['2']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar3', Number.call, staticArgs=['3']),
+		opcodes.CALL_FUNCTION_STATIC(
+			'_tmpVar4', vector__of.call, args=['_tmpVar1', '_tmpVar2', '_tmpVar3']
+		),
+		opcodes.VARIABLE('_tmpVar4'),
+	]
+
+	assert str(execute.executed.scope['_tmpVar4']) == 'Vector<_head=[1, 2, 3]>'

@@ -1,5 +1,7 @@
-from actl.syntax import Token, Parsed, Or, BufferRule, SyntaxRules, IsInstance
-from actl.opcodes import CALL_FUNCTION_STATIC, GET_ATTRIBUTE, CALL_FUNCTION, VARIABLE
+from actl.syntax import *
+from actl.opcodes import *
+from actl.objects import NativeFunction
+from std.base.executor import bindExecutor
 from std.base.rules import RULES as stdRULES
 
 
@@ -67,3 +69,31 @@ def _parseVector(parser, inp):
 
 	inpRule.pop(Token(']'))
 	inp.insert(0, [dst])
+
+
+@NativeFunction
+async def vector__of(*args):
+	executor = await bindExecutor()
+	Vector = executor.scope['Vector']
+	vector = await Vector.call()
+	append = await vector.getAttribute('append')
+	for element in args:
+		await append.call(element)
+
+	return vector
+
+
+@RULES.add(
+	IsInstance(VARIABLE),
+	Token(', '),
+	IsInstance(VARIABLE),
+	Many(Token(','), Maybe(Token(' ')), Parsed(), IsInstance(VARIABLE), minMatches=0),
+	useParser=True,
+)
+def _parseConstVector(*inp, parser):
+	args = [arg.name for arg in inp if VARIABLE == arg]
+	dst = parser.makeTmpVar()
+
+	parser.define(CALL_FUNCTION_STATIC(dst.name, vector__of.call, args=args))
+
+	return [dst]
