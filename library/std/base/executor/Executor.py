@@ -67,7 +67,7 @@ class Executor:
 				continue
 
 			try:
-				return parent._HANDLERS[opcodeType]  # pylint: disable=protected-access
+				return parent._HANDLERS[opcodeType]
 			except KeyError:
 				pass
 

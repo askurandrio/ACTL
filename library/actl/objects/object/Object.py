@@ -69,8 +69,6 @@ async def object__setAttribute(self, key, value):
 
 
 async def _toPyString(self):
-	# pylint: disable=protected-access
-
 	if not hasattr(_toPyString, '_stringSeen'):
 		_toPyString._stringSeen = set()
 

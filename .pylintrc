@@ -20,7 +20,8 @@
 		global-statement,
 		exec-used,
 		wildcard-import,
-		unused-wildcard-import
+		unused-wildcard-import,
+		protected-access
 [FORMAT]
 	indent-string='	'
 [MASTER]

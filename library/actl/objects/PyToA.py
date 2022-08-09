@@ -1,4 +1,3 @@
-# pylint: disable=protected-access
 from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String

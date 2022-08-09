@@ -1,4 +1,3 @@
-# pylint: disable=protected-access
 from actl.objects.AToPy import AToPy
 from actl.objects.object import class_
 from actl.utils import executeSyncCoroutine
