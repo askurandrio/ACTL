@@ -75,6 +75,9 @@ class Buffer:
 				break
 
 	def __eq__(self, other):
+		if not hasattr(other, '__iter__'):
+			return False
+
 		return list(self) == list(other)
 
 	def __getitem__(self, index):
