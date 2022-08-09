@@ -76,3 +76,30 @@ async def test_Const_Vector_syntaxInit(execute):
 	]
 
 	assert str(execute.executed.scope['_tmpVar4']) == 'Vector<_head=[1, 2, 3]>'
+
+
+async def test_ConstVector_packUnpack(execute):
+	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
+	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
+	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
+	execute.executeInInitialScope('from std._std.objects._internals import Iter')
+
+	execute('v = 1, 2, 3\na, b, c = v')
+
+	assert execute.parsed.code == [
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', Number.call, staticArgs=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['2']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar3', Number.call, staticArgs=['3']),
+		opcodes.CALL_FUNCTION_STATIC(
+			'_tmpVar4', vector__of.call, args=['_tmpVar1', '_tmpVar2', '_tmpVar3']
+		),
+		opcodes.SET_VARIABLE('v', '_tmpVar4'),
+		opcodes.CALL_FUNCTION('_tmpVar1_1', 'Iter', args=['v']),
+		opcodes.GET_ATTRIBUTE('_tmpVar1_2', '_tmpVar1_1', 'next'),
+		opcodes.CALL_FUNCTION('a', '_tmpVar1_2'),
+		opcodes.CALL_FUNCTION('b', '_tmpVar1_2'),
+		opcodes.CALL_FUNCTION('c', '_tmpVar1_2'),
+	]
+
+	for var, value in [['a', 1], ['b', 2], ['c', 3]]:
+		assert str(execute.executed.scope[var]) == str(value)

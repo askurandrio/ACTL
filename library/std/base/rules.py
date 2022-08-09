@@ -112,7 +112,7 @@ def _parseVar(var):
 	Parsed(),
 	IsInstance(VARIABLE),
 )
-def _parseSetVariable(dst, _, _1, _2, src):
+def parseSetVariable(dst, _, _1, _2, src):
 	return [SET_VARIABLE(dst.name, src.name)]
 
 
@@ -277,9 +277,7 @@ class CodeBlock:
 def _parseGetAttribute(object_, _, attribute, parser):
 	dst = parser.makeTmpVar()
 
-	parser.define(
-		GET_ATTRIBUTE(dst=dst.name, object=object_.name, attribute=attribute.name)
-	)
+	parser.define(GET_ATTRIBUTE(dst.name, object_.name, attribute.name))
 
 	return [dst]
 

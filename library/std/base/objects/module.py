@@ -51,12 +51,14 @@ async def _Module__getAttribute(self, key):
 
 	project = AToPy(await self.getAttribute('__project__'))
 	dirLibrary = await self.getAttribute('__path__')
-	path = os.path.join(dirLibrary, key)
-	module = await project['import'].importByPath(path)
 
-	if module is not None:
-		modules[key] = module
-		return await self.getAttribute(key)
+	if isinstance(key, str):
+		path = os.path.join(dirLibrary, key)
+		module = await project['import'].importByPath(path)
+
+		if module is not None:
+			modules[key] = module
+			return await self.getAttribute(key)
 
 	raise AAttributeNotFound(key)
 

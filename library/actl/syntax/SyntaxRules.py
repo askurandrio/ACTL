@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from .SyntaxRule import SyntaxRule
 
 
@@ -9,6 +11,16 @@ class SyntaxRules:
 			rules = list(from_)
 
 		self._rules = rules
+
+	@contextmanager
+	def disable(self, rule):
+		index = self._rules.index(rule)
+
+		del self._rules[index]
+
+		yield
+
+		self._rules.insert(index, rule)
 
 	def match(self, parser, buff):
 		for rule in self._rules:
@@ -27,7 +39,7 @@ class SyntaxRules:
 			)(func)
 
 			self.rawAdd(rule)
-			return func
+			return rule
 
 		return decorator
 

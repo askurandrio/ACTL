@@ -20,6 +20,9 @@ class Buffer:
 
 		return type(self)(map(watch, self))
 
+	def filter(self, func):
+		return type(self)(filter(func, self))
+
 	def one(self):
 		try:
 			(res,) = self

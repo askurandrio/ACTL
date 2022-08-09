@@ -16,6 +16,12 @@ class TransactionBuffer:
 
 		return TransactionBufferOrigin(origin, self._shiftIndex(0))
 
+	def get(self, index=0):
+		try:
+			return self[index]
+		except IndexError:
+			return None
+
 	def commit(self):
 		for index in reversed(sorted(self._skippedIndexes)):
 			del self._origin[index]

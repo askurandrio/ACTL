@@ -2,7 +2,7 @@ from actl.syntax import *
 from actl.opcodes import *
 from actl.objects import NativeFunction
 from std.base.executor import bindExecutor
-from std.base.rules import RULES as stdRULES
+from std.base.rules import RULES as stdRULES, parseSetVariable
 
 
 RULES = SyntaxRules(stdRULES)
@@ -83,11 +83,28 @@ async def vector__of(*args):
 	return vector
 
 
+def disableSetVariableRule(*template):
+	template = Template(*template)
+
+	def match(parser, inp):
+		with parser.rules.disable(parseSetVariable):
+
+			return template(parser, inp)
+
+	return match
+
+
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token(', '),
 	IsInstance(VARIABLE),
-	Many(Token(','), Maybe(Token(' ')), Parsed(), IsInstance(VARIABLE), minMatches=0),
+	Many(
+		Token(','),
+		Maybe(Token(' ')),
+		disableSetVariableRule(Parsed()),
+		IsInstance(VARIABLE),
+		minMatches=0,
+	),
 	useParser=True,
 )
 def _parseConstVector(*inp, parser):
@@ -97,3 +114,46 @@ def _parseConstVector(*inp, parser):
 	parser.define(CALL_FUNCTION_STATIC(dst.name, vector__of.call, args=args))
 
 	return [dst]
+
+
+@CustomTemplate.create
+def _setVariableDstIsUnpack(parser, buff):
+	setVariableOpcode = buff.get()
+	if SET_VARIABLE != setVariableOpcode:
+		return None
+
+	dst = setVariableOpcode.dst
+	if not parser.makeTmpVar.isTmpVar(dst):
+		return None
+
+	dstDefinition = parser.definition.filter(
+		lambda opcode: (CALL_FUNCTION_STATIC == opcode) and (opcode.dst == dst)
+	)
+	if not dstDefinition:
+		return None
+
+	dstDefinition = dstDefinition.one()
+	if dstDefinition.function != vector__of.call:
+		return None
+
+	return [[buff.pop(), dstDefinition]]
+
+
+@RULES.add(_setVariableDstIsUnpack, useParser=True)
+def _parseSetWithUnpack(setVariableInfo, parser):
+	setVariableOpcode, dstDefinition = setVariableInfo
+	parser.definition = parser.definition.filter(lambda opcode: opcode != dstDefinition)
+
+	with parser.makeTmpVar.onNestedScope():
+		srcAsIter = parser.makeTmpVar().name
+		srcIterNext = parser.makeTmpVar().name
+
+	parser.define(
+		CALL_FUNCTION(srcAsIter, 'Iter', args=[setVariableOpcode.src]),
+		GET_ATTRIBUTE(srcIterNext, srcAsIter, 'next'),
+	)
+
+	for arg in dstDefinition.args:
+		parser.define(CALL_FUNCTION(arg, srcIterNext))
+
+	return ()

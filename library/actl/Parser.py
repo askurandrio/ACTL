@@ -81,10 +81,15 @@ class Parser:
 
 
 class _TmpVarFactory:
+	_tmpVarPrefix = '_tmpVar'
+
 	def __init__(self):
 		self._counter = 0
 		self._contextCounter = 0
 		self._nestedScopeCounter = 0
+
+	def isTmpVar(self, varName):
+		return varName.startswith(self._tmpVarPrefix)
 
 	@contextmanager
 	def onNestedScope(self):
@@ -102,7 +107,7 @@ class _TmpVarFactory:
 		else:
 			scopeName = f'{self._nestedScopeCounter}_'
 
-		return VARIABLE(f'_tmpVar{scopeName}{self._counter}')
+		return VARIABLE(f'{self._tmpVarPrefix}{scopeName}{self._counter}')
 
 	def __enter__(self):
 		self._contextCounter += 1
