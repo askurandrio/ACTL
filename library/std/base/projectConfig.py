@@ -78,6 +78,7 @@ def getInitialScope(project):  # pylint: disable=unused-argument
 		('__project__', 'project'),
 		('lt', 'lt'),
 		('pass', 'None'),
+		('breakPoint', 'breakpoint'),
 	):
 		pyVar = loader(pyName)
 		var = executeSyncCoroutine(objects.PyToA.call(pyVar))
