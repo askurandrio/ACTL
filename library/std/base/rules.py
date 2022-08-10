@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 from actl.Buffer import TransactionBuffer, Buffer
-from actl.objects import AToPy, Number
+from actl.objects import AToPy, Number, AObject
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import (
 	SyntaxRules,
@@ -60,7 +60,9 @@ class _ApplySyntaxObjectSyntaxRule:
 				continue
 
 			tokenValue = scope[token.name]
-			if executeCoroutine(tokenValue.hasAttribute('__syntaxRule__')):
+			if isinstance(tokenValue, AObject) and executeCoroutine(
+				tokenValue.hasAttribute('__syntaxRule__')
+			):
 				yield tokenValue
 
 
