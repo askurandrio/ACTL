@@ -18,7 +18,10 @@ async def _PyToA__call(cls, value):
 		return Bool.True_ if value else Bool.False_
 
 	if isinstance(value, (int, float)):
-		return Number.call(value)
+		return await Number.call(value)
+
+	if isinstance(value, str):
+		return await String.call(value)
 
 	superCall = await cls.super_(PyToA, '__call__')
 	self = await superCall.call()
@@ -37,8 +40,12 @@ async def _PyToA__exec(cls, code, resultName):
 
 @PyToA.addMethod('__call__')
 async def _PyToA__call(self, *args, **kwargs):
-	args = [AToPy(arg) for arg in args]
-	kwargs = {key: AToPy(value) for key, value in kwargs.items()}
+	noWrap = kwargs.pop('_noWrap', False)
+
+	if not noWrap:
+		args = [AToPy(arg) for arg in args]
+		kwargs = {key: AToPy(value) for key, value in kwargs.items()}
+
 	res = self._value(*args, **kwargs)
 	return await PyToA.call(res)
 

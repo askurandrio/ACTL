@@ -41,4 +41,4 @@ async def test_String__split(execute):
 
 	execute("s = '1v2'\nr = s.split('v')")
 
-	assert str(execute.executed.scope['r']) == "Vector<_head=['1', '2']>"
+	assert str(execute.executed.scope['r']) == "Vector<_head=[1, 2]>"

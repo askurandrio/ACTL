@@ -25,7 +25,7 @@ def test_Vector__append(execute):
 
 	execute('v = Vector()\nv.append(1)')
 
-	assert str(execute.executed.scope['v']) == 'Vector<_head=[1]>'
+	assert str(execute.executed.scope['v']) == 'Vector<_head=[Number<1>]>'
 
 
 async def test_Vector_syntaxInit(execute):
@@ -66,8 +66,7 @@ async def test_ConstVector_syntaxInit(execute, length):
 	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
 	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
 
-	code = ', '.join(map(str, range(length)))
-	execute(code)
+	execute(', '.join(map(str, range(length))))
 
 	assert execute.parsed.code == [
 		*[
@@ -84,8 +83,10 @@ async def test_ConstVector_syntaxInit(execute, length):
 		opcodes.VARIABLE(f'_tmpVar{length + 1}'),
 	]
 
+	headAsStr = ', '.join(f'Number<{index}>' for index in range(length))
 	assert (
-		str(execute.executed.scope[f'_tmpVar{length + 1}']) == f'Vector<_head=[{code}]>'
+		str(execute.executed.scope[f'_tmpVar{length + 1}'])
+		== f'Vector<_head=[{headAsStr}]>'
 	)
 
 
@@ -119,4 +120,4 @@ async def test_ConstVector_packUnpack(execute, length):
 	]
 
 	for index in range(length):
-		assert execute.executed.scope[f'v{index}'] == index
+		assert str(execute.executed.scope[f'v{index}']) == f'Number<{index}>'
