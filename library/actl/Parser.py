@@ -6,7 +6,15 @@ from actl.opcodes import VARIABLE
 
 
 class Parser:
-	def __init__(self, scope, rules, buff, endLine=Token('\n'), makeTmpVar=None):
+	def __init__(
+		self,
+		scope,
+		rules,
+		buff,
+		endLine=Token('\n'),
+		makeTmpVar=None,
+		onLineStart=False,
+	):
 		self.scope = scope
 		self.rules = rules
 		self.buff = buff
@@ -15,6 +23,7 @@ class Parser:
 		if makeTmpVar is None:
 			makeTmpVar = _TmpVarFactory()
 		self.makeTmpVar = makeTmpVar
+		self.onLineStart = onLineStart
 
 	def define(self, *opcodes):
 		self.definition.append(*opcodes)
@@ -36,6 +45,8 @@ class Parser:
 				apply()
 			except Exception as ex:
 				raise self._makeSyntaxError() from ex
+
+			self.onLineStart = False
 			return True
 		return False
 
@@ -65,6 +76,7 @@ class Parser:
 
 	def __iter__(self):
 		while self.buff:
+			self.onLineStart = True
 			with self.makeTmpVar:
 				self.parseLine()
 			self.definition = Buffer()

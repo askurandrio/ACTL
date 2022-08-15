@@ -2,19 +2,7 @@
 from actl.Buffer import TransactionBuffer, Buffer
 from actl.objects import AToPy, Number, AObject
 from actl.opcodes.opcodes import RETURN
-from actl.syntax import (
-	SyntaxRules,
-	CustomTemplate,
-	IsInstance,
-	Many,
-	Or,
-	Token,
-	Maybe,
-	Template,
-	BufferRule,
-	Parsed,
-	Not,
-)
+from actl.syntax import *
 from actl.opcodes import (
 	VARIABLE,
 	SET_VARIABLE,
@@ -332,3 +320,20 @@ def _parseOperator(first, _, _1, second, operator, parser):
 	)
 
 	return [dst]
+
+
+def _onLineStart(parser, _):
+	if parser.onLineStart:
+		return ()
+
+	return None
+
+
+@RULES.add(
+	_onLineStart,
+	Many(Or([Token(' ')], [Token('\t')])),
+	Not(Or([Token(' ')], [Token('\t')])),
+	manualApply=True,
+)
+def _spacesBeforeCodeIsForbidden(inp):
+	raise RuntimeError(f'Speces before code is forbidden: {inp}')
