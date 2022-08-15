@@ -24,6 +24,14 @@ def debugStuck():
 	signal.alarm(20)
 
 
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call):  # pylint: disable=unused-argument
+	outcome = yield
+	rep = outcome.get_result()
+	setattr(item, "rep_" + rep.when, rep)
+	return rep
+
+
 def pytest_collection_modifyitems(
 	session, config, items
 ):  # pylint: disable=unused-argument

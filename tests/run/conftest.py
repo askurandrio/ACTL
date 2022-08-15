@@ -11,6 +11,9 @@ from actl import DIR_LIBRARY
 class _Run:
 	_actlBinary = os.path.join(os.path.dirname(DIR_LIBRARY), 'actl')
 
+	def __init__(self, request):
+		self._request = request
+
 	def __enter__(self):
 		return self
 
@@ -56,6 +59,10 @@ class _Run:
 				break
 
 	def __exit__(self, *_):
+		if self._request.node.rep_call:
+			self.process.kill()
+			return
+
 		self.process.stdin.close()
 		self.process.wait(timeout=5)
 		assert self.process.returncode == 0, self.process.returncode
@@ -65,6 +72,6 @@ class _Run:
 
 
 @pytest.fixture
-def run():
-	with _Run() as run_:
+def run(request):
+	with _Run(request) as run_:
 		yield run_
