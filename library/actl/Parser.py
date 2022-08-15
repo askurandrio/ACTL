@@ -44,7 +44,7 @@ class Parser:
 			try:
 				apply()
 			except Exception as ex:
-				raise self._makeSyntaxError() from ex
+				raise self._makeSyntaxError(ex) from ex
 
 			self.onLineStart = False
 			return True

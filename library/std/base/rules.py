@@ -231,6 +231,13 @@ class CodeBlock:
 				tuple(self.inpRule.popUntil(Token('\n')))
 				self.inpRule.pop(Token('\n'))
 
+		if self.inpRule.startsWith(
+			Many(Or([Token(' ')], [Token('\t')])), Not(Or([Token(' ')], [Token('\t')]))
+		):
+			raise RuntimeError(
+				f'Speces before code after block is forbidden: {self.inp}'
+			)
+
 		code.loadAll()
 		if code[-1] == '\n':
 			self.inp.insert(0, (code.pop(-1),))
