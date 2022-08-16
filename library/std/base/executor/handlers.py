@@ -1,5 +1,5 @@
 from actl import opcodes
-from actl.objects import While, Bool, If, AToPy, AObject
+from actl.objects import While, Bool, If, AToPy, AObject, PyToA
 
 from std.base.executor.frame import Frame
 from std.base.executor.Executor import Executor
@@ -87,8 +87,7 @@ async def _CALL_OPERATOR__handler(executor, opcode):
 		{'pyFirst': pyFirst, 'pySecond': pySecond},
 	)
 
-	resultClass = await first.getAttribute('__class__')
-	result = await resultClass.call(pyResult)
+	result = await PyToA.call(pyResult)
 
 	executor.scope[opcode.dst] = result
 
