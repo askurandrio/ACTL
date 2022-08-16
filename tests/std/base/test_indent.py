@@ -1,3 +1,5 @@
+# pylint: disable=line-too-long
+
 import pytest
 
 
@@ -12,7 +14,8 @@ async def test_spacesBeforeCodeIsForbidden(execute):
 
 	assert (
 		repr(ex.value)
-		== 'RuntimeError("Error during parsing at buff<Buffer([\' \', \'a\', \' \', \'=\', \' \', \'1\'])>Speces before code is forbidden: Buffer([\' \', \'a\', \' \', \'=\', \' \', \'1\'])")')
+		== 'RuntimeError("Error during parsing at buff<Buffer([\' \', \'a\', \' \', \'=\', \' \', \'1\'])>Speces before code is forbidden: Buffer([\' \', \'a\', \' \', \'=\', \' \', \'1\'])")'
+	)
 
 
 async def test_spacesBeforeCodeIsForbiddenCheckedOnFirstInstruction(execute):
