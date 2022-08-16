@@ -1,5 +1,6 @@
 while True:
 	input = readInput()
+	input = String(input)
 	first, operator, second = input.split(' ')
 	first = Number(first)
 	second = Number(second)
