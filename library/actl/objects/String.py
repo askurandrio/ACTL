@@ -22,8 +22,11 @@ String = _AStringClass(
 @String.addMethodToClass('__call__')
 async def String__call(cls, value=''):
 	if isinstance(value, AObject):
-		toStringMethod = await value.getAttribute(String)
-		return await toStringMethod.call()
+		if await String.isinstance_(value):
+			value = value._value
+		else:
+			toStringMethod = await value.getAttribute(String)
+			return await toStringMethod.call()
 
 	parentCall = await cls.super_(String, '__call__')
 	self = await parentCall.call()
@@ -51,3 +54,11 @@ executeSyncCoroutine(triggerSignal('actl.String:created', String))
 @String.addMethod(String)
 async def sting__String(self):
 	return self
+
+
+@onSignal('actl.Number:created')
+async def _onNumberCreated(Number):
+	@String.addMethod(Number)
+	async def string__Number(self):
+		value = float(self._value)
+		return await Number.call(value)

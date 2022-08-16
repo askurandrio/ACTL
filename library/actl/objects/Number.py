@@ -2,9 +2,10 @@
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
-from actl.objects.object import class_
+from actl.objects.object import class_, AObject
 
 from actl.utils import executeSyncCoroutine
+from actl.signals import triggerSignal
 
 
 Number = executeSyncCoroutine(class_.call('Number'))
@@ -17,6 +18,14 @@ async def _Number__init(self, value):
 			value = float(value)
 		else:
 			value = int(value)
+
+	elif isinstance(value, AObject):
+		toNumberMethod = await value.getAttribute(Number)
+		value = await toNumberMethod.call()
+		value = value._value
+	elif not isinstance(value, (int, float)):
+		raise RuntimeError(f'Invalid number: {value}')
+
 	self._value = value
 
 
@@ -38,3 +47,6 @@ async def _Number__String(self):
 @Number.addMethod(AToPy)
 async def _Number__AToPy(self):
 	return self._value
+
+
+executeSyncCoroutine(triggerSignal('actl.Number:created', Number))
