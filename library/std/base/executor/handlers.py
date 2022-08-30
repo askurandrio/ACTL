@@ -59,7 +59,12 @@ async def _CALL_FUNCTION_STATIC__handler(executor, opcode):
 async def _CALL_FUNCTION__handler(executor, opcode):
 	function = executor.scope[opcode.function]
 	assert opcode.typeb == '('
-	args = [executor.scope[varName] for varName in opcode.args]
+
+	if isinstance(opcode.args, str):
+		args = executor.scope[opcode.args]
+		args = (await args.getAttribute('_head'))._value
+	else:
+		args = [executor.scope[varName] for varName in opcode.args]
 	kwargs = {
 		argName: executor.scope[varName] for argName, varName in opcode.kwargs.items()
 	}

@@ -21,12 +21,6 @@ def test_setVar(run):
 	run.readTemplate('>>> ')
 
 
-def test_expliciSetProjectF(run):
-	run('--projectF', 'std/repl')
-
-	run.readTemplate('>>> ')
-
-
 def test_setExtraSource(run):
 	extraSource = [
 		{
@@ -45,19 +39,7 @@ def test_setExtraSource(run):
 	run.readTemplate('>>> ')
 
 
-def test_explicitProjectFAndMainF(run):
-	run('--projectF', 'std', '--mainF', 'tests/actl/example.a')
-
-	assert run.readLine() == '1\n'
-
-
-def test_projectFAndMainF(run):
-	run('std', 'tests/actl/example.a')
-
-	assert run.readLine() == '1\n'
-
-
-def test_projectFAndMainFAndSource(run):
+def test_explicitProjectFAndMainFAndSource(run):
 	extraSource = [
 		{
 			'py-externalKey': {
@@ -67,15 +49,16 @@ def test_projectFAndMainFAndSource(run):
 			}
 		}
 	]
-	run('std', 'tests/actl/example.a', json.dumps(extraSource))
+	run(
+		'--projectF',
+		'std',
+		'--mainF',
+		'tests/actl/example.a',
+		'--source',
+		json.dumps(extraSource),
+	)
 
 	assert run.readLine() == 'mocked: 1\n'
-
-
-def test_explicitMainF(run):
-	run('--mainF', 'tests/actl/example.a')
-
-	assert run.readLine() == '1\n'
 
 
 def test_mainF(run):
@@ -96,3 +79,12 @@ def test_main(run):
 	run('tests/run/test_main.a')
 
 	assert run.readLine() == '1\n'
+
+
+def test_mainWithArgv(run, tmp_path):
+	fileName = tmp_path / 'example.a'
+	fileName.write_text('fun main(arg):\n\tprint("arg", arg)')
+
+	run(fileName, '1')
+
+	assert run.readLine() == 'arg 1\n'

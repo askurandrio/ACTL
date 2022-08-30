@@ -1,17 +1,14 @@
 from actl.Scope import ScopeChild
 from actl import opcodes, executeSyncCoroutine
-from actl.objects import NativeFunction, PyToA
+from actl.objects import NativeFunction, PyToA, AToPy
 
-from std.base import Executor
+from std.base import Executor, bindExecutor
 from std.base.projectConfig import getInitialScope as getInitialBaseScope
 from std.base.objects.importDefinition import import_, copyAlllIntoScope
 from std.base.objects import If
 
 
 def getInitialScope(project):
-	if not project['projectF'].endswith('ACTL/library/std/std/std.yaml'):
-		return project['std']['initialScope'].child()
-
 	try:
 		return project['__initialScope']
 	except KeyError:
@@ -47,8 +44,9 @@ def getBuildCode(project):
 					opcodes.VARIABLE('hasMain'),
 				],
 				[
+					opcodes.CALL_FUNCTION_STATIC('argv', _loadArgv.call),
 					opcodes.GET_ATTRIBUTE('main', 'module', 'main'),
-					opcodes.CALL_FUNCTION_STATIC('_', 'main'),
+					opcodes.CALL_FUNCTION('_', 'main', args='argv'),
 				],
 			]
 		)
@@ -60,3 +58,19 @@ def getBuildCode(project):
 async def _hasAttribute(obj, attribute):
 	hasAttribute = await obj.hasAttribute(attribute)
 	return await PyToA.call(hasAttribute)
+
+
+@NativeFunction
+async def _loadArgv():
+	executor = await bindExecutor()
+	project = AToPy(executor.scope['__project__'])
+	argv = project['argv']
+
+	result = await executor.scope['Vector'].call()
+	resultAppend = await result.getAttribute('append')
+
+	for arg in argv:
+		aArg = await executor.scope['String'].call(arg)
+		await resultAppend.call(aArg)
+
+	return result

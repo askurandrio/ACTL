@@ -59,7 +59,7 @@ class _Run:
 				break
 
 	def __exit__(self, *_):
-		if self._request.node.rep_call:
+		if self._request.node.rep_call.failed:
 			self.process.kill()
 			return
 
