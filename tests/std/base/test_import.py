@@ -117,11 +117,9 @@ async def test_importFromPackageAndPackageAndModuleAllNames(
 
 
 async def test_importNotFound(execute, _mockIsDir, _mockIsFile):
-	_mockIsDir('m404', False)
-	_mockIsFile('m404.a', False)
-	stdLibraryDirecory = execute.project['std/base']['libraryDirectory']
-	_mockIsDir('m404', False, dirLibrary=stdLibraryDirecory)
-	_mockIsFile('m404.a', False, dirLibrary=stdLibraryDirecory)
+	for dirLibrary in execute.project['libraryDirectories']:
+		_mockIsDir('m404', False, dirLibrary=dirLibrary)
+		_mockIsFile('m404.a', False, dirLibrary=dirLibrary)
 
 	execute('import m404')
 

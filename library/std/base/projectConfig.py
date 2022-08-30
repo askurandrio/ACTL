@@ -112,13 +112,17 @@ def getBuild(project):
 	return build
 
 
-def getLibraryDirectory(project):
+def getLibraryDirectories(project):
+	libraryDirectories = [DIR_LIBRARY]
+
 	try:
 		projectF = project['projectF']
 	except KeyError:
-		return None
+		pass
+	else:
+		libraryDirectories.append(os.path.dirname(projectF))
 
-	return os.path.dirname(projectF)
+	return libraryDirectories
 
 
 def _cacheInSelf(method):
@@ -148,23 +152,18 @@ class Importer:
 			for name in names:  # pylint: disable=redefined-argument-from-local
 				package = await package.getAttribute(name)
 
-			return await self.importByName(name)
+			return package
 
-		for dirLibrary in self._getLibraryDirs():
+		for dirLibrary in self._currentProject['libraryDirectories']:
 			path = os.path.join(dirLibrary, name)
 			module = await self.importByPath(path)
 			if module is not None:
 				return module
 
-		raise RuntimeError(f'Module {name} not found in {self._currentProject}')
-
-	def _getLibraryDirs(self):
-		yield DIR_LIBRARY
-
-		try:
-			yield self._currentProject['libraryDirectory']
-		except KeyError:
-			return
+		raise RuntimeError(
+			f'Module {name} not found in {self._currentProject}, '
+			f'{self._currentProject["libraryDirectories"]=}'
+		)
 
 	@_cacheInSelf
 	async def importByPath(self, path):

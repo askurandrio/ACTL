@@ -47,5 +47,5 @@
 
 -  py-externalKey:
     from: std.base.projectConfig
-    import: getLibraryDirectory
-    name: libraryDirectory
+    import: getLibraryDirectories
+    name: libraryDirectories

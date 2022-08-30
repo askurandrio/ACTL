@@ -59,7 +59,7 @@ class Project:
 					raise
 				if key == '__parents__':
 					raise
-				tmpRes = self.parents[key]
+				raise
 
 			if isinstance(tmpRes, Lazy):
 				tmpRes = tmpRes.evaluate()
@@ -76,6 +76,14 @@ class Project:
 
 	def __delitem__(self, key):
 		del self._head[key]
+
+	def __contains__(self, key):
+		try:
+			self[key]
+		except KeyError:
+			return False
+		else:
+			return True
 
 	@classmethod
 	@lru_cache(maxsize=None)
@@ -106,7 +114,7 @@ class Project:
 		return decorator
 
 	def __repr__(self):
-		if 'projectF' in self._head:
+		if 'projectF' in self:
 			head = 'projectF={!r}'.format(self['projectF'])
 		else:
 			head = 'source={}'.format(self['__source__'])
