@@ -339,8 +339,13 @@ def _onLineStart(parser, _):
 @RULES.add(
 	_onLineStart,
 	Many(Or([Token(' ')], [Token('\t')])),
-	Not(Or([Token(' ')], [Token('\t')])),
+	Not(Or([Token(' ')], [Token('\t')], [Token('\n')])),
 	manualApply=True,
 )
 def _spacesBeforeCodeIsForbidden(inp):
 	raise RuntimeError(f'Speces before code is forbidden: {inp}')
+
+
+@RULES.add(Or([Many(Token(' ')), Token('\n')], [Many(Token('\t')), Token('\n')]))
+def _removeEmptyLine(*_):
+	return ()

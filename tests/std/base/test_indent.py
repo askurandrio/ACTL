@@ -28,3 +28,9 @@ async def test_spacesBeforeCodeIsForbiddenCheckedOnFirstInstruction(execute):
 		str(ex.value)
 		== "Error during parsing at buff<Buffer([' ', 'b'])>Speces before code after block is forbidden: Buffer([' ', 'b'])"
 	)
+
+
+async def test_lineWithOnlySpacesAllowed(execute):
+	execute('  \n')
+
+	assert execute.executed.scope
