@@ -1,3 +1,4 @@
+import os
 import pdb
 import traceback
 
@@ -15,7 +16,13 @@ def getParseInput(project):
 def getInput(project):
 	@Buffer.wrap
 	def make():
+		if 'CODE' in os.environ:
+			yield from os.environ['CODE']
+			yield '\n'
+			return
+
 		parser = project['buildParser']
+
 		while True:
 			if parser.applyingRule:
 				msg = '... '
