@@ -2,6 +2,8 @@
 
 import pytest
 
+from actl import Buffer
+
 
 ORDER_KEY = 9
 
@@ -34,3 +36,17 @@ async def test_lineWithOnlySpacesAllowed(execute):
 	execute('  \n')
 
 	assert execute.executed.scope
+
+
+@pytest.mark.parametrize("code", [' \t\n', '\t \n'])
+def test_mixedIndentationIsForbidden(execute, code):
+	codeRepr = Buffer(code).loadAll()
+	execute(code)
+
+	with pytest.raises(RuntimeError) as ex:
+		assert execute.executed.scope
+
+	assert (
+		str(ex.value)
+		== f"Error during parsing at buff<{codeRepr}>Mixed indentation is forbidden: {codeRepr}"
+	)

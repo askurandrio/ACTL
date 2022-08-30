@@ -349,3 +349,8 @@ def _spacesBeforeCodeIsForbidden(inp):
 @RULES.add(Or([Many(Token(' ')), Token('\n')], [Many(Token('\t')), Token('\n')]))
 def _removeEmptyLine(*_):
 	return ()
+
+
+@RULES.add(Or([Token(' '), Token('\t')], [Token('\t'), Token(' ')]), manualApply=True)
+def _mixedIndentationIsForbidden(inp):
+	raise RuntimeError(f'Mixed indentation is forbidden: {inp}')
