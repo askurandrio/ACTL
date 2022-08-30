@@ -133,6 +133,34 @@ def pytest_fixture_setup(fixturedef, request):  # pylint: disable=unused-argumen
 	yield
 
 
+@pytest.fixture
+def cleanupOnSuccess(request):
+	handlers = []
+
+	yield handlers.append
+
+	rep_call = getattr(request.node, 'rep_call', None)
+	if rep_call and (not rep_call.failed):
+		return
+
+	for handler in reversed(handlers):
+		handler()
+
+
+@pytest.fixture
+def cleanupOnFailure(request):
+	handlers = []
+
+	yield handlers.append
+
+	rep_call = getattr(request.node, 'rep_call', None)
+	if (rep_call is None) or rep_call.failed:
+		return
+
+	for handler in reversed(handlers):
+		handler()
+
+
 def _wrapAsyncFunction(function):
 	def wrapper(*args, **kwargs):
 		result = function(*args, **kwargs)

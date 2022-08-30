@@ -11,12 +11,6 @@ from actl import DIR_LIBRARY
 class _Run:
 	_actlBinary = os.path.join(os.path.dirname(DIR_LIBRARY), 'actl')
 
-	def __init__(self, request):
-		self._request = request
-
-	def __enter__(self):
-		return self
-
 	def __call__(self, *args):
 		self.process = subprocess.Popen(  # pylint: disable=consider-using-with
 			args=[self._actlBinary, *args],
@@ -38,9 +32,9 @@ class _Run:
 			assert (time.time() - startTime) < 5, f'Timeout exceeded, {line=}'
 
 			char = self.process.stdout.read(1)
-			if char is None:
+			if not char:
 				assert self.process.poll() is None, self.process.returncode
-				time.sleep(0.2)
+				time.sleep(0.1)
 				continue
 
 			line += char.decode()
@@ -58,20 +52,22 @@ class _Run:
 			if line == template:
 				break
 
-	def __exit__(self, *_):
-		if self._request.node.rep_call.failed:
-			self.process.kill()
-			return
-
-		self.process.stdin.close()
-		self.process.wait(timeout=5)
-		assert self.process.returncode == 0, self.process.returncode
-
-		output = self.process.stdout.read()
-		assert not output, output
-
 
 @pytest.fixture
-def run(request):
-	with _Run(request) as run_:
-		yield run_
+def run(cleanupOnSuccess, cleanupOnFailure):
+	run_ = _Run()
+
+	@cleanupOnFailure
+	def _cleanupRunOnFailure():
+		run_.process.kill()
+
+	@cleanupOnSuccess
+	def _cleanupRunOnSuccess():
+		run_.process.stdin.close()
+		run_.process.wait(timeout=5)
+		assert run_.process.returncode == 0, run_.process.returncode
+
+		output = run_.process.stdout.read()
+		assert not output, output
+
+	return run_
