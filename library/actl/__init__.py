@@ -1,5 +1,7 @@
+import signal
 import sys
 import logging
+import traceback
 
 from .utils import *
 from . import objects
@@ -19,6 +21,16 @@ def _makeLogger():
 	stdout = logging.StreamHandler(sys.stdout)
 	stdout.setFormatter(formatter)
 	logger.addHandler(stdout)
+
+
+if 'DEBUG_TIMER' in os.environ:
+
+	def debug(_, frame):
+		print(traceback.format_stack(frame))
+		breakpoint()  # pylint: disable=forgotten-debug-statement
+
+	signal.signal(signal.SIGALRM, debug)
+	signal.alarm(int(os.environ['DEBUG_TIMER']))
 
 
 _makeLogger()

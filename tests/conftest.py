@@ -1,5 +1,3 @@
-import traceback
-import signal
 import inspect
 import importlib
 import os
@@ -12,16 +10,6 @@ from actl.Buffer import Buffer
 from actl.objects import AObject
 from actl.utils import executeSyncCoroutine
 from actl.opcodes import DynamicOpCode
-
-
-@pytest.fixture
-def debugStuck():
-	def debug(_, frame):
-		print(traceback.format_stack(frame))
-		breakpoint()  # pylint: disable=forgotten-debug-statement
-
-	signal.signal(signal.SIGALRM, debug)
-	signal.alarm(20)
 
 
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
