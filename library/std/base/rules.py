@@ -346,7 +346,9 @@ def _spacesBeforeCodeIsForbidden(inp):
 	raise RuntimeError(f'Speces before code is forbidden: {inp}')
 
 
-@RULES.add(Or([Many(Token(' ')), Token('\n')], [Many(Token('\t')), Token('\n')]))
+@RULES.add(
+	_onLineStart, Or([Many(Token(' ')), Token('\n')], [Many(Token('\t')), Token('\n')])
+)
 def _removeEmptyLine(*_):
 	return ()
 
