@@ -80,7 +80,7 @@ class Parser:
 			with self.makeTmpVar:
 				self.parseLine()
 			self.definition = Buffer()
-			res = BufferRule(self, self.buff).popUntil(self.endLine)
+			res = BufferRule(self, self.buff).popUntil(self.endLine).loadAll()
 			for opcode in res:
 				try:
 					yield opcode
