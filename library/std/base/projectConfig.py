@@ -82,7 +82,9 @@ def getInitialScope(project):  # pylint: disable=unused-argument
 	):
 		pyVar = loader(pyName)
 		var = executeSyncCoroutine(objects.PyToA.call(pyVar))
-		scope[varName] = var
+		varCast = executeSyncCoroutine(var.getAttribute('cast'))
+		varCastResult = executeSyncCoroutine(varCast.call())
+		scope[varName] = varCastResult
 
 	return Scope(scope)
 

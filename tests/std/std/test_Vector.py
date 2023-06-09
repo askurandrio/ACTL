@@ -12,7 +12,6 @@ ORDER_KEY = 1
 def test_Vector__init(execute):
 	execute('v = Vector()\n')
 
-	print(execute.parsed.code)
 	assert str(execute.executed.scope['v']) == 'Vector<_head=[]>'
 
 

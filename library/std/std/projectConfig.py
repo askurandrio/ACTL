@@ -61,8 +61,11 @@ def getBuildCode(project):
 
 @NativeFunction
 async def _hasAttribute(obj, attribute):
-	hasAttribute = await obj.hasAttribute(attribute)
-	return await PyToA.call(hasAttribute)
+	pyHasAttribute = await obj.hasAttribute(attribute)
+	hasAttribute = await PyToA.call(pyHasAttribute)
+	hasAttributeCastMethod = await hasAttribute.getAttribute('cast')
+	hasAttributeCast = await hasAttributeCastMethod.call()
+	return hasAttributeCast
 
 
 @NativeFunction

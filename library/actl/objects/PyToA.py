@@ -11,21 +11,26 @@ PyToA = executeSyncCoroutine(class_.call('PyToA'))
 
 @PyToA.addMethodToClass('__call__')
 async def _PyToA__call(cls, value):
-	if isinstance(value, AObject):
-		return value
-
-	if isinstance(value, bool):
-		return Bool.True_ if value else Bool.False_
-
-	if isinstance(value, (int, float)):
-		return await Number.call(value)
-
-	if isinstance(value, str):
-		return await String.call(value)
-
 	superCall = await cls.super_(PyToA, '__call__')
 	self = await superCall.call()
 	self._value = value
+	return self
+
+
+@PyToA.addMethod('cast')
+async def _PyToA__cast(self):
+	if isinstance(self._value, AObject):
+		return self._value
+
+	if isinstance(self._value, bool):
+		return Bool.True_ if self._value else Bool.False_
+
+	if isinstance(self._value, (int, float)):
+		return await Number.call(self._value)
+
+	if isinstance(self._value, str):
+		return await String.call(self._value)
+
 	return self
 
 
@@ -47,6 +52,7 @@ async def _PyToA__call(self, *args, **kwargs):
 		kwargs = {key: AToPy(value) for key, value in kwargs.items()}
 
 	res = self._value(*args, **kwargs)
+
 	return await PyToA.call(res)
 
 

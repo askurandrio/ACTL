@@ -3,8 +3,9 @@ from std.std.objects._internals import addMethod
 from std.std.objects.string.string import String
 from std.std.objects.string.internals.internals import getStringLength
 
+getStringLength__cast = getStringLength.cast()
 
-String__length = Property(getStringLength)
+String__length = Property(getStringLength__cast)
 
 
 addMethod(String, 'length', String__length)
