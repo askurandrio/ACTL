@@ -1,1 +1,0 @@
-internals = PyToA.exec('from std._std.objects.string import internals', 'internals')

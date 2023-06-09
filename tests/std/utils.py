@@ -1,5 +1,4 @@
 from actl import Project, Buffer
-from std.base.executor.Executor import Executor
 
 
 class AbstractExecute:
@@ -10,16 +9,11 @@ class AbstractExecute:
 		self.isExecuted = False
 		self.project = Project()
 		self.project.processSource([{'include': self._PROJECT_NAME}])
+
+		# for heat up project
+		self.project['initialScope']  # pylint: disable=pointless-statement
+
 		self.executor = None
-
-	def executeInInitialScope(self, code):
-		scopeChildType = type(self.scope.child())
-		scopeChildType.allowOverride = True
-
-		code = self.project['parseInput'](self.scope, Buffer(code))
-		Executor(self.scope).execute(code)
-
-		scopeChildType.allowOverride = False
 
 	def flush(self):
 		assert self.executed

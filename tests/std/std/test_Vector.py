@@ -3,35 +3,26 @@ import pytest
 from actl import opcodes
 from actl.objects import Number
 
-from std._std.rules import vector__of
+from std.std.rules import vector__of
 
 
 ORDER_KEY = 1
 
 
 def test_Vector__init(execute):
-	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
-
 	execute('v = Vector()\n')
 
+	print(execute.parsed.code)
 	assert str(execute.executed.scope['v']) == 'Vector<_head=[]>'
 
 
 def test_Vector__append(execute):
-	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
-
 	execute('v = Vector()\nv.append(1)')
 
 	assert str(execute.executed.scope['v']) == 'Vector<_head=[Number<1>]>'
 
 
 async def test_Vector_syntaxInit(execute):
-	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
-
 	execute('[]')
 
 	assert execute.parsed.code == [
@@ -43,10 +34,6 @@ async def test_Vector_syntaxInit(execute):
 
 
 async def test_Vector_syntaxInitWithNumber(execute):
-	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
-
 	execute('[1]')
 
 	assert execute.parsed.code == [
@@ -62,10 +49,6 @@ async def test_Vector_syntaxInitWithNumber(execute):
 
 @pytest.mark.parametrize("length", list(range(2, 6)))
 async def test_ConstVector_syntaxInit(execute, length):
-	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
-
 	execute(', '.join(map(str, range(length))))
 
 	assert execute.parsed.code == [
@@ -92,11 +75,6 @@ async def test_ConstVector_syntaxInit(execute, length):
 
 @pytest.mark.parametrize("length", list(range(2, 6)))
 async def test_ConstVector_packUnpack(execute, length):
-	execute.executeInInitialScope('from std._std.objects.vector.vector import Vector')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__init')
-	execute.executeInInitialScope('import std._std.objects.vector.vector__append')
-	execute.executeInInitialScope('from std._std.objects._internals import Iter')
-
 	setCode = ', '.join(map(str, range(length)))
 	getCode = ', '.join(f'v{index}' for index in range(length))
 	execute(f'v = {setCode}\n{getCode} = v')

@@ -1,0 +1,2 @@
+addMethod = PyToA.exec('from std.std.objects.internals import addMethod', 'addMethod')
+Iter = PyToA.exec('from std.std.objects.internals import Iter', 'Iter')

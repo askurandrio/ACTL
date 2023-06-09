@@ -1,0 +1,12 @@
+from std.std.objects._internals import addMethod
+from std.std.objects.vector.vector import Vector
+import std.std.objects.vector.vector__init
+import std.std.objects.vector.vector__append
+from std.std.objects.string.string import String
+from std.std.objects.string.internals.internals import makeString__split
+
+
+String__split = makeString__split(String, Vector)
+
+
+addMethod(String, 'split', String__split)

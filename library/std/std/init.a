@@ -1,6 +1,8 @@
-from std._std.objects.vector.vector import Vector
-import std._std.objects.vector.vector__init
-import std._std.objects.vector.vector__append
-import std._std.objects.string.string__split
-from std._std.objects.string.string import String
-from std._std.objects._internals import Iter
+from std.std.objects.vector.vector import Vector
+import std.std.objects.vector.vector__init
+import std.std.objects.vector.vector__append
+import std.std.objects.string.string__split
+import std.std.objects.string.string__length
+from std.std.objects.string.string import String
+from std.std.objects._internals import Iter
+from std.std.objects.slice import Slice

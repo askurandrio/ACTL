@@ -8,8 +8,6 @@ ORDER_KEY = 2
 
 
 async def test_Slice__init(execute):
-	execute.executeInInitialScope('from std._std.objects.slice import Slice')
-
 	execute('s = Slice(1, 2, 3)\n')
 
 	assert (
@@ -19,7 +17,6 @@ async def test_Slice__init(execute):
 
 
 async def test_Slice_syntaxInit(execute):
-	execute.executeInInitialScope('from std._std.objects.slice import Slice')
 	collection = await Object.call()
 	getItemMock = Mock()
 	await collection.setAttribute('__getItem__', await PyToA.call(getItemMock))

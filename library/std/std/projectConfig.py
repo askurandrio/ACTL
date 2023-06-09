@@ -2,10 +2,15 @@ from actl.Scope import ScopeChild
 from actl import opcodes, executeSyncCoroutine
 from actl.objects import NativeFunction, PyToA, AToPy
 
+from std.std.rules import RULES
 from std.base import Executor, bindExecutor
 from std.base.projectConfig import getInitialScope as getInitialBaseScope
 from std.base.objects.importDefinition import import_, copyAlllIntoScope
 from std.base.objects import If
+
+
+def getRules(_):
+	return RULES
 
 
 def getInitialScope(project):

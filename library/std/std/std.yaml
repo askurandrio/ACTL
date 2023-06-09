@@ -1,4 +1,10 @@
--  include: std/_std
+-  include: std/base
+
+
+-  py-externalKey:
+    from: std.std.projectConfig
+    import: getRules
+    name: rules
 
 
 -  py-externalKey:
