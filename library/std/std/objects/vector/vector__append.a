@@ -3,7 +3,8 @@ from std.std.objects.vector.vector import Vector
 
 
 fun Vector__append(self, element):
-	self._head.append(element, _noWrap=True)
+	headAppend = self._head.getAttribute('append')
+	headAppend(element, _noWrap=True)
 
 
 addMethod(Vector, 'append', Vector__append)

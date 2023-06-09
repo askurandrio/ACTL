@@ -56,24 +56,16 @@ async def _PyToA__call(self, *args, **kwargs):
 	return await PyToA.call(res)
 
 
-@PyToA.addMethod('__getAttribute__')
+@PyToA.addMethod('getAttribute')
 async def _PyToA__getAttribute(self, key):
-	superGetAttribute = await self.super_(PyToA, '__getAttribute__')
+	pyKey = AToPy(key)
 
 	try:
-		return await superGetAttribute.call(key)
-	except AAttributeNotFound.class_(key=key):
-		pass
+		value = getattr(self._value, pyKey)
+	except AttributeError as ex:
+		raise AAttributeNotFound(pyKey) from ex
 
-	if isinstance(key, str):
-		try:
-			value = getattr(self._value, key)
-		except AttributeError:
-			pass
-		else:
-			return await PyToA.call(value)
-
-	raise AAttributeNotFound(key)
+	return await PyToA.call(value)
 
 
 @PyToA.addMethod('__setAttribute__')

@@ -1,1 +1,5 @@
 internals = PyToA.exec('from std.std.objects.string import internals', 'internals').cast()
+
+
+getStringLength = internals.getAttribute('getStringLength').cast()
+makeString__split = internals.getAttribute('makeString__split').cast()

@@ -1,11 +1,10 @@
 from std.std.objects.property import Property
 from std.std.objects._internals import addMethod
 from std.std.objects.string.string import String
-from std.std.objects.string.internals.internals import getStringLength
+from std.std.objects.string.internals import getStringLength
 
-getStringLength__cast = getStringLength.cast()
 
-String__length = Property(getStringLength__cast)
+String__length = Property(getStringLength)
 
 
 addMethod(String, 'length', String__length)
