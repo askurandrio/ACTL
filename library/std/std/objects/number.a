@@ -1,0 +1,3 @@
+class Number:
+	fun __init__(self, head):
+		self._head = head
