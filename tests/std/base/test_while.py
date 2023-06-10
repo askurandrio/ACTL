@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 from actl import opcodes
-from actl.objects import PyToA, Number
+from actl.objects import PyToA
 from std.base.objects import While
 
 
@@ -19,7 +19,7 @@ async def test_simple_while(execute):
 	execute.scope['conditionMock'] = await PyToA.call(conditionMock)
 	execute.initialScope['codeMock'] = await PyToA.call(codeMock)
 
-	execute('while conditionMock(): codeMock(1)')
+	execute('while conditionMock(): codeMock("a")')
 
 	cycle = execute.parsed.code.one()
 	assert await cycle.getAttribute('__class__') is While
@@ -29,7 +29,7 @@ async def test_simple_while(execute):
 	)
 	assert await cycle.getAttribute('code') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1_1', function=Number.call, staticArgs=['1']
+			dst='_tmpVar1_1', function='String', staticArgs=['a']
 		),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
@@ -39,7 +39,7 @@ async def test_simple_while(execute):
 
 	assert execute.executed
 	assert conditionMock.call_count == 2
-	codeMock.assert_called_once_with(1)
+	codeMock.assert_called_once_with('a')
 
 
 async def test_whileWithFullCodeBlock(execute):
@@ -53,7 +53,7 @@ async def test_whileWithFullCodeBlock(execute):
 	execute.scope['conditionMock'] = await PyToA.call(conditionMock)
 	execute.initialScope['codeMock'] = await PyToA.call(codeMock)
 
-	execute('while conditionMock():\n codeMock(1)')
+	execute('while conditionMock():\n codeMock("a")')
 
 	cycle = execute.parsed.code.one()
 	assert await cycle.getAttribute('__class__') is While
@@ -63,7 +63,7 @@ async def test_whileWithFullCodeBlock(execute):
 	)
 	assert await cycle.getAttribute('code') == (
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1_1', function=Number.call, staticArgs=['1']
+			dst='_tmpVar1_1', function='String', staticArgs=['a']
 		),
 		opcodes.CALL_FUNCTION(
 			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
@@ -73,4 +73,4 @@ async def test_whileWithFullCodeBlock(execute):
 
 	assert execute.executed
 	assert conditionMock.call_count == 2
-	codeMock.assert_called_once_with(1)
+	codeMock.assert_called_once_with('a')

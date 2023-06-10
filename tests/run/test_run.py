@@ -15,9 +15,9 @@ def test_invitation(run):
 def test_setVar(run):
 	run()
 
-	run.writeLine('a = 1')
+	run.writeLine('a = "a"')
 	run.writeLine('print(a)')
-	assert run.readLine() == '>>> >>> 1\n'
+	assert run.readLine() == ">>> >>> a\n"
 	run.readTemplate('>>> ')
 
 
@@ -34,8 +34,8 @@ def test_setExtraSource(run):
 
 	run('--source', json.dumps(extraSource))
 
-	run.writeLine('print(1)')
-	assert run.readLine() == '>>> mocked: 1\n'
+	run.writeLine('print("a")')
+	assert run.readLine() == '>>> mocked: a\n'
 	run.readTemplate('>>> ')
 
 
@@ -58,13 +58,13 @@ def test_explicitProjectFAndMainFAndSource(run):
 		json.dumps(extraSource),
 	)
 
-	assert run.readLine() == 'mocked: 1\n'
+	assert run.readLine() == 'mocked: a\n'
 
 
 def test_mainF(run):
 	run('tests/actl/example.a')
 
-	assert run.readLine() == '1\n'
+	assert run.readLine() == 'a\n'
 
 
 def getInitialScope(project):
@@ -78,7 +78,7 @@ def getInitialScope(project):
 def test_main(run):
 	run('tests/run/test_main.a')
 
-	assert run.readLine() == '1\n'
+	assert run.readLine() == 'a\n'
 
 
 def test_mainWithArgv(run, tmp_path):

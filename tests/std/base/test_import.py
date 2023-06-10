@@ -15,7 +15,7 @@ ORDER_KEY = 10
 
 async def test_simpleImport(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
-	_mockFile('testModule.a', 'a = 1')
+	_mockFile('testModule.a', 'a = "a"')
 	execute('import testModule')
 
 	assert execute.parsed.code == [
@@ -24,13 +24,13 @@ async def test_simpleImport(execute, _mockFile, _mockIsDir):
 
 	testModule = execute.executed.scope['testModule']
 	assert await Module.isinstance_(testModule)
-	assert str(await testModule.getAttribute('a')) == 'Number<1>'
+	assert str(await testModule.getAttribute('a')) == 'a'
 
 
 async def test_importPackageAndModule(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testPackage', True)
 	_mockIsDir('testPackage/testModule', False)
-	_mockFile('testPackage/testModule.a', 'a = 1')
+	_mockFile('testPackage/testModule.a', 'a = "a"')
 	execute('import testPackage.testModule')
 
 	assert execute.parsed.code == [
@@ -42,12 +42,12 @@ async def test_importPackageAndModule(execute, _mockFile, _mockIsDir):
 	testPackage = execute.executed.scope['testPackage']
 	assert await Module.isinstance_(testPackage)
 	testModule = await testPackage.getAttribute('testModule')
-	assert str(await testModule.getAttribute('a')) == 'Number<1>'
+	assert str(await testModule.getAttribute('a')) == 'a'
 
 
 async def test_importFromModuleAllNames(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
-	_mockFile('testModule.a', 'a = 1')
+	_mockFile('testModule.a', 'a = "a"')
 	execute('from testModule import *')
 
 	assert execute.parsed.code == [
@@ -57,12 +57,12 @@ async def test_importFromModuleAllNames(execute, _mockFile, _mockIsDir):
 		),
 	]
 
-	assert str(execute.executed.scope['a']) == 'Number<1>'
+	assert str(execute.executed.scope['a']) == 'a'
 
 
 async def test_importFromModuleImportName(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testModule', False)
-	_mockFile('testModule.a', 'a = 1')
+	_mockFile('testModule.a', 'a = "a"')
 	execute('from testModule import a')
 
 	assert execute.parsed.code == [
@@ -70,14 +70,14 @@ async def test_importFromModuleImportName(execute, _mockFile, _mockIsDir):
 		GET_ATTRIBUTE('a', '_tmpVar1', 'a'),
 	]
 
-	assert str(execute.executed.scope['a']) == 'Number<1>'
+	assert str(execute.executed.scope['a']) == 'a'
 
 
 async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
-	_mockFile('testMainPackage/testPackage/testModule.a', 'a = 1')
+	_mockFile('testMainPackage/testPackage/testModule.a', 'a = "a"')
 	execute('import testMainPackage.testPackage.testModule')
 
 	assert execute.parsed.code == [
@@ -92,7 +92,7 @@ async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	testMainPackage = execute.executed.scope['testMainPackage']
 	testPackage = await testMainPackage.getAttribute('testPackage')
 	testModule = await testPackage.getAttribute('testModule')
-	assert str(await testModule.getAttribute('a')) == 'Number<1>'
+	assert str(await testModule.getAttribute('a')) == 'a'
 
 
 async def test_importFromPackageAndPackageAndModuleAllNames(
@@ -101,7 +101,7 @@ async def test_importFromPackageAndPackageAndModuleAllNames(
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
-	_mockFile('testMainPackage/testPackage/testModule.a', 'a = 1')
+	_mockFile('testMainPackage/testPackage/testModule.a', 'a = "a"')
 	execute('from testMainPackage.testPackage.testModule import *')
 
 	assert execute.parsed.code == [
@@ -113,7 +113,7 @@ async def test_importFromPackageAndPackageAndModuleAllNames(
 		),
 	]
 
-	assert str(execute.executed.scope['a']) == 'Number<1>'
+	assert str(execute.executed.scope['a']) == 'a'
 
 
 async def test_importNotFound(execute, _mockIsDir, _mockIsFile):
@@ -131,7 +131,7 @@ async def test_importFromAnotherProject(execute, _mockIsDir, _mockFile):
 	_mockIsDir('testProject', True, True)
 	_mockFile('testProject/testProject.yaml', '-  include: std/base')
 	_mockIsDir('testProject/testModule', False)
-	_mockFile('testProject/testModule.a', 'a = 1')
+	_mockFile('testProject/testModule.a', 'a = "a"')
 	execute('import testProject.testModule')
 
 	testPackage = execute.executed.scope['testProject']
@@ -139,7 +139,7 @@ async def test_importFromAnotherProject(execute, _mockIsDir, _mockFile):
 	assert testPackageProject['projectF'].endswith('testProject/testProject.yaml')
 	testModule = await testPackage.getAttribute('testModule')
 	assert testPackageProject is AToPy(await testModule.getAttribute('__project__'))
-	assert str(await testModule.getAttribute('a')) == 'Number<1>'
+	assert str(await testModule.getAttribute('a')) == 'a'
 
 
 class _PathChecker:

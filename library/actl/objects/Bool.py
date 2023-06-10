@@ -1,5 +1,6 @@
 from actl.objects.AToPy import AToPy
 from actl.objects.object import class_
+from actl.objects.String import String
 from actl.utils import executeSyncCoroutine
 
 
@@ -24,3 +25,10 @@ async def _Bool__call(_, val):
 @Bool.addMethod(AToPy)
 async def _Bool__AToPy(self):
 	return self._value
+
+
+@String.addMethod(Bool)
+async def _String__Bool(self):
+	toPyStringMethod = await self.getAttribute('toPyString')
+	pyString = await toPyStringMethod.call()
+	return Bool.True_ if pyString else Bool.False_

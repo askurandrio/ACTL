@@ -1,4 +1,4 @@
-from actl.objects.Number import Number
+# from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
 from actl.objects.AToPy import AToPy
@@ -32,6 +32,12 @@ async def _PyToA__cast(self):
 		return await String.call(self._value)
 
 	return self
+
+
+@PyToA.addMethod('await')
+async def _PyToA__await(self):
+	value = await self._value
+	return value
 
 
 @PyToA.addMethodToClass('exec')

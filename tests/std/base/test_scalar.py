@@ -1,12 +1,12 @@
 from actl import opcodes
-from actl.objects import Number, AToPy
+from actl.objects import String, AToPy
 
 
 ORDER_KEY = 1
 
 
 async def test_var(execute):
-	one = await Number.call(1)
+	one = await String.call('a')
 	execute.scope['var'] = one
 
 	execute('var')
@@ -15,25 +15,25 @@ async def test_var(execute):
 	assert execute.executed
 
 
-async def test_floatNumber(execute):
-	execute('1.1')
+# async def test_floatNumber(execute):
+# 	execute('1.1')
 
-	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, staticArgs=['1.1']
-		),
-		opcodes.VARIABLE(name='_tmpVar1'),
-	]
-	assert AToPy(execute.executed.scope['_tmpVar1']) == 1.1
+# 	assert execute.parsed.code == [
+# 		opcodes.CALL_FUNCTION_STATIC(
+# 			dst='_tmpVar1', function=Number.call, staticArgs=['1.1']
+# 		),
+# 		opcodes.VARIABLE(name='_tmpVar1'),
+# 	]
+# 	assert AToPy(execute.executed.scope['_tmpVar1']) == 1.1
 
 
-async def test_negativeNumber(execute):
-	execute('-1')
+# async def test_negativeNumber(execute):
+# 	execute('-1')
 
-	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, staticArgs=['-1']
-		),
-		opcodes.VARIABLE(name='_tmpVar1'),
-	]
-	assert AToPy(execute.executed.scope['_tmpVar1']) == -1
+# 	assert execute.parsed.code == [
+# 		opcodes.CALL_FUNCTION_STATIC(
+# 			dst='_tmpVar1', function=Number.call, staticArgs=['-1']
+# 		),
+# 		opcodes.VARIABLE(name='_tmpVar1'),
+# 	]
+# 	assert AToPy(execute.executed.scope['_tmpVar1']) == -1

@@ -1,4 +1,4 @@
-from actl.objects import NativeFunction, Number
+from actl.objects import NativeFunction
 
 
 @NativeFunction

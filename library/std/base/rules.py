@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 from actl.Buffer import TransactionBuffer, Buffer
-from actl.objects import AToPy, Number, AObject
+from actl.objects import AToPy, AObject
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import *
 from actl.opcodes import (
@@ -127,16 +127,16 @@ def _isDigit(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
-@RULES.add(
-	Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True
-)
-def _parseNumber(*args, parser=None):
-	number = ''.join(args)
-	dst = parser.makeTmpVar()
-	parser.define(
-		CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, staticArgs=[number])
-	)
-	return [dst]
+# @RULES.add(
+# 	Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True
+# )
+# def _parseNumber(*args, parser=None):
+# 	number = ''.join(args)
+# 	dst = parser.makeTmpVar()
+# 	parser.define(
+# 		CALL_FUNCTION_STATIC(dst=dst.name, function=Number.call, staticArgs=[number])
+# 	)
+# 	return [dst]
 
 
 @RULES.add(IsInstance(VARIABLE), Token('('), manualApply=True, useParser=True)

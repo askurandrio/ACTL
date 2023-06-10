@@ -63,7 +63,6 @@ def getInitialScope(project):  # pylint: disable=unused-argument
 		('Bool', 'objects.Bool'),
 		('Object', 'objects.Object'),
 		('String', 'objects.String'),
-		('Number', 'objects.Number'),
 		('elif', 'objects.elif_'),
 		('else', 'objects.else_'),
 		('None', 'objects.ANone'),

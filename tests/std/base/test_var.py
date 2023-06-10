@@ -1,12 +1,12 @@
 from actl import opcodes
-from actl.objects import Number, AToPy
+from actl.objects import String, AToPy
 
 
 ORDER_KEY = 2
 
 
 async def test_varWithEndLine(execute):
-	one = await Number.call(1)
+	one = await String.call('a')
 	execute.scope['var'] = one
 
 	execute('var\n')
@@ -16,12 +16,12 @@ async def test_varWithEndLine(execute):
 
 
 def test_setVariable(execute):
-	execute('a = 1')
+	execute('a = "a"')
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function=Number.call, staticArgs=['1']
+			dst='_tmpVar1', function='String', staticArgs=['a']
 		),
 		opcodes.SET_VARIABLE(dst='a', src='_tmpVar1'),
 	]
-	assert AToPy(execute.executed.scope['a']) == 1
+	assert AToPy(execute.executed.scope['a']) == 'a'

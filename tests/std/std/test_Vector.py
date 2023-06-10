@@ -1,7 +1,6 @@
 import pytest
 
 from actl import opcodes
-from actl.objects import Number
 
 from std.std.rules import vector__of
 
@@ -16,9 +15,9 @@ def test_Vector__init(execute):
 
 
 def test_Vector__append(execute):
-	execute('v = Vector()\nv.append(1)')
+	execute('v = Vector()\nv.append("a")')
 
-	assert str(execute.executed.scope['v']) == 'Vector<_head=[Number<1>]>'
+	assert str(execute.executed.scope['v']) == 'Vector<_head=[a]>'
 
 
 async def test_Vector_syntaxInit(execute):
@@ -33,12 +32,12 @@ async def test_Vector_syntaxInit(execute):
 
 
 async def test_Vector_syntaxInitWithNumber(execute):
-	execute('[1]')
+	execute('["a"]')
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', 'Vector'),
 		opcodes.GET_ATTRIBUTE('_tmpVar2', '_tmpVar1', 'append'),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar4', Number.call, staticArgs=['1']),
+		opcodes.CALL_FUNCTION_STATIC('_tmpVar4', "String", staticArgs=['a']),
 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar2', args=['_tmpVar4']),
 		opcodes.VARIABLE(name='_tmpVar1'),
 	]
@@ -48,12 +47,12 @@ async def test_Vector_syntaxInitWithNumber(execute):
 
 @pytest.mark.parametrize("length", list(range(2, 6)))
 async def test_ConstVector_syntaxInit(execute, length):
-	execute(', '.join(map(str, range(length))))
+	execute(', '.join(f'"{idx}"' for idx in range(length)))
 
 	assert execute.parsed.code == [
 		*[
 			opcodes.CALL_FUNCTION_STATIC(
-				f'_tmpVar{index + 1}', Number.call, staticArgs=[str(index)]
+				f'_tmpVar{index + 1}', 'String', staticArgs=[str(index)]
 			)
 			for index in range(length)
 		],
@@ -65,7 +64,7 @@ async def test_ConstVector_syntaxInit(execute, length):
 		opcodes.VARIABLE(f'_tmpVar{length + 1}'),
 	]
 
-	headAsStr = ', '.join(f'Number<{index}>' for index in range(length))
+	headAsStr = ', '.join(map(str, range(length)))
 	assert (
 		str(execute.executed.scope[f'_tmpVar{length + 1}'])
 		== f'Vector<_head=[{headAsStr}]>'
@@ -74,14 +73,14 @@ async def test_ConstVector_syntaxInit(execute, length):
 
 @pytest.mark.parametrize("length", list(range(2, 6)))
 async def test_ConstVector_packUnpack(execute, length):
-	setCode = ', '.join(map(str, range(length)))
+	setCode = ', '.join(f'"{idx}"' for idx in range(length))
 	getCode = ', '.join(f'v{index}' for index in range(length))
 	execute(f'v = {setCode}\n{getCode} = v')
 
 	assert execute.parsed.code == [
 		*[
 			opcodes.CALL_FUNCTION_STATIC(
-				f'_tmpVar{index + 1}', Number.call, staticArgs=[str(index)]
+				f'_tmpVar{index + 1}', 'String', staticArgs=[str(index)]
 			)
 			for index in range(length)
 		],
@@ -97,4 +96,4 @@ async def test_ConstVector_packUnpack(execute, length):
 	]
 
 	for index in range(length):
-		assert str(execute.executed.scope[f'v{index}']) == f'Number<{index}>'
+		assert str(execute.executed.scope[f'v{index}']) == str(index)
