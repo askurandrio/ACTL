@@ -1,7 +1,11 @@
 from std.std.objects.property import Property
 from std.std.objects._internals import addMethod
 from std.std.objects.string.string import String
-from std.std.objects.string.internals import getStringLength
+
+
+fun getStringLength(self):
+	length = PyToA.exec('length = len(string._value)', 'length', string=self)
+	return Number(length)
 
 
 String__length = Property(getStringLength)

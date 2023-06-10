@@ -25,7 +25,9 @@ async def test_Slice_syntaxInit(execute):
 	execute('collection[2:]')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', 'Number', staticArgs=[await PyToA.call('2')]),
+		opcodes.CALL_FUNCTION_STATIC(
+			'_tmpVar1', 'Number', staticArgs=[await PyToA.call('2')]
+		),
 		opcodes.CALL_FUNCTION_STATIC(
 			'_tmpVar2', 'Slice', args=['_tmpVar1', 'None', 'None']
 		),
