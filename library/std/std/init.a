@@ -6,3 +6,4 @@ import std.std.objects.string.string__length
 from std.std.objects.string.string import String
 from std.std.objects._internals import Iter
 from std.std.objects.slice import Slice
+from std.std.objects.number import Number

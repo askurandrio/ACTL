@@ -92,4 +92,4 @@ async def _PyToA__Bool(self):
 
 @PyToA.addMethod(String)
 async def _PyToA__String(self):
-	return await String.call(str(self._value))
+	return await String.call(f'PyToA({self._value})')

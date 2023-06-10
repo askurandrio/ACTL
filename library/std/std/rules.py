@@ -1,6 +1,7 @@
 from actl.syntax import *
 from actl.opcodes import *
-from actl.objects import NativeFunction
+from actl.objects import NativeFunction, PyToA
+from actl import executeSyncCoroutine
 from std.base.executor import bindExecutor
 from std.base.rules import RULES as stdRULES, parseSetVariable
 
@@ -157,3 +158,21 @@ def _parseSetWithUnpack(setVariableInfo, parser):
 		parser.define(CALL_FUNCTION(arg, srcIterNext))
 
 	return ()
+
+
+@CustomTemplate.createToken
+def _isDigit(_, token):
+	return isinstance(token, str) and token.isdigit()
+
+
+@RULES.add(
+	Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True
+)
+def _parseNumber(*args, parser=None):
+	number = ''.join(args)
+	aProxy = executeSyncCoroutine(PyToA.call(number))
+	dst = parser.makeTmpVar()
+	parser.define(
+		CALL_FUNCTION_STATIC(dst=dst.name, function='Number', staticArgs=[aProxy])
+	)
+	return [dst]

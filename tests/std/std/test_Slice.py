@@ -4,7 +4,7 @@ from actl import opcodes
 from actl.objects import Object, PyToA, AToPy
 
 
-ORDER_KEY = 2
+ORDER_KEY = 3
 
 
 # async def test_Slice__init(execute):
