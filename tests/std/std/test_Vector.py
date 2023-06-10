@@ -11,13 +11,13 @@ ORDER_KEY = 2
 def test_Vector__init(execute):
 	execute('v = Vector()\n')
 
-	assert str(execute.executed.scope['v']) == 'Vector<_head=PyToA([])>'
+	assert str(execute.executed.scope['v']) == 'Vector<_head=PyToA<[]>>'
 
 
 def test_Vector__append(execute):
 	execute('v = Vector()\nv.append("a")')
 
-	assert str(execute.executed.scope['v']) == 'Vector<_head=PyToA([a])>'
+	assert str(execute.executed.scope['v']) == 'Vector<_head=PyToA<[a]>>'
 
 
 async def test_Vector_syntaxInit(execute):
@@ -67,7 +67,7 @@ async def test_ConstVector_syntaxInit(execute, length):
 	headAsStr = ', '.join(map(str, range(length)))
 	assert (
 		str(execute.executed.scope[f'_tmpVar{length + 1}'])
-		== f'Vector<_head=PyToA([{headAsStr}])>'
+		== f'Vector<_head=PyToA<[{headAsStr}]>>'
 	)
 
 
