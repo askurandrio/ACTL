@@ -12,3 +12,11 @@ class Parser(actl.Parser):
 		self.applyingRule = prevApplyingRule
 		return res
 
+	# def parseLine(self):
+	# 	res = super().parseLine()
+
+	# 	if res:
+	# 		res += (
+	# 			actl.opcodes.CALL_FUNCTION(
+	# 			dst=''),
+	# 		)

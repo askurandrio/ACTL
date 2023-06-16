@@ -1,4 +1,4 @@
-from actl.objects import NativeFunction, class_
+from actl.objects import NativeFunction, class_, ANone
 from actl import executeSyncCoroutine
 
 
@@ -8,6 +8,7 @@ async def addMethod(cls, name, method):
 
 	self_ = await cls.getAttribute('__self__')
 	self_[name] = method
+	return ANone
 
 
 Iter = executeSyncCoroutine(class_.call('Iter'))

@@ -1,5 +1,5 @@
 from actl import opcodes
-from actl.objects import String, AToPy
+from actl.objects import String
 
 
 ORDER_KEY = 1

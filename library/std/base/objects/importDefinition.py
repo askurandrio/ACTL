@@ -12,7 +12,7 @@ from actl.syntax import (
 	Maybe,
 )
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE, GET_ATTRIBUTE
-from actl.objects import NativeFunction, Object, AToPy
+from actl.objects import NativeFunction, Object, AToPy, ANone
 from actl import asDecorator, Buffer
 from actl.utils import executeSyncCoroutine
 from std.base.executor.utils import bindExecutor
@@ -33,6 +33,8 @@ async def import_(importName):
 async def copyAlllIntoScope(module, scope):
 	for key, value in (await module.getAttribute('__scope__')).getDiff():
 		scope[key] = value
+
+	return ANone
 
 
 @asDecorator(

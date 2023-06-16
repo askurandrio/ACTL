@@ -1,3 +1,6 @@
+from actl.objects import AObject
+
+
 class Scope:
 	def __init__(self, head):
 		self._head = head
@@ -18,6 +21,8 @@ class Scope:
 		return self._head[key]
 
 	def __setitem__(self, key, value):
+		assert isinstance(value, AObject), f'{type(value)}({value})'
+
 		if key == '_':
 			return
 
