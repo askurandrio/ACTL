@@ -46,21 +46,23 @@ class IfSyntax:
 				self._inp.pop()
 			return tuple(code)
 
-		def parseLine():
-			self._parser.subParser(self._inp, self._ELIF_OR_ELSE_OR_ENDLINE).parseLine()
+		def parseUntilLineEnd():
+			self._parser.subParser(
+				self._inp, self._ELIF_OR_ELSE_OR_ENDLINE
+			).parseUntilLineEnd()
 			line = BufferRule(self._parser, self._inp).popUntil(
 				self._ELIF_OR_ELSE_OR_ENDLINE
 			)
 			self._inp.insert(0, line)
 
 		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
-		parseLine()
+		parseUntilLineEnd()
 		while self._inpRule.startsWith(Value(objects.elif_)):
 			self._inpRule.pop(Value(objects.elif_), Token(' '))
 			frame = Parsed(Token(':'))(self._parser, self._inp)
 			self._inpRule.pop(Token(':'))
 			conditions.append((tuple(frame), popCodeBlock()))
-			parseLine()
+			parseUntilLineEnd()
 
 		if self._inpRule.startsWith(Value(objects.else_)):
 			self._inpRule.pop(Value(objects.else_), Token(':'))
@@ -72,7 +74,7 @@ class IfSyntax:
 
 	def _getFromInlineCodeBlock(self):
 		def popCodeBlock():
-			self._parser.subParser(self._inp, self._INLINE_IF_END).parseLine()
+			self._parser.subParser(self._inp, self._INLINE_IF_END).parseUntilLineEnd()
 			codeBlock = BufferRule(self._parser, self._inp).popUntil(
 				self._INLINE_IF_END
 			)
@@ -96,7 +98,7 @@ class IfSyntax:
 			self._inp.pop()
 			self._inp.pop()
 
-			self._parser.subParser(self._inp, Token('\n')).parseLine()
+			self._parser.subParser(self._inp, Token('\n')).parseUntilLineEnd()
 			elseCode = tuple(BufferRule(self._parser, self._inp).popUntil(Token('\n')))
 		else:
 			elseCode = None

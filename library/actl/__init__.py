@@ -7,7 +7,7 @@ from .utils import *
 from . import objects
 from . import opcodes
 from .Buffer import Buffer
-from .Parser import Parser
+from .parser import Parser
 from .project import *
 from .Scope import Scope
 

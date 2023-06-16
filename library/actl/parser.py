@@ -50,7 +50,7 @@ class Parser:
 			return True
 		return False
 
-	def parseLine(self, insertDefiniton=True, checkEndLineInBuff=False):
+	def parseUntilLineEnd(self, insertDefiniton=True, checkEndLineInBuff=False):
 		flush = Buffer()
 
 		while (self.endLine not in BufferRule(self, flush)) and self.buff:
@@ -74,13 +74,17 @@ class Parser:
 		else:
 			self.buff.insert(0, res)
 
+	def parseLine(self):
+		self.onLineStart = True
+		with self.makeTmpVar:
+			self.parseUntilLineEnd()
+		self.definition = Buffer()
+		res = BufferRule(self, self.buff).popUntil(self.endLine).loadAll()
+		return res
+
 	def __iter__(self):
 		while self.buff:
-			self.onLineStart = True
-			with self.makeTmpVar:
-				self.parseLine()
-			self.definition = Buffer()
-			res = BufferRule(self, self.buff).popUntil(self.endLine).loadAll()
+			res = self.parseLine()
 			for opcode in res:
 				try:
 					yield opcode

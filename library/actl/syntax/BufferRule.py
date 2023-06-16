@@ -11,7 +11,7 @@ class BufferRule:
 		self._buff = buff
 
 	def parseUntil(self, until):
-		self._parser.subParser(self._buff, until).parseLine()
+		self._parser.subParser(self._buff, until).parseUntilLineEnd()
 
 	def get(self, *template):
 		template = Template(*template)

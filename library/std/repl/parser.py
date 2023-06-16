@@ -11,3 +11,4 @@ class Parser(actl.Parser):
 		res = super()._applyRule()
 		self.applyingRule = prevApplyingRule
 		return res
+

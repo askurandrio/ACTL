@@ -19,11 +19,11 @@ class Parsed(AbstractTemplate):
 		origin = getattr(buff, 'origin', buff)
 		subParser = parser.subParser(origin, self.until)
 		if self.until is None:
-			subParser.parseLine(insertDefiniton=False)
+			subParser.parseUntilLineEnd(insertDefiniton=False)
 			parser.definition += subParser.definition
 			return ()
 
-		subParser.parseLine(checkEndLineInBuff=self.checkEndLineInBuff)
+		subParser.parseUntilLineEnd(checkEndLineInBuff=self.checkEndLineInBuff)
 		res = BufferRule(parser, buff).popUntil(self.until)
 		return tuple(res)
 

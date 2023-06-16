@@ -3,7 +3,7 @@ import pdb
 import traceback
 
 from actl.Buffer import Buffer
-from std.base import Parser
+from std.repl.parser import Parser
 
 
 def getParseInput(project):
