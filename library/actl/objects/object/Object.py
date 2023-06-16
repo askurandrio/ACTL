@@ -65,6 +65,7 @@ async def object__init(_):
 
 @Object.addMethod('__setAttribute__')
 async def object__setAttribute(self, key, value):
+	# assert isinstance(value, AObject), f'{type(value)}({value})'
 	self.head[key] = value
 
 

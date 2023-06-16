@@ -21,7 +21,9 @@ class Scope:
 		return self._head[key]
 
 	def __setitem__(self, key, value):
-		assert isinstance(value, AObject), f'{type(value)}({value})'
+		assert isinstance(
+			value, AObject
+		), f'{type(value)}({value}) should be instance of AObject to be able to write in Scope'
 
 		if key == '_':
 			return
