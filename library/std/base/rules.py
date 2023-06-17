@@ -149,6 +149,8 @@ class _ParseFunctionCall:
 			argName = None
 
 		argCode = self._inpRule.pop(Parsed(Or([Token(')')], [Token(',')])))
+		while argCode[-1] in (' ', '\n'):
+			argCode.pop(-1)
 		argVar = argCode.pop(-1).name
 		self._parser.define(*argCode)
 		return argName, argVar

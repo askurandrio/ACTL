@@ -18,6 +18,8 @@ ORDER_KEY = 5
 		['testF( )', []],
 		['testF(\n)', []],
 		['testF(arg)', ["arg"]],
+		['testF( arg )', ["arg"]],
+		['testF(\narg\n)', ["arg"]],
 		['testF(first, second)', ["first", "second"]],
 	],
 )
