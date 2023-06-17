@@ -159,7 +159,11 @@ class _ParseFunctionCall:
 		kwargs = {}
 		opToken = self._inpRule.pop(Token('(')).one()
 
-		while not self._inpRule.startsWith(Token(')')):
+		while True:
+			self._inpRule.pop(Many(Or([Token(' ')], [Token('\n')]), minMatches=0))
+			if self._inpRule.startsWith(Token(')')):
+				break
+
 			argName, argVar = self._parseArg()
 			if argName is None:
 				assert not kwargs, kwargs

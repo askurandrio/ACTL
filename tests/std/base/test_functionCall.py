@@ -11,8 +11,9 @@ from actl.opcodes import opcodes
 ORDER_KEY = 5
 
 
-async def test_call(execute, testF):
-	execute('testF()')
+@pytest.mark.parametrize("code", ['testF()', 'testF( )', 'testF(\n)'])
+async def test_callSimple(execute, testF, code):
+	execute(code)
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='testF'),

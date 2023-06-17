@@ -1,0 +1,11 @@
+class Operator:
+	pass
+
+
+fun Operator__call(_, first, operator, second):
+	result = PyToA.exec()
+
+	return result
+
+
+Operator.call = Operator__call
