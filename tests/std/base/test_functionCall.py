@@ -21,6 +21,9 @@ ORDER_KEY = 5
 		['testF( arg )', ["arg"]],
 		['testF(\narg\n)', ["arg"]],
 		['testF(first, second)', ["first", "second"]],
+		['testF(first,second)', ["first", "second"]],
+		['testF( first , second )', ["first", "second"]],
+		['testF(\nfirst\n,\nsecond\n)', ["first", "second"]],
 	],
 )
 async def test_calls(execute, testF, code, args):

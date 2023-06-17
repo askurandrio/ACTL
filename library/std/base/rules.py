@@ -173,7 +173,8 @@ class _ParseFunctionCall:
 			else:
 				kwargs[argName] = argVar
 
-			self._inpRule.pop(Token(','), Token(' '), default=None)
+			self._inpRule.pop(Many(Or([Token(' ')], [Token('\n')]), minMatches=0))
+			self._inpRule.pop(Token(','), default=None)
 
 		self._inpRule.pop(Token(')'))
 		dst = self._parser.makeTmpVar()
