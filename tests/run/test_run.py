@@ -15,9 +15,12 @@ def test_invitation(run):
 def test_setVar(run):
 	run()
 
+	run.readTemplate('>>> ')
 	run.writeLine('a = "a"')
+	run.readTemplate('>>> ')
 	run.writeLine('print(a)')
-	assert run.readLine() == ">>> >>> a\n"
+	assert run.readLine() == "a\n"
+	assert run.readLine() == "None\n"
 	run.readTemplate('>>> ')
 
 
@@ -34,8 +37,10 @@ def test_setExtraSource(run):
 
 	run('--source', json.dumps(extraSource))
 
+	run.readTemplate('>>> ')
 	run.writeLine('print("a")')
-	assert run.readLine() == '>>> mocked: a\n'
+	assert run.readLine() == 'mocked: a\n'
+	assert run.readLine() == "mocked: None\n"
 	run.readTemplate('>>> ')
 
 

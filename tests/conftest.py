@@ -140,7 +140,8 @@ def cleanupOnSuccess(request):
 	yield handlers.append
 
 	rep_call = getattr(request.node, 'rep_call', None)
-	if rep_call and (not rep_call.failed):
+
+	if rep_call and rep_call.failed:
 		return
 
 	for handler in reversed(handlers):
@@ -154,7 +155,7 @@ def cleanupOnFailure(request):
 	yield handlers.append
 
 	rep_call = getattr(request.node, 'rep_call', None)
-	if (rep_call is None) or rep_call.failed:
+	if (rep_call is None) or (not rep_call.failed):
 		return
 
 	for handler in reversed(handlers):

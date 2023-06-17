@@ -1,6 +1,7 @@
 import fcntl
 import os
 import subprocess
+import sys
 import time
 
 import pytest
@@ -49,6 +50,11 @@ class _Run:
 
 	def readTemplate(self, template):
 		for line in self.reader():
+			if ('\n' in line) and (template[: len(line)] != line):
+				raise RuntimeError(
+					f'readTemplate already can not be successful. template<"{template}"> != line<"{line}">'
+				)
+
 			if line == template:
 				break
 
@@ -59,7 +65,15 @@ def run(cleanupOnSuccess, cleanupOnFailure):
 
 	@cleanupOnFailure
 	def _cleanupRunOnFailure():
+		run_.process.stdin.close()
 		run_.process.kill()
+		run_.process.wait(timeout=1)
+
+		cmd = ' '.join(run_.process.args)
+		print(
+			f"'{cmd}' cleanup on failure with returncode {run_.process.returncode}",
+			file=sys.stderr,
+		)
 
 	@cleanupOnSuccess
 	def _cleanupRunOnSuccess():
