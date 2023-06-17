@@ -11,30 +11,29 @@ from actl.opcodes import opcodes
 ORDER_KEY = 5
 
 
-@pytest.mark.parametrize("code", ['testF()', 'testF( )', 'testF(\n)'])
-async def test_callSimple(execute, testF, code):
+@pytest.mark.parametrize(
+	["code", "args"],
+	[
+		['testF()', []],
+		['testF( )', []],
+		['testF(\n)', []],
+		['testF(arg)', ["arg"]],
+		['testF(first, second)', ["first", "second"]],
+	],
+)
+async def test_calls(execute, testF, code, args):
+	mocks = [Mock() for _ in args]
+	for name, mock in zip(args, mocks):
+		execute.scope[name] = await PyToA.call(mock)
+
 	execute(code)
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='testF'),
+		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='testF', args=args),
 		opcodes.VARIABLE(name='_tmpVar1'),
 	]
 	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
-	testF.assert_called_once_with()
-
-
-async def test_callWithArg(execute, testF):
-	arg = Mock()
-	execute.scope['arg'] = await PyToA.call(arg)
-
-	execute('testF(arg)')
-
-	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='testF', args=['arg']),
-		opcodes.VARIABLE(name='_tmpVar1'),
-	]
-	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
-	testF.assert_called_once_with(arg)
+	testF.assert_called_once_with(*mocks)
 
 
 async def test_callWithString(execute, testF):
@@ -49,24 +48,6 @@ async def test_callWithString(execute, testF):
 	]
 	assert AToPy(execute.executed.scope['_tmpVar2']) == testF.return_value
 	testF.assert_called_once_with('s')
-
-
-async def test_callWithTwoArg(execute, testF):
-	first = Mock()
-	second = Mock()
-	execute.scope['first'] = await PyToA.call(first)
-	execute.scope['second'] = await PyToA.call(second)
-
-	execute('testF(first, second)')
-
-	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(
-			dst='_tmpVar1', function='testF', args=['first', 'second']
-		),
-		opcodes.VARIABLE(name='_tmpVar1'),
-	]
-	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
-	testF.assert_called_once_with(first, second)
 
 
 async def test_callWithNamedArg(execute, testF):

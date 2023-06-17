@@ -2,5 +2,5 @@
 /IDE
 /.idea
 /.pytest_cache
-/.coverage
+/.coverage*
 /.vscode
