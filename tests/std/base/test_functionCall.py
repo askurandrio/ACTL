@@ -12,33 +12,41 @@ ORDER_KEY = 5
 
 
 @pytest.mark.parametrize(
-	["code", "args"],
+	["code", "args", "kwargs"],
 	[
-		['testF()', []],
-		['testF( )', []],
-		['testF(\n)', []],
-		['testF(arg)', ["arg"]],
-		['testF( arg )', ["arg"]],
-		['testF(\narg\n)', ["arg"]],
-		['testF(first, second)', ["first", "second"]],
-		['testF(first,second)', ["first", "second"]],
-		['testF( first , second )', ["first", "second"]],
-		['testF(\nfirst\n,\nsecond\n)', ["first", "second"]],
+		['testF()', [], {}],
+		['testF( )', [], {}],
+		['testF(\n)', [], {}],
+		['testF(arg)', ["arg"], {}],
+		['testF( arg )', ["arg"], {}],
+		['testF(\narg\n)', ["arg"], {}],
+		['testF(first, second)', ["first", "second"], {}],
+		['testF(first,second)', ["first", "second"], {}],
+		['testF( first , second )', ["first", "second"], {}],
+		['testF(\nfirst\n,\nsecond\n)', ["first", "second"], {}],
+		['testF(argName=arg)', [], {'argName': 'arg'}],
+		['testF(first, secondName=second)', ["first"], {'secondName': 'second'}],
 	],
 )
-async def test_calls(execute, testF, code, args):
-	mocks = [Mock() for _ in args]
-	for name, mock in zip(args, mocks):
+async def test_calls(execute, testF, code, args, kwargs):
+	arg_values = [Mock() for _ in args]
+	kwarg_values = {name: Mock() for name in kwargs.values()}
+
+	for name, mock in (*zip(args, arg_values), *kwarg_values.items()):
 		execute.scope[name] = await PyToA.call(mock)
 
 	execute(code)
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='testF', args=args),
+		opcodes.CALL_FUNCTION(
+			dst='_tmpVar1', function='testF', args=args, kwargs=kwargs
+		),
 		opcodes.VARIABLE(name='_tmpVar1'),
 	]
 	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
-	testF.assert_called_once_with(*mocks)
+	testF.assert_called_once_with(
+		*arg_values, **{key: kwarg_values[value] for key, value in kwargs.items()}
+	)
 
 
 async def test_callWithString(execute, testF):
@@ -53,43 +61,6 @@ async def test_callWithString(execute, testF):
 	]
 	assert AToPy(execute.executed.scope['_tmpVar2']) == testF.return_value
 	testF.assert_called_once_with('s')
-
-
-async def test_callWithNamedArg(execute, testF):
-	arg = Mock()
-	execute.scope['arg'] = await PyToA.call(arg)
-
-	execute('testF(argName=arg)')
-
-	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(
-			dst='_tmpVar1', function='testF', kwargs={'argName': 'arg'}
-		),
-		opcodes.VARIABLE(name='_tmpVar1'),
-	]
-	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
-	testF.assert_called_once_with(argName=arg)
-
-
-async def test_callWithArgAndNamedArg(execute, testF):
-	first = Mock()
-	second = Mock()
-	execute.scope['first'] = await PyToA.call(first)
-	execute.scope['second'] = await PyToA.call(second)
-
-	execute('testF(first, secondName=second)')
-
-	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION(
-			dst='_tmpVar1',
-			function='testF',
-			args=['first'],
-			kwargs={'secondName': 'second'},
-		),
-		opcodes.VARIABLE(name='_tmpVar1'),
-	]
-	assert AToPy(execute.executed.scope['_tmpVar1']) == testF.return_value
-	testF.assert_called_once_with(first, secondName=second)
 
 
 @pytest.fixture
