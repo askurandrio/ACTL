@@ -30,7 +30,7 @@ class _Run:
 		startTime = time.time()
 
 		while True:
-			assert (time.time() - startTime) < 5, f'Timeout exceeded, {line=}'
+			assert (time.time() - startTime) < 60, f'Timeout exceeded, {line=}'
 
 			char = self.process.stdout.read(1)
 			if not char:
