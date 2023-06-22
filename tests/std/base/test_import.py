@@ -219,7 +219,7 @@ class _FileContentMock:
 		return self
 
 	def __exit__(self, *_):
-		@self._cleanupOnSuccesspOnSuccess
+		@self._cleanupOnSuccess
 		def _check():
 			for _, content in self._result.items():
 				assert content is None
