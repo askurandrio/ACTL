@@ -1,11 +1,17 @@
 from contextlib import contextmanager
+import os
 
 from actl.Buffer import Buffer
 from actl.syntax import Token, BufferRule
 from actl.opcodes import VARIABLE
+from actl.utils import Inside
 
 
 class Parser:
+	_LOG_APPLY = os.environ.get('ACTL_LOG_APPLY')
+	if _LOG_APPLY:
+		_INSIDE = Inside()
+
 	def __init__(
 		self,
 		scope,
@@ -39,13 +45,22 @@ class Parser:
 		return type(self)(self.scope, self.rules, buff, endLine, self.makeTmpVar)
 
 	def _applyRule(self):
+		if self._LOG_APPLY:
+			buffRepr = str(self.buff)
+
 		apply = self.rules.match(self, self.buff)
 		if apply:
+			if self._LOG_APPLY:
+				print(f'{self._INSIDE.indent()}{apply}\n{self._INSIDE.indent()}    before: {buffRepr}')
+				self._INSIDE.__enter__()
 			try:
 				apply()
 			except Exception as ex:
 				raise self._makeSyntaxError(ex) from ex
 
+			if self._LOG_APPLY:
+				self._INSIDE.__exit__()
+				print(f'{self._INSIDE.indent()}{self._INSIDE.indent()}    after: {self.buff}')
 			self.onLineStart = False
 			return True
 		return False

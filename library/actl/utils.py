@@ -125,3 +125,17 @@ def bindEternalIdx():
 
 
 getEternalIdx.store = {}
+
+
+class Inside:
+	def __init__(self):
+		self.stack = 0
+
+	def indent(self):
+		return self.stack * '    '
+
+	def __enter__(self):
+		self.stack += 1
+
+	def __exit__(self, *_):
+		self.stack -= 1

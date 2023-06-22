@@ -40,6 +40,9 @@ class SyntaxRule:
 				inp = inp.origin
 			inp.insert(0, res)
 
+		apply = setFunctionName(
+			apply, f'SyntaRule__{self.func.__name__}__apply'
+		)
 		return apply
 
 	def __repr__(self):
@@ -56,6 +59,9 @@ class SyntaxRule:
 					instance = userFunc(*args, **kwargs)
 					return instance.parse()
 
+				func = setFunctionName(
+					func, userFunc.__name__
+				)
 			else:
 				func = userFunc
 
