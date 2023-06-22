@@ -33,4 +33,10 @@ if 'DEBUG_TIMER' in os.environ:
 	signal.alarm(int(os.environ['DEBUG_TIMER']))
 
 
+if 'ACTL_ENABLE_TRACEMALLOC' in os.environ:
+	import tracemalloc
+
+	tracemalloc.start()
+
+
 _makeLogger()
