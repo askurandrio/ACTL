@@ -195,10 +195,10 @@ class _DirChecker(_PathChecker):
 
 
 class _FileContentMock:
-	def __init__(self, mocker, mockIsFile):
-		super().__init__()
+	def __init__(self, mocker, mockIsFile, cleanupOnSuccess):
 		self._result = {}
 		self._mockIsFile = mockIsFile
+		self._cleanupOnSuccess = cleanupOnSuccess
 
 		mocker.patch('std.base.objects.module.open', self._mock)
 		mocker.patch('actl.project.open', self._mock)
@@ -219,8 +219,10 @@ class _FileContentMock:
 		return self
 
 	def __exit__(self, *_):
-		for _, content in self._result.items():
-			assert content is None
+		@self._cleanupOnSuccesspOnSuccess
+		def _check():
+			for _, content in self._result.items():
+				assert content is None
 
 
 @pytest.fixture
@@ -236,6 +238,6 @@ def _mockIsDir(mocker, _mockIsFile):
 
 
 @pytest.fixture
-def _mockFile(mocker, _mockIsFile):
-	with _FileContentMock(mocker, _mockIsFile) as mock:
+def _mockFile(mocker, _mockIsFile, cleanupOnSuccess):
+	with _FileContentMock(mocker, _mockIsFile, cleanupOnSuccess) as mock:
 		yield mock
