@@ -162,3 +162,12 @@ class Buffer:
 				value += 1
 
 		return gen()
+
+	@classmethod
+	async def loadAsync(cls, gen):
+		head = []
+
+		async for element in gen:
+			head.append(element)
+
+		return cls(head)

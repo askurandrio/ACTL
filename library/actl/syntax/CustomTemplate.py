@@ -12,13 +12,13 @@ IS_APPLYING_END_DICT = {}
 class CustomTemplate(AbstractTemplate):
 	__slots__ = ('name', 'func')
 
-	def __call__(self, parser, inp):
-		return self.func(parser, inp)
+	async def __call__(self, parser, inp):
+		return await self.func(parser, inp)
 
 	@classmethod
 	def asArg(cls, template, arg):
-		def asArg(parser, inp):
-			res = template(parser, inp)
+		async def asArg(parser, inp):
+			res = await template(parser, inp)
 			if res is None:
 				return res
 			return Buffer.of(NamedResult(arg, res))
@@ -32,11 +32,11 @@ class CustomTemplate(AbstractTemplate):
 
 	@classmethod
 	def createToken(cls, func, name=None):
-		def template(parser, inp):
+		async def template(parser, inp):
 			if not inp:
 				return None
 			token = inp[0]
-			if func(parser, token):
+			if await func(parser, token):
 				del inp[0]
 				return Buffer.of(token)
 			return None
@@ -50,23 +50,23 @@ class CustomTemplate(AbstractTemplate):
 
 @lru_cache(maxsize=None)
 def IsInstance(cls):
-	def rule(_, val):
+	async def rule(_, val):
 		return isinstance(val, cls)
 
 	return CustomTemplate.createToken(rule, f'IsInstance({cls})')
 
 
 @CustomTemplate.create
-def End(parser, buff):
+async def End(parser, buff):
 	if not buff:
 		return Buffer()
 
 	if parser in IS_APPLYING_END_DICT:
-		return Token('\n')(parser, buff)
+		return await Token('\n')(parser, buff)
 
 	IS_APPLYING_END_DICT[parser] = True
 
 	try:
-		return parser.endLine(parser, buff)
+		return await parser.endLine(parser, buff)
 	finally:
 		del IS_APPLYING_END_DICT[parser]

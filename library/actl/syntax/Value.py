@@ -6,7 +6,7 @@ from actl.syntax.AbstractTemplate import AbstractTemplate
 class Value(AbstractTemplate):
 	__slots__ = ('value',)
 
-	def __call__(self, parser, buff):
+	async def __call__(self, parser, buff):
 		if (
 			(not buff)
 			or (VARIABLE != buff[0])

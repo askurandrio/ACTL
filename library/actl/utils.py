@@ -132,7 +132,7 @@ class Inside:
 		self.stack = 0
 
 	def indent(self):
-		return self.stack * '    '
+		return self.stack * '	'
 
 	def __enter__(self):
 		self.stack += 1

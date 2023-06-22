@@ -10,15 +10,15 @@ RULES = SyntaxRules(stdRULES)
 
 
 @RULES.add(IsInstance(VARIABLE), Token('['), manualApply=True, useParser=True)
-def _parseSlice(parser, inp):
+async def _parseSlice(parser, inp):
 	inpRule = BufferRule(parser, inp)
-	collectionVariable = inpRule.pop(IsInstance(VARIABLE)).one()
-	inpRule.pop(Token('['))
+	collectionVariable = (await inpRule.pop(IsInstance(VARIABLE))).one()
+	await inpRule.pop(Token('['))
 
-	startDeclarationCode = inpRule.pop(Parsed(Token(':')))
+	startDeclarationCode = await inpRule.pop(Parsed(Token(':')))
 	startVariable = startDeclarationCode.pop(-1)
 	parser.define(*startDeclarationCode)
-	inpRule.pop(Token(':]'))
+	await inpRule.pop(Token(':]'))
 
 	sliceVariable = parser.makeTmpVar()
 	parser.define(
@@ -49,26 +49,26 @@ def _parseSlice(parser, inp):
 
 
 @RULES.add(Token('['), manualApply=True, useParser=True)
-def _parseVector(parser, inp):
+async def _parseVector(parser, inp):
 	inpRule = BufferRule(parser, inp)
-	inpRule.pop(Token('['))
+	await inpRule.pop(Token('['))
 	dst = parser.makeTmpVar()
 	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='Vector'))
 
-	if not inpRule.startsWith(Token(']')):
+	if not await inpRule.startsWith(Token(']')):
 		appendVarName = parser.makeTmpVar().name
 		parser.define(GET_ATTRIBUTE(appendVarName, dst.name, 'append'))
 		appendResultVarName = parser.makeTmpVar().name
 
-		while not inpRule.startsWith(Token(']')):
-			elementCode = inpRule.pop(Parsed(Or([Token(']')], [Token(',')])))
+		while not await inpRule.startsWith(Token(']')):
+			elementCode = await inpRule.pop(Parsed(Or([Token(']')], [Token(',')])))
 			elementVarName = elementCode.pop(-1).name
 			parser.define(
 				*elementCode,
 				CALL_FUNCTION(appendResultVarName, appendVarName, args=[elementVarName])
 			)
 
-	inpRule.pop(Token(']'))
+	await inpRule.pop(Token(']'))
 	inp.insert(0, [dst])
 
 
@@ -87,10 +87,10 @@ async def vector__of(*args):
 def disableRules(rules, template):
 	template = Template(*template)
 
-	def match(parser, inp):
+	async def match(parser, inp):
 		with parser.rules.disable(*rules):
 
-			return template(parser, inp)
+			return await template(parser, inp)
 
 	return match
 
@@ -108,7 +108,7 @@ def disableRules(rules, template):
 	),
 	useParser=True,
 )
-def _parseConstVector(*inp, parser):
+async def _parseConstVector(*inp, parser):
 	args = [arg.name for arg in inp if VARIABLE == arg]
 	dst = parser.makeTmpVar()
 
@@ -118,7 +118,7 @@ def _parseConstVector(*inp, parser):
 
 
 @CustomTemplate.create
-def _setVariableDstIsUnpack(parser, buff):
+async def _setVariableDstIsUnpack(parser, buff):
 	setVariableOpcode = buff.get()
 	if SET_VARIABLE != setVariableOpcode:
 		return None
@@ -141,7 +141,7 @@ def _setVariableDstIsUnpack(parser, buff):
 
 
 @RULES.add(_setVariableDstIsUnpack, useParser=True)
-def _parseSetWithUnpack(setVariableInfo, parser):
+async def _parseSetWithUnpack(setVariableInfo, parser):
 	setVariableOpcode, dstDefinition = setVariableInfo
 	parser.definition = parser.definition.filter(lambda opcode: opcode != dstDefinition)
 
@@ -161,14 +161,14 @@ def _parseSetWithUnpack(setVariableInfo, parser):
 
 
 @CustomTemplate.createToken
-def _isDigit(_, token):
+async def _isDigit(_, token):
 	return isinstance(token, str) and token.isdigit()
 
 
 @RULES.add(
 	Maybe(Token('-')), Many(_isDigit), Maybe(Token('.'), Many(_isDigit)), useParser=True
 )
-def _parseNumber(*args, parser=None):
+async def _parseNumber(*args, parser=None):
 	number = ''.join(args)
 	aProxy = executeSyncCoroutine(PyToA.call(number))
 	dst = parser.makeTmpVar()

@@ -48,12 +48,12 @@ class _ParseFunction:
 		self._inp = inp
 		self._inpRule = BufferRule(parser, inp)
 
-	def parse(self):
-		self._inpRule.pop(Value(Function), Token(' '))
-		name = self._parseName()
-		signature = self._parseSignature()
-		if self._inpRule.startsWith(Token(':')):
-			body = self._parseBody()
+	async def parse(self):
+		await self._inpRule.pop(Value(Function), Token(' '))
+		name = await self._parseName()
+		signature = await self._parseSignature()
+		if await self._inpRule.startsWith(Token(':')):
+			body = await self._parseBody()
 		else:
 			body = None
 		makeFunctionOpcode = CALL_FUNCTION_STATIC(
@@ -64,27 +64,27 @@ class _ParseFunction:
 		)
 		self._inp.insert(0, [makeFunctionOpcode])
 
-	def _parseName(self):
-		return self._inpRule.pop(IsInstance(VARIABLE)).one().name
+	async def _parseName(self):
+		return (await self._inpRule.pop(IsInstance(VARIABLE))).one().name
 
-	def _parseSignature(self):
+	async def _parseSignature(self):
 		args = []
-		self._inpRule.pop(Token('('))
+		await self._inpRule.pop(Token('('))
 
-		while not self._inpRule.startsWith(Token(')')):
-			self._inpRule.parseUntil(IsInstance(VARIABLE))
-			argVar = self._inpRule.pop(IsInstance(VARIABLE)).one().name
+		while not await self._inpRule.startsWith(Token(')')):
+			await self._inpRule.parseUntil(IsInstance(VARIABLE))
+			argVar = (await self._inpRule.pop(IsInstance(VARIABLE))).one().name
 			args.append(argVar)
-			if self._inpRule.startsWith(Token(',')):
-				self._inpRule.pop(Token(','), Maybe(Token(' ')))
+			if await self._inpRule.startsWith(Token(',')):
+				await self._inpRule.pop(Token(','), Maybe(Token(' ')))
 
-		self._inpRule.pop(Token(')'))
+		await self._inpRule.pop(Token(')'))
 		signature = executeSyncCoroutine(objects.Signature.call(args))
 		return signature
 
-	def _parseBody(self):
-		self._inpRule.pop(Token(':'))
-		body = CodeBlock(self._parser, self._inp).parse()
+	async def _parseBody(self):
+		await self._inpRule.pop(Token(':'))
+		body = await CodeBlock(self._parser, self._inp).parse()
 
 		if (not body) or (RETURN != body[-1]):
 			body = (*body, RETURN('None'))

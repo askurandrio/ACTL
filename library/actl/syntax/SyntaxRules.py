@@ -37,9 +37,9 @@ class SyntaxRules:
 		for index, rule in reversed(tuple(zip(indexes, rules))):
 			self._rules.insert(index, rule)
 
-	def match(self, parser, buff):
+	async def match(self, parser, buff):
 		for rule in self._rules:
-			apply = rule.match(parser, buff)
+			apply = await rule.match(parser, buff)
 			if apply:
 				return apply
 		return None

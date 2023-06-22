@@ -9,14 +9,14 @@ class Many(AbstractTemplate):
 	def __init__(self, *template, minMatches=1):
 		super().__init__(Template(*template), minMatches)
 
-	def __call__(self, parser, inp):
+	async def __call__(self, parser, inp):
 		res = Buffer()
 		mainTransactionBuff = TransactionBuffer(inp)
 
 		for matches in Buffer.inf():
 			itTransactionBuff = TransactionBuffer(mainTransactionBuff)
 
-			tmplRes = self.template(parser, inp)
+			tmplRes = await self.template(parser, inp)
 			if tmplRes is None:
 				if matches < self.minMatches:
 					return None

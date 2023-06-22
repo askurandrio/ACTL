@@ -10,10 +10,10 @@ class Or(AbstractTemplate):
 		templates = tuple(Template(*template) for template in templates)
 		super().__init__(templates)
 
-	def __call__(self, parser, inp):
+	async def __call__(self, parser, inp):
 		for template in self.templates:
 			transactionBuff = TransactionBuffer(inp)
-			res = template(parser, transactionBuff)
+			res = await template(parser, transactionBuff)
 			if res is not None:
 				transactionBuff.commit()
 				return res

@@ -16,15 +16,19 @@ class Template(AbstractTemplate, metaclass=_MetaTemplate):
 	def __init__(self, *template):
 		super().__init__(template)
 
-	def __call__(self, parser, buff):
+	async def __call__(self, parser, buff):
 		transactionBuff = TransactionBuffer(buff)
 		res = Buffer()
 
 		for tmpl in self._template:
-			tmplRes = tmpl(parser, transactionBuff)
+			tmplRes = await tmpl(parser, transactionBuff)
 			if tmplRes is None:
 				return None
-			res += tmplRes
+			try:
+				res += tmplRes
+			except:
+				print(self, tmpl)
+				raise
 
 		transactionBuff.commit()
 		return res

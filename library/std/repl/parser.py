@@ -12,8 +12,8 @@ class Parser(actl.Parser):
 		self.applyingRule = prevApplyingRule
 		return res
 
-	def parseLine(self):
-		res = super().parseLine()
+	async def parseLine(self):
+		res = await super().parseLine()
 
 		if res:
 			res += self._genPrintLastResult(res[-1])

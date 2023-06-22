@@ -4,7 +4,7 @@ import os
 from actl.Buffer import Buffer
 from actl.syntax import Token, BufferRule
 from actl.opcodes import VARIABLE
-from actl.utils import Inside
+from actl.utils import Inside, executeSyncCoroutine
 
 
 class Parser:
@@ -44,36 +44,40 @@ class Parser:
 
 		return type(self)(self.scope, self.rules, buff, endLine, self.makeTmpVar)
 
-	def _applyRule(self):
+	async def _applyRule(self):
 		if self._LOG_APPLY:
 			buffRepr = str(self.buff)
 
-		apply = self.rules.match(self, self.buff)
+		apply = await self.rules.match(self, self.buff)
 		if apply:
 			if self._LOG_APPLY:
-				print(f'{self._INSIDE.indent()}{apply}\n{self._INSIDE.indent()}    before: {buffRepr}')
+				print(
+					f'{self._INSIDE.indent()}{apply}\n{self._INSIDE.indent()}	before: {buffRepr}'
+				)
 				self._INSIDE.__enter__()
 			try:
-				apply()
+				await apply()
 			except Exception as ex:
 				raise self._makeSyntaxError(ex) from ex
 
 			if self._LOG_APPLY:
 				self._INSIDE.__exit__()
-				print(f'{self._INSIDE.indent()}{self._INSIDE.indent()}    after: {self.buff}')
+				print(
+					f'{self._INSIDE.indent()}{self._INSIDE.indent()}	after: {self.buff}'
+				)
 			self.onLineStart = False
 			return True
 		return False
 
-	def parseUntilLineEnd(self, insertDefiniton=True, checkEndLineInBuff=False):
+	async def parseUntilLineEnd(self, insertDefiniton=True, checkEndLineInBuff=False):
 		flush = Buffer()
 
-		while (self.endLine not in BufferRule(self, flush)) and self.buff:
-			isApplied = self._applyRule()
+		while (not await BufferRule(self, flush).contains(self.endLine)) and self.buff:
+			isApplied = await self._applyRule()
 			if isApplied:
 				self.buff.insert(0, flush)
 				flush = Buffer()
-				if checkEndLineInBuff and BufferRule(self, self.buff).startsWith(
+				if checkEndLineInBuff and await BufferRule(self, self.buff).startsWith(
 					self.endLine
 				):
 					return
@@ -81,7 +85,9 @@ class Parser:
 
 			flush.append(self.buff.pop())
 
-		res = tuple(BufferRule(self, flush).popUntil(self.endLine))
+		res = tuple(
+			await Buffer.loadAsync(BufferRule(self, flush).popUntil(self.endLine))
+		)
 		self.buff.insert(0, flush)
 
 		if insertDefiniton:
@@ -89,23 +95,27 @@ class Parser:
 		else:
 			self.buff.insert(0, res)
 
-	def parseLine(self):
+	async def parseLine(self):
 		self.onLineStart = True
 		with self.makeTmpVar:
-			self.parseUntilLineEnd()
+			await self.parseUntilLineEnd()
 		self.definition = Buffer()
-		res = BufferRule(self, self.buff).popUntil(self.endLine).loadAll()
+		res = (
+			await Buffer.loadAsync(BufferRule(self, self.buff).popUntil(self.endLine))
+		).loadAll()
 		return res
 
 	def __iter__(self):
 		while self.buff:
-			res = self.parseLine()
+			res = executeSyncCoroutine(self.parseLine())
 			for opcode in res:
 				try:
 					yield opcode
 				except Exception as ex:
 					raise self._makeSyntaxError(f'at res<{res}>') from ex
-			BufferRule(self, self.buff).pop(self.endLine, default=None)
+			executeSyncCoroutine(
+				BufferRule(self, self.buff).pop(self.endLine, default=None)
+			)
 
 	def __str__(self):
 		return f'Parser<{self.__dict__}>'

@@ -28,20 +28,20 @@ class_ = executeSyncCoroutine(actlClass.call('class_', baseParent=actlClass))
 	useParser=True,
 	manualApply=True,
 )
-def _parseClass(parser, inp):
+async def _parseClass(parser, inp):
 	inpRule = BufferRule(parser, inp)
-	inpRule.pop(Value(class_), Token(' '))
-	className = inpRule.pop(IsInstance(VARIABLE)).one().name
+	await inpRule.pop(Value(class_), Token(' '))
+	className = (await inpRule.pop(IsInstance(VARIABLE))).one().name
 
 	parents = []
-	if inpRule.startsWith(Token('(')):
-		inpRule.pop(Token('('))
-		parentName = inpRule.pop(Parsed(Token(')'))).one().name
+	if await inpRule.startsWith(Token('(')):
+		await inpRule.pop(Token('('))
+		parentName = (await inpRule.pop(Parsed(Token(')')))).one().name
 		parents.append(parser.scope[parentName])
-		inpRule.pop(Token(')'))
+		await inpRule.pop(Token(')'))
 
-	inpRule.pop(Token(':'))
-	body = CodeBlock(parser, inp).parse()
+	await inpRule.pop(Token(':'))
+	body = await CodeBlock(parser, inp).parse()
 	buildClassOpcode = CALL_FUNCTION_STATIC(
 		className, buildClass.call, staticArgs=(className, tuple(parents), body)
 	)

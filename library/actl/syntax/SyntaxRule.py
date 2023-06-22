@@ -12,12 +12,12 @@ class SyntaxRule:
 		self._manualApply = manualApply
 		self._useParser = useParser
 
-	def match(self, parser, inp):
-		res = self._runTemplate(parser, inp)
+	async def match(self, parser, inp):
+		res = await self._runTemplate(parser, inp)
 		if res is None:
 			return None
 
-		def apply():
+		async def apply():
 			nonlocal res, inp
 
 			kwargs = {}
@@ -28,21 +28,23 @@ class SyntaxRule:
 			if self._manualApply:
 				inp.insert(0, res)
 				kwargs = {**kwargs, 'inp': inp}
-				self.func(**kwargs)
+				await self.func(**kwargs)
 				return
 
 			args = tuple(arg for arg in res if not isinstance(arg, NamedResult))
 			kwargs.update(
 				{arg.arg: arg.value for arg in res if isinstance(arg, NamedResult)}
 			)
-			res = self.func(*args, **kwargs)
+			try:
+				res = await self.func(*args, **kwargs)
+			except:
+				print(self)
+				raise
 			while hasattr(inp, 'origin'):
 				inp = inp.origin
 			inp.insert(0, res)
 
-		apply = setFunctionName(
-			apply, f'SyntaRule__{self.func.__name__}__apply'
-		)
+		apply = setFunctionName(apply, f'SyntaRule__{self.func.__name__}__apply')
 		return apply
 
 	def __repr__(self):
@@ -55,13 +57,11 @@ class SyntaxRule:
 
 			if isclass(userFunc):
 
-				def func(*args, **kwargs):
+				async def func(*args, **kwargs):
 					instance = userFunc(*args, **kwargs)
-					return instance.parse()
+					return await instance.parse()
 
-				func = setFunctionName(
-					func, userFunc.__name__
-				)
+				func = setFunctionName(func, userFunc.__name__)
 			else:
 				func = userFunc
 

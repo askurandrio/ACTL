@@ -51,32 +51,34 @@ async def copyAlllIntoScope(module, scope):
 	),
 	useParser=True,
 )
-def _parseImport(*args, parser=None):
+async def _parseImport(*args, parser=None):
 	args = BufferRule(parser, Buffer(args))
-	args.pop(Value(import_), Token(' '))
+	await args.pop(Value(import_), Token(' '))
 
-	mainModuleName = args.pop(IsInstance(VARIABLE)).one().name
-	moduleNames = tuple(args.popUntil(Or([Token(' ')], [End])))
+	mainModuleName = (await args.pop(IsInstance(VARIABLE))).one().name
+	moduleNames = tuple(await Buffer.loadAsync(args.popUntil(Or([Token(' ')], [End]))))
 
-	if args.startsWith(Token(' '), Token.of(VARIABLE('as'))):
-		args.pop(Token(' '), Token.of(VARIABLE('as')), Token(' '))
-		resultName = args.pop(IsInstance(VARIABLE)).one().name
+	if await args.startsWith(Token(' '), Token.of(VARIABLE('as'))):
+		await args.pop(Token(' '), Token.of(VARIABLE('as')), Token(' '))
+		resultName = (await args.pop(IsInstance(VARIABLE))).one().name
 	else:
 		resultName = mainModuleName
 
-	yield CALL_FUNCTION_STATIC(resultName, import_.call, staticArgs=(mainModuleName,))
+	res = [CALL_FUNCTION_STATIC(resultName, import_.call, staticArgs=(mainModuleName,))]
 
 	if moduleNames:
 		if not resultName.startswith('_tmpVar'):
 			tmpResultName = parser.makeTmpVar().name
-			yield SET_VARIABLE(tmpResultName, resultName)
+			res.append(SET_VARIABLE(tmpResultName, resultName))
 			resultName = tmpResultName
 
 		for moduleName in moduleNames:
 			if moduleName == '.':
 				continue
 
-			yield GET_ATTRIBUTE(resultName, resultName, moduleName.name)
+			res.append(GET_ATTRIBUTE(resultName, resultName, moduleName.name))
+
+	return res
 
 
 @asDecorator(
@@ -93,25 +95,34 @@ def _parseImport(*args, parser=None):
 	MatchParsed(Or([IsInstance(VARIABLE)], [Token('*')])),
 	useParser=True,
 )
-def _parseFromImport(*args, parser=None):
+async def _parseFromImport(*args, parser=None):
 	args = BufferRule(parser, Buffer(args))
-	args.pop(Value(From), Token(' '))
+	await args.pop(Value(From), Token(' '))
 
-	codeModuleName = tuple(args.popUntil(Token(' ')))
-	args.pop(Token(' '))
+	codeModuleName = tuple(await Buffer.loadAsync(args.popUntil(Token(' '))))
+	await args.pop(Token(' '))
 	codeModuleImport = Buffer(
-		(*args.pop(Value(import_)), ' ', *codeModuleName, *' as ', parser.makeTmpVar())
+		(
+			*(await args.pop(Value(import_))),
+			' ',
+			*codeModuleName,
+			*' as ',
+			parser.makeTmpVar(),
+		)
 	)
-	codeModuleImport = tuple(parser.subParser(codeModuleImport))
-	yield from codeModuleImport
-	args.pop(Token(' '))
-	moduleVarName = codeModuleImport[-1].dst
+	res = [*parser.subParser(Buffer(codeModuleImport))]
+	await args.pop(Token(' '))
+	moduleVarName = res[-1].dst
 
 	for attributeName in args:
 		if '*' == attributeName:
-			yield CALL_FUNCTION_STATIC(
-				'_', copyAlllIntoScope.call, args=(moduleVarName, '__scope__')
+			res.append(
+				CALL_FUNCTION_STATIC(
+					'_', copyAlllIntoScope.call, args=(moduleVarName, '__scope__')
+				)
 			)
 			continue
 
-		yield GET_ATTRIBUTE(attributeName.name, moduleVarName, attributeName.name)
+		res.append(GET_ATTRIBUTE(attributeName.name, moduleVarName, attributeName.name))
+
+	return res

@@ -28,78 +28,86 @@ class IfSyntax:
 		self._inp = inp
 		self._inpRule = BufferRule(self._parser, self._inp)
 
-	def parse(self):
-		self._inpRule.pop(Value(If), Token(' '))
-		self._firstConditionFrame = tuple(self._inpRule.pop(Parsed(Token(':'))))
-		self._inpRule.pop(Token(':'))
-		if CodeBlock(self._parser, self._inp).isFullCodeBlock():
-			conditions, elseCode = self._getFromFullCodeBlock()
+	async def parse(self):
+		await self._inpRule.pop(Value(If), Token(' '))
+		self._firstConditionFrame = tuple(await self._inpRule.pop(Parsed(Token(':'))))
+		await self._inpRule.pop(Token(':'))
+		if await CodeBlock(self._parser, self._inp).isFullCodeBlock():
+			conditions, elseCode = await self._getFromFullCodeBlock()
 		else:
-			conditions, elseCode = self._getFromInlineCodeBlock()
+			conditions, elseCode = await self._getFromInlineCodeBlock()
 		if_ = executeSyncCoroutine(If.call(*conditions, elseCode=elseCode))
 		self._inp.insert(0, [if_])
 
-	def _getFromFullCodeBlock(self):
-		def popCodeBlock():
-			code = Buffer(CodeBlock(self._parser, self._inp).parseFullCodeBlock())
+	async def _getFromFullCodeBlock(self):
+		async def popCodeBlock():
+			code = Buffer(await CodeBlock(self._parser, self._inp).parseFullCodeBlock())
 			if self._inp.startsWith('\n'):
 				self._inp.pop()
 			return tuple(code)
 
-		def parseUntilLineEnd():
-			self._parser.subParser(
+		async def parseUntilLineEnd():
+			await self._parser.subParser(
 				self._inp, self._ELIF_OR_ELSE_OR_ENDLINE
 			).parseUntilLineEnd()
-			line = BufferRule(self._parser, self._inp).popUntil(
-				self._ELIF_OR_ELSE_OR_ENDLINE
+			line = await Buffer.loadAsync(
+				BufferRule(self._parser, self._inp).popUntil(
+					self._ELIF_OR_ELSE_OR_ENDLINE
+				)
 			)
 			self._inp.insert(0, line)
 
-		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
-		parseUntilLineEnd()
-		while self._inpRule.startsWith(Value(objects.elif_)):
-			self._inpRule.pop(Value(objects.elif_), Token(' '))
-			frame = Parsed(Token(':'))(self._parser, self._inp)
-			self._inpRule.pop(Token(':'))
-			conditions.append((tuple(frame), popCodeBlock()))
-			parseUntilLineEnd()
+		conditions = [(tuple(self._firstConditionFrame), await popCodeBlock())]
+		await parseUntilLineEnd()
+		while await self._inpRule.startsWith(Value(objects.elif_)):
+			await self._inpRule.pop(Value(objects.elif_), Token(' '))
+			frame = await Parsed(Token(':'))(self._parser, self._inp)
+			await self._inpRule.pop(Token(':'))
+			conditions.append((tuple(frame), await popCodeBlock()))
+			await parseUntilLineEnd()
 
-		if self._inpRule.startsWith(Value(objects.else_)):
-			self._inpRule.pop(Value(objects.else_), Token(':'))
-			elseCode = popCodeBlock()
+		if await self._inpRule.startsWith(Value(objects.else_)):
+			await self._inpRule.pop(Value(objects.else_), Token(':'))
+			elseCode = await popCodeBlock()
 		else:
 			elseCode = None
 
 		return tuple(conditions), elseCode
 
-	def _getFromInlineCodeBlock(self):
-		def popCodeBlock():
-			self._parser.subParser(self._inp, self._INLINE_IF_END).parseUntilLineEnd()
-			codeBlock = BufferRule(self._parser, self._inp).popUntil(
-				self._INLINE_IF_END
+	async def _getFromInlineCodeBlock(self):
+		async def popCodeBlock():
+			await self._parser.subParser(
+				self._inp, self._INLINE_IF_END
+			).parseUntilLineEnd()
+			codeBlock = await Buffer.loadAsync(
+				BufferRule(self._parser, self._inp).popUntil(self._INLINE_IF_END)
 			)
 			return tuple(codeBlock)
 
 		self._inp.pop()
-		conditions = [(tuple(self._firstConditionFrame), popCodeBlock())]
+		conditions = [(tuple(self._firstConditionFrame), await popCodeBlock())]
 
-		while self._inpRule.startsWith(Token(' '), Value(objects.elif_)):
+		while await self._inpRule.startsWith(Token(' '), Value(objects.elif_)):
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
-			frame = Parsed(Token(':'))(self._parser, self._inp)
+			frame = await Parsed(Token(':'))(self._parser, self._inp)
 			self._inp.pop()
 			self._inp.pop()
-			conditions.append((tuple(frame), popCodeBlock()))
+			conditions.append((tuple(frame), await popCodeBlock()))
 
-		if self._inpRule.startsWith(Token(' '), Value(objects.else_)):
+		if await self._inpRule.startsWith(Token(' '), Value(objects.else_)):
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
 
-			self._parser.subParser(self._inp, Token('\n')).parseUntilLineEnd()
-			elseCode = tuple(BufferRule(self._parser, self._inp).popUntil(Token('\n')))
+			await self._parser.subParser(self._inp, Token('\n')).parseUntilLineEnd()
+			elseCode = tuple(
+				await Buffer.loadAsync(
+					BufferRule(self._parser, self._inp).popUntil(Token('\n'))
+				)
+			)
 		else:
 			elseCode = None
 
