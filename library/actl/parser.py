@@ -70,30 +70,37 @@ class Parser:
 		return False
 
 	async def parseUntilLineEnd(self, insertDefiniton=True, checkEndLineInBuff=False):
-		flush = Buffer()
+		try:
+			flush = Buffer()
 
-		while (not await BufferRule(self, flush).contains(self.endLine)) and self.buff:
-			isApplied = await self._applyRule()
-			if isApplied:
-				self.buff.insert(0, flush)
-				flush = Buffer()
-				if checkEndLineInBuff and await BufferRule(self, self.buff).startsWith(
-					self.endLine
-				):
-					return
-				continue
+			while (not await BufferRule(self, flush).contains(self.endLine)) and self.buff:
+				isApplied = await self._applyRule()
+				if isApplied:
+					self.buff.insert(0, flush)
+					flush = Buffer()
+					if checkEndLineInBuff and await BufferRule(self, self.buff).startsWith(
+						self.endLine
+					):
+						return
+					continue
 
-			flush.append(self.buff.pop())
+				flush.append(self.buff.pop())
 
-		res = tuple(
-			await Buffer.loadAsync(BufferRule(self, flush).popUntil(self.endLine))
-		)
-		self.buff.insert(0, flush)
+			res = tuple(
+				await Buffer.loadAsync(BufferRule(self, flush).popUntil(self.endLine))
+			)
+			self.buff.insert(0, flush)
 
-		if insertDefiniton:
-			self.buff.insert(0, self.definition + res)
-		else:
-			self.buff.insert(0, res)
+			if insertDefiniton:
+				self.buff.insert(0, self.definition + res)
+			else:
+				self.buff.insert(0, res)
+		except:
+			self.definition = Buffer()
+			(
+				await Buffer.loadAsync(BufferRule(self, self.buff).popUntil(self.endLine))
+			).loadAll()
+			raise
 
 	async def parseLine(self):
 		self.onLineStart = True

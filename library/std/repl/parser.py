@@ -22,7 +22,7 @@ class Parser(actl.Parser):
 
 	@staticmethod
 	def _genPrintLastResult(opcode):
-		if type(opcode) in (actl.opcodes.SET_VARIABLE, actl.opcodes.SET_ATTRIBUTE):
+		if type(opcode) in (actl.opcodes.SET_VARIABLE, actl.opcodes.SET_ATTRIBUTE, actl.opcodes.RETURN):
 			return ()
 
 		if actl.opcodes.VARIABLE == opcode:
