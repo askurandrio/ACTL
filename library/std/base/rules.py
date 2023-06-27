@@ -82,7 +82,7 @@ class VariableTemplate(Template):
 		return [variable]
 
 
-@RULES.add(Token('return '), Parsed(), IsInstance(VARIABLE))
+@RULES.add(Token('return '), ParsedOld(), IsInstance(VARIABLE))
 async def _parseReturn(*args):
 	*_, returnVar = args
 
@@ -99,7 +99,7 @@ async def _parseVar(var):
 	Token(' '),
 	Token('='),
 	Token(' '),
-	Parsed(),
+	ParsedOld(),
 	IsInstance(VARIABLE),
 )
 async def parseSetVariable(dst, _, _1, _2, src):
@@ -150,7 +150,7 @@ class _ParseFunctionCall:
 		else:
 			argName = None
 
-		argCode = await self._inpRule.pop(Parsed(Or([Token(')')], [Token(',')])))
+		argCode = await self._inpRule.pop(ParsedOld(Or([Token(')')], [Token(',')])))
 		while argCode[-1] in (' ', '\n'):
 			argCode.pop(-1)
 		argVar = argCode.pop(-1).name
@@ -279,7 +279,7 @@ async def _parseGetAttribute(object_, _, attribute, parser):
 	Token(' '),
 	Token('='),
 	Token(' '),
-	Parsed(),
+	ParsedOld(),
 	IsInstance(VARIABLE),
 )
 async def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
@@ -305,7 +305,7 @@ async def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
 		'operator',
 	),
 	Token(' '),
-	Parsed(),
+	ParsedOld(),
 	IsInstance(VARIABLE),
 	useParser=True,
 )

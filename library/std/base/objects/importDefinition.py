@@ -4,7 +4,7 @@ from actl.syntax import (
 	Value,
 	Token,
 	IsInstance,
-	MatchParsed,
+	MatchParsedOld,
 	Many,
 	Or,
 	End,
@@ -44,10 +44,10 @@ async def copyAlllIntoScope(module, scope):
 	Value(import_),
 	Token(' '),
 	IsInstance(VARIABLE),
-	Many(Token('.'), MatchParsed(IsInstance(VARIABLE)), minMatches=0),
+	Many(Token('.'), MatchParsedOld(IsInstance(VARIABLE)), minMatches=0),
 	Maybe(
 		Token(' '),
-		MatchParsed(Token.of(VARIABLE('as')), Token(' '), IsInstance(VARIABLE)),
+		MatchParsedOld(Token.of(VARIABLE('as')), Token(' '), IsInstance(VARIABLE)),
 	),
 	useParser=True,
 )
@@ -87,12 +87,12 @@ async def _parseImport(*args, parser=None):
 @SyntaxRule.wrap(
 	Value(From),
 	Token(' '),
-	MatchParsed(IsInstance(VARIABLE)),
-	Many(Token('.'), MatchParsed(IsInstance(VARIABLE)), minMatches=0),
+	MatchParsedOld(IsInstance(VARIABLE)),
+	Many(Token('.'), MatchParsedOld(IsInstance(VARIABLE)), minMatches=0),
 	Token(' '),
-	MatchParsed(Value(import_)),
+	MatchParsedOld(Value(import_)),
 	Token(' '),
-	MatchParsed(Or([IsInstance(VARIABLE)], [Token('*')])),
+	MatchParsedOld(Or([IsInstance(VARIABLE)], [Token('*')])),
 	useParser=True,
 )
 async def _parseFromImport(*args, parser=None):

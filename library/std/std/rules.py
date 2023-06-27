@@ -15,7 +15,7 @@ async def _parseSlice(parser, inp):
 	collectionVariable = (await inpRule.pop(IsInstance(VARIABLE))).one()
 	await inpRule.pop(Token('['))
 
-	startDeclarationCode = await inpRule.pop(Parsed(Token(':')))
+	startDeclarationCode = await inpRule.pop(ParsedOld(Token(':')))
 	startVariable = startDeclarationCode.pop(-1)
 	parser.define(*startDeclarationCode)
 	await inpRule.pop(Token(':]'))
@@ -61,7 +61,7 @@ async def _parseVector(parser, inp):
 		appendResultVarName = parser.makeTmpVar().name
 
 		while not await inpRule.startsWith(Token(']')):
-			elementCode = await inpRule.pop(Parsed(Or([Token(']')], [Token(',')])))
+			elementCode = await inpRule.pop(ParsedOld(Or([Token(']')], [Token(',')])))
 			elementVarName = elementCode.pop(-1).name
 			parser.define(
 				*elementCode,
@@ -102,7 +102,7 @@ def disableRules(rules, template):
 	Many(
 		Token(','),
 		Maybe(Token(' ')),
-		disableRules([parseSetVariable, '_parseConstVector'], [Parsed()]),
+		disableRules([parseSetVariable, '_parseConstVector'], [ParsedOld()]),
 		IsInstance(VARIABLE),
 		minMatches=0,
 	),

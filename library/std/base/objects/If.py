@@ -1,6 +1,6 @@
 from actl import objects
 from actl.Buffer import Buffer
-from actl.syntax import SyntaxRule, Value, Token, Parsed, Or, BufferRule
+from actl.syntax import SyntaxRule, Value, Token, ParsedOld, Or, BufferRule
 from actl.utils import asDecorator, executeSyncCoroutine
 from std.base.rules import CodeBlock
 
@@ -30,7 +30,9 @@ class IfSyntax:
 
 	async def parse(self):
 		await self._inpRule.pop(Value(If), Token(' '))
-		self._firstConditionFrame = tuple(await self._inpRule.pop(Parsed(Token(':'))))
+		self._firstConditionFrame = tuple(
+			await self._inpRule.pop(ParsedOld(Token(':')))
+		)
 		await self._inpRule.pop(Token(':'))
 		if await CodeBlock(self._parser, self._inp).isFullCodeBlock():
 			conditions, elseCode = await self._getFromFullCodeBlock()
@@ -61,7 +63,7 @@ class IfSyntax:
 		await parseUntilLineEnd()
 		while await self._inpRule.startsWith(Value(objects.elif_)):
 			await self._inpRule.pop(Value(objects.elif_), Token(' '))
-			frame = await Parsed(Token(':'))(self._parser, self._inp)
+			frame = await ParsedOld(Token(':'))(self._parser, self._inp)
 			await self._inpRule.pop(Token(':'))
 			conditions.append((tuple(frame), await popCodeBlock()))
 			await parseUntilLineEnd()
@@ -91,7 +93,7 @@ class IfSyntax:
 			self._inp.pop()
 			self._inp.pop()
 			self._inp.pop()
-			frame = await Parsed(Token(':'))(self._parser, self._inp)
+			frame = await ParsedOld(Token(':'))(self._parser, self._inp)
 			self._inp.pop()
 			self._inp.pop()
 			conditions.append((tuple(frame), await popCodeBlock()))

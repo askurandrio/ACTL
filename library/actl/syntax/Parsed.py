@@ -6,7 +6,7 @@ from actl.syntax.AbstractTemplate import AbstractTemplate
 from actl.Buffer import Buffer
 
 
-class Parsed(AbstractTemplate):
+class ParsedOld(AbstractTemplate):
 	__slots__ = ('until', 'checkEndLineInBuff')
 
 	def __init__(self, *templates, checkEndLineInBuff=False):
@@ -29,7 +29,7 @@ class Parsed(AbstractTemplate):
 		return tuple(res)
 
 
-class MatchParsed(Parsed):
+class MatchParsedOld(ParsedOld):
 	def __init__(self, *templates):
 		super().__init__(Or(templates, [End]), checkEndLineInBuff=True)
 
