@@ -82,7 +82,7 @@ class VariableTemplate(Template):
 		return [variable]
 
 
-@RULES.add(Token('return '), ParsedOld(), IsInstance(VARIABLE))
+@RULES.add(Token('return '), Parsed(IsInstance(VARIABLE)))
 async def _parseReturn(*args):
 	*_, returnVar = args
 
@@ -99,8 +99,7 @@ async def _parseVar(var):
 	Token(' '),
 	Token('='),
 	Token(' '),
-	ParsedOld(),
-	IsInstance(VARIABLE),
+	Parsed(IsInstance(VARIABLE)),
 )
 async def parseSetVariable(dst, _, _1, _2, src):
 	return [SET_VARIABLE(dst.name, src.name)]
@@ -279,8 +278,7 @@ async def _parseGetAttribute(object_, _, attribute, parser):
 	Token(' '),
 	Token('='),
 	Token(' '),
-	ParsedOld(),
-	IsInstance(VARIABLE),
+	Parsed(IsInstance(VARIABLE)),
 )
 async def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
 	return [SET_ATTRIBUTE(object=object_.name, attribute=attribute.name, src=src.name)]
@@ -305,8 +303,7 @@ async def _parseSetAttribute(object_, _, attribute, _1, _2, _3, src):
 		'operator',
 	),
 	Token(' '),
-	ParsedOld(),
-	IsInstance(VARIABLE),
+	Parsed(IsInstance(VARIABLE)),
 	useParser=True,
 )
 async def _parseOperator(first, _, _1, second, operator, parser):

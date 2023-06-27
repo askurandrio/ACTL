@@ -6,6 +6,27 @@ from actl.syntax.AbstractTemplate import AbstractTemplate
 from actl.Buffer import Buffer
 
 
+class Parsed(AbstractTemplate):
+	__slots__ = ('template', 'endLine')
+
+	def __init__(self, *template, endLine=None):
+		template = Template(*template)
+
+		if endLine is not None:
+			endLine = Template(*endLine)
+
+		super().__init__(template, endLine)
+
+	async def __call__(self, parser, buff):
+		origin = getattr(buff, 'origin', buff)
+		subParser = parser.subParser(origin, self.endLine)
+
+		await subParser.parseUntilLineEnd(insertDefiniton=False)
+		parser.definition += subParser.definition
+
+		return await self.template(parser, buff)
+
+
 class ParsedOld(AbstractTemplate):
 	__slots__ = ('until', 'checkEndLineInBuff')
 
