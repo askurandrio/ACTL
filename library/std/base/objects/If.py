@@ -1,7 +1,7 @@
 from actl import objects
 from actl.Buffer import Buffer
 from actl.syntax import SyntaxRule, Value, Token, ParsedOld, Or, BufferRule
-from actl.utils import asDecorator, executeSyncCoroutine
+from actl.utils import asDecorator, executeSyncCoroutine, loadCoroutine
 from std.base.rules import CodeBlock
 
 
@@ -49,9 +49,7 @@ class IfSyntax:
 			return tuple(code)
 
 		async def parseUntilLineEnd():
-			await self._parser.subParser(
-				self._inp, self._ELIF_OR_ELSE_OR_ENDLINE
-			).parseUntilLineEnd()
+			self._inpRule.parseUntil(self._ELIF_OR_ELSE_OR_ENDLINE)
 			line = await Buffer.loadAsync(
 				BufferRule(self._parser, self._inp).popUntil(
 					self._ELIF_OR_ELSE_OR_ENDLINE
@@ -78,9 +76,7 @@ class IfSyntax:
 
 	async def _getFromInlineCodeBlock(self):
 		async def popCodeBlock():
-			await self._parser.subParser(
-				self._inp, self._INLINE_IF_END
-			).parseUntilLineEnd()
+			self._inpRule.parseUntil(self._INLINE_IF_END)
 			codeBlock = await Buffer.loadAsync(
 				BufferRule(self._parser, self._inp).popUntil(self._INLINE_IF_END)
 			)
@@ -104,7 +100,10 @@ class IfSyntax:
 			self._inp.pop()
 			self._inp.pop()
 
-			await self._parser.subParser(self._inp, Token('\n')).parseUntilLineEnd()
+			definition, _ = loadCoroutine(
+				self._parser.subParser(self._inp, Token('\n')).parseUntilLineEnd()
+			)
+			self._inp.insert(0, definition)
 			elseCode = tuple(
 				await Buffer.loadAsync(
 					BufferRule(self._parser, self._inp).popUntil(Token('\n'))

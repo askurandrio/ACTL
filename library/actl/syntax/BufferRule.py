@@ -1,5 +1,6 @@
 from actl.Buffer import TransactionBuffer, Buffer
 from actl.syntax.Template import Template
+from actl.utils import loadCoroutine
 
 
 _nothing = object()
@@ -10,8 +11,11 @@ class BufferRule:
 		self._parser = parser
 		self._buff = buff
 
-	async def parseUntil(self, until):
-		await self._parser.subParser(self._buff, until).parseUntilLineEnd()
+	def parseUntil(self, until):
+		definition, _ = loadCoroutine(
+			self._parser.subParser(self._buff, until).parseUntilLineEnd()
+		)
+		self._buff.insert(0, definition)
 
 	async def get(self, *template):
 		template = Template(*template)

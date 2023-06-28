@@ -18,23 +18,29 @@ class SyntaxRules:
 			if isinstance(key, SyntaxRule):
 				return key
 
-			return next(
-				rule
-				for rule in self._rules
-				if isinstance(rule, SyntaxRule) and rule.func.__name__ == key
-			)
+			for rule in self._rules:
+				if isinstance(rule, SyntaxRule) and rule.func.__name__ == key:
+					return rule
+
+			return None
 
 		rules = [lookup(rule) for rule in rules]
 		indexes = []
 
 		for rule in rules:
-			index = self._rules.index(rule)
+			if rule in self._rules:
+				index = self._rules.index(rule)
+			else:
+				index = None
 			indexes.append(index)
-			del self._rules[index]
+			if index is not None:
+				del self._rules[index]
 
 		yield
 
 		for index, rule in reversed(tuple(zip(indexes, rules))):
+			if index is None:
+				continue
 			self._rules.insert(index, rule)
 
 	async def match(self, parser, buff):

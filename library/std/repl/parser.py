@@ -14,6 +14,7 @@ class Parser(actl.Parser):
 
 	async def parseLine(self):
 		res = await super().parseLine()
+		res.loadAll()
 
 		if res:
 			res += self._genPrintLastResult(res[-1])
@@ -22,7 +23,11 @@ class Parser(actl.Parser):
 
 	@staticmethod
 	def _genPrintLastResult(opcode):
-		if type(opcode) in (actl.opcodes.SET_VARIABLE, actl.opcodes.SET_ATTRIBUTE, actl.opcodes.RETURN):
+		if type(opcode) in (
+			actl.opcodes.SET_VARIABLE,
+			actl.opcodes.SET_ATTRIBUTE,
+			actl.opcodes.RETURN,
+		):
 			return ()
 
 		if actl.opcodes.VARIABLE == opcode:

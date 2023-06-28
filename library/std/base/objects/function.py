@@ -72,7 +72,7 @@ class _ParseFunction:
 		await self._inpRule.pop(Token('('))
 
 		while not await self._inpRule.startsWith(Token(')')):
-			await self._inpRule.parseUntil(IsInstance(VARIABLE))
+			self._inpRule.parseUntil(IsInstance(VARIABLE))
 			argVar = (await self._inpRule.pop(IsInstance(VARIABLE))).one().name
 			args.append(argVar)
 			if await self._inpRule.startsWith(Token(',')):

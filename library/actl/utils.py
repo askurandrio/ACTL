@@ -101,6 +101,19 @@ def executeSyncCoroutine(coroutine):
 		)
 
 
+def loadCoroutine(coroutine):
+	result = None
+
+	def loadResult():
+		nonlocal result
+
+		result = yield from coroutine.__await__()
+
+	collection = tuple(loadResult())
+
+	return collection, result
+
+
 def getEternalIdx():
 	frame = inspect.currentframe().f_back
 	codePlaceId = frame.f_code.co_filename, frame.f_lineno
@@ -139,3 +152,11 @@ class Inside:
 
 	def __exit__(self, *_):
 		self.stack -= 1
+
+
+class generatorToAwaitable:
+	def __init__(self, *head):
+		self._head = iter(head)
+
+	def __await__(self):
+		yield from self._head

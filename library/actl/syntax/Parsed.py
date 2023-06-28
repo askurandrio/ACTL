@@ -4,6 +4,7 @@ from actl.syntax.Template import Template
 from actl.syntax.Or import Or
 from actl.syntax.AbstractTemplate import AbstractTemplate
 from actl.Buffer import Buffer
+from actl.utils import loadCoroutine
 
 
 class Parsed(AbstractTemplate):
@@ -20,10 +21,7 @@ class Parsed(AbstractTemplate):
 	async def __call__(self, parser, buff):
 		origin = getattr(buff, 'origin', buff)
 		subParser = parser.subParser(origin, self.endLine)
-
-		await subParser.parseUntilLineEnd(insertDefiniton=False)
-		parser.definition += subParser.definition
-
+		await subParser.parseUntilLineEnd()
 		return await self.template(parser, buff)
 
 
@@ -41,11 +39,13 @@ class ParsedOld(AbstractTemplate):
 		origin = getattr(buff, 'origin', buff)
 		subParser = parser.subParser(origin, self.until)
 		if self.until is None:
-			await subParser.parseUntilLineEnd(insertDefiniton=False)
-			parser.definition += subParser.definition
+			await subParser.parseUntilLineEnd()
 			return ()
 
-		await subParser.parseUntilLineEnd(checkEndLineInBuff=self.checkEndLineInBuff)
+		definition, _ = loadCoroutine(
+			subParser.parseUntilLineEnd(checkEndLineInBuff=self.checkEndLineInBuff)
+		)
+		origin.insert(0, definition)
 		res = await Buffer.loadAsync(BufferRule(parser, buff).popUntil(self.until))
 		return tuple(res)
 

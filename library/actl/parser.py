@@ -4,7 +4,7 @@ import os
 from actl.Buffer import Buffer
 from actl.syntax import Token, BufferRule
 from actl.opcodes import VARIABLE
-from actl.utils import Inside, executeSyncCoroutine
+from actl.utils import Inside, executeSyncCoroutine, loadCoroutine
 
 
 class Parser:
@@ -25,14 +25,10 @@ class Parser:
 		self.rules = rules
 		self.buff = buff
 		self.endLine = endLine
-		self.definition = Buffer()
 		if makeTmpVar is None:
 			makeTmpVar = _TmpVarFactory()
 		self.makeTmpVar = makeTmpVar
 		self.onLineStart = onLineStart
-
-	def define(self, *opcodes):
-		self.definition.append(*opcodes)
 
 	def _makeSyntaxError(self, message=''):
 		message = f'Error during parsing at buff<{self.buff}>{message}'
@@ -69,18 +65,20 @@ class Parser:
 			return True
 		return False
 
-	async def parseUntilLineEnd(self, insertDefiniton=True, checkEndLineInBuff=False):
+	async def parseUntilLineEnd(self, checkEndLineInBuff=False):
 		try:
 			flush = Buffer()
 
-			while (not await BufferRule(self, flush).contains(self.endLine)) and self.buff:
+			while (
+				not await BufferRule(self, flush).contains(self.endLine)
+			) and self.buff:
 				isApplied = await self._applyRule()
 				if isApplied:
 					self.buff.insert(0, flush)
 					flush = Buffer()
-					if checkEndLineInBuff and await BufferRule(self, self.buff).startsWith(
-						self.endLine
-					):
+					if checkEndLineInBuff and await BufferRule(
+						self, self.buff
+					).startsWith(self.endLine):
 						return
 					continue
 
@@ -90,27 +88,25 @@ class Parser:
 				await Buffer.loadAsync(BufferRule(self, flush).popUntil(self.endLine))
 			)
 			self.buff.insert(0, flush)
-
-			if insertDefiniton:
-				self.buff.insert(0, self.definition + res)
-			else:
-				self.buff.insert(0, res)
+			self.buff.insert(0, res)
 		except:
-			self.definition = Buffer()
 			(
-				await Buffer.loadAsync(BufferRule(self, self.buff).popUntil(self.endLine))
+				await Buffer.loadAsync(
+					BufferRule(self, self.buff).popUntil(self.endLine)
+				)
 			).loadAll()
 			raise
 
 	async def parseLine(self):
 		self.onLineStart = True
 		with self.makeTmpVar:
-			await self.parseUntilLineEnd()
-		self.definition = Buffer()
+			definition, _ = loadCoroutine(self.parseUntilLineEnd())
+
 		res = (
 			await Buffer.loadAsync(BufferRule(self, self.buff).popUntil(self.endLine))
 		).loadAll()
-		return res
+
+		return Buffer(definition) + res
 
 	def __iter__(self):
 		while self.buff:

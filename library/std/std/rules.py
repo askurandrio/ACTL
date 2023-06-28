@@ -1,7 +1,7 @@
 from actl.syntax import *
 from actl.opcodes import *
 from actl.objects import NativeFunction, PyToA
-from actl import executeSyncCoroutine
+from actl import executeSyncCoroutine, generatorToAwaitable
 from std.base.executor import bindExecutor
 from std.base.rules import RULES as stdRULES, parseSetVariable
 
@@ -17,11 +17,11 @@ async def _parseSlice(parser, inp):
 
 	startDeclarationCode = await inpRule.pop(ParsedOld(Token(':')))
 	startVariable = startDeclarationCode.pop(-1)
-	parser.define(*startDeclarationCode)
+	await generatorToAwaitable(*startDeclarationCode)
 	await inpRule.pop(Token(':]'))
 
 	sliceVariable = parser.makeTmpVar()
-	parser.define(
+	await generatorToAwaitable(
 		CALL_FUNCTION_STATIC(
 			dst=sliceVariable.name,
 			function='Slice',
@@ -30,14 +30,14 @@ async def _parseSlice(parser, inp):
 	)
 
 	getItemMethodVariable = parser.makeTmpVar()
-	parser.define(
+	await generatorToAwaitable(
 		GET_ATTRIBUTE(
 			getItemMethodVariable.name, collectionVariable.name, '__getItem__'
 		)
 	)
 
 	subCollectionVariable = parser.makeTmpVar()
-	parser.define(
+	await generatorToAwaitable(
 		CALL_FUNCTION(
 			subCollectionVariable.name,
 			getItemMethodVariable.name,
@@ -53,17 +53,17 @@ async def _parseVector(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	await inpRule.pop(Token('['))
 	dst = parser.makeTmpVar()
-	parser.define(CALL_FUNCTION_STATIC(dst=dst.name, function='Vector'))
+	await generatorToAwaitable(CALL_FUNCTION_STATIC(dst=dst.name, function='Vector'))
 
 	if not await inpRule.startsWith(Token(']')):
 		appendVarName = parser.makeTmpVar().name
-		parser.define(GET_ATTRIBUTE(appendVarName, dst.name, 'append'))
+		await generatorToAwaitable(GET_ATTRIBUTE(appendVarName, dst.name, 'append'))
 		appendResultVarName = parser.makeTmpVar().name
 
 		while not await inpRule.startsWith(Token(']')):
 			elementCode = await inpRule.pop(ParsedOld(Or([Token(']')], [Token(',')])))
 			elementVarName = elementCode.pop(-1).name
-			parser.define(
+			await generatorToAwaitable(
 				*elementCode,
 				CALL_FUNCTION(appendResultVarName, appendVarName, args=[elementVarName])
 			)
@@ -102,60 +102,61 @@ def disableRules(rules, template):
 	Many(
 		Token(','),
 		Maybe(Token(' ')),
-		disableRules([parseSetVariable, '_parseConstVector'], [ParsedOld()]),
+		disableRules(
+			[parseSetVariable, '_parseConstVector', '_parseSetWithUnpack'],
+			[ParsedOld()],
+		),
 		IsInstance(VARIABLE),
 		minMatches=0,
 	),
+	Not(Token(' '), Token('=')),
 	useParser=True,
 )
 async def _parseConstVector(*inp, parser):
 	args = [arg.name for arg in inp if VARIABLE == arg]
 	dst = parser.makeTmpVar()
 
-	parser.define(CALL_FUNCTION_STATIC(dst.name, vector__of.call, args=args))
+	await generatorToAwaitable(
+		CALL_FUNCTION_STATIC(dst.name, vector__of.call, args=args)
+	)
 
 	return [dst]
 
 
-@CustomTemplate.create
-async def _setVariableDstIsUnpack(parser, buff):
-	setVariableOpcode = buff.get()
-	if SET_VARIABLE != setVariableOpcode:
-		return None
-
-	dst = setVariableOpcode.dst
-	if not parser.makeTmpVar.isTmpVar(dst):
-		return None
-
-	dstDefinition = parser.definition.filter(
-		lambda opcode: (CALL_FUNCTION_STATIC == opcode) and (opcode.dst == dst)
-	)
-	if not dstDefinition:
-		return None
-
-	dstDefinition = dstDefinition.one()
-	if dstDefinition.function != vector__of.call:
-		return None
-
-	return [[buff.pop(), dstDefinition]]
-
-
-@RULES.add(_setVariableDstIsUnpack, useParser=True)
-async def _parseSetWithUnpack(setVariableInfo, parser):
-	setVariableOpcode, dstDefinition = setVariableInfo
-	parser.definition = parser.definition.filter(lambda opcode: opcode != dstDefinition)
-
+@RULES.add(
+	IsInstance(VARIABLE),
+	Token(', '),
+	IsInstance(VARIABLE),
+	Many(
+		Token(','),
+		Maybe(Token(' ')),
+		disableRules([parseSetVariable, '_parseSetWithUnpack'], [ParsedOld()]),
+		IsInstance(VARIABLE),
+		minMatches=0,
+	),
+	Token(' '),
+	Token('='),
+	Token(' '),
+	Parsed(IsInstance(VARIABLE)),
+	useParser=True,
+)
+async def _parseSetWithUnpack(*inp, parser):
 	with parser.makeTmpVar.onNestedScope():
 		srcAsIter = parser.makeTmpVar().name
 		srcIterNext = parser.makeTmpVar().name
 
-	parser.define(
-		CALL_FUNCTION(srcAsIter, 'Iter', args=[setVariableOpcode.src]),
+	await generatorToAwaitable(
+		CALL_FUNCTION(srcAsIter, 'Iter', args=[inp[-1].name]),
 		GET_ATTRIBUTE(srcIterNext, srcAsIter, 'next'),
 	)
 
-	for arg in dstDefinition.args:
-		parser.define(CALL_FUNCTION(arg, srcIterNext))
+	for arg in inp:
+		if VARIABLE == arg:
+			await generatorToAwaitable(CALL_FUNCTION(arg.name, srcIterNext))
+			continue
+
+		if '=' == arg:
+			break
 
 	return ()
 
@@ -172,7 +173,7 @@ async def _parseNumber(*args, parser=None):
 	number = ''.join(args)
 	aProxy = executeSyncCoroutine(PyToA.call(number))
 	dst = parser.makeTmpVar()
-	parser.define(
+	await generatorToAwaitable(
 		CALL_FUNCTION_STATIC(dst=dst.name, function='Number', staticArgs=[aProxy])
 	)
 	return [dst]

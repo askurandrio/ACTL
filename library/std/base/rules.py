@@ -12,6 +12,7 @@ from actl.opcodes import (
 	GET_ATTRIBUTE,
 	SET_ATTRIBUTE,
 )
+from actl.utils import generatorToAwaitable
 
 
 RULES = SyntaxRules()
@@ -114,7 +115,7 @@ async def _parseString(inp, parser):
 	while start:
 		assert start.pop(0) == inp.pop()
 	dst = parser.makeTmpVar()
-	parser.define(
+	await generatorToAwaitable(
 		CALL_FUNCTION_STATIC(dst=dst.name, function='String', staticArgs=[string])
 	)
 
@@ -133,13 +134,11 @@ class _ParseFunctionCall:
 		return functionVar.name
 
 	async def _parseArg(self):
-		await self._inpRule.parseUntil(
-			Or([IsInstance(VARIABLE)], [Token(')')], [Token(',')])
-		)
+		self._inpRule.parseUntil(Or([IsInstance(VARIABLE)], [Token(')')], [Token(',')]))
 
 		if await self._inpRule.startsWith(IsInstance(VARIABLE)):
 			var = (await self._inpRule.pop(IsInstance(VARIABLE))).one()
-			await self._inpRule.parseUntil(Or([Token('=')], [Token(')')], [Token(',')]))
+			self._inpRule.parseUntil(Or([Token('=')], [Token(')')], [Token(',')]))
 			if await self._inpRule.startsWith(Token('=')):
 				argName = var.name
 				await self._inpRule.pop(Token('='))
@@ -153,7 +152,7 @@ class _ParseFunctionCall:
 		while argCode[-1] in (' ', '\n'):
 			argCode.pop(-1)
 		argVar = argCode.pop(-1).name
-		self._parser.define(*argCode)
+		await generatorToAwaitable(*argCode)
 		return argName, argVar
 
 	async def parse(self):
@@ -179,7 +178,7 @@ class _ParseFunctionCall:
 
 		await self._inpRule.pop(Token(')'))
 		dst = self._parser.makeTmpVar()
-		self._parser.define(
+		await generatorToAwaitable(
 			CALL_FUNCTION(
 				dst.name, functionName, typeb=opToken, args=args, kwargs=kwargs
 			)
@@ -266,7 +265,7 @@ class CodeBlock:
 async def _parseGetAttribute(object_, _, attribute, parser):
 	dst = parser.makeTmpVar()
 
-	parser.define(GET_ATTRIBUTE(dst.name, object_.name, attribute.name))
+	await generatorToAwaitable(GET_ATTRIBUTE(dst.name, object_.name, attribute.name))
 
 	return [dst]
 
@@ -310,7 +309,7 @@ async def _parseOperator(first, _, _1, second, operator, parser):
 	dst = parser.makeTmpVar()
 	operator = ''.join(operator)
 
-	parser.define(
+	await generatorToAwaitable(
 		CALL_OPERATOR(
 			dst=dst.name, first=first.name, operator=operator, second=second.name
 		)
