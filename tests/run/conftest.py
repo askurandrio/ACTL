@@ -17,9 +17,19 @@ class _Run:
 			args=[self._actlBinary, *args],
 			stdin=subprocess.PIPE,
 			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE,
 		)
 
-		fcntl.fcntl(self.process.stdout.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
+		for file in (self.process.stdout, self.process.stderr):
+			fcntl.fcntl(file.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
+
+		self._stderr = ''
+
+	def readStdErr(self, count=None):
+		chars = self.process.stderr.read(count)
+		if chars:
+			self._stderr += chars.decode()
+		return self._stderr
 
 	def writeLine(self, line):
 		self.process.stdin.write(f'{line}\n'.encode())
@@ -35,6 +45,9 @@ class _Run:
 			char = self.process.stdout.read(1)
 			if not char:
 				assert self.process.poll() is None, self.process.returncode
+				self.readStdErr(1)
+				if self._stderr:
+					raise RuntimeError('stderr is not empty')
 				time.sleep(0.1)
 				continue
 
@@ -74,6 +87,7 @@ def run(cleanupOnSuccess, cleanupOnFailure):
 			f"'{cmd}' cleanup on failure with returncode {run_.process.returncode}",
 			file=sys.stderr,
 		)
+		print(run_.readStdErr(), file=sys.stderr)
 
 	@cleanupOnSuccess
 	def _cleanupRunOnSuccess():
