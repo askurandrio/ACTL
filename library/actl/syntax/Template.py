@@ -21,6 +21,10 @@ class Template(AbstractTemplate, metaclass=_MetaTemplate):
 		res = Buffer()
 
 		for tmpl in self._template:
+			if tmpl is breakpoint:
+				breakpoint()
+				continue
+
 			tmplRes = await tmpl(parser, transactionBuff)
 			if tmplRes is None:
 				return None
