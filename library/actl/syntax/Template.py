@@ -22,7 +22,7 @@ class Template(AbstractTemplate, metaclass=_MetaTemplate):
 
 		for tmpl in self._template:
 			if tmpl is breakpoint:
-				breakpoint()
+				tmpl()
 				continue
 
 			tmplRes = await tmpl(parser, transactionBuff)
