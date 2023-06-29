@@ -46,7 +46,7 @@ async def test_Vector_syntaxInitWithNumber(execute):
 
 
 @pytest.mark.parametrize("length", list(range(2, 6)))
-async def test_ConstVector_syntaxInit(execute, length):
+async def test_ConstVector_syntaxInitMultipleItems(execute, length):
 	execute(', '.join(f'"{idx}"' for idx in range(length)))
 
 	assert execute.parsed.code == [
