@@ -84,17 +84,6 @@ async def vector__of(*args):
 	return vector
 
 
-def disableRules(rules, template):
-	template = Template(*template)
-
-	async def match(parser, inp):
-		with parser.rules.disable(*rules):
-
-			return await template(parser, inp)
-
-	return match
-
-
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token(', '),
@@ -102,7 +91,7 @@ def disableRules(rules, template):
 	Many(
 		Token(','),
 		Maybe(Token(' ')),
-		disableRules(
+		Disable(
 			[parseSetVariable, '_parseConstVector', '_parseSetWithUnpack'],
 			[ParsedOld()],
 		),
@@ -130,7 +119,7 @@ async def _parseConstVector(*inp, parser):
 	Many(
 		Token(','),
 		Maybe(Token(' ')),
-		disableRules([parseSetVariable, '_parseSetWithUnpack'], [ParsedOld()]),
+		Disable([parseSetVariable, '_parseSetWithUnpack'], [ParsedOld()]),
 		IsInstance(VARIABLE),
 		minMatches=0,
 	),

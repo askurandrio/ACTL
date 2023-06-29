@@ -11,3 +11,4 @@ from .Value import Value
 from .Not import Not
 from .BreakPoint import BreakPoint
 from .Token import Token
+from .Disable import Disable
