@@ -48,7 +48,7 @@ class SyntaxRule:
 		return apply
 
 	def __repr__(self):
-		return f'{type(self).__name__}({self._runTemplate.template, self.func})'
+		return f'{type(self).__name__}<{self.func}, {self._runTemplate.template})'
 
 	@classmethod
 	def wrap(cls, *template, manualApply=False, useParser=False):
