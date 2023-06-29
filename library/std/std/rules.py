@@ -87,16 +87,14 @@ async def vector__of(*args):
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token(', '),
-	IsInstance(VARIABLE),
-	Many(
-		Token(','),
-		Maybe(Token(' ')),
-		Disable(
-			[parseSetVariable, '_parseConstVector', '_parseSetWithUnpack'],
-			[ParsedOld()],
-		),
-		IsInstance(VARIABLE),
-		minMatches=0,
+	Disable(
+		[parseSetVariable, '_parseConstVector', '_parseSetWithUnpack'],
+		[
+			IsInstance(VARIABLE),
+			Parsed(
+				Many(Token(','), Maybe(Token(' ')), IsInstance(VARIABLE), minMatches=0)
+			),
+		],
 	),
 	Not(Token(' '), Token('=')),
 	useParser=True,
@@ -115,13 +113,14 @@ async def _parseConstVector(*inp, parser):
 @RULES.add(
 	IsInstance(VARIABLE),
 	Token(', '),
-	IsInstance(VARIABLE),
-	Many(
-		Token(','),
-		Maybe(Token(' ')),
-		Disable([parseSetVariable, '_parseSetWithUnpack'], [ParsedOld()]),
-		IsInstance(VARIABLE),
-		minMatches=0,
+	Disable(
+		[parseSetVariable, '_parseConstVector', '_parseSetWithUnpack'],
+		[
+			IsInstance(VARIABLE),
+			Parsed(
+				Many(Token(','), Maybe(Token(' ')), IsInstance(VARIABLE), minMatches=0)
+			),
+		],
 	),
 	Token(' '),
 	Token('='),

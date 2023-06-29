@@ -32,6 +32,9 @@ class _ApplySyntaxObjectSyntaxRule:
 				syntaxRule = [syntaxRule]
 
 			for rule in syntaxRule:
+				if parser.rules.isDisabled(rule):
+					continue
+
 				apply = await rule.match(parser, inp)
 				if apply:
 					return apply

@@ -95,9 +95,7 @@ async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	assert str(await testModule.getAttribute('a')) == 'a'
 
 
-async def test_importNameFromPackageAndPackageAndModule(
-	execute, _mockFile, _mockIsDir
-):
+async def test_importNameFromPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	_mockIsDir('testMainPackage', True)
 	_mockIsDir('testMainPackage/testPackage', True)
 	_mockIsDir('testMainPackage/testPackage/testModule', False)
@@ -133,6 +131,7 @@ async def test_importFromPackageAndPackageAndModuleAllNames(
 	]
 
 	assert str(execute.executed.scope['a']) == 'a'
+
 
 async def test_importNotFound(execute, _mockIsDir, _mockIsFile):
 	for dirLibrary in execute.project['libraryDirectories']:

@@ -48,19 +48,3 @@ class ParsedOld(AbstractTemplate):
 		origin.insert(0, definition)
 		res = await Buffer.loadAsync(BufferRule(parser, buff).popUntil(self.until))
 		return tuple(res)
-
-
-class MatchParsedOld(ParsedOld):
-	def __init__(self, *templates):
-		super().__init__(Or(templates, [End]), checkEndLineInBuff=True)
-
-	async def __call__(self, parser, buff):
-		res = await super().__call__(parser, buff)
-		if res:
-			return None
-
-		buff = BufferRule(parser, buff)
-		if await buff.startsWith(self.until):
-			return await buff.pop(self.until)
-
-		return None

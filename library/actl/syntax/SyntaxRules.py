@@ -11,40 +11,32 @@ class SyntaxRules:
 			rules = list(from_)
 
 		self._rules = rules
+		self._disabled = []
 
 	@contextmanager
-	def disable(self, *rules):
-		def lookup(key):
-			if isinstance(key, SyntaxRule):
-				return key
-
-			for rule in self._rules:
-				if isinstance(rule, SyntaxRule) and rule.func.__name__ == key:
-					return rule
-
-			return None
-
-		rules = [lookup(rule) for rule in rules]
-		indexes = []
-
-		for rule in rules:
-			if rule in self._rules:
-				index = self._rules.index(rule)
-			else:
-				index = None
-			indexes.append(index)
-			if index is not None:
-				del self._rules[index]
+	def disable(self, *keys):
+		self._disabled.extend(keys)
 
 		yield
 
-		for index, rule in reversed(tuple(zip(indexes, rules))):
-			if index is None:
-				continue
-			self._rules.insert(index, rule)
+		for key in keys:
+			self._disabled.remove(key)
+
+	def isDisabled(self, rule):
+		for key in self._disabled:
+			if rule == key:
+				return True
+
+			if isinstance(rule, SyntaxRule) and rule.func.__name__ == key:
+				return True
+
+		return False
 
 	async def match(self, parser, buff):
 		for rule in self._rules:
+			if self.isDisabled(rule):
+				continue
+
 			apply = await rule.match(parser, buff)
 			if apply:
 				return apply

@@ -4,7 +4,8 @@ from actl.syntax import (
 	Value,
 	Token,
 	IsInstance,
-	MatchParsedOld,
+	Disable,
+	Parsed,
 	Many,
 	Or,
 	End,
@@ -44,10 +45,15 @@ async def copyAlllIntoScope(module, scope):
 	Value(import_),
 	Token(' '),
 	IsInstance(VARIABLE),
-	Many(Token('.'), MatchParsedOld(IsInstance(VARIABLE)), minMatches=0),
+	Disable(
+		['_parseGetAttribute'],
+		[Parsed(Many(Token('.'), IsInstance(VARIABLE), minMatches=0))],
+	),
 	Maybe(
 		Token(' '),
-		MatchParsedOld(Token.of(VARIABLE('as')), Token(' '), IsInstance(VARIABLE)),
+		Token.of(VARIABLE('as')),
+		Token(' '),
+		IsInstance(VARIABLE),
 	),
 	useParser=True,
 )
@@ -87,12 +93,15 @@ async def _parseImport(*args, parser=None):
 @SyntaxRule.wrap(
 	Value(From),
 	Token(' '),
-	MatchParsedOld(IsInstance(VARIABLE)),
-	Many(Token('.'), MatchParsedOld(IsInstance(VARIABLE)), minMatches=0),
+	IsInstance(VARIABLE),
+	Disable(
+		['_parseGetAttribute', '_parseImport'],
+		[Parsed(Many(Token('.'), IsInstance(VARIABLE), minMatches=0))],
+	),
 	Token(' '),
-	MatchParsedOld(Value(import_)),
+	Value(import_),
 	Token(' '),
-	MatchParsedOld(Or([IsInstance(VARIABLE)], [Token('*')])),
+	Or([IsInstance(VARIABLE)], [Token('*')]),
 	useParser=True,
 )
 async def _parseFromImport(*args, parser=None):
