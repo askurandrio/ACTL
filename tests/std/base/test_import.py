@@ -95,6 +95,25 @@ async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 	assert str(await testModule.getAttribute('a')) == 'a'
 
 
+async def test_importNameFromPackageAndPackageAndModule(
+	execute, _mockFile, _mockIsDir
+):
+	_mockIsDir('testMainPackage', True)
+	_mockIsDir('testMainPackage/testPackage', True)
+	_mockIsDir('testMainPackage/testPackage/testModule', False)
+	_mockFile('testMainPackage/testPackage/testModule.a', 'a = "a"')
+	execute('from testMainPackage.testPackage.testModule import a')
+
+	assert execute.parsed.code == [
+		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testMainPackage',)),
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
+		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
+		GET_ATTRIBUTE('a', '_tmpVar1', 'a'),
+	]
+
+	assert str(execute.executed.scope['a']) == 'a'
+
+
 async def test_importFromPackageAndPackageAndModuleAllNames(
 	execute, _mockFile, _mockIsDir
 ):
@@ -114,7 +133,6 @@ async def test_importFromPackageAndPackageAndModuleAllNames(
 	]
 
 	assert str(execute.executed.scope['a']) == 'a'
-
 
 async def test_importNotFound(execute, _mockIsDir, _mockIsFile):
 	for dirLibrary in execute.project['libraryDirectories']:
