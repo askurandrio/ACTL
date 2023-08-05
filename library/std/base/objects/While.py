@@ -1,7 +1,7 @@
 from actl import objects
-from actl.syntax import SyntaxRule, Value, Token, ParsedOld
+from actl.syntax import SyntaxRule, Value, Token, Parsed
 from actl.syntax.BufferRule import BufferRule
-from actl.utils import asDecorator, executeSyncCoroutine
+from actl.utils import asDecorator, executeSyncCoroutine, loadCoroutine
 from std.base.rules import CodeBlock
 
 
@@ -16,7 +16,8 @@ async def _syntaxRule(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	await inpRule.pop(Value(While))
 	await inpRule.pop(Token(' '))
-	condition = tuple(await inpRule.pop(ParsedOld(Token(':'))))
+	definition, condition = loadCoroutine(inpRule.pop(Parsed.until(Token(':'))))
+	condition = (*definition, *condition)
 	await inpRule.pop(Token(':'))
 	code = await CodeBlock(parser, inp).parse()
 	while_ = executeSyncCoroutine(While.call(condition, code))
