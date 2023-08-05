@@ -6,7 +6,7 @@ from .Many import Many
 from .Or import Or
 from .CustomTemplate import CustomTemplate, IsInstance, End
 from .Maybe import Maybe
-from .Parsed import ParsedOld, Parsed
+from .Parsed import Parsed
 from .Value import Value
 from .Not import Not
 from .Token import Token

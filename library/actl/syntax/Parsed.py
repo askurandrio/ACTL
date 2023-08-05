@@ -43,28 +43,3 @@ class Parsed(AbstractTemplate):
 	@classmethod
 	def until(cls, endLine):
 		return cls(_Until(endLine), endLine=[endLine])
-
-
-class ParsedOld(AbstractTemplate):
-	__slots__ = ('until', 'checkEndLineInBuff')
-
-	def __init__(self, *templates, checkEndLineInBuff=False):
-		if templates:
-			until = Template(*templates)
-		else:
-			until = None
-		super().__init__(until, checkEndLineInBuff)
-
-	async def __call__(self, parser, buff):
-		origin = getattr(buff, 'origin', buff)
-		subParser = parser.subParser(origin, self.until)
-		if self.until is None:
-			await subParser.parseUntilLineEnd()
-			return ()
-
-		definition, _ = loadCoroutine(
-			subParser.parseUntilLineEnd(checkEndLineInBuff=self.checkEndLineInBuff)
-		)
-		origin.insert(0, definition)
-		res = await Buffer.loadAsync(BufferRule(parser, buff).popUntil(self.until))
-		return tuple(res)

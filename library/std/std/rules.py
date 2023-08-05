@@ -60,7 +60,9 @@ async def _parseVector(parser, inp):
 		appendResultVarName = parser.makeTmpVar().name
 
 		while not await inpRule.startsWith(Token(']')):
-			elementCode = await inpRule.pop(ParsedOld(Or([Token(']')], [Token(',')])))
+			elementCode = await inpRule.pop(
+				Parsed.until(Or([Token(']')], [Token(',')]))
+			)
 			elementVarName = elementCode.pop(-1).name
 			await generatorToAwaitable(
 				*elementCode,

@@ -1,6 +1,6 @@
 from actl import objects
 from actl.Buffer import Buffer
-from actl.syntax import SyntaxRule, Value, Token, Parsed, Or, BufferRule, ParsedOld
+from actl.syntax import SyntaxRule, Value, Token, Parsed, Or, BufferRule
 from actl.utils import asDecorator, executeSyncCoroutine, loadCoroutine
 from std.base.rules import CodeBlock
 
