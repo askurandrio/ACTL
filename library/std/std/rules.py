@@ -15,9 +15,8 @@ async def _parseSlice(parser, inp):
 	collectionVariable = (await inpRule.pop(IsInstance(VARIABLE))).one()
 	await inpRule.pop(Token('['))
 
-	startDeclarationCode = await inpRule.pop(ParsedOld(Token(':')))
-	startVariable = startDeclarationCode.pop(-1)
-	await generatorToAwaitable(*startDeclarationCode)
+	startVariable = (await inpRule.pop(Parsed.until(Token(':')))).one()
+
 	await inpRule.pop(Token(':]'))
 
 	sliceVariable = parser.makeTmpVar()
