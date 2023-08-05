@@ -6,7 +6,7 @@ from actl.objects import (
 )
 from actl.opcodes import VARIABLE, RETURN
 from actl.opcodes.opcodes import CALL_FUNCTION_STATIC
-from actl.syntax import SyntaxRule, Value, Token, IsInstance, Maybe, ParsedOld
+from actl.syntax import SyntaxRule, Value, Token, IsInstance, Maybe, Parsed
 from actl import asDecorator, executeSyncCoroutine
 from actl.syntax.BufferRule import BufferRule
 from std.base.rules import CodeBlock
@@ -36,7 +36,7 @@ async def _parseClass(parser, inp):
 	parents = []
 	if await inpRule.startsWith(Token('(')):
 		await inpRule.pop(Token('('))
-		parentName = (await inpRule.pop(ParsedOld(Token(')')))).one().name
+		parentName = (await inpRule.pop(Parsed.until(Token(')')))).one().name
 		parents.append(parser.scope[parentName])
 		await inpRule.pop(Token(')'))
 
