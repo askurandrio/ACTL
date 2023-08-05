@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 from actl.Buffer import TransactionBuffer, Buffer
-from actl.objects import AToPy, AObject
+from actl.objects import AToPy, AObject, PyToA
 from actl.opcodes.opcodes import RETURN
 from actl.syntax import *
 from actl.opcodes import (
@@ -348,3 +348,48 @@ async def _removeEmptyLine(*_):
 @RULES.add(Or([Token(' '), Token('\t')], [Token('\t'), Token(' ')]), manualApply=True)
 async def _mixedIndentationIsForbidden(inp):
 	raise RuntimeError(f'Mixed indentation is forbidden: {inp}')
+
+
+def hasAttribute(attribute):
+	async def match(parser, inp):
+		executeCoroutine = AToPy(parser.scope['__project__'])[
+			'buildExecutor'
+		].executeCoroutine
+		token = inp[0]
+
+		if not isinstance(token, AObject):
+			if (VARIABLE != inp[0]) or (inp[0].name not in parser.scope):
+				return
+
+			token = parser.scope[inp[0].name]
+
+		if not executeCoroutine(token.hasAttribute(attribute)):
+			return
+
+		inp.pop(0)
+		return [token]
+
+	return match
+
+
+@RULES.add(Or([Token(' '), Token('\t')], [Token('\t'), Token(' ')]), manualApply=True)
+async def _mixedIndentationIsForbidden(inp):
+	raise RuntimeError(f'Mixed indentation is forbidden: {inp}')
+
+
+@RULES.add(
+	hasAttribute('__useCodeBlock__'), Token(':'), useParser=True, manualApply=True
+)
+async def _parseUseCodeBlock(parser, inp):
+	var = inp.pop(0)
+	inp.pop(0)
+	codeBlock = await CodeBlock(parser, inp).parse()
+
+	executeCoroutine = AToPy(parser.scope['__project__'])[
+		'buildExecutor'
+	].executeCoroutine
+	useCodeBlock = executeCoroutine(var.getAttribute('__useCodeBlock__'))
+	aCodeBlock = executeCoroutine(PyToA.call(codeBlock))
+	result = executeCoroutine(useCodeBlock.call(aCodeBlock))
+
+	inp.insert(0, (result,))

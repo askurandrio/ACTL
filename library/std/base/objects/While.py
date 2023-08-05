@@ -18,7 +18,12 @@ async def _syntaxRule(parser, inp):
 	await inpRule.pop(Token(' '))
 	definition, condition = loadCoroutine(inpRule.pop(Parsed.until(Token(':'))))
 	condition = (*definition, *condition)
-	await inpRule.pop(Token(':'))
-	code = await CodeBlock(parser, inp).parse()
-	while_ = executeSyncCoroutine(While.call(condition, code))
+	while_ = executeSyncCoroutine(While.call(condition, None))
 	inp.insert(0, [while_])
+
+
+@While.addMethod('__useCodeBlock__')
+async def _While__useCodeBlock__(self, codeBlock):
+	codeBlock = tuple(objects.AToPy(codeBlock))
+	await self.setAttribute('code', codeBlock)
+	return self
