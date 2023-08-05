@@ -151,7 +151,7 @@ class _ParseFunctionCall:
 		else:
 			argName = None
 
-		argCode = await self._inpRule.pop(ParsedOld(Or([Token(')')], [Token(',')])))
+		argCode = await self._inpRule.pop(Parsed.until(Or([Token(')')], [Token(',')])))
 		while argCode[-1] in (' ', '\n'):
 			argCode.pop(-1)
 		argVar = argCode.pop(-1).name
