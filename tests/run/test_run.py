@@ -87,6 +87,15 @@ def test_changeInvitation(run):
 	run.readTemplate('>>> ')
 
 
+def test_processEmptyLine(run):
+	run()
+
+	run.writeLine('')
+
+	run.readTemplate('>>> ')
+	run.readTemplate('>>> ')
+
+
 def getInitialScope(project):
 	scope = project['std/base', 'initialScope']
 	scope['print'] = executeSyncCoroutine(
