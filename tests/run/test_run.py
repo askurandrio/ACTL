@@ -72,6 +72,21 @@ def test_mainF(run):
 	assert run.readLine() == 'a\n'
 
 
+def test_changeInvitation(run):
+	run()
+
+	run.writeLine('fun f():')
+	run.writeLine('\ta = 1')
+	run.writeLine('f()')
+
+	assert (
+		run.readLine().strip()
+		== """>>> ... ... fun f(): (CALL_FUNCTION_STATIC('_tmpVar1_1', 'Number', typeb='(', staticArgs=[PyToA<1>], staticKwargs={}, args=[], kwargs={}), SET_VARIABLE('a', '_tmpVar1_1'), RETURN('None'))"""
+	)
+	assert run.readLine() == 'None\n'
+	run.readTemplate('>>> ')
+
+
 def getInitialScope(project):
 	scope = project['std/base', 'initialScope']
 	scope['print'] = executeSyncCoroutine(
