@@ -19,6 +19,7 @@ def getInput(project):
 		if 'CODE' in os.environ:
 			yield from os.environ['CODE']
 			yield '\n'
+			project['isBuild'] = False
 			return
 
 		parser = project['buildParser']

@@ -11,13 +11,15 @@ from actl import DIR_LIBRARY
 
 class _Run:
 	_actlBinary = os.path.join(os.path.dirname(DIR_LIBRARY), 'actl')
+	_readerTimeout = int(os.environ.get('ACTL_READER_TIMEOUT', '60'))
 
-	def __call__(self, *args):
+	def __call__(self, *args, **kwargs):
 		self.process = subprocess.Popen(  # pylint: disable=consider-using-with
 			args=[self._actlBinary, *args],
 			stdin=subprocess.PIPE,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
+			**kwargs,
 		)
 
 		for file in (self.process.stdout, self.process.stderr):
@@ -40,7 +42,9 @@ class _Run:
 		startTime = time.time()
 
 		while True:
-			assert (time.time() - startTime) < 60, f'Timeout exceeded, {line=}'
+			assert (
+				time.time() - startTime
+			) < self._readerTimeout, f'Timeout exceeded, {line=}'
 
 			char = self.process.stdout.read(1)
 			if not char:

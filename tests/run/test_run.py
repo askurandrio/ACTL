@@ -96,6 +96,13 @@ def test_processEmptyLine(run):
 	run.readTemplate('>>> ')
 
 
+def test_envVarCODE(run):
+	run(env={'CODE': 'print(1)'})
+
+	assert run.readLine() == 'Number<_head=PyToA<1>>\n'
+	assert run.readLine() == 'None\n'
+
+
 def getInitialScope(project):
 	scope = project['std/base', 'initialScope']
 	scope['print'] = executeSyncCoroutine(
