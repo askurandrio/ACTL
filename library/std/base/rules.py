@@ -383,13 +383,21 @@ async def _mixedIndentationIsForbidden(inp):
 async def _parseUseCodeBlock(parser, inp):
 	var = inp.pop(0)
 	inp.pop(0)
-	codeBlock = await CodeBlock(parser, inp).parse()
 
 	executeCoroutine = AToPy(parser.scope['__project__'])[
 		'buildExecutor'
 	].executeCoroutine
-	useCodeBlock = executeCoroutine(var.getAttribute('__useCodeBlock__'))
-	aCodeBlock = executeCoroutine(PyToA.call(codeBlock))
-	result = executeCoroutine(useCodeBlock.call(aCodeBlock))
 
-	inp.insert(0, (result,))
+	async def callUseCodeBlock():
+		useCodeBlockMethod = await var.getAttribute('__useCodeBlock__')
+
+		codeBlock = CodeBlock(parser, inp)
+		aCodeBlock = await PyToA.call(codeBlock)
+		result = await useCodeBlockMethod.call(aCodeBlock)
+
+		return AToPy(result)
+
+	parseFunc, applyFunc = executeCoroutine(callUseCodeBlock())
+
+	await parseFunc()
+	executeCoroutine(applyFunc())

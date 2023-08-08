@@ -24,6 +24,16 @@ async def _syntaxRule(parser, inp):
 
 @While.addMethod('__useCodeBlock__')
 async def _While__useCodeBlock__(self, codeBlock):
-	codeBlock = tuple(objects.AToPy(codeBlock))
-	await self.setAttribute('code', codeBlock)
-	return self
+	code = None
+
+	async def parse():
+		nonlocal codeBlock, code
+
+		codeBlock = objects.AToPy(codeBlock)
+		code = tuple(await codeBlock.parse())
+		codeBlock.inp.insert(0, (self,))
+
+	async def apply():
+		await self.setAttribute('code', code)
+
+	return await objects.PyToA.call((parse, apply))
