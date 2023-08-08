@@ -75,6 +75,33 @@ async def test_ConstVector_syntaxInitMultipleItems(execute, length):
 async def test_ConstVector_packUnpack(execute, length):
 	setCode = ', '.join(f'"{idx}"' for idx in range(length))
 	getCode = ', '.join(f'v{index}' for index in range(length))
+	execute(f'{getCode} = {setCode}')
+
+	assert execute.parsed.code == [
+		*[
+			opcodes.CALL_FUNCTION_STATIC(
+				f'_tmpVar{index + 1}', 'String', staticArgs=[str(index)]
+			)
+			for index in range(length)
+		],
+		opcodes.CALL_FUNCTION_STATIC(
+			f'_tmpVar{length + 1}',
+			vector__of.call,
+			args=[f'_tmpVar{index + 1}' for index in range(length)],
+		),
+		opcodes.CALL_FUNCTION('_tmpVar1_1', 'Iter', args=[f'_tmpVar{length + 1}']),
+		opcodes.GET_ATTRIBUTE('_tmpVar1_2', '_tmpVar1_1', 'next'),
+		*[opcodes.CALL_FUNCTION(f'v{index}', '_tmpVar1_2') for index in range(length)],
+	]
+
+	for index in range(length):
+		assert str(execute.executed.scope[f'v{index}']) == str(index)
+
+
+@pytest.mark.parametrize("length", list(range(2, 6)))
+async def test_ConstVector_packUnpackViaVariable(execute, length):
+	setCode = ', '.join(f'"{idx}"' for idx in range(length))
+	getCode = ', '.join(f'v{index}' for index in range(length))
 	execute(f'v = {setCode}\n{getCode} = v')
 
 	assert execute.parsed.code == [

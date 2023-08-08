@@ -6,9 +6,9 @@ class Parser(actl.Parser):
 		self.applyingRule = False
 		super().__init__(*args, **kwargs)
 
-	def _applyRule(self):
+	async def _applyRule(self):
 		prevApplyingRule, self.applyingRule = self.applyingRule, True
-		res = super()._applyRule()
+		res = await super()._applyRule()
 		self.applyingRule = prevApplyingRule
 		return res
 
