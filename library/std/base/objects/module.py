@@ -24,6 +24,12 @@ async def _Module__init(self, path):
 		executeModule = await self.getAttribute('_executeModule')
 		await executeModule.call()
 
+	elif os.path.isfile(os.path.join(path, '__module__.a')):
+		getAttribute = await self.getAttribute('__getAttribute__')
+		self_ = await getAttribute.call('__module__')
+		selfScope = await self_.getAttribute('__scope__')
+		await self.setAttribute('__scope__', selfScope)
+
 
 @Module.addMethod('__getAttribute__')
 async def _Module__getAttribute(self, key):

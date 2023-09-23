@@ -133,6 +133,21 @@ async def test_importFromPackageAndPackageAndModuleAllNames(
 	assert str(execute.executed.scope['a']) == 'a'
 
 
+async def test_importModuleFile(execute, _mockIsDir, _mockFile):
+	_mockIsDir('testPackage', True, mockSelf=False)
+	_mockIsDir('testPackage/__module__', False)
+	_mockFile('testPackage/__module__.a', 'a = "a"')
+
+	execute('from testPackage import a')
+
+	assert execute.parsed.code == [
+		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testPackage',)),
+		GET_ATTRIBUTE('a', '_tmpVar1', 'a'),
+	]
+
+	assert str(execute.executed.scope['a']) == 'a'
+
+
 async def test_importNotFound(execute, _mockIsDir, _mockIsFile):
 	for dirLibrary in execute.project['libraryDirectories']:
 		_mockIsDir('m404', False, dirLibrary=dirLibrary)
@@ -196,13 +211,24 @@ class _DirChecker(_PathChecker):
 		super().__init__(mocker, mockFunction)
 		self._mockIsFile = mockIsFile
 
-	def __call__(self, path, checkResult, isProjectDir=False, dirLibrary=DIR_LIBRARY):
+	def __call__(
+		self,
+		path,
+		checkResult,
+		isProjectDir=False,
+		dirLibrary=DIR_LIBRARY,
+		mockSelf=True,
+	):
 		super().__call__(path, checkResult, dirLibrary=dirLibrary)
 
 		if not checkResult:
 			return
 
 		self._mockIsFile(path, False)
+
+		if mockSelf:
+			self._mockIsFile(os.path.join(path, '__module__.a'), False)
+
 		if isProjectDir:
 			return
 
