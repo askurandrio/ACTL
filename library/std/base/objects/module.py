@@ -25,12 +25,13 @@ async def _Module__init(self, onModuleCreated, path):
 	if os.path.isfile(path):
 		executeModule = await self.getAttribute('_executeModule')
 		await executeModule.call()
+		return
 
-	elif os.path.isfile(os.path.join(path, '__module__.a')):
-		getAttribute = await self.getAttribute('__getAttribute__')
-		self_ = await getAttribute.call('__module__')
-		selfScope = await self_.getAttribute('__scope__')
-		await self.setAttribute('__scope__', selfScope)
+	if os.path.isdir(path) and os.path.isfile(os.path.join(path, '__module__.a')):
+		module = await self.getAttribute('__module__')
+		scope = await module.getAttribute('__scope__')
+		await self.setAttribute('__scope__', scope)
+		return
 
 
 @Module.addMethod('__getAttribute__')
