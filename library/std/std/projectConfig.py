@@ -23,7 +23,7 @@ def getInitialScope(project):
 	project['__initialScope'] = initialScope
 	ScopeChild.allowOverride = True
 	executor = Executor(project['__initialScope'])
-	initModule = executor.executeCoroutine(import_.call('std.std.init'))
+	initModule = executor.executeCoroutine(import_.call('std.std.objects'))
 	executor.executeCoroutine(copyAlllIntoScope.call(initModule, initialScope))
 
 	del project['__initialScope']
