@@ -1,6 +1,6 @@
 from actl.Scope import ScopeChild
 from actl import opcodes, executeSyncCoroutine
-from actl.objects import NativeFunction, PyToA, AToPy
+from actl.objects import NativeFunction, PyToA, AToPy, ANone
 
 from std.std.rules import RULES
 from std.base import Executor, bindExecutor
@@ -34,7 +34,7 @@ def getInitialScope(project):
 
 def getBuildCode(project):
 	yield opcodes.CALL_FUNCTION_STATIC(
-		'module', 'Module', staticArgs=[project['mainF']]
+		'module', _importModuleByPath.call, staticArgs=[project['mainF']]
 	)
 	ifOpcode = executeSyncCoroutine(
 		If.call(
@@ -57,6 +57,20 @@ def getBuildCode(project):
 		)
 	)
 	yield ifOpcode
+
+
+@NativeFunction
+async def _importModuleByPath(path):
+	executor = await bindExecutor()
+	result = ANone
+
+	async def onModuleCreated(module):
+		nonlocal result
+		result = module
+
+	await executor.scope['Module'].call(onModuleCreated, path)
+
+	return result
 
 
 @NativeFunction

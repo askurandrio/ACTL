@@ -143,52 +143,70 @@ class Importer:
 		self._currentProject = currentProject
 		self.cache = {}
 
-	@_cacheInSelf
 	async def importByName(self, name):
+		if name in self.cache:
+			return self.cache[name]
+
 		if '.' in name:
-			names = name.split('.')
-			mainPackageName = names.pop(0)
+			moduleNames = name.split('.')
+			mainPackageName = moduleNames.pop(0)
 			mainPackage = await self.importByName(mainPackageName)
 			package = mainPackage
-			for name in names:  # pylint: disable=redefined-argument-from-local
-				package = await package.getAttribute(name)
+			for (
+				moduleName
+			) in moduleNames:  # pylint: disable=redefined-argument-from-local
+				package = await package.getAttribute(moduleName)
 
-			return package
+			self.cache[name] = package
+			return await self.importByName(name)
 
 		for dirLibrary in self._currentProject['libraryDirectories']:
 			path = os.path.join(dirLibrary, name)
-			module = await self.importByPath(path)
-			if module is not None:
-				return module
+
+			async def onModuleCreated(module):
+				self.cache[name] = module
+
+			await self.importByPath(onModuleCreated, path)
+			if name in self.cache:
+				return await self.importByName(name)
 
 		raise RuntimeError(
-			f'Module {name} not found in {self._currentProject}, '
-			f'{self._currentProject["libraryDirectories"]=}'
+			f"Module {name} not found in {self._currentProject}, "
+			f"{self._currentProject['libraryDirectories']=}"
 		)
 
-	@_cacheInSelf
-	async def importByPath(self, path):
+	async def importByPath(self, onModuleCreated, path):
+		if path in self.cache:
+			await onModuleCreated(self.cache[path])
+			return
+
+		async def localOnModuleCreated(module):
+			self.cache[path] = module
+			await onModuleCreated(module)
+
 		executor = await bindExecutor()
 
 		if executor != self._currentProject['buildExecutor']:
-			return self._currentProject['buildExecutor'].executeCoroutine(
-				self._currentProject['import'].importByPath(path)
+			self._currentProject['buildExecutor'].executeCoroutine(
+				self._currentProject['import'].importByPath(localOnModuleCreated, path)
 			)
+			return
 
 		if os.path.isdir(path):
 			pathBaseName = os.path.basename(path)
 			yamlPath = os.path.join(path, f'{pathBaseName}.yaml')
 			if os.path.isfile(yamlPath):
 				project = self._currentProject.loadProject(yamlPath)
-				if project is self._currentProject:
-					return await executor.scope['Module'].call(path)
+				if project is not self._currentProject:
+					await project['import'].importByPath(localOnModuleCreated, path)
+					return
 
-				return await project['import'].importByPath(path)
+			await executor.scope['Module'].call(localOnModuleCreated, path)
+			return
 
-			return await executor.scope['Module'].call(path)
+		aPath = f'{path}.a'
+		if os.path.isfile(aPath):
+			await executor.scope['Module'].call(localOnModuleCreated, aPath)
+			return
 
-		path = f'{path}.a'
-		if os.path.isfile(path):
-			return await executor.scope['Module'].call(path)
-
-		return None
+		return

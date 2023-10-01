@@ -12,13 +12,15 @@ Module = executeSyncCoroutine(class_.call('Module'))
 
 
 @Module.addMethod('__init__')
-async def _Module__init(self, path):
+async def _Module__init(self, onModuleCreated, path):
 	await self.setAttribute('__path__', path)
 	await self.setAttribute('__scope__', None)
 	await self.setAttribute('__modules__', {})
 
 	executor = await bindExecutor()
 	await self.setAttribute('__project__', executor.scope['__project__'])
+
+	await onModuleCreated(self)
 
 	if os.path.isfile(path):
 		executeModule = await self.getAttribute('_executeModule')
@@ -59,11 +61,14 @@ async def _Module__getAttribute(self, key):
 	dirLibrary = await self.getAttribute('__path__')
 
 	if isinstance(key, str):
-		path = os.path.join(dirLibrary, key)
-		module = await project['import'].importByPath(path)
 
-		if module is not None:
+		async def onModuleCreated(module):
 			modules[key] = module
+
+		path = os.path.join(dirLibrary, key)
+		await project['import'].importByPath(onModuleCreated, path)
+
+		if key in modules:
 			return await self.getAttribute(key)
 
 	raise AAttributeNotFound(key)
