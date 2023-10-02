@@ -41,11 +41,25 @@ async def _PyToA__await(self):
 
 
 @PyToA.addMethodToClass('exec')
-async def _PyToA__exec(cls, code, resultName, **lc_scope):
-	code = str(AToPy(code))
-	exec(code, None, lc_scope)
-	result = lc_scope[str(resultName)]
-	return await cls.call(result)
+async def _PyToA__exec(cls_, resultName_, code_=None, **lc_scope):
+	if code_ is None:
+		code_ = resultName_
+		resultName_ = None
+
+	code_ = str(AToPy(code_))
+
+	if (resultName_ is None) and (code_.rstrip().startswith('=')):
+		resultName_ = 'result_'
+		code_ = f'{resultName_} {code_}'
+
+	exec(code_, None, lc_scope)
+
+	if resultName_ is None:
+		result = None
+	else:
+		result = lc_scope[str(resultName_)]
+
+	return await cls_.call(result)
 
 
 @PyToA.addMethod('__call__')
