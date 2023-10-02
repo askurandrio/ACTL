@@ -155,8 +155,12 @@ class Inside:
 
 
 class generatorToAwaitable:
-	def __init__(self, *head):
+	def __init__(self, head):
 		self._head = iter(head)
 
 	def __await__(self):
 		yield from self._head
+
+	@classmethod
+	def of(cls, *elements):
+		return cls(elements)

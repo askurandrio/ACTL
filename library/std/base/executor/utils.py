@@ -1,6 +1,6 @@
+from actl import generatorToAwaitable
 from actl.opcodes import DynamicOpCode
 from std.base.executor.Executor import Executor
-from std.base.executor.frame import Frame
 
 
 _BIND_EXECUTOR = DynamicOpCode.create('BIND_EXECUTOR', 'executor')
@@ -8,7 +8,7 @@ _BIND_EXECUTOR = DynamicOpCode.create('BIND_EXECUTOR', 'executor')
 
 async def bindExecutor():
 	opcode = _BIND_EXECUTOR(executor=None)
-	await Frame((opcode,))
+	await generatorToAwaitable.of(opcode)
 
 	return opcode.executor
 

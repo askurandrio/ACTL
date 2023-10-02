@@ -1,7 +1,6 @@
-from actl import opcodes
+from actl import opcodes, generatorToAwaitable
 from actl.objects import While, Bool, If, AToPy, AObject, PyToA
 
-from std.base.executor.frame import Frame
 from std.base.executor.Executor import Executor
 
 
@@ -123,24 +122,24 @@ async def _While__handler(executor, opcode):
 	code = await opcode.getAttribute('code')
 
 	while True:
-		await Frame(conditionFrame)
+		await generatorToAwaitable(conditionFrame)
 		res = await Bool.call(executor.scope[resultConditionName])
 		if not AToPy(res):
 			break
 
-		await Frame(code)
+		await generatorToAwaitable(code)
 
 
 @Executor.addHandler(If)
 async def _If__handler(executor, opcode):
 	for conditionFrame, code in await opcode.getAttribute('conditions'):
-		await Frame(conditionFrame)
+		await generatorToAwaitable(conditionFrame)
 		res = executor.scope[conditionFrame[-1].name]
 		res = await Bool.call(res)
 		if AToPy(res):
-			await Frame(code)
+			await generatorToAwaitable(code)
 			return
 
 	if await opcode.hasAttribute('elseCode'):
 		elseCode = await opcode.getAttribute('elseCode')
-		await Frame(elseCode)
+		await generatorToAwaitable(elseCode)

@@ -20,7 +20,7 @@ async def _parseSlice(parser, inp):
 	await inpRule.pop(Token(':]'))
 
 	sliceVariable = parser.makeTmpVar()
-	await generatorToAwaitable(
+	await generatorToAwaitable.of(
 		CALL_FUNCTION_STATIC(
 			dst=sliceVariable.name,
 			function='Slice',
@@ -29,14 +29,14 @@ async def _parseSlice(parser, inp):
 	)
 
 	getItemMethodVariable = parser.makeTmpVar()
-	await generatorToAwaitable(
+	await generatorToAwaitable.of(
 		GET_ATTRIBUTE(
 			getItemMethodVariable.name, collectionVariable.name, '__getItem__'
 		)
 	)
 
 	subCollectionVariable = parser.makeTmpVar()
-	await generatorToAwaitable(
+	await generatorToAwaitable.of(
 		CALL_FUNCTION(
 			subCollectionVariable.name,
 			getItemMethodVariable.name,
@@ -52,11 +52,11 @@ async def _parseVector(parser, inp):
 	inpRule = BufferRule(parser, inp)
 	await inpRule.pop(Token('['))
 	dst = parser.makeTmpVar()
-	await generatorToAwaitable(CALL_FUNCTION_STATIC(dst=dst.name, function='Vector'))
+	await generatorToAwaitable.of(CALL_FUNCTION_STATIC(dst=dst.name, function='Vector'))
 
 	if not await inpRule.startsWith(Token(']')):
 		appendVarName = parser.makeTmpVar().name
-		await generatorToAwaitable(GET_ATTRIBUTE(appendVarName, dst.name, 'append'))
+		await generatorToAwaitable.of(GET_ATTRIBUTE(appendVarName, dst.name, 'append'))
 		appendResultVarName = parser.makeTmpVar().name
 
 		while not await inpRule.startsWith(Token(']')):
@@ -64,7 +64,7 @@ async def _parseVector(parser, inp):
 				Parsed.until(Or([Token(']')], [Token(',')]))
 			)
 			elementVarName = elementCode.pop(-1).name
-			await generatorToAwaitable(
+			await generatorToAwaitable.of(
 				*elementCode,
 				CALL_FUNCTION(appendResultVarName, appendVarName, args=[elementVarName])
 			)
@@ -104,7 +104,7 @@ async def _parseConstVector(*inp, parser):
 	args = [arg.name for arg in inp if VARIABLE == arg]
 	dst = parser.makeTmpVar()
 
-	await generatorToAwaitable(
+	await generatorToAwaitable.of(
 		CALL_FUNCTION_STATIC(dst.name, vector__of.call, args=args)
 	)
 
@@ -134,14 +134,14 @@ async def _parseSetWithUnpack(*inp, parser):
 		srcAsIter = parser.makeTmpVar().name
 		srcIterNext = parser.makeTmpVar().name
 
-	await generatorToAwaitable(
+	await generatorToAwaitable.of(
 		CALL_FUNCTION(srcAsIter, 'Iter', args=[inp[-1].name]),
 		GET_ATTRIBUTE(srcIterNext, srcAsIter, 'next'),
 	)
 
 	for arg in inp:
 		if VARIABLE == arg:
-			await generatorToAwaitable(CALL_FUNCTION(arg.name, srcIterNext))
+			await generatorToAwaitable.of(CALL_FUNCTION(arg.name, srcIterNext))
 			continue
 
 		if '=' == arg:
@@ -162,7 +162,7 @@ async def _parseNumber(*args, parser=None):
 	number = ''.join(args)
 	aProxy = executeSyncCoroutine(PyToA.call(number))
 	dst = parser.makeTmpVar()
-	await generatorToAwaitable(
+	await generatorToAwaitable.of(
 		CALL_FUNCTION_STATIC(dst=dst.name, function='Number', staticArgs=[aProxy])
 	)
 	return [dst]
