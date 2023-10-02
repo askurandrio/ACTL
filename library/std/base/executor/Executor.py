@@ -38,6 +38,8 @@ class Executor:
 			except StopIteration:
 				self.frames.pop(-1)
 				continue
+			except Exception as ex:
+				self._handleException(ex)
 
 			self._executeOpcode(opcode)
 
@@ -46,6 +48,18 @@ class Executor:
 			previusSetReturnValue,
 			previusFrames,
 		)
+
+	def _handleException(self, exception):
+		self.frames.pop(-1)
+
+		while self.frames:
+			try:
+				self.frames[-1].throw(exception)
+			except Exception as ex:
+				self.frames.pop(-1)
+				exception = ex
+
+		raise exception
 
 	def _executeOpcode(self, opcode):
 		if 'SHOW_CODE_BEFORE_EXECUTION' in os.environ:
