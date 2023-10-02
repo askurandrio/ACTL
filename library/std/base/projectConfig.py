@@ -117,11 +117,11 @@ def getLibraryDirectories(project):
 	libraryDirectories = [DIR_LIBRARY]
 
 	try:
-		projectF = project['projectF']
+		mainF = project['mainF']
 	except KeyError:
 		pass
 	else:
-		libraryDirectories.append(os.path.dirname(projectF))
+		libraryDirectories.append(os.path.dirname(mainF))
 
 	return libraryDirectories
 
