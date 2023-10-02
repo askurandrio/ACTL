@@ -112,10 +112,8 @@ class Parser:
 		while self.buff:
 			res = executeSyncCoroutine(self.parseLine())
 			for opcode in res:
-				try:
-					yield opcode
-				except Exception as ex:
-					raise self._makeSyntaxError(f'at res<{res}>') from ex
+				yield opcode
+
 			executeSyncCoroutine(
 				BufferRule(self, self.buff).pop(self.endLine, default=None)
 			)
