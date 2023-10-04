@@ -54,7 +54,10 @@ async def _PyToA__exec(cls_, resultName_, code_=None, **lc_scope):
 		resultName_ = 'result_'
 		code_ = f'{resultName_} {code_}'
 
-	exec(code_, None, lc_scope)
+	try:
+		exec(code_, None, lc_scope)
+	except Exception as ex:
+		raise RuntimeError(f'Error in exec: {code_}, lc_scope: {lc_scope}') from ex
 
 	if resultName_ is None:
 		result = None

@@ -4,7 +4,7 @@ from std.std.objects.string.string import String
 
 
 fun getStringLength(self):
-	length = PyToA.exec('= len(string._value)', string=self)
+	length = PyToA.exec('= len(string.value)', string=self)
 	return Number(length)
 
 

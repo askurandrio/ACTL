@@ -31,6 +31,4 @@ async def _onPyToACreated(PyToA):
 
 @String.addMethod(Bool)
 async def _String__Bool(self):
-	toPyStringMethod = await self.getAttribute('toPyString')
-	pyString = await toPyStringMethod.call()
-	return Bool.True_ if pyString else Bool.False_
+	return Bool.True_ if self.value else Bool.False_

@@ -9,6 +9,12 @@ class _AStringClass(AObjectClass):
 		return "class 'String'"
 
 
+class _AString(AObject):
+	def __init__(self, head, value):
+		super().__init__(head)
+		self.value = value
+
+
 String = _AStringClass(
 	{
 		'__name__': 'String',
@@ -23,29 +29,20 @@ String = _AStringClass(
 async def String__call(cls, value=''):
 	if isinstance(value, AObject):
 		if await String.isinstance_(value):
-			value = value._value
+			value = value.value
 		else:
 			toStringMethod = await value.getAttribute(String)
 			return await toStringMethod.call()
 
-	parentCall = await cls.super_(String, '__call__')
-	self = await parentCall.call()
-	self._value = str(value)
+	self = _AString({'__class__': cls}, value)
 	return self
-
-
-@String.addMethod('toPyString')
-async def string__toPyString(self):
-	return self._value
 
 
 @onSignal('actl.PyToA:created')
 async def _onPyToACreated(PyToA):
 	@String.addMethod(PyToA)
 	async def string_PyToA(self):
-		toPyStringMethod = await self.getAttribute('toPyString')
-		pyString = await toPyStringMethod.call()
-		return await PyToA.call(pyString)
+		return await PyToA.call(self.value)
 
 
 executeSyncCoroutine(triggerSignal('actl.String:created', String))
@@ -60,5 +57,5 @@ async def sting__String(self):
 async def _onNumberCreated(Number):
 	@String.addMethod(Number)
 	async def string__Number(self):
-		value = float(self._value)
+		value = float(self.value)
 		return await Number.call(value)

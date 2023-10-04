@@ -215,9 +215,7 @@ class AObject(ReprToStr):
 	def __str__(self):
 		try:
 			string = executeSyncCoroutine(AObject.String.call(self))
-			toPyStringMethod = executeSyncCoroutine(string.getAttribute('toPyString'))
-			pyString = executeSyncCoroutine(toPyStringMethod.call())
-			return pyString
+			return string.value
 		except Exception as ex:  # pylint: disable=broad-except
 			traceback.print_exc()
 
