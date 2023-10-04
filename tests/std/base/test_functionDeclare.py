@@ -20,7 +20,7 @@ async def test_simpleFunctionDeclare(execute):
 			Function.call,
 			staticArgs=(
 				'f',
-				await Signature.call([]),
+				await Signature.call(()),
 				(
 					opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock'),
 					opcodes.VARIABLE('_tmpVar1_1'),
@@ -48,7 +48,7 @@ async def test_declareMultiLineFunction(execute):
 			Function.call,
 			staticArgs=(
 				'f',
-				await Signature.call([]),
+				await Signature.call(()),
 				(
 					opcodes.CALL_FUNCTION_STATIC(
 						dst='_tmpVar1_1', function='String', staticArgs=['a']
@@ -82,7 +82,7 @@ async def test_declareFunctionWithArg(execute):
 			Function.call,
 			staticArgs=(
 				'f',
-				await Signature.call(['arg']),
+				await Signature.call(('arg',)),
 				(
 					opcodes.CALL_FUNCTION('_tmpVar1_1', 'mock', args=['arg']),
 					opcodes.VARIABLE('_tmpVar1_1'),
@@ -111,7 +111,7 @@ async def test_functionWithReturn(execute):
 			Function.call,
 			staticArgs=(
 				'f',
-				await Signature.call([]),
+				await Signature.call(()),
 				(
 					opcodes.CALL_FUNCTION_STATIC(
 						'_tmpVar1_1', 'String', staticArgs=['a']

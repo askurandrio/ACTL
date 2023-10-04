@@ -68,7 +68,7 @@ async def object__init(_):
 @Object.addMethod('__setAttribute__')
 async def object__setAttribute(self, key, value):
 	assert isinstance(
-		value, (AObject, str, list, dict, tuple, type(None), type(ANY))
+		value, (AObject, str, dict, tuple, type(None), type(ANY))
 	) or hasattr(value, '__next__'), f'{type(value)}({value})'
 	self.head[key] = value
 

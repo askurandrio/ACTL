@@ -53,7 +53,7 @@ async def test_classWithInitMethod(execute):
 						Function.call,
 						staticArgs=(
 							'__init__',
-							await Signature.call(['self', 'a']),
+							await Signature.call(('self', 'a')),
 							(
 								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 								opcodes.RETURN('None'),
@@ -76,7 +76,7 @@ async def test_classWithInitMethod(execute):
 			self_={
 				'__init__': await Function.call(
 					'__init__',
-					await Signature.call(['self', 'a']),
+					await Signature.call(('self', 'a')),
 					(opcodes.SET_ATTRIBUTE('self', 'a', 'a'), opcodes.RETURN('None')),
 					ANY,
 				)
@@ -112,7 +112,7 @@ async def test_classWithInitMethod(execute):
 # 						Function.call,
 # 						staticArgs=(
 # 							'method',
-# 							await Signature.call(['self', 'a']),
+# 							await Signature.call(('self', 'a')),
 # 							(
 # 								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 # 								opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
@@ -172,7 +172,7 @@ async def test_classWithInitMethod(execute):
 # 						Function.call,
 # 						staticArgs=(
 # 							'methodA',
-# 							await Signature.call(['self', 'a']),
+# 							await Signature.call(('self', 'a')),
 # 							(
 # 								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
 # 								opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
@@ -193,7 +193,7 @@ async def test_classWithInitMethod(execute):
 # 						Function.call,
 # 						staticArgs=(
 # 							'methodB',
-# 							await Signature.call(['self', 'b']),
+# 							await Signature.call(('self', 'b')),
 # 							(
 # 								opcodes.CALL_FUNCTION_STATIC(
 # 									'_tmpVar2_1', Number.call, staticArgs=['1']
@@ -257,7 +257,7 @@ async def test_classInherit(execute):
 						Function.call,
 						staticArgs=(
 							'inheritMerhod',
-							await Signature.call(['self']),
+							await Signature.call(('self',)),
 							(
 								opcodes.CALL_FUNCTION_STATIC(
 									'_tmpVar2_1', 'String', staticArgs=['b']

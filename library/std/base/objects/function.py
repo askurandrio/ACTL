@@ -83,7 +83,7 @@ class _ParseFunction:
 				await self._inpRule.pop(Token(','), Maybe(Token(' ')))
 
 		await self._inpRule.pop(Token(')'))
-		signature = executeSyncCoroutine(objects.Signature.call(args))
+		signature = executeSyncCoroutine(objects.Signature.call(tuple(args)))
 		return signature
 
 	async def _parseBody(self):

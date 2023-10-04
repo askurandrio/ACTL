@@ -18,4 +18,4 @@ async def test_recursiveObjectAsStr():
 
 async def test_strWhile():
 	assert str(While) == "class 'While'"
-	assert str(await While.call([])) == 'While<conditionFrame=[]>'
+	assert str(await While.call(())) == 'While<conditionFrame=()>'

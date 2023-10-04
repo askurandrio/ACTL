@@ -60,8 +60,8 @@ async def buildClass(name, parents, body):
 	executor = await bindExecutor()
 	builder = await Function.call(
 		f'_build{name}',
-		await Signature.call(['__class__', name]),
-		[*body, RETURN('__scope__')],
+		await Signature.call(('__class__', name)),
+		(*body, RETURN('__scope__')),
 		await PyToA.call(executor.scope),
 	)
 	scope = AToPy(await builder.call(cls, cls))
