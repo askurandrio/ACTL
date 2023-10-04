@@ -109,7 +109,7 @@ async def class__superGetAttribute(self, for_, key):
 @NativeFunction
 async def class__setAttribute(self, key, value):
 	assert isinstance(
-		value, (AObject, int, str, list, dict, tuple, type(None), type(ANY))
+		value, (AObject, str, list, dict, tuple, type(None), type(ANY))
 	) or hasattr(value, '__next__'), f'{type(value)}({value})'
 	self.head[key] = value
 
