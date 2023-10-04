@@ -1,7 +1,7 @@
 from actl.objects.String import String
 from actl.objects.object import AObject
 from actl.utils import executeSyncCoroutine
-from actl.signals import triggerSignal
+from actl.objects.PyToA import PyToA
 
 
 class _MetaAToPy(type):
@@ -9,9 +9,10 @@ class _MetaAToPy(type):
 		if not isinstance(value, AObject):
 			return value
 
-		if executeSyncCoroutine(value.hasAttribute(AToPy)):
-			toAToPyMethod = executeSyncCoroutine(value.getAttribute(AToPy))
-			return executeSyncCoroutine(toAToPyMethod.call())
+		if executeSyncCoroutine(value.hasAttribute(PyToA)):
+			toPyToAMethod = executeSyncCoroutine(value.getAttribute(PyToA))
+			valuePyToA = executeSyncCoroutine(toPyToAMethod.call())
+			return valuePyToA._value
 
 		return super().__call__(value)
 
@@ -33,6 +34,3 @@ class AToPy(metaclass=_MetaAToPy):
 		toStringMethod = executeSyncCoroutine(self._value.getAttribute(String))
 		aString = executeSyncCoroutine(toStringMethod.call())
 		return type(self)(aString)
-
-
-executeSyncCoroutine(triggerSignal('actl.AToPy:created', AToPy))

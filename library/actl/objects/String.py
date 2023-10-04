@@ -39,13 +39,13 @@ async def string__toPyString(self):
 	return self._value
 
 
-@onSignal('actl.AToPy:created')
-async def _onAToPyCreated(AToPy):
-	@String.addMethod(AToPy)
-	async def string__AToPy(self):
+@onSignal('actl.PyToA:created')
+async def _onPyToACreated(PyToA):
+	@String.addMethod(PyToA)
+	async def string_PyToA(self):
 		toPyStringMethod = await self.getAttribute('toPyString')
 		pyString = await toPyStringMethod.call()
-		return pyString
+		return await PyToA.call(pyString)
 
 
 executeSyncCoroutine(triggerSignal('actl.String:created', String))

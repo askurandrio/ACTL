@@ -1,7 +1,7 @@
-from actl.objects.AToPy import AToPy
 from actl.objects.object import class_
 from actl.objects.String import String
 from actl.utils import executeSyncCoroutine
+from actl.signals import onSignal
 
 
 Bool = executeSyncCoroutine(class_.call('Bool'))
@@ -22,9 +22,11 @@ async def _Bool__call(_, val):
 	return await toBoolMethod.call()
 
 
-@Bool.addMethod(AToPy)
-async def _Bool__AToPy(self):
-	return self._value
+@onSignal('actl.PyToA:created')
+async def _onPyToACreated(PyToA):
+	@Bool.addMethod(PyToA)
+	async def _Bool__PyToA(self):
+		return await PyToA.call(self._value)
 
 
 @String.addMethod(Bool)

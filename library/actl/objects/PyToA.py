@@ -1,9 +1,9 @@
 # from actl.objects.Number import Number
 from actl.objects.Bool import Bool
 from actl.objects.String import String
-from actl.objects.AToPy import AToPy
 from actl.objects.object import class_, AAttributeNotFound, AObject
 from actl.utils import executeSyncCoroutine
+from actl.signals import triggerSignal
 
 
 PyToA = executeSyncCoroutine(class_.call('PyToA'))
@@ -42,6 +42,8 @@ async def _PyToA__await(self):
 
 @PyToA.addMethodToClass('exec')
 async def _PyToA__exec(cls_, resultName_, code_=None, **lc_scope):
+	from actl.objects.AToPy import AToPy
+
 	if code_ is None:
 		code_ = resultName_
 		resultName_ = None
@@ -64,11 +66,16 @@ async def _PyToA__exec(cls_, resultName_, code_=None, **lc_scope):
 
 @PyToA.addMethod('__call__')
 async def _PyToA__call(self, *args, **kwargs):
+	from actl.objects.AToPy import AToPy
+
 	noWrap = kwargs.pop('_noWrap', False)
 
 	if not noWrap:
-		args = [AToPy(arg) for arg in args]
-		kwargs = {key: AToPy(value) for key, value in kwargs.items()}
+		try:
+			args = [AToPy(arg) for arg in args]
+			kwargs = {key: AToPy(value) for key, value in kwargs.items()}
+		except:
+			breakpoint()
 
 	res = self._value(*args, **kwargs)
 
@@ -77,6 +84,8 @@ async def _PyToA__call(self, *args, **kwargs):
 
 @PyToA.addMethod('getAttribute')
 async def _PyToA__getAttribute(self, key):
+	from actl.objects.AToPy import AToPy
+
 	pyKey = AToPy(key)
 
 	try:
@@ -92,9 +101,9 @@ async def _PyToA__setAttribute(self, key, value):
 	setattr(self._value, key, value)
 
 
-@PyToA.addMethod(AToPy)
-async def _PyToA__AToPY(self):
-	return self._value
+@PyToA.addMethod(PyToA)
+async def _PyToA__PyToA(self):
+	return self
 
 
 @PyToA.addMethod(Bool)
@@ -106,3 +115,6 @@ async def _PyToA__Bool(self):
 @PyToA.addMethod(String)
 async def _PyToA__String(self):
 	return await String.call(f'PyToA<{self._value}>')
+
+
+executeSyncCoroutine(triggerSignal('actl.PyToA:created', PyToA))
