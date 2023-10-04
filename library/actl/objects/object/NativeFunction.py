@@ -10,15 +10,11 @@ class NativeFunction(AObject):
 		self._function = function
 		super().__init__({})
 
-		@onSignal('actl.Function:created', None)
-		async def _onFunctionCreated(Function):
-			self.head['__class__'] = Function
-
-		if self.head['__class__'] is None:
-
-			@onSignal('actl.Object:created')
-			async def _onObjectCreated(Object):
-				self.head['__class__'] = Object
+	async def _resolve__class__(self):
+		try:
+			return self.class_
+		except AttributeError:
+			return self.Object
 
 	async def call(self, *args, **kwargs):
 		return await self._function(*args, **kwargs)
@@ -72,11 +68,20 @@ async def _onStringCreated(String):
 
 @onSignal('actl.Function:created')
 async def _onFunctionCreated(_):
-	from actl.objects.Function import Signature
+	from actl.objects.object import class_
+	from actl.objects.Function import Function, Signature
 
-	@onSignal('actl.Function:created')
-	async def _onFunctionCreatedLastHandler(_):
-		NativeFunction.emptySignature = await Signature.call(())
+	# First, set class_ to Function to allow class_ stuff works
+	NativeFunction.class_ = Function
+
+	NativeFunction.class_ = await class_.call('NativeFunction', (Function,))
+
+	NativeFunction.emptySignature = await Signature.call(())
+
+
+@onSignal('actl.Object:created')
+async def _onObjectCreated(Object):
+	NativeFunction.Object = Object
 
 
 @onSignal('actl.None:created')
