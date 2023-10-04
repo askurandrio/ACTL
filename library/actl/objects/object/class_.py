@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 from actl.objects.object.AObject import AObject
 from actl.objects.object.NativeMethod import NativeFunction
 from actl.objects.object.exceptions import AAttributeNotFound
@@ -106,7 +108,9 @@ async def class__superGetAttribute(self, for_, key):
 
 @NativeFunction
 async def class__setAttribute(self, key, value):
-	# assert isinstance(value, AObject), f'{type(value)}({value})'
+	assert isinstance(
+		value, (AObject, int, str, list, dict, tuple, type(None), type(ANY))
+	) or hasattr(value, '__next__'), f'{type(value)}({value})'
 	self.head[key] = value
 
 
