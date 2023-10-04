@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import time
+import shlex
 
 import pytest
 
@@ -86,9 +87,8 @@ def run(cleanupOnSuccess, cleanupOnFailure):
 		run_.process.kill()
 		run_.process.wait(timeout=1)
 
-		cmd = ' '.join(run_.process.args)
 		print(
-			f"'{cmd}' cleanup on failure with returncode {run_.process.returncode}",
+			f"'{shlex.join(run_.process.args)}' cleanup on failure with returncode {run_.process.returncode}",
 			file=sys.stderr,
 		)
 		print(run_.readStdErr(), file=sys.stderr)
