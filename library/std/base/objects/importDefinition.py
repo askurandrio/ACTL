@@ -25,15 +25,15 @@ From = executeSyncCoroutine(Object.call())
 @NativeFunction
 async def import_(importName):
 	executor = await bindExecutor()
-	project = AToPy(executor.scope['__project__'])
+	project = await AToPy(executor.scope['__project__'])
 	module = await project['import'].importByName(importName)
 	return module
 
 
 @NativeFunction
 async def copyAlllIntoScope(module, scope):
-	scope = AToPy(scope)
-	for key, value in AToPy(await module.getAttribute('__scope__')).getDiff():
+	scope = await AToPy(scope)
+	for key, value in (await AToPy(await module.getAttribute('__scope__'))).getDiff():
 		scope[key] = value
 
 	return ANone

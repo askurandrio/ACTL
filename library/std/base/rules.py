@@ -12,7 +12,7 @@ from actl.opcodes import (
 	GET_ATTRIBUTE,
 	SET_ATTRIBUTE,
 )
-from actl.utils import generatorToAwaitable
+from actl.utils import generatorToAwaitable, executeSyncCoroutine
 
 
 RULES = SyntaxRules()
@@ -22,13 +22,13 @@ RULES = SyntaxRules()
 class _ApplySyntaxObjectSyntaxRule:
 	@classmethod
 	async def match(cls, parser, inp):
-		executeCoroutine = AToPy(parser.scope['__project__'])[
+		executeCoroutine = executeSyncCoroutine(AToPy(parser.scope['__project__']))[
 			'buildExecutor'
 		].executeCoroutine
 
 		async for syntaxObject in cls._getSyntaxObjects(parser, inp, executeCoroutine):
-			syntaxRule = AToPy(
-				executeCoroutine(syntaxObject.getAttribute('__syntaxRule__'))
+			syntaxRule = executeSyncCoroutine(
+				AToPy(executeCoroutine(syntaxObject.getAttribute('__syntaxRule__')))
 			)
 			if not isinstance(syntaxRule, list):
 				syntaxRule = [syntaxRule]
@@ -354,7 +354,7 @@ async def _mixedIndentationIsForbidden(inp):
 
 def hasAttribute(attribute):
 	async def match(parser, inp):
-		executeCoroutine = AToPy(parser.scope['__project__'])[
+		executeCoroutine = executeSyncCoroutine(AToPy(parser.scope['__project__']))[
 			'buildExecutor'
 		].executeCoroutine
 		token = inp[0]
@@ -386,7 +386,7 @@ async def _parseUseCodeBlock(parser, inp):
 	var = inp.pop(0)
 	inp.pop(0)
 
-	executeCoroutine = AToPy(parser.scope['__project__'])[
+	executeCoroutine = executeSyncCoroutine(AToPy(parser.scope['__project__']))[
 		'buildExecutor'
 	].executeCoroutine
 
@@ -397,7 +397,7 @@ async def _parseUseCodeBlock(parser, inp):
 		aCodeBlock = await PyToA.call(codeBlock)
 		result = await useCodeBlockMethod.call(aCodeBlock)
 
-		return AToPy(result)
+		return await AToPy(result)
 
 	parseFunc, applyFunc = executeCoroutine(callUseCodeBlock())
 

@@ -41,7 +41,7 @@ async def test_calls(execute, testF, code, args, kwargs):
 		opcodes.CALL_FUNCTION(dst='#1', function='testF', args=args, kwargs=kwargs),
 		opcodes.VARIABLE(name='#1'),
 	]
-	assert AToPy(execute.executed.scope['#1']) == testF.return_value
+	assert await AToPy(execute.executed.scope['#1']) == testF.return_value
 	testF.assert_called_once_with(
 		*arg_values, **{key: kwarg_values[value] for key, value in kwargs.items()}
 	)
@@ -55,7 +55,7 @@ async def test_callWithString(execute, testF):
 		opcodes.CALL_FUNCTION(dst='#2', function='testF', args=['#1']),
 		opcodes.VARIABLE(name='#2'),
 	]
-	assert AToPy(execute.executed.scope['#2']) == testF.return_value
+	assert await AToPy(execute.executed.scope['#2']) == testF.return_value
 	testF.assert_called_once_with('s')
 
 

@@ -28,7 +28,7 @@ async def test_simple_if(execute):
 			)
 		)
 	]
-	assert AToPy(execute.executed.scope['a']) == 'a'
+	assert await AToPy(execute.executed.scope['a']) == 'a'
 
 
 async def test_ifFalse(execute):
@@ -84,7 +84,7 @@ async def test_ifElif(execute):
 			),
 		),
 	)
-	assert AToPy(execute.executed.scope['a']) == 'b'
+	assert await AToPy(execute.executed.scope['a']) == 'b'
 
 
 async def test_ifElse(execute):
@@ -105,7 +105,7 @@ async def test_ifElse(execute):
 		opcodes.CALL_FUNCTION_STATIC(dst='#3', function='String', staticArgs=['b']),
 		opcodes.SET_VARIABLE(dst='a', src='#3'),
 	)
-	assert AToPy(execute.executed.scope['a']) == 'b'
+	assert await AToPy(execute.executed.scope['a']) == 'b'
 
 
 async def test_ifElifElseWithFullCodeBlock(execute):
@@ -147,4 +147,4 @@ async def test_ifElifElseWithFullCodeBlock(execute):
 		opcodes.CALL_FUNCTION_STATIC(dst='#5', function='String', staticArgs=['c']),
 		opcodes.SET_VARIABLE(dst='a', src='#5'),
 	)
-	assert AToPy(execute.executed.scope['a']) == 'c'
+	assert await AToPy(execute.executed.scope['a']) == 'c'

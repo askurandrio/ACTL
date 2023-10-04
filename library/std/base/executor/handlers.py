@@ -84,8 +84,8 @@ async def _CALL_OPERATOR__handler(executor, opcode):
 	first = executor.scope[opcode.first]
 	second = executor.scope[opcode.second]
 
-	pyFirst = AToPy(first)
-	pySecond = AToPy(second)
+	pyFirst = await AToPy(first)
+	pySecond = await AToPy(second)
 	pyResult = eval(  # pylint: disable=eval-used
 		f'pyFirst {opcode.operator} pySecond',
 		{'pyFirst': pyFirst, 'pySecond': pySecond},
@@ -124,7 +124,7 @@ async def _While__handler(executor, opcode):
 	while True:
 		await generatorToAwaitable(conditionFrame)
 		res = await Bool.call(executor.scope[resultConditionName])
-		if not AToPy(res):
+		if not await AToPy(res):
 			break
 
 		await generatorToAwaitable(code)
@@ -136,7 +136,7 @@ async def _If__handler(executor, opcode):
 		await generatorToAwaitable(conditionFrame)
 		res = executor.scope[conditionFrame[-1].name]
 		res = await Bool.call(res)
-		if AToPy(res):
+		if await AToPy(res):
 			await generatorToAwaitable(code)
 			return
 

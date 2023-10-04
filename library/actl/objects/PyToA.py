@@ -48,7 +48,7 @@ async def _PyToA__exec(cls_, resultName_, code_=None, **lc_scope):
 		code_ = resultName_
 		resultName_ = None
 
-	code_ = str(AToPy(code_))
+	code_ = str(await AToPy(code_))
 
 	if (resultName_ is None) and (code_.rstrip().startswith('=')):
 		resultName_ = 'result_'
@@ -74,14 +74,12 @@ async def _PyToA__call(self, *args, **kwargs):
 	noWrap = kwargs.pop('_noWrap', False)
 
 	if not noWrap:
-		try:
-			args = [AToPy(arg) for arg in args]
-			kwargs = {key: AToPy(value) for key, value in kwargs.items()}
-		except:
-			breakpoint()
-
-	res = self._value(*args, **kwargs)
-
+		args = [await AToPy(arg) for arg in args]
+		kwargs = {key: await AToPy(value) for key, value in kwargs.items()}
+	try:
+		res = self._value(*args, **kwargs)
+	except Exception as ex:
+		breakpoint()
 	return await PyToA.call(res)
 
 
@@ -89,7 +87,7 @@ async def _PyToA__call(self, *args, **kwargs):
 async def _PyToA__getAttribute(self, key):
 	from actl.objects.AToPy import AToPy
 
-	pyKey = AToPy(key)
+	pyKey = await AToPy(key)
 
 	try:
 		value = getattr(self._value, pyKey)

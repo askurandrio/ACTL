@@ -85,7 +85,7 @@ async def _hasAttribute(obj, attribute):
 @NativeFunction
 async def _loadArgv():
 	executor = await bindExecutor()
-	project = AToPy(executor.scope['__project__'])
+	project = await AToPy(executor.scope['__project__'])
 	argv = project['argv']
 
 	result = await executor.scope['Vector'].call()

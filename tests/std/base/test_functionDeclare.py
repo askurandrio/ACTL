@@ -32,7 +32,7 @@ async def test_simpleFunctionDeclare(execute):
 		opcodes.CALL_FUNCTION(dst='#1', function='f', args=[]),
 		opcodes.VARIABLE(name='#1'),
 	]
-	assert AToPy(execute.executed.scope['#1']) is None
+	assert await AToPy(execute.executed.scope['#1']) is None
 	mock.assert_called_once_with()
 
 
@@ -64,7 +64,7 @@ async def test_declareMultiLineFunction(execute):
 		opcodes.CALL_FUNCTION(dst='#1', function='f', args=[]),
 		opcodes.VARIABLE(name='#1'),
 	]
-	assert AToPy(execute.executed.scope['#1']) is None
+	assert await AToPy(execute.executed.scope['#1']) is None
 	mock.assert_called_once_with('a')
 
 
@@ -94,7 +94,7 @@ async def test_declareFunctionWithArg(execute):
 		opcodes.VARIABLE(name='#2'),
 	]
 
-	assert AToPy(execute.executed.scope['#2']) is None
+	assert await AToPy(execute.executed.scope['#2']) is None
 	mock.assert_called_once_with('a')
 
 
@@ -119,10 +119,10 @@ async def test_functionWithReturn(execute):
 		opcodes.VARIABLE('#1'),
 	]
 
-	assert AToPy(execute.executed.scope['#1']) == 'a'
+	assert await AToPy(execute.executed.scope['#1']) == 'a'
 
 
 async def test_returnFromWhile(execute):
 	execute('fun f():\n	while True:\n		return "a"\nf()')
 
-	assert AToPy(execute.executed.scope['#1']) == 'a'
+	assert await AToPy(execute.executed.scope['#1']) == 'a'

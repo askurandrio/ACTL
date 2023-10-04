@@ -15,11 +15,11 @@ async def test_varWithEndLine(execute):
 	assert execute.executed
 
 
-def test_setVariable(execute):
+async def test_setVariable(execute):
 	execute('a = "a"')
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(dst='#1', function='String', staticArgs=['a']),
 		opcodes.SET_VARIABLE(dst='a', src='#1'),
 	]
-	assert AToPy(execute.executed.scope['a']) == 'a'
+	assert await AToPy(execute.executed.scope['a']) == 'a'

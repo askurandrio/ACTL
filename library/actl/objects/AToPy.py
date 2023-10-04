@@ -5,13 +5,12 @@ from actl.objects.PyToA import PyToA
 
 
 class _MetaAToPy(type):
-	def __call__(self, value):
+	async def __call__(self, value):
 		if not isinstance(value, AObject):
 			return value
 
-		if executeSyncCoroutine(value.hasAttribute(PyToA)):
-			toPyToAMethod = executeSyncCoroutine(value.getAttribute(PyToA))
-			valuePyToA = executeSyncCoroutine(toPyToAMethod.call())
+		if await value.hasAttribute(PyToA):
+			valuePyToA = await (await value.getAttribute(PyToA)).call()
 			return valuePyToA._value
 
 		return super().__call__(value)
@@ -33,4 +32,5 @@ class AToPy(metaclass=_MetaAToPy):
 	def __str__(self):
 		toStringMethod = executeSyncCoroutine(self._value.getAttribute(String))
 		aString = executeSyncCoroutine(toStringMethod.call())
-		return type(self)(aString)
+		pyValue = executeSyncCoroutine(type(self)(aString))
+		return str(pyValue)

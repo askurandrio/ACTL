@@ -33,7 +33,7 @@ async def _While__useCodeBlock__(self, codeBlock):
 	async def parse():
 		nonlocal codeBlock, code
 
-		codeBlock = objects.AToPy(codeBlock)
+		codeBlock = await objects.AToPy(codeBlock)
 		code = tuple(await codeBlock.parse())
 		codeBlock.inp.insert(0, (self,))
 

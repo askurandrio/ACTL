@@ -64,7 +64,7 @@ async def buildClass(name, parents, body):
 		(*body, RETURN('__scope__')),
 		await PyToA.call(executor.scope),
 	)
-	scope = AToPy(await builder.call(cls, cls))
+	scope = await AToPy(await builder.call(cls, cls))
 	for key, value in scope.getDiff():
 		if key in ['__class__', name]:
 			continue

@@ -34,8 +34,8 @@ async def test_Slice_syntaxInit(execute):
 		opcodes.VARIABLE('#4'),
 	]
 
-	assert AToPy(execute.executed.scope['#4']) == getItemMock.return_value
-	getItemMock.assert_called_once_with(AToPy(execute.executed.scope['#2']))
+	assert await AToPy(execute.executed.scope['#4']) == getItemMock.return_value
+	getItemMock.assert_called_once_with(await AToPy(execute.executed.scope['#2']))
 	assert (
 		str(execute.executed.scope['#2'])
 		== 'Slice<start=Number<_head=PyToA<2>>, stop=NoneType<>, step=↑...>'

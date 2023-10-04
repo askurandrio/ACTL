@@ -39,7 +39,7 @@ async def test_setString(execute):
 # 	execute(f'result = {code}')
 
 # 	try:
-# 		aResult = AToPy(execute.executed.scope['result'])
+# 		aResult = await AToPy(execute.executed.scope['result'])
 # 	except:
 # 		print('Code parsed as', execute.parsed.code, file=sys.stderr)
 # 		raise

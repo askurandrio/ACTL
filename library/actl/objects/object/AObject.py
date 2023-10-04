@@ -215,7 +215,7 @@ class AObject(ReprToStr):
 	def __str__(self):
 		try:
 			string = executeSyncCoroutine(AObject.String.call(self))
-			return string.value
+			return str(string.value)
 		except Exception as ex:  # pylint: disable=broad-except
 			traceback.print_exc()
 

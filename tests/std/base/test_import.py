@@ -163,10 +163,12 @@ async def test_importFromAnotherProject(execute, _mockIsDir, _mockFile):
 	execute('import testProject.testModule')
 
 	testPackage = execute.executed.scope['testProject']
-	testPackageProject = AToPy(await testPackage.getAttribute('__project__'))
+	testPackageProject = await AToPy(await testPackage.getAttribute('__project__'))
 	assert testPackageProject['projectF'].endswith('testProject/testProject.yaml')
 	testModule = await testPackage.getAttribute('testModule')
-	assert testPackageProject is AToPy(await testModule.getAttribute('__project__'))
+	assert testPackageProject is await AToPy(
+		await testModule.getAttribute('__project__')
+	)
 	assert str(await testModule.getAttribute('a')) == 'a'
 
 

@@ -99,7 +99,7 @@ def test_processEmptyLine(run):
 def test_envVarCODE(run):
 	run(env={'CODE': 'print(1)'})
 
-	assert run.readLine() == 'Number<_head=PyToA<1>>\n'
+	assert run.readLine() == '1\n'
 	assert run.readLine() == 'None\n'
 
 

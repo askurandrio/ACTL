@@ -12,7 +12,7 @@ _default = object()
 
 @Function.addMethod('__call__')
 async def _Function__call(self, *args):
-	callScope = objects.AToPy(await self.getAttribute('scope'))
+	callScope = await objects.AToPy(await self.getAttribute('scope'))
 	signature = await self.getAttribute('signature')
 	argNames = await signature.getAttribute('args')
 	body = await self.getAttribute('body')

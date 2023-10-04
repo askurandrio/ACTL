@@ -53,13 +53,13 @@ async def _Module__getAttribute(self, key):
 	scope = await superGetAttribute.call('__scope__')
 
 	if scope is not None:
-		pyScope = AToPy(scope)
+		pyScope = await AToPy(scope)
 		try:
 			return pyScope[key]
 		except KeyError:
 			pass
 
-	project = AToPy(await self.getAttribute('__project__'))
+	project = await AToPy(await self.getAttribute('__project__'))
 	dirLibrary = await self.getAttribute('__path__')
 
 	if isinstance(key, str):
@@ -80,7 +80,7 @@ async def _Module__getAttribute(self, key):
 async def _Module__executeModule(self):
 	path = await self.getAttribute('__path__')
 	project = await self.getAttribute('__project__')
-	pyProject = AToPy(project)
+	pyProject = await AToPy(project)
 	parsedInput = None
 
 	@Buffer.wrap
