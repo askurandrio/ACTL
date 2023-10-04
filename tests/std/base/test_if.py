@@ -15,15 +15,15 @@ async def test_simple_if(execute):
 			(
 				(
 					opcodes.CALL_FUNCTION_STATIC(
-						dst='_tmpVar1', function='String', staticArgs=['a']
+						dst='#1', function='String', staticArgs=['a']
 					),
-					opcodes.VARIABLE(name='_tmpVar1'),
+					opcodes.VARIABLE(name='#1'),
 				),
 				(
 					opcodes.CALL_FUNCTION_STATIC(
-						dst='_tmpVar2', function='String', staticArgs=['a']
+						dst='#2', function='String', staticArgs=['a']
 					),
-					opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+					opcodes.SET_VARIABLE(dst='a', src='#2'),
 				),
 			)
 		)
@@ -38,16 +38,12 @@ async def test_ifFalse(execute):
 	assert (await if_.getAttribute('__class__')) is If
 	conditionFrame, code = Buffer(await if_.getAttribute('conditions')).one()
 	assert conditionFrame == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function='String', staticArgs=['']
-		),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#1', function='String', staticArgs=['']),
+		opcodes.VARIABLE(name='#1'),
 	)
 	assert code == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar2', function='String', staticArgs=['a']
-		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#2', function='String', staticArgs=['a']),
+		opcodes.SET_VARIABLE(dst='a', src='#2'),
 	)
 
 	assert 'a' not in execute.executed.scope
@@ -62,29 +58,29 @@ async def test_ifElif(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar1', function='String', staticArgs=['']
+					dst='#1', function='String', staticArgs=['']
 				),
-				opcodes.VARIABLE(name='_tmpVar1'),
+				opcodes.VARIABLE(name='#1'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar2', function='String', staticArgs=['a']
+					dst='#2', function='String', staticArgs=['a']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+				opcodes.SET_VARIABLE(dst='a', src='#2'),
 			),
 		),
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar3', function='String', staticArgs=['a']
+					dst='#3', function='String', staticArgs=['a']
 				),
-				opcodes.VARIABLE(name='_tmpVar3'),
+				opcodes.VARIABLE(name='#3'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar4', function='String', staticArgs=['b']
+					dst='#4', function='String', staticArgs=['b']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4'),
+				opcodes.SET_VARIABLE(dst='a', src='#4'),
 			),
 		),
 	)
@@ -98,22 +94,16 @@ async def test_ifElse(execute):
 	assert await if_.getAttribute('__class__') is If
 	conditionFrame, code = Buffer(await if_.getAttribute('conditions')).one()
 	assert conditionFrame == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1', function='String', staticArgs=['']
-		),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#1', function='String', staticArgs=['']),
+		opcodes.VARIABLE(name='#1'),
 	)
 	assert code == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar2', function='String', staticArgs=['a']
-		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#2', function='String', staticArgs=['a']),
+		opcodes.SET_VARIABLE(dst='a', src='#2'),
 	)
 	assert await if_.getAttribute('elseCode') == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar3', function='String', staticArgs=['b']
-		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar3'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#3', function='String', staticArgs=['b']),
+		opcodes.SET_VARIABLE(dst='a', src='#3'),
 	)
 	assert AToPy(execute.executed.scope['a']) == 'b'
 
@@ -127,36 +117,34 @@ async def test_ifElifElseWithFullCodeBlock(execute):
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar1', function='String', staticArgs=['']
+					dst='#1', function='String', staticArgs=['']
 				),
-				opcodes.VARIABLE(name='_tmpVar1'),
+				opcodes.VARIABLE(name='#1'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar2', function='String', staticArgs=['a']
+					dst='#2', function='String', staticArgs=['a']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar2'),
+				opcodes.SET_VARIABLE(dst='a', src='#2'),
 			),
 		),
 		(
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar3', function='String', staticArgs=['']
+					dst='#3', function='String', staticArgs=['']
 				),
-				opcodes.VARIABLE(name='_tmpVar3'),
+				opcodes.VARIABLE(name='#3'),
 			),
 			(
 				opcodes.CALL_FUNCTION_STATIC(
-					dst='_tmpVar4', function='String', staticArgs=['b']
+					dst='#4', function='String', staticArgs=['b']
 				),
-				opcodes.SET_VARIABLE(dst='a', src='_tmpVar4'),
+				opcodes.SET_VARIABLE(dst='a', src='#4'),
 			),
 		),
 	)
 	assert await if_.getAttribute('elseCode') == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar5', function='String', staticArgs=['c']
-		),
-		opcodes.SET_VARIABLE(dst='a', src='_tmpVar5'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#5', function='String', staticArgs=['c']),
+		opcodes.SET_VARIABLE(dst='a', src='#5'),
 	)
 	assert AToPy(execute.executed.scope['a']) == 'c'

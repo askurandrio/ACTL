@@ -123,7 +123,7 @@ class Parser:
 
 
 class _TmpVarFactory:
-	_tmpVarPrefix = '_tmpVar'
+	_tmpVarPrefix = '#'
 
 	def __init__(self):
 		self._counter = 0

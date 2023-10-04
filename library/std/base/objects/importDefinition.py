@@ -76,7 +76,7 @@ async def _parseImport(*args, parser=None):
 	res = [CALL_FUNCTION_STATIC(resultName, import_.call, staticArgs=(mainModuleName,))]
 
 	if moduleNames:
-		if not resultName.startswith('_tmpVar'):
+		if not resultName.startswith('#'):
 			tmpResultName = parser.makeTmpVar().name
 			res.append(SET_VARIABLE(tmpResultName, resultName))
 			resultName = tmpResultName

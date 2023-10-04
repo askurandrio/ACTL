@@ -35,8 +35,8 @@ async def test_importPackageAndModule(execute, _mockFile, _mockIsDir):
 
 	assert execute.parsed.code == [
 		CALL_FUNCTION_STATIC('testPackage', import_.call, staticArgs=('testPackage',)),
-		SET_VARIABLE('_tmpVar1', 'testPackage'),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
+		SET_VARIABLE('#1', 'testPackage'),
+		GET_ATTRIBUTE('#1', '#1', 'testModule'),
 	]
 
 	testPackage = execute.executed.scope['testPackage']
@@ -51,10 +51,8 @@ async def test_importFromModuleAllNames(execute, _mockFile, _mockIsDir):
 	execute('from testModule import *')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testModule',)),
-		CALL_FUNCTION_STATIC(
-			'_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__')
-		),
+		CALL_FUNCTION_STATIC('#1', import_.call, staticArgs=('testModule',)),
+		CALL_FUNCTION_STATIC('_', copyAlllIntoScope.call, args=('#1', '__scope__')),
 	]
 
 	assert str(execute.executed.scope['a']) == 'a'
@@ -66,8 +64,8 @@ async def test_importFromModuleImportName(execute, _mockFile, _mockIsDir):
 	execute('from testModule import a')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testModule',)),
-		GET_ATTRIBUTE('a', '_tmpVar1', 'a'),
+		CALL_FUNCTION_STATIC('#1', import_.call, staticArgs=('testModule',)),
+		GET_ATTRIBUTE('a', '#1', 'a'),
 	]
 
 	assert str(execute.executed.scope['a']) == 'a'
@@ -84,9 +82,9 @@ async def test_importPackageAndPackageAndModule(execute, _mockFile, _mockIsDir):
 		CALL_FUNCTION_STATIC(
 			'testMainPackage', import_.call, staticArgs=('testMainPackage',)
 		),
-		SET_VARIABLE('_tmpVar1', 'testMainPackage'),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
+		SET_VARIABLE('#1', 'testMainPackage'),
+		GET_ATTRIBUTE('#1', '#1', 'testPackage'),
+		GET_ATTRIBUTE('#1', '#1', 'testModule'),
 	]
 
 	testMainPackage = execute.executed.scope['testMainPackage']
@@ -103,10 +101,10 @@ async def test_importNameFromPackageAndPackageAndModule(execute, _mockFile, _moc
 	execute('from testMainPackage.testPackage.testModule import a')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testMainPackage',)),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
-		GET_ATTRIBUTE('a', '_tmpVar1', 'a'),
+		CALL_FUNCTION_STATIC('#1', import_.call, staticArgs=('testMainPackage',)),
+		GET_ATTRIBUTE('#1', '#1', 'testPackage'),
+		GET_ATTRIBUTE('#1', '#1', 'testModule'),
+		GET_ATTRIBUTE('a', '#1', 'a'),
 	]
 
 	assert str(execute.executed.scope['a']) == 'a'
@@ -122,12 +120,10 @@ async def test_importFromPackageAndPackageAndModuleAllNames(
 	execute('from testMainPackage.testPackage.testModule import *')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testMainPackage',)),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testPackage'),
-		GET_ATTRIBUTE('_tmpVar1', '_tmpVar1', 'testModule'),
-		CALL_FUNCTION_STATIC(
-			'_', copyAlllIntoScope.call, args=('_tmpVar1', '__scope__')
-		),
+		CALL_FUNCTION_STATIC('#1', import_.call, staticArgs=('testMainPackage',)),
+		GET_ATTRIBUTE('#1', '#1', 'testPackage'),
+		GET_ATTRIBUTE('#1', '#1', 'testModule'),
+		CALL_FUNCTION_STATIC('_', copyAlllIntoScope.call, args=('#1', '__scope__')),
 	]
 
 	assert str(execute.executed.scope['a']) == 'a'
@@ -141,8 +137,8 @@ async def test_importModuleFile(execute, _mockIsDir, _mockFile):
 	execute('from testPackage import a')
 
 	assert execute.parsed.code == [
-		CALL_FUNCTION_STATIC('_tmpVar1', import_.call, staticArgs=('testPackage',)),
-		GET_ATTRIBUTE('a', '_tmpVar1', 'a'),
+		CALL_FUNCTION_STATIC('#1', import_.call, staticArgs=('testPackage',)),
+		GET_ATTRIBUTE('a', '#1', 'a'),
 	]
 
 	assert str(execute.executed.scope['a']) == 'a'

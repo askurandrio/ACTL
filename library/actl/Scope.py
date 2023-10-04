@@ -46,7 +46,7 @@ class ScopeChild(Scope):
 
 	def getDiff(self):
 		for key, value in self._head.items():
-			if key.startswith('_tmpVar'):
+			if key.startswith('#'):
 				continue
 			yield key, value
 

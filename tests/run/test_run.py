@@ -81,7 +81,7 @@ def test_changeInvitation(run):
 
 	assert (
 		run.readLine().strip()
-		== """>>> ... ... fun f(): (CALL_FUNCTION_STATIC('_tmpVar1_1', 'Number', typeb='(', staticArgs=[PyToA<1>], staticKwargs={}, args=[], kwargs={}), SET_VARIABLE('a', '_tmpVar1_1'), RETURN('None'))"""
+		== """>>> ... ... fun f(): (CALL_FUNCTION_STATIC('#1_1', 'Number', typeb='(', staticArgs=[PyToA<1>], staticKwargs={}, args=[], kwargs={}), SET_VARIABLE('a', '#1_1'), RETURN('None'))"""
 	)
 	assert run.readLine() == 'None\n'
 	run.readTemplate('>>> ')

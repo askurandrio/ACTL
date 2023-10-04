@@ -24,17 +24,13 @@ async def test_simple_while(execute):
 	cycle = execute.parsed.code.one()
 	assert await cycle.getAttribute('__class__') is While
 	assert await cycle.getAttribute('conditionFrame') == (
-		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='conditionMock'),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.CALL_FUNCTION(dst='#1', function='conditionMock'),
+		opcodes.VARIABLE(name='#1'),
 	)
 	assert await cycle.getAttribute('code') == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1_1', function='String', staticArgs=['a']
-		),
-		opcodes.CALL_FUNCTION(
-			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
-		),
-		opcodes.VARIABLE(name='_tmpVar1_2'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#1_1', function='String', staticArgs=['a']),
+		opcodes.CALL_FUNCTION(dst='#1_2', function='codeMock', args=['#1_1']),
+		opcodes.VARIABLE(name='#1_2'),
 	)
 
 	assert execute.executed
@@ -58,17 +54,13 @@ async def test_whileWithFullCodeBlock(execute):
 	cycle = execute.parsed.code.one()
 	assert await cycle.getAttribute('__class__') is While
 	assert await cycle.getAttribute('conditionFrame') == (
-		opcodes.CALL_FUNCTION(dst='_tmpVar1', function='conditionMock'),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.CALL_FUNCTION(dst='#1', function='conditionMock'),
+		opcodes.VARIABLE(name='#1'),
 	)
 	assert await cycle.getAttribute('code') == (
-		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1_1', function='String', staticArgs=['a']
-		),
-		opcodes.CALL_FUNCTION(
-			dst='_tmpVar1_2', function='codeMock', args=['_tmpVar1_1']
-		),
-		opcodes.VARIABLE(name='_tmpVar1_2'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#1_1', function='String', staticArgs=['a']),
+		opcodes.CALL_FUNCTION(dst='#1_2', function='codeMock', args=['#1_1']),
+		opcodes.VARIABLE(name='#1_2'),
 	)
 
 	assert execute.executed

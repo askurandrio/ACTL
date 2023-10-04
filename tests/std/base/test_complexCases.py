@@ -12,8 +12,8 @@ async def test_setString(execute):
 	execute("res = 's'")
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', 'String', staticArgs=['s']),
-		opcodes.SET_VARIABLE('res', '_tmpVar1'),
+		opcodes.CALL_FUNCTION_STATIC('#1', 'String', staticArgs=['s']),
+		opcodes.SET_VARIABLE('res', '#1'),
 	]
 	assert execute.executed.scope['res'] == await String.call('s')
 

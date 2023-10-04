@@ -24,10 +24,10 @@ async def test_Vector_syntaxInit(execute):
 	execute('[]')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC(dst='_tmpVar1', function='Vector'),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.CALL_FUNCTION_STATIC(dst='#1', function='Vector'),
+		opcodes.VARIABLE(name='#1'),
 	]
-	vector = execute.executed.scope['_tmpVar1']
+	vector = execute.executed.scope['#1']
 	assert await vector.getAttribute('__class__') is execute.scope['Vector']
 
 
@@ -35,13 +35,13 @@ async def test_Vector_syntaxInitWithNumber(execute):
 	execute('["a"]')
 
 	assert execute.parsed.code == [
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', 'Vector'),
-		opcodes.GET_ATTRIBUTE('_tmpVar2', '_tmpVar1', 'append'),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar4', "String", staticArgs=['a']),
-		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar2', args=['_tmpVar4']),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.CALL_FUNCTION_STATIC('#1', 'Vector'),
+		opcodes.GET_ATTRIBUTE('#2', '#1', 'append'),
+		opcodes.CALL_FUNCTION_STATIC('#4', "String", staticArgs=['a']),
+		opcodes.CALL_FUNCTION('#3', '#2', args=['#4']),
+		opcodes.VARIABLE(name='#1'),
 	]
-	vector = execute.executed.scope['_tmpVar1']
+	vector = execute.executed.scope['#1']
 	assert await vector.getAttribute('__class__') is execute.scope['Vector']
 
 
@@ -52,21 +52,21 @@ async def test_ConstVector_syntaxInitMultipleItems(execute, length):
 	assert execute.parsed.code == [
 		*[
 			opcodes.CALL_FUNCTION_STATIC(
-				f'_tmpVar{index + 1}', 'String', staticArgs=[str(index)]
+				f'#{index + 1}', 'String', staticArgs=[str(index)]
 			)
 			for index in range(length)
 		],
 		opcodes.CALL_FUNCTION_STATIC(
-			f'_tmpVar{length + 1}',
+			f'#{length + 1}',
 			vector__of.call,
-			args=[f'_tmpVar{index + 1}' for index in range(length)],
+			args=[f'#{index + 1}' for index in range(length)],
 		),
-		opcodes.VARIABLE(f'_tmpVar{length + 1}'),
+		opcodes.VARIABLE(f'#{length + 1}'),
 	]
 
 	headAsStr = ', '.join(map(str, range(length)))
 	assert (
-		str(execute.executed.scope[f'_tmpVar{length + 1}'])
+		str(execute.executed.scope[f'#{length + 1}'])
 		== f'Vector<_head=PyToA<[{headAsStr}]>>'
 	)
 
@@ -80,18 +80,18 @@ async def test_ConstVector_packUnpack(execute, length):
 	assert execute.parsed.code == [
 		*[
 			opcodes.CALL_FUNCTION_STATIC(
-				f'_tmpVar{index + 1}', 'String', staticArgs=[str(index)]
+				f'#{index + 1}', 'String', staticArgs=[str(index)]
 			)
 			for index in range(length)
 		],
 		opcodes.CALL_FUNCTION_STATIC(
-			f'_tmpVar{length + 1}',
+			f'#{length + 1}',
 			vector__of.call,
-			args=[f'_tmpVar{index + 1}' for index in range(length)],
+			args=[f'#{index + 1}' for index in range(length)],
 		),
-		opcodes.CALL_FUNCTION('_tmpVar1_1', 'Iter', args=[f'_tmpVar{length + 1}']),
-		opcodes.GET_ATTRIBUTE('_tmpVar1_2', '_tmpVar1_1', 'next'),
-		*[opcodes.CALL_FUNCTION(f'v{index}', '_tmpVar1_2') for index in range(length)],
+		opcodes.CALL_FUNCTION('#1_1', 'Iter', args=[f'#{length + 1}']),
+		opcodes.GET_ATTRIBUTE('#1_2', '#1_1', 'next'),
+		*[opcodes.CALL_FUNCTION(f'v{index}', '#1_2') for index in range(length)],
 	]
 
 	for index in range(length):
@@ -107,19 +107,19 @@ async def test_ConstVector_packUnpackViaVariable(execute, length):
 	assert execute.parsed.code == [
 		*[
 			opcodes.CALL_FUNCTION_STATIC(
-				f'_tmpVar{index + 1}', 'String', staticArgs=[str(index)]
+				f'#{index + 1}', 'String', staticArgs=[str(index)]
 			)
 			for index in range(length)
 		],
 		opcodes.CALL_FUNCTION_STATIC(
-			f'_tmpVar{length + 1}',
+			f'#{length + 1}',
 			vector__of.call,
-			args=[f'_tmpVar{index + 1}' for index in range(length)],
+			args=[f'#{index + 1}' for index in range(length)],
 		),
-		opcodes.SET_VARIABLE('v', f'_tmpVar{length + 1}'),
-		opcodes.CALL_FUNCTION('_tmpVar1_1', 'Iter', args=['v']),
-		opcodes.GET_ATTRIBUTE('_tmpVar1_2', '_tmpVar1_1', 'next'),
-		*[opcodes.CALL_FUNCTION(f'v{index}', '_tmpVar1_2') for index in range(length)],
+		opcodes.SET_VARIABLE('v', f'#{length + 1}'),
+		opcodes.CALL_FUNCTION('#1_1', 'Iter', args=['v']),
+		opcodes.GET_ATTRIBUTE('#1_2', '#1_1', 'next'),
+		*[opcodes.CALL_FUNCTION(f'v{index}', '#1_2') for index in range(length)],
 	]
 
 	for index in range(length):

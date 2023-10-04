@@ -9,13 +9,13 @@ async def test_Number(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1',
+			dst='#1',
 			function='Number',
 			staticArgs=[await objects.PyToA.call('1')],
 		),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.VARIABLE(name='#1'),
 	]
-	assert str(execute.executed.scope['_tmpVar1']) == 'Number<_head=PyToA<1>>'
+	assert str(execute.executed.scope['#1']) == 'Number<_head=PyToA<1>>'
 
 
 async def test_floatNumber(execute):
@@ -23,13 +23,13 @@ async def test_floatNumber(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1',
+			dst='#1',
 			function='Number',
 			staticArgs=[await objects.PyToA.call('1.1')],
 		),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.VARIABLE(name='#1'),
 	]
-	assert str(execute.executed.scope['_tmpVar1']) == 'Number<_head=PyToA<1.1>>'
+	assert str(execute.executed.scope['#1']) == 'Number<_head=PyToA<1.1>>'
 
 
 async def test_negativeNumber(execute):
@@ -37,10 +37,10 @@ async def test_negativeNumber(execute):
 
 	assert execute.parsed.code == [
 		opcodes.CALL_FUNCTION_STATIC(
-			dst='_tmpVar1',
+			dst='#1',
 			function='Number',
 			staticArgs=[await objects.PyToA.call('-1')],
 		),
-		opcodes.VARIABLE(name='_tmpVar1'),
+		opcodes.VARIABLE(name='#1'),
 	]
-	assert str(execute.executed.scope['_tmpVar1']) == 'Number<_head=PyToA<-1>>'
+	assert str(execute.executed.scope['#1']) == 'Number<_head=PyToA<-1>>'

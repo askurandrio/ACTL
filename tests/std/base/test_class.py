@@ -21,9 +21,9 @@ async def test_simpleClassDeclare(execute):
 				(),
 				(
 					opcodes.CALL_FUNCTION_STATIC(
-						'_tmpVar1_1', function='String', staticArgs=['a']
+						'#1_1', function='String', staticArgs=['a']
 					),
-					opcodes.SET_VARIABLE('a', '_tmpVar1_1'),
+					opcodes.SET_VARIABLE('a', '#1_1'),
 				),
 			),
 		)
@@ -64,9 +64,9 @@ async def test_classWithInitMethod(execute):
 				),
 			),
 		),
-		opcodes.CALL_FUNCTION_STATIC('_tmpVar1', 'String', staticArgs=['a']),
-		opcodes.CALL_FUNCTION('_tmpVar2', 'C', args=['_tmpVar1']),
-		opcodes.SET_VARIABLE('c', '_tmpVar2'),
+		opcodes.CALL_FUNCTION_STATIC('#1', 'String', staticArgs=['a']),
+		opcodes.CALL_FUNCTION('#2', 'C', args=['#1']),
+		opcodes.SET_VARIABLE('c', '#2'),
 	]
 
 	assert (
@@ -115,14 +115,14 @@ async def test_classWithInitMethod(execute):
 # 							await Signature.call(('self', 'a')),
 # 							(
 # 								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
-# 								opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
+# 								opcodes.GET_ATTRIBUTE('#2_1', 'self', 'a'),
 # 								opcodes.CALL_FUNCTION_STATIC(
-# 									'_tmpVar2_2', 'String', staticArgs=['2']
+# 									'#2_2', 'String', staticArgs=['2']
 # 								),
 # 								opcodes.CALL_OPERATOR(
-# 									'_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'
+# 									'#2_3', '#2_1', '+', '#2_2'
 # 								),
-# 								opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
+# 								opcodes.SET_VARIABLE('a', '#2_3'),
 # 								opcodes.RETURN('a'),
 # 							),
 # 						),
@@ -131,12 +131,12 @@ async def test_classWithInitMethod(execute):
 # 				),
 # 			),
 # 		),
-# 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
-# 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
-# 		opcodes.GET_ATTRIBUTE('_tmpVar1', 'c', 'method'),
-# 		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['1']),
-# 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar1', args=['_tmpVar2']),
-# 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3'),
+# 		opcodes.CALL_FUNCTION('#1', 'C'),
+# 		opcodes.SET_VARIABLE('c', '#1'),
+# 		opcodes.GET_ATTRIBUTE('#1', 'c', 'method'),
+# 		opcodes.CALL_FUNCTION_STATIC('#2', Number.call, staticArgs=['1']),
+# 		opcodes.CALL_FUNCTION('#3', '#1', args=['#2']),
+# 		opcodes.SET_VARIABLE('tMethodResult', '#3'),
 # 	]
 
 # 	assert str(await String.call(execute.executed.scope['c'])) == 'C<a=Number<1>>'
@@ -175,14 +175,14 @@ async def test_classWithInitMethod(execute):
 # 							await Signature.call(('self', 'a')),
 # 							(
 # 								opcodes.SET_ATTRIBUTE('self', 'a', 'a'),
-# 								opcodes.GET_ATTRIBUTE('_tmpVar2_1', 'self', 'a'),
+# 								opcodes.GET_ATTRIBUTE('#2_1', 'self', 'a'),
 # 								opcodes.CALL_FUNCTION_STATIC(
-# 									'_tmpVar2_2', Number.call, staticArgs=['2']
+# 									'#2_2', Number.call, staticArgs=['2']
 # 								),
 # 								opcodes.CALL_OPERATOR(
-# 									'_tmpVar2_3', '_tmpVar2_1', '+', '_tmpVar2_2'
+# 									'#2_3', '#2_1', '+', '#2_2'
 # 								),
-# 								opcodes.SET_VARIABLE('a', '_tmpVar2_3'),
+# 								opcodes.SET_VARIABLE('a', '#2_3'),
 # 								opcodes.RETURN('a'),
 # 							),
 # 						),
@@ -196,17 +196,17 @@ async def test_classWithInitMethod(execute):
 # 							await Signature.call(('self', 'b')),
 # 							(
 # 								opcodes.CALL_FUNCTION_STATIC(
-# 									'_tmpVar2_1', Number.call, staticArgs=['1']
+# 									'#2_1', Number.call, staticArgs=['1']
 # 								),
 # 								opcodes.CALL_OPERATOR(
-# 									'_tmpVar2_2', 'b', '+', '_tmpVar2_1'
+# 									'#2_2', 'b', '+', '#2_1'
 # 								),
-# 								opcodes.SET_VARIABLE('b', '_tmpVar2_2'),
-# 								opcodes.GET_ATTRIBUTE('_tmpVar2_3', 'self', 'methodA'),
+# 								opcodes.SET_VARIABLE('b', '#2_2'),
+# 								opcodes.GET_ATTRIBUTE('#2_3', 'self', 'methodA'),
 # 								opcodes.CALL_FUNCTION(
-# 									'_tmpVar2_4', '_tmpVar2_3', args=['b']
+# 									'#2_4', '#2_3', args=['b']
 # 								),
-# 								opcodes.RETURN('_tmpVar2_4'),
+# 								opcodes.RETURN('#2_4'),
 # 							),
 # 						),
 # 						kwargs={'scope': '__scope__'},
@@ -214,12 +214,12 @@ async def test_classWithInitMethod(execute):
 # 				),
 # 			),
 # 		),
-# 		opcodes.CALL_FUNCTION('_tmpVar1', 'C'),
-# 		opcodes.SET_VARIABLE('c', '_tmpVar1'),
-# 		opcodes.GET_ATTRIBUTE('_tmpVar1', 'c', 'methodB'),
-# 		opcodes.CALL_FUNCTION_STATIC('_tmpVar2', Number.call, staticArgs=['1']),
-# 		opcodes.CALL_FUNCTION('_tmpVar3', '_tmpVar1', args=['_tmpVar2']),
-# 		opcodes.SET_VARIABLE('tMethodResult', '_tmpVar3'),
+# 		opcodes.CALL_FUNCTION('#1', 'C'),
+# 		opcodes.SET_VARIABLE('c', '#1'),
+# 		opcodes.GET_ATTRIBUTE('#1', 'c', 'methodB'),
+# 		opcodes.CALL_FUNCTION_STATIC('#2', Number.call, staticArgs=['1']),
+# 		opcodes.CALL_FUNCTION('#3', '#1', args=['#2']),
+# 		opcodes.SET_VARIABLE('tMethodResult', '#3'),
 # 	]
 
 # 	assert str(execute.executed.scope['c']) == 'C<a=Number<2>>'
@@ -260,12 +260,10 @@ async def test_classInherit(execute):
 							await Signature.call(('self',)),
 							(
 								opcodes.CALL_FUNCTION_STATIC(
-									'_tmpVar2_1', 'String', staticArgs=['b']
+									'#2_1', 'String', staticArgs=['b']
 								),
-								opcodes.CALL_FUNCTION(
-									'_tmpVar2_2', 'mock', args=['_tmpVar2_1']
-								),
-								opcodes.VARIABLE('_tmpVar2_2'),
+								opcodes.CALL_FUNCTION('#2_2', 'mock', args=['#2_1']),
+								opcodes.VARIABLE('#2_2'),
 								opcodes.RETURN('None'),
 							),
 						),
@@ -274,14 +272,14 @@ async def test_classInherit(execute):
 				),
 			),
 		),
-		opcodes.CALL_FUNCTION('_tmpVar1', 'Inherit'),
-		opcodes.SET_VARIABLE('inherit', '_tmpVar1'),
-		opcodes.GET_ATTRIBUTE('_tmpVar1', 'inherit', 'baseMethod'),
-		opcodes.CALL_FUNCTION('_tmpVar2', '_tmpVar1'),
-		opcodes.VARIABLE('_tmpVar2'),
-		opcodes.GET_ATTRIBUTE('_tmpVar1', 'inherit', 'inheritMerhod'),
-		opcodes.CALL_FUNCTION('_tmpVar2', '_tmpVar1'),
-		opcodes.VARIABLE('_tmpVar2'),
+		opcodes.CALL_FUNCTION('#1', 'Inherit'),
+		opcodes.SET_VARIABLE('inherit', '#1'),
+		opcodes.GET_ATTRIBUTE('#1', 'inherit', 'baseMethod'),
+		opcodes.CALL_FUNCTION('#2', '#1'),
+		opcodes.VARIABLE('#2'),
+		opcodes.GET_ATTRIBUTE('#1', 'inherit', 'inheritMerhod'),
+		opcodes.CALL_FUNCTION('#2', '#1'),
+		opcodes.VARIABLE('#2'),
 	]
 
 	assert execute.executed.scope['inherit']
