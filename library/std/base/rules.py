@@ -27,7 +27,9 @@ class _ApplySyntaxObjectSyntaxRule:
 		].executeCoroutine
 
 		async for syntaxObject in cls._getSyntaxObjects(parser, inp, executeCoroutine):
-			syntaxRule = executeCoroutine(syntaxObject.getAttribute('__syntaxRule__'))
+			syntaxRule = AToPy(
+				executeCoroutine(syntaxObject.getAttribute('__syntaxRule__'))
+			)
 			if not isinstance(syntaxRule, list):
 				syntaxRule = [syntaxRule]
 

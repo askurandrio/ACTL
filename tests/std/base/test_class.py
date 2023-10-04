@@ -69,17 +69,20 @@ async def test_classWithInitMethod(execute):
 		opcodes.SET_VARIABLE('c', '_tmpVar2'),
 	]
 
-	assert execute.executed.scope['C'] == await class_.call(
-		'C',
-		(),
-		self_={
-			'__init__': await Function.call(
-				'__init__',
-				await Signature.call(['self', 'a']),
-				(opcodes.SET_ATTRIBUTE('self', 'a', 'a'), opcodes.RETURN('None')),
-				ANY,
-			)
-		},
+	assert (
+		await class_.call(
+			'C',
+			(),
+			self_={
+				'__init__': await Function.call(
+					'__init__',
+					await Signature.call(['self', 'a']),
+					(opcodes.SET_ATTRIBUTE('self', 'a', 'a'), opcodes.RETURN('None')),
+					ANY,
+				)
+			},
+		)
+		== execute.executed.scope['C']
 	)
 
 	assert str(await String.call(execute.executed.scope['c'])) == 'C<a=a>'

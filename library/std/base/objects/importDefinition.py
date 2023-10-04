@@ -13,7 +13,7 @@ from actl.syntax import (
 	Maybe,
 )
 from actl.opcodes import CALL_FUNCTION_STATIC, VARIABLE, GET_ATTRIBUTE
-from actl.objects import NativeFunction, Object, AToPy, ANone
+from actl.objects import NativeFunction, Object, AToPy, ANone, PyToA
 from actl import asDecorator, Buffer
 from actl.utils import executeSyncCoroutine
 from std.base.executor.utils import bindExecutor
@@ -32,14 +32,17 @@ async def import_(importName):
 
 @NativeFunction
 async def copyAlllIntoScope(module, scope):
-	for key, value in (await module.getAttribute('__scope__')).getDiff():
+	scope = AToPy(scope)
+	for key, value in AToPy(await module.getAttribute('__scope__')).getDiff():
 		scope[key] = value
 
 	return ANone
 
 
 @asDecorator(
-	lambda rule: executeSyncCoroutine(import_.setAttribute('__syntaxRule__', rule))
+	lambda rule: executeSyncCoroutine(
+		import_.setAttribute('__syntaxRule__', executeSyncCoroutine(PyToA.call(rule)))
+	)
 )
 @SyntaxRule.wrap(
 	Value(import_),
@@ -88,7 +91,9 @@ async def _parseImport(*args, parser=None):
 
 
 @asDecorator(
-	lambda rule: executeSyncCoroutine(From.setAttribute('__syntaxRule__', rule))
+	lambda rule: executeSyncCoroutine(
+		From.setAttribute('__syntaxRule__', executeSyncCoroutine(PyToA.call(rule)))
+	)
 )
 @SyntaxRule.wrap(
 	Value(From),

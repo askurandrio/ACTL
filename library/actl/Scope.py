@@ -1,4 +1,4 @@
-from actl.objects import AObject
+from actl.objects import AObject, PyToA, executeSyncCoroutine
 
 
 class Scope:
@@ -16,7 +16,7 @@ class Scope:
 
 	def __getitem__(self, key):
 		if key == '__scope__':
-			return self
+			return executeSyncCoroutine(PyToA.call(self))
 
 		return self._head[key]
 

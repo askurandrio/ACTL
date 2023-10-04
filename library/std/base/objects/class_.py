@@ -3,6 +3,8 @@ from actl.objects import (
 	Function as actlFunction,
 	Signature,
 	NativeFunction,
+	PyToA,
+	AToPy,
 )
 from actl.opcodes import VARIABLE, RETURN
 from actl.opcodes.opcodes import CALL_FUNCTION_STATIC
@@ -18,7 +20,9 @@ class_ = executeSyncCoroutine(actlClass.call('class_', baseParent=actlClass))
 
 
 @asDecorator(
-	lambda rule: executeSyncCoroutine(class_.setAttribute('__syntaxRule__', rule))
+	lambda rule: executeSyncCoroutine(
+		class_.setAttribute('__syntaxRule__', executeSyncCoroutine(PyToA.call(rule)))
+	)
 )
 @SyntaxRule.wrap(
 	Value(class_),
@@ -58,9 +62,9 @@ async def buildClass(name, parents, body):
 		f'_build{name}',
 		await Signature.call(['__class__', name]),
 		[*body, RETURN('__scope__')],
-		executor.scope,
+		await PyToA.call(executor.scope),
 	)
-	scope = await builder.call(cls, cls)
+	scope = AToPy(await builder.call(cls, cls))
 	for key, value in scope.getDiff():
 		if key in ['__class__', name]:
 			continue

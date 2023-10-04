@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 from actl.objects.object.AObject import AObject
 from actl.objects.object.class_ import class_
 from actl.objects.object.exceptions import AAttributeNotFound
@@ -65,7 +67,9 @@ async def object__init(_):
 
 @Object.addMethod('__setAttribute__')
 async def object__setAttribute(self, key, value):
-	# assert isinstance(value, AObject), f'{type(value)}({value})'
+	assert isinstance(
+		value, (AObject, int, str, list, dict, tuple, type(None), type(ANY))
+	) or hasattr(value, '__next__'), f'{type(value)}({value})'
 	self.head[key] = value
 
 

@@ -12,7 +12,7 @@ _default = object()
 
 @Function.addMethod('__call__')
 async def _Function__call(self, *args):
-	callScope = await self.getAttribute('scope')
+	callScope = objects.AToPy(await self.getAttribute('scope'))
 	signature = await self.getAttribute('signature')
 	argNames = await signature.getAttribute('args')
 	body = await self.getAttribute('body')
@@ -32,7 +32,11 @@ async def _Function__call(self, *args):
 
 
 @asDecorator(
-	lambda rule: executeSyncCoroutine(Function.setAttribute('__syntaxRule__', rule))
+	lambda rule: executeSyncCoroutine(
+		Function.setAttribute(
+			'__syntaxRule__', executeSyncCoroutine(objects.PyToA.call(rule))
+		)
+	)
 )
 @SyntaxRule.wrap(
 	Value(Function),

@@ -8,7 +8,13 @@ from std.base.rules import CodeBlock
 If = executeSyncCoroutine(objects.class_.call('If', (objects.If,)))
 
 
-@asDecorator(lambda rule: executeSyncCoroutine(If.setAttribute('__syntaxRule__', rule)))
+@asDecorator(
+	lambda rule: executeSyncCoroutine(
+		If.setAttribute(
+			'__syntaxRule__', executeSyncCoroutine(objects.PyToA.call(rule))
+		)
+	)
+)
 @SyntaxRule.wrap(Value(If), Token(' '), useParser=True, manualApply=True)
 class IfSyntax:
 	_INLINE_IF_END = Or(

@@ -9,7 +9,11 @@ While = executeSyncCoroutine(objects.class_.call('While', (objects.While,)))
 
 
 @asDecorator(
-	lambda rule: executeSyncCoroutine(While.setAttribute('__syntaxRule__', rule))
+	lambda rule: executeSyncCoroutine(
+		While.setAttribute(
+			'__syntaxRule__', executeSyncCoroutine(objects.PyToA.call(rule))
+		)
+	)
 )
 @SyntaxRule.wrap(Value(While), Token(' '), manualApply=True, useParser=True)
 async def _syntaxRule(parser, inp):

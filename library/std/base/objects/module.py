@@ -1,6 +1,6 @@
 import os
 
-from actl.objects import class_, AToPy, AAttributeNotFound, Signature
+from actl.objects import class_, AToPy, AAttributeNotFound, Signature, PyToA
 from actl.Buffer import Buffer
 from actl.opcodes.opcodes import RETURN
 from actl.utils import executeSyncCoroutine
@@ -53,8 +53,9 @@ async def _Module__getAttribute(self, key):
 	scope = await superGetAttribute.call('__scope__')
 
 	if scope is not None:
+		pyScope = AToPy(scope)
 		try:
-			return scope[key]
+			return pyScope[key]
 		except KeyError:
 			pass
 
@@ -98,8 +99,8 @@ async def _Module__executeModule(self):
 
 	name = f'{self}__executeModuleCode'
 	signature = await Signature.call(())
-	body = createParsedInput() + yieldParsedInput()
-	scope = pyProject['initialScope']
+	body = iter(createParsedInput() + yieldParsedInput())
+	scope = await PyToA.call(pyProject['initialScope'])
 	function = await Function.call(name, signature, body, scope)
 	moduleScope = await function.call()
 	await self.setAttribute('__scope__', moduleScope)
