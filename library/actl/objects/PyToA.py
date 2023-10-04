@@ -76,10 +76,9 @@ async def _PyToA__call(self, *args, **kwargs):
 	if not noWrap:
 		args = [await AToPy(arg) for arg in args]
 		kwargs = {key: await AToPy(value) for key, value in kwargs.items()}
-	try:
-		res = self._value(*args, **kwargs)
-	except Exception as ex:
-		breakpoint()
+
+	res = self._value(*args, **kwargs)
+
 	return await PyToA.call(res)
 
 

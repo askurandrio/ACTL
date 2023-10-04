@@ -1,3 +1,13 @@
+from std.std.objects._internals import addMethod
+
+
 class Number:
 	fun __init__(self, head):
 		self._head = head
+
+
+fun _Number__PyToA(self):
+	return PyToA.exec("= int(value._value)", value=self._head)
+
+
+addMethod(Number, PyToA, _Number__PyToA)

@@ -1,10 +1,11 @@
-from actl.objects import NativeFunction, class_, ANone
+from actl.objects import NativeFunction, class_, ANone, String
 from actl import executeSyncCoroutine
 
 
 @NativeFunction
 async def addMethod(cls, name, method):
-	name = str(name)
+	if await String.isinstance_(name):
+		name = str(name)
 
 	self_ = await cls.getAttribute('__self__')
 	self_[name] = method

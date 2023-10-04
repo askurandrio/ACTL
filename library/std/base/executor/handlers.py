@@ -91,11 +91,10 @@ async def _CALL_OPERATOR__handler(executor, opcode):
 		{'pyFirst': pyFirst, 'pySecond': pySecond},
 	)
 
-	result = await PyToA.call(pyResult)
-	resultCastMathod = await result.getAttribute('cast')
-	resultCast = await resultCastMathod.call()
+	pyToAResult = await PyToA.call(pyResult)
+	result = await (await first.getAttribute('__class__')).call(pyToAResult)
 
-	executor.scope[opcode.dst] = resultCast
+	executor.scope[opcode.dst] = result
 
 
 @Executor.addHandler(opcodes.GET_ATTRIBUTE)
