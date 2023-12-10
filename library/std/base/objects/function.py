@@ -1,7 +1,7 @@
 from actl import objects, asDecorator
 from actl.utils import executeSyncCoroutine
 from actl.opcodes import VARIABLE, RETURN, CALL_FUNCTION_STATIC
-from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe
+from actl.syntax import SyntaxRule, Value, Token, IsInstance, BufferRule, Maybe, Or
 from std.base.rules import CodeBlock
 from std.base.executor.utils import bindExecutor, CallFrame
 
@@ -76,7 +76,9 @@ class _ParseFunction:
 		await self._inpRule.pop(Token('('))
 
 		while not await self._inpRule.startsWith(Token(')')):
-			self._inpRule.parseUntil(IsInstance(VARIABLE))
+			self._inpRule.parseUntil(
+				Or((IsInstance(VARIABLE),), (Token(','),), (Token(')'),))
+			)
 			argVar = (await self._inpRule.pop(IsInstance(VARIABLE))).one().name
 			args.append(argVar)
 			if await self._inpRule.startsWith(Token(',')):
