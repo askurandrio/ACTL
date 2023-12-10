@@ -1,15 +1,8 @@
+import os
 import signal
 import sys
 import logging
 import traceback
-
-from .utils import *
-from . import objects
-from . import opcodes
-from .Buffer import Buffer
-from .parser import Parser
-from .project import *
-from .Scope import Scope
 
 
 def _makeLogger():
@@ -36,10 +29,18 @@ if 'DEBUG_TIMER' in os.environ:
 		signal.alarm(DEBUG_TIMER)
 
 
-if 'ACTL_ENABLE_TRACEMALLOC' in os.environ:
-	import tracemalloc
-
-	tracemalloc.start()
+RECURSION_LIMIT = os.environ.get('RECURSION_LIMIT')
+if RECURSION_LIMIT is not None:
+	sys.setrecursionlimit(int(RECURSION_LIMIT))
 
 
 _makeLogger()
+
+
+from .utils import *
+from . import objects
+from . import opcodes
+from .Buffer import Buffer
+from .parser import Parser
+from .project import *
+from .Scope import Scope
