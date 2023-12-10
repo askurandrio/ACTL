@@ -1,6 +1,6 @@
 # ACTL
 
-![tests](https://github.com/askurandrio/ACTL/actions/workflows/build.yml/badge.svg)
+![tests](https://github.com/askurandrio/ACTL/actions/workflows/tests.yml/badge.svg)
 ![coverage](https://raw.githubusercontent.com/askurandrio/ACTL/master/coverage.svg)
 
 ACTL this compiler A in C++
