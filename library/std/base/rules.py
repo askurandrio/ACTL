@@ -196,7 +196,6 @@ class CodeBlock:
 		self.parser = parser
 		self.inp = inp
 		self.inpRule = BufferRule(parser, inp)
-		self._var = None
 
 	async def parse(self):
 		with self.parser.makeTmpVar.onNestedScope():

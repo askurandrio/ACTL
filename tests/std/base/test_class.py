@@ -1,7 +1,7 @@
 from unittest.mock import ANY, Mock
 
 from actl import opcodes
-from actl.objects import Signature, String, PyToA, class_
+from actl.objects import Signature, String, PyToA, class_, Bool
 from std.base.objects import Function
 from std.base.objects.class_ import buildClass
 
@@ -230,7 +230,7 @@ async def test_classInherit(execute):
 	mock = Mock()
 	execute.scope['mock'] = await PyToA.call(mock)
 
-	execute('class Base:\n	fun baseMethod(self):\n		mock("a")\n')
+	execute('class Base:\n	fun baseMethod(self):\n		mock("a")\n	base = True')
 
 	assert execute.executed
 	execute.flush()
@@ -242,6 +242,7 @@ async def test_classInherit(execute):
 		'inherit = Inherit()\n'
 		'inherit.baseMethod()\n'
 		'inherit.inheritMerhod()\n'
+		'inherit_cls = Inherit.base\n'
 	)
 
 	assert execute.parsed.code == [
@@ -280,7 +281,10 @@ async def test_classInherit(execute):
 		opcodes.GET_ATTRIBUTE('#1', 'inherit', 'inheritMerhod'),
 		opcodes.CALL_FUNCTION('#2', '#1'),
 		opcodes.VARIABLE('#2'),
+		opcodes.GET_ATTRIBUTE('#1', 'Inherit', 'base'),
+		opcodes.SET_VARIABLE('inherit_cls', '#1'),
 	]
 
 	assert execute.executed.scope['inherit']
 	assert mock.call_args_list == [(('a',),), (('b',),)]
+	assert execute.executed.scope['inherit_cls'] == Bool.True_
