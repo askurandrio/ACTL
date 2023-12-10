@@ -26,11 +26,14 @@ def _makeLogger():
 if 'DEBUG_TIMER' in os.environ:
 
 	def debug(_, frame):
-		print(traceback.format_stack(frame))
+		print(''.join(traceback.format_stack(frame)))
 		breakpoint()  # pylint: disable=forgotten-debug-statement
 
 	signal.signal(signal.SIGALRM, debug)
-	signal.alarm(int(os.environ['DEBUG_TIMER']))
+
+	DEBUG_TIMER = int(os.environ['DEBUG_TIMER'])
+	if DEBUG_TIMER > 0:
+		signal.alarm(DEBUG_TIMER)
 
 
 if 'ACTL_ENABLE_TRACEMALLOC' in os.environ:
