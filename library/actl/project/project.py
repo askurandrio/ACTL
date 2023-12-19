@@ -1,25 +1,22 @@
-import copy
 import os
-from collections import ChainMap
 import logging
-import importlib
 from functools import lru_cache
 
 import yaml
 
+from actl.project.projectConfig import init
+
 
 LOGGER = logging.getLogger('actl')
-DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DIR_LIBRARY = os.path.dirname(
+	os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 
 
 class Project:
-	_DEFAULT_HANDLERS = {}
-
 	def __init__(self, source):
-		self._head = {'__parents__': [], '__source__': [], '__previous__': {}}
-		self['handlers'] = InheritedDict(
-			'handlers', copy.copy(self._DEFAULT_HANDLERS), self
-		)
+		self._head = {}
+		init(self)
 
 		for command in source:
 			self['__source__'].append(command)
@@ -126,59 +123,6 @@ class Lazy:
 		return f'{type(self).__name__}({self.evaluate})'
 
 
-@Project.addDefaultHandler('setKey')
-def _setKeyHandler(project, arg):
-	project[arg['key']] = arg['value']
-
-
-@Project.addDefaultHandler('import')
-def _importHandler(project, projectF):
-	project[projectF] = project.import_(projectF)
-
-
-@Project.addDefaultHandler('include')
-def _includeHandler(project, projectF):
-	project.executeCommand({'import': projectF})
-
-	for command in project[projectF]['__source__']:
-		if ('setKey' in command) and (command['setKey']['key'] == 'projectF'):
-			continue
-
-		project.executeCommand(command)
-
-	project['__parents__'].append(project[projectF])
-
-
-@Project.addDefaultHandler('py-execExternalFunction')
-def _pyExecExtrnalFunctionHandler(project, arg):
-	function = importFrom(arg)
-	function(project)
-
-
-def importFrom(arg):
-	try:
-		from_ = arg['from']
-		import_ = arg['import']
-	except KeyError as ex:
-		raise RuntimeError(
-			f'Error during getting py-execExternalFunction: {arg}'
-		) from ex
-
-	try:
-		from_ = importlib.import_module(from_)
-	except ImportError as ex:
-		raise RuntimeError(
-			f'Error importing from_ at py-execExternalFunction: {arg}'
-		) from ex
-
-	try:
-		return getattr(from_, import_)
-	except AttributeError as ex:
-		raise RuntimeError(
-			f'Error getting {import_} at py-execExternalFunction: {arg}'
-		) from ex
-
-
 class _ProjectParentsProxy:
 	def __init__(self, project):
 		self._project = project
@@ -191,20 +135,6 @@ class _ProjectParentsProxy:
 				pass
 
 		raise KeyError(f'This key not found: {key}')
-
-
-class InheritedDict(ChainMap):
-	def __init__(self, key, head, project):
-		self._key = key
-		self._head = head
-		self._project = project
-
-	@property
-	def maps(self):
-		maps = [self._head]
-		for parent in self._project['__parents__']:
-			maps.append(parent[self._key])
-		return maps
 
 
 class _ProjectPreviousProxy:
