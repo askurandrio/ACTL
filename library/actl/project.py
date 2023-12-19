@@ -86,7 +86,7 @@ class Project:
 
 	@classmethod
 	@lru_cache(maxsize=None)
-	def loadProject(cls, projectF):
+	def import_(cls, projectF):
 		if not os.path.isabs(projectF):
 			fileName = os.path.join(DIR_LIBRARY, projectF)
 
@@ -94,14 +94,13 @@ class Project:
 				fileName = os.path.join(fileName, os.path.basename(projectF))
 
 			fileName = fileName + '.yaml'
-			return cls.loadProject(fileName)
+			return cls.import_(fileName)
 
 		with open(projectF, encoding='utf-8') as file:
 			source = yaml.load(file, Loader=yaml.SafeLoader)
-			source = [*source, {'setKey': {'key': 'projectF', 'value': projectF}}]
 
-		subProject = Project(source)
-		return subProject
+		source = [*source, {'setKey': {'key': 'projectF', 'value': projectF}}]
+		return Project(source)
 
 	@classmethod
 	def addDefaultHandler(cls, name):
@@ -132,18 +131,22 @@ def _setKeyHandler(project, arg):
 	project[arg['key']] = arg['value']
 
 
+@Project.addDefaultHandler('import')
+def _importHandler(project, projectF):
+	project[projectF] = project.import_(projectF)
+
+
 @Project.addDefaultHandler('include')
 def _includeHandler(project, projectF):
-	subProject = project.loadProject(projectF)
+	project.executeCommand({'import': projectF})
 
-	for command in subProject['__source__']:
+	for command in project[projectF]['__source__']:
 		if ('setKey' in command) and (command['setKey']['key'] == 'projectF'):
 			continue
 
 		project.executeCommand(command)
 
-	project[projectF] = subProject
-	project['__parents__'].append(subProject)
+	project['__parents__'].append(project[projectF])
 
 
 @Project.addDefaultHandler('py-execExternalFunction')

@@ -196,7 +196,7 @@ class Importer:
 			pathBaseName = os.path.basename(path)
 			yamlPath = os.path.join(path, f'{pathBaseName}.yaml')
 			if os.path.isfile(yamlPath):
-				project = self._currentProject.loadProject(yamlPath)
+				project = self._currentProject.import_(yamlPath)
 				if project is not self._currentProject:
 					await project['import'].importByPath(localOnModuleCreated, path)
 					return
