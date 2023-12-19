@@ -7,8 +7,7 @@ class AbstractExecute:
 	def __init__(self):
 		self.isParsed = False
 		self.isExecuted = False
-		self.project = Project()
-		self.project.processSource([{'include': self._PROJECT_NAME}])
+		self.project = Project([{'include': self._PROJECT_NAME}])
 
 		# for heat up project
 		self.project['initialScope']  # pylint: disable=pointless-statement
@@ -20,8 +19,7 @@ class AbstractExecute:
 		self.isParsed = False
 		self.isExecuted = False
 		buildScope = self.scope
-		self.project = Project()
-		self.project.processSource([{'include': self._PROJECT_NAME}])
+		self.project = Project([{'include': self._PROJECT_NAME}])
 		self.project['buildScope'] = buildScope
 
 	@property

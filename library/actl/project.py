@@ -15,11 +15,15 @@ DIR_LIBRARY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Project:
 	_DEFAULT_HANDLERS = {}
 
-	def __init__(self):
+	def __init__(self, source):
 		self._head = {'__parents__': [], '__source__': [], '__previous__': {}}
 		self['handlers'] = InheritedDict(
 			'handlers', copy.copy(self._DEFAULT_HANDLERS), self
 		)
+
+		for command in source:
+			self['__source__'].append(command)
+			self.executeCommand(command)
 
 	@property
 	def parents(self):
@@ -28,11 +32,6 @@ class Project:
 	@property
 	def previous(self):
 		return _ProjectPreviousProxy(self)
-
-	def processSource(self, source):
-		for command in source:
-			self['__source__'].append(command)
-			self.executeCommand(command)
 
 	def executeCommand(self, command):
 		items = iter(command.items())
@@ -101,8 +100,7 @@ class Project:
 			source = yaml.load(file, Loader=yaml.SafeLoader)
 			source = [*source, {'setKey': {'key': 'projectF', 'value': projectF}}]
 
-		subProject = Project()
-		subProject.processSource(source)
+		subProject = Project(source)
 		return subProject
 
 	@classmethod
