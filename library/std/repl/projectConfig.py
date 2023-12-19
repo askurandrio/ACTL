@@ -14,29 +14,37 @@ def getParseInput(project):
 
 
 def getInput(project):
-	@Buffer.wrap
-	def make():
-		if 'CODE' in os.environ:
-			yield from os.environ['CODE']
-			yield '\n'
+	if 'CODE' in os.environ:
+		try:
+			code = eval(os.environ['CODE'])  # pylint: disable=eval-used
+			assert isinstance(code, str), repr(code)
+		except:
 			project['isBuild'] = False
-			return
+			raise
 
-		parser = project['buildParser']
+		@Buffer.wrap
+		def make():
+			yield from code
+			project['isBuild'] = False
 
-		while True:
-			if parser.applyingRule:
-				msg = '... '
-			else:
-				msg = '>>> '
+	else:
 
-			try:
-				inp = input(msg) + '\n'
-			except EOFError:
-				project['isBuild'] = False
-				break
+		@Buffer.wrap
+		def make():
+			parser = project['buildParser']
+			while True:
+				if parser.applyingRule:
+					msg = '... '
+				else:
+					msg = '>>> '
 
-			yield from inp
+				try:
+					inp = input(msg) + '\n'
+				except EOFError:
+					project['isBuild'] = False
+					break
+
+				yield from inp
 
 	return make()
 
