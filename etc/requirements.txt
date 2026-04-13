@@ -3,7 +3,7 @@ coverage-badge==1.1.0
 coverage-badge==1.1.0
 pylint==2.14.5
 pylint-ignore==2021.1024
-pytest==7.1.2
+pytest==9.0.3
 pytest-cov==3.0.0
 pytest-cov==3.0.0
 pytest-cov==3.0.0
